@@ -1,0 +1,27 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage":  "",
+    "FUNCTIONS_WORKER_RUNTIME": "node",
+
+    "SQL_SERVER":   "TU_SERVIDOR.database.windows.net",
+    "SQL_DATABASE": "PeopleTrackDB",
+    "SQL_USER":     "peopletrack_app",
+    "SQL_PASSWORD": "P3opl3#Tr4ck2026App!",
+
+    "AZURE_TENANT_ID":     "TU_TENANT_ID",
+    "AZURE_CLIENT_ID":     "TU_CLIENT_ID",
+    "AZURE_CLIENT_SECRET": "TU_CLIENT_SECRET",
+
+    "CLAUDE_API_KEY": "sk-ant-api03-...",
+
+    "SMTP_SERVER":   "smtp.office365.com",
+    "SMTP_PORT":     "587",
+    "SMTP_USER":     "peopletrack@tuempresa.com",
+    "SMTP_PASSWORD": "TU_PASSWORD_SMTP",
+    "EMAIL_SENDER":  "peopletrack@tuempresa.com",
+
+    "ALERT_THRESHOLD": "70",
+    "ALLOWED_ORIGIN":  "https://TU_APP.azurestaticapps.net"
+  }
+}

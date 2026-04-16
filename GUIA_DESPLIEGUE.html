@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PeopleTrack — Guía de Despliegue en Azure</title>
+<style>
+body { font-family: 'Segoe UI', Arial, sans-serif; max-width: 860px; margin: 0 auto; padding: 32px 20px; color: #212529; background: #f8f9fa; }
+h1 { color: #1B3A5C; border-bottom: 3px solid #00A3A3; padding-bottom: 12px; }
+h2 { color: #1B3A5C; margin-top: 36px; display: flex; align-items: center; gap: 10px; }
+h2 .num { background: #1B3A5C; color: #fff; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+h3 { color: #00A3A3; margin-top: 20px; }
+.card { background: #fff; border: 1px solid #dee2e6; border-radius: 12px; padding: 20px 24px; margin: 12px 0; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.step { border-left: 4px solid #00A3A3; padding: 10px 16px; margin: 10px 0; background: #f0fafa; border-radius: 0 8px 8px 0; }
+.step strong { color: #1B3A5C; }
+code { background: #1B3A5C; color: #e8f4f8; padding: 2px 7px; border-radius: 4px; font-size: 13px; font-family: 'Courier New', monospace; }
+pre { background: #1B3A5C; color: #e8f4f8; padding: 16px 20px; border-radius: 10px; overflow-x: auto; font-size: 13px; line-height: 1.7; }
+.badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+.badge-ok { background: #d4edda; color: #155724; }
+.badge-req { background: #fff3cd; color: #856404; }
+.badge-warn { background: #f8d7da; color: #721c24; }
+.tip { background: #e8f4f8; border: 1px solid #00A3A3; border-radius: 8px; padding: 12px 16px; margin: 10px 0; font-size: 13px; }
+.tip::before { content: '💡 '; }
+table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+th { background: #1B3A5C; color: #fff; padding: 10px 12px; text-align: left; font-size: 12px; }
+td { padding: 9px 12px; border-bottom: 1px solid #dee2e6; font-size: 13px; }
+tr:hover td { background: #f8f9fa; }
+.arch { background: #1B3A5C; color: #fff; border-radius: 12px; padding: 20px; margin: 16px 0; text-align: center; }
+.arch-box { display: inline-block; background: #00A3A3; color: #fff; border-radius: 8px; padding: 8px 16px; margin: 4px; font-size: 13px; font-weight: 600; }
+.arch-arrow { color: rgba(255,255,255,0.5); margin: 0 4px; }
+</style>
+</head>
+<body>
+
+<h1>🚀 PeopleTrack — Guía Paso a Paso: Despliegue en Azure</h1>
+<p style="color:#6c757d;margin-top:-8px">Tiempo estimado: 45–60 minutos · Sin experiencia previa requerida</p>
+
+<div class="card">
+  <strong>Arquitectura del sistema:</strong>
+  <div class="arch" style="margin-top:12px">
+    <div class="arch-box">Tu Browser</div>
+    <span class="arch-arrow">→</span>
+    <div class="arch-box">Azure Static Web App<br><small>(frontend HTML)</small></div>
+    <span class="arch-arrow">→</span>
+    <div class="arch-box">Azure Functions<br><small>(API backend Node.js)</small></div>
+    <span class="arch-arrow">→</span>
+    <div class="arch-box">Azure SQL<br><small>(PeopleTrackDB)</small></div>
+  </div>
+  <div style="margin-top:12px;font-size:13px;color:#6c757d">+ Azure AD para el login SSO de los usuarios</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<h2><span class="num">1</span> Prerrequisitos</h2>
+<div class="card">
+  <table>
+    <tr><th>Herramienta</th><th>Para qué</th><th>Estado</th></tr>
+    <tr><td><strong>GitHub account</strong></td><td>Guardar el código y despliegue automático</td><td><span class="badge badge-req">Requerido</span></td></tr>
+    <tr><td><strong>Git</strong> (instalado en PC)</td><td>Subir código a GitHub</td><td><span class="badge badge-req">Requerido</span></td></tr>
+    <tr><td><strong>Node.js 18+</strong></td><td>Correr el backend localmente para probar</td><td><span class="badge badge-req">Requerido</span></td></tr>
+    <tr><td><strong>Azure CLI</strong></td><td>Comandos de Azure desde terminal</td><td><span class="badge badge-req">Requerido</span></td></tr>
+    <tr><td><strong>VS Code</strong></td><td>Editor (opcional pero recomendado)</td><td><span class="badge badge-ok">Opcional</span></td></tr>
+  </table>
+  <div class="tip">Descargá Node.js desde nodejs.org · Git desde git-scm.com · Azure CLI desde aka.ms/installazurecli</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<h2><span class="num">2</span> Crear el repositorio en GitHub</h2>
+<div class="card">
+  <div class="step"><strong>2.1</strong> Andá a <strong>github.com</strong> → botón verde "New" → nombre: <code>peopletrack</code> → Create repository</div>
+  <div class="step"><strong>2.2</strong> En tu PC, abrí una terminal (cmd o PowerShell) y ejecutá:</div>
+  <pre>
+mkdir peopletrack
+cd peopletrack
+git init
+git remote add origin https://github.com/TU_USUARIO/peopletrack.git</pre>
+  <div class="step"><strong>2.3</strong> Copiá los archivos del ZIP que te entregué dentro de la carpeta <code>peopletrack</code>. La estructura debe quedar así:</div>
+  <pre>
+peopletrack/
+  ├── frontend/
+  │   ├── index.html           ← la app visual
+  │   ├── api-client.js        ← cliente de API
+  │   └── staticwebapp.config.json
+  ├── api/
+  │   ├── index.js             ← rutas del backend
+  │   ├── db.js                ← conexión SQL
+  │   ├── auth.js              ← validación Azure AD
+  │   ├── package.json
+  │   ├── host.json
+  │   └── local.settings.json  ← NO subir a GitHub
+  └── .github/
+      └── workflows/
+          └── deploy.yml</pre>
+  <div class="step"><strong>2.4</strong> Agregá un archivo <code>.gitignore</code> en la raíz:</div>
+  <pre>
+api/local.settings.json
+api/node_modules/
+*.env</pre>
+  <div class="step"><strong>2.5</strong> Subí el código:</div>
+  <pre>
+git add .
+git commit -m "Initial PeopleTrack deploy"
+git branch -M main
+git push -u origin main</pre>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<h2><span class="num">3</span> Crear la Azure Static Web App</h2>
+<div class="card">
+  <div class="step"><strong>3.1</strong> Andá al <strong>portal.azure.com</strong> → buscá "Static Web Apps" en el buscador → <strong>+ Create</strong></div>
+  <div class="step"><strong>3.2</strong> Completá el formulario:
+    <ul>
+      <li><strong>Subscription:</strong> tu suscripción</li>
+      <li><strong>Resource Group:</strong> creá uno nuevo: <code>rg-peopletrack</code></li>
+      <li><strong>Name:</strong> <code>peopletrack-app</code></li>
+      <li><strong>Plan type:</strong> Free</li>
+      <li><strong>Region:</strong> East US 2 (o la más cercana)</li>
+      <li><strong>Source:</strong> GitHub → autorizá → seleccioná tu repo <code>peopletrack</code> → branch: <code>main</code></li>
+      <li><strong>App location:</strong> <code>/frontend</code></li>
+      <li><strong>Api location:</strong> <code>/api</code></li>
+      <li><strong>Output location:</strong> dejar vacío</li>
+    </ul>
+  </div>
+  <div class="step"><strong>3.3</strong> Click en <strong>Review + Create</strong> → <strong>Create</strong>. Azure va a crear la app y agregar automáticamente un secret al repo de GitHub.</div>
+  <div class="tip">El primer despliegue tarda 3–5 minutos. Podés verlo en GitHub → Actions</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<h2><span class="num">4</span> Configurar las variables de entorno</h2>
+<div class="card">
+  <div class="step"><strong>4.1</strong> En el portal Azure → tu Static Web App → <strong>Configuration</strong> → <strong>Application settings</strong></div>
+  <div class="step"><strong>4.2</strong> Agregá cada variable con el botón <strong>+ Add</strong>:</div>
+  <table>
+    <tr><th>Variable</th><th>Valor</th></tr>
+    <tr><td><code>SQL_SERVER</code></td><td>TU_SERVIDOR.database.windows.net</td></tr>
+    <tr><td><code>SQL_DATABASE</code></td><td>PeopleTrackDB</td></tr>
+    <tr><td><code>SQL_USER</code></td><td>peopletrack_app</td></tr>
+    <tr><td><code>SQL_PASSWORD</code></td><td>P3opl3#Tr4ck2026App!</td></tr>
+    <tr><td><code>AZURE_TENANT_ID</code></td><td>Tu Tenant ID de Azure AD</td></tr>
+    <tr><td><code>AZURE_CLIENT_ID</code></td><td>Tu Client ID (ver paso 5)</td></tr>
+    <tr><td><code>AZURE_CLIENT_SECRET</code></td><td>Tu Client Secret (ver paso 5)</td></tr>
+    <tr><td><code>SMTP_SERVER</code></td><td>smtp.office365.com (o Gmail: smtp.gmail.com)</td></tr>
+    <tr><td><code>SMTP_PORT</code></td><td>587</td></tr>
+    <tr><td><code>SMTP_USER</code></td><td>tu-email@empresa.com</td></tr>
+    <tr><td><code>SMTP_PASSWORD</code></td><td>tu contraseña o app password</td></tr>
+    <tr><td><code>EMAIL_SENDER</code></td><td>peopletrack@empresa.com</td></tr>
+    <tr><td><code>ALERT_THRESHOLD</code></td><td>70</td></tr>
+    <tr><td><code>ALLOWED_ORIGIN</code></td><td>https://peopletrack-app.azurestaticapps.net</td></tr>
+    <tr><td><code>CLAUDE_API_KEY</code></td><td>sk-ant-api03-... (tu key de Anthropic)</td></tr>
+  </table>
+  <div class="step"><strong>4.3</strong> Click en <strong>Save</strong>. La app se reinicia automáticamente.</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<h2><span class="num">5</span> Registrar la App en Azure AD (para SSO)</h2>
+<div class="card">
+  <div class="step"><strong>5.1</strong> Portal Azure → <strong>Azure Active Directory</strong> → <strong>App registrations</strong> → <strong>+ New registration</strong></div>
+  <div class="step"><strong>5.2</strong> Completá:
+    <ul>
+      <li><strong>Name:</strong> PeopleTrack</li>
+      <li><strong>Supported account types:</strong> Accounts in this organizational directory only</li>
+      <li><strong>Redirect URI:</strong> Single-page application → <code>https://peopletrack-app.azurestaticapps.net</code></li>
+    </ul>
+  </div>
+  <div class="step"><strong>5.3</strong> Una vez creada, copiá:
+    <ul>
+      <li><strong>Application (client) ID</strong> → es tu <code>AZURE_CLIENT_ID</code></li>
+      <li><strong>Directory (tenant) ID</strong> → es tu <code>AZURE_TENANT_ID</code></li>
+    </ul>
+  </div>
+  <div class="step"><strong>5.4</strong> Andá a <strong>Certificates &amp; secrets</strong> → <strong>+ New client secret</strong> → copiá el valor → es tu <code>AZURE_CLIENT_SECRET</code></div>
+  <div class="step"><strong>5.5</strong> Andá a <strong>API permissions</strong> → <strong>+ Add a permission</strong> → Microsoft Graph → Delegated:
+    <code>openid</code>, <code>profile</code>, <code>email</code>, <code>User.Read</code> → <strong>Grant admin consent</strong></div>
+  <div class="tip">Actualizá <code>AZURE_TENANT_ID</code>, <code>AZURE_CLIENT_ID</code> y <code>AZURE_CLIENT_SECRET</code> en las Application Settings del paso 4</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<h2><span class="num">6</span> Habilitar MSAL en el frontend</h2>
+<div class="card">
+  <div class="step"><strong>6.1</strong> Abrí <code>frontend/index.html</code> y agregá dentro del <code>&lt;head&gt;</code>:</div>
+  <pre>
+&lt;script src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js"&gt;&lt;/script&gt;
+&lt;script src="api-client.js"&gt;&lt;/script&gt;</pre>
+  <div class="step"><strong>6.2</strong> En el <code>&lt;script&gt;</code> de la app, reemplazá la función <code>doLogin()</code> con:</div>
+  <pre>
+async function doLogin() {
+  API.initMsal(
+    'TU_TENANT_ID',    // ← reemplazar
+    'TU_CLIENT_ID',    // ← reemplazar
+    window.location.origin
+  );
+  const account = await API.loginWithAzure();
+  if (account) {
+    document.getElementById('ssoScreen').style.display = 'none';
+    const me = await API.getMe();
+    if (me.ok) renderApp(me.data);
+  }
+}
+
+async function renderApp(user) {
+  // Cargar dashboard con datos reales
+  document.querySelector('.user-info .name').textContent = user.FullName;
+  document.querySelector('.user-info .role').textContent = user.RoleName + ' · ' + user.AreaName;
+  document.querySelector('.user-avatar').textContent =
+    user.FullName.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase();
+  await loadDashboard();
+}
+
+async function loadDashboard() {
+  const res = await API.getDashboard();
+  if (!res.ok) return;
+  // Los datos de res.data.team y res.data.kpi ya están listos
+  // El renderTeamProgress() existente puede usarlos directamente
+  renderTeamProgress(res.data.team);
+  drawDonut(res.data.kpi);
+}</pre>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<h2><span class="num">7</span> Verificar el despliegue</h2>
+<div class="card">
+  <div class="step"><strong>7.1</strong> Abrí GitHub → tu repo → pestaña <strong>Actions</strong> → verificá que el workflow "Deploy PeopleTrack" esté en verde ✅</div>
+  <div class="step"><strong>7.2</strong> Andá a tu URL: <code>https://peopletrack-app.azurestaticapps.net</code></div>
+  <div class="step"><strong>7.3</strong> Probá el login con Azure AD con tu cuenta corporativa</div>
+  <div class="step"><strong>7.4</strong> Probá la API directamente:</div>
+  <pre>https://peopletrack-app.azurestaticapps.net/api/periods</pre>
+  <div class="tip">Si ves un JSON con los períodos fiscales, la API está funcionando correctamente</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<h2><span class="num">8</span> Agregar el primer usuario admin</h2>
+<div class="card">
+  <div class="step"><strong>8.1</strong> Conectate a PeopleTrackDB con SSMS y ejecutá (reemplazando con tus datos):</div>
+  <pre>
+INSERT INTO Users (Email, FullName, AzureObjectID, AppRole)
+VALUES (
+  'tu-email@empresa.com',
+  'Tu Nombre Completo',
+  'TU_AZURE_OBJECT_ID',   -- Lo encontrás en Azure AD → Users → tu usuario → Object ID
+  'admin'
+);</pre>
+  <div class="tip">Tu Azure Object ID lo encontrás en portal.azure.com → Azure Active Directory → Users → tu usuario → Object ID (campo en la página de perfil)</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<h2>✅ Resumen de URLs importantes</h2>
+<div class="card">
+  <table>
+    <tr><th>Recurso</th><th>URL / Ubicación</th></tr>
+    <tr><td>App web</td><td>https://peopletrack-app.azurestaticapps.net</td></tr>
+    <tr><td>API base</td><td>https://peopletrack-app.azurestaticapps.net/api/</td></tr>
+    <tr><td>Portal Azure</td><td>portal.azure.com → Static Web Apps → peopletrack-app</td></tr>
+    <tr><td>Variables de entorno</td><td>Portal → Static Web App → Configuration</td></tr>
+    <tr><td>Logs de Functions</td><td>Portal → Static Web App → Functions → Monitor</td></tr>
+    <tr><td>GitHub Actions</td><td>github.com/TU_USUARIO/peopletrack → Actions</td></tr>
+  </table>
+</div>
+
+<div class="card" style="background:#e8f4f8;border-color:#00A3A3;margin-top:24px">
+  <strong>🎯 Con esto queda:</strong>
+  <ul style="margin:8px 0 0;font-size:13px;line-height:2">
+    <li>✅ Frontend desplegado y accesible desde cualquier browser</li>
+    <li>✅ Backend (API) en Azure Functions conectado a Azure SQL</li>
+    <li>✅ Login SSO con Azure AD corporativo</li>
+    <li>✅ Despliegue automático: cada push a <code>main</code> actualiza la app en segundos</li>
+    <li>✅ Base de datos PeopleTrackDB ya existente con todos los objetos</li>
+  </ul>
+</div>
+
+</body>
+</html>

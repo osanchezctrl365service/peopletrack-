@@ -45,13 +45,13 @@
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
-body { font-family: var(--font); font-size: 14px; color: #F0EBE3; background: #0d0d0d; display: flex; overflow: hidden; }
+body { font-family: var(--font); font-size: 14px; color: var(--gray-800); background: var(--gray-50); display: flex; overflow: hidden; }
 
 /* SIDEBAR */
 .sidebar {
   width: var(--sidebar-w);
   height: 100vh;
-  background: #111111;
+  background: var(--primary);
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
@@ -121,7 +121,7 @@ body { font-family: var(--font); font-size: 14px; color: #F0EBE3; background: #0
   position: relative;
 }
 .nav-item:hover { background: rgba(255,255,255,0.07); color: #fff; }
-.nav-item.active { background: rgba(255,84,0,0.12); color: #FF5400; border-left-color: #FF5400; }
+.nav-item.active { background: rgba(0,163,163,0.15); color: #fff; border-left-color: var(--accent); }
 .nav-icon { width: 18px; height: 18px; flex-shrink: 0; opacity: 0.8; }
 .nav-item.active .nav-icon { opacity: 1; }
 .nav-badge {
@@ -135,18 +135,18 @@ body { font-family: var(--font); font-size: 14px; color: #F0EBE3; background: #0
 }
 
 /* MAIN */
-.main-wrap { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: #0d0d0d; }
+.main-wrap { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 .topbar {
   height: var(--header-h);
-  background: #0d0d0d;
-  border-bottom: 1px solid rgba(255,255,255,.08);
+  background: var(--white);
+  border-bottom: 1px solid var(--gray-200);
   display: flex;
   align-items: center;
   padding: 0 24px;
   gap: 16px;
   flex-shrink: 0;
 }
-.topbar-title { font-size: 16px; font-weight: 700; color: #F0EBE3; flex: 1; }
+.topbar-title { font-size: 16px; font-weight: 700; color: var(--primary); flex: 1; }
 .topbar-period {
   background: var(--primary-pale);
   color: var(--primary);
@@ -173,7 +173,7 @@ body { font-family: var(--font); font-size: 14px; color: #F0EBE3; background: #0
 .topbar-btn:hover { background: var(--gray-50); }
 .topbar-btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
 .topbar-btn.primary:hover { background: var(--accent-dark); }
-.content { flex: 1; overflow-y: auto; padding: 24px; background: #0d0d0d; }
+.content { flex: 1; overflow-y: auto; padding: 24px; }
 
 /* SECTIONS (pages) */
 .section { display: none; }
@@ -181,15 +181,16 @@ body { font-family: var(--font); font-size: 14px; color: #F0EBE3; background: #0
 
 /* CARDS */
 .card {
-  background: rgba(255,255,255,.04);
-  border: 1px solid rgba(255,255,255,.09);
+  background: var(--white);
+  border: 1px solid var(--gray-200);
   border-radius: var(--radius-lg);
   padding: 20px;
+  box-shadow: var(--shadow-sm);
 }
 .card-title {
   font-size: 13px;
   font-weight: 700;
-  color: #FF5400;
+  color: var(--primary);
   margin-bottom: 14px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -206,13 +207,14 @@ body { font-family: var(--font); font-size: 14px; color: #F0EBE3; background: #0
 
 /* KPI CARDS */
 .kpi-card {
-  background: rgba(255,255,255,.04);
-  border: 1px solid rgba(255,255,255,.09);
+  background: var(--white);
+  border: 1px solid var(--gray-200);
   border-radius: var(--radius-lg);
   padding: 18px 20px;
+  box-shadow: var(--shadow-sm);
 }
 .kpi-label { font-size: 11px; font-weight: 600; color: var(--gray-600); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
-.kpi-value { font-size: 28px; font-weight: 800; color: #F0EBE3; line-height: 1; }
+.kpi-value { font-size: 28px; font-weight: 800; color: var(--primary); line-height: 1; }
 .kpi-sub { font-size: 11px; color: var(--gray-500); margin-top: 4px; }
 .kpi-bar { height: 4px; background: var(--gray-200); border-radius: 4px; margin-top: 10px; overflow: hidden; }
 .kpi-bar-fill { height: 100%; border-radius: 4px; }
@@ -250,17 +252,17 @@ body { font-family: var(--font); font-size: 14px; color: #F0EBE3; background: #0
   padding: 10px 12px;
   font-size: 10px;
   font-weight: 700;
-  color: #888580;
+  color: var(--gray-600);
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  border-bottom: 1px solid rgba(255,255,255,.09);
-  background: rgba(255,255,255,.02);
+  border-bottom: 2px solid var(--gray-200);
+  background: var(--gray-50);
 }
 .data-table td {
   padding: 11px 12px;
-  border-bottom: 1px solid rgba(255,255,255,.04);
+  border-bottom: 1px solid var(--gray-100);
   font-size: 13px;
-  color: #F0EBE3;
+  color: var(--gray-800);
   vertical-align: middle;
 }
 .data-table tr:hover td { background: var(--gray-50); }
@@ -286,13 +288,13 @@ body { font-family: var(--font); font-size: 14px; color: #F0EBE3; background: #0
 .form-label { display: block; font-size: 11px; font-weight: 700; color: var(--gray-700); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 5px; }
 .form-control {
   width: 100%;
-  border: 1px solid rgba(255,255,255,.09);
+  border: 1px solid var(--gray-300);
   border-radius: var(--radius-sm);
   padding: 8px 12px;
   font-size: 13px;
   font-family: var(--font);
-  color: #F0EBE3;
-  background: rgba(255,255,255,.04);
+  color: var(--gray-800);
+  background: var(--white);
   outline: none;
   transition: border-color 0.15s;
 }
@@ -311,20 +313,19 @@ textarea.form-control { min-height: 80px; resize: vertical; }
 }
 .modal-overlay.open { display: flex; }
 .modal {
-  background: #161616;
-  border: 1px solid rgba(255,255,255,.09);
+  background: var(--white);
   border-radius: var(--radius-xl);
   padding: 28px;
   width: 560px;
   max-width: 95vw;
   max-height: 85vh;
   overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(0,0,0,.5);
+  box-shadow: var(--shadow-lg);
 }
 .modal-title { font-size: 18px; font-weight: 800; color: var(--primary); margin-bottom: 20px; }
 .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
 .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 18px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid transparent; transition: all 0.15s; font-family: var(--font); }
-.btn-primary { background: #FF5400; color: #fff; border-color: #FF5400; }
+.btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
 .btn-primary:hover { background: var(--accent-dark); }
 .btn-secondary { background: var(--white); color: var(--gray-700); border-color: var(--gray-300); }
 .btn-secondary:hover { background: var(--gray-50); }
@@ -435,7 +436,7 @@ textarea.form-control { min-height: 80px; resize: vertical; }
 
 /* SECTION HEADER */
 .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-.section-heading { font-size: 20px; font-weight: 800; color: #F0EBE3; }
+.section-heading { font-size: 20px; font-weight: 800; color: var(--primary); }
 .section-subheading { font-size: 13px; color: var(--gray-500); margin-top: 2px; }
 
 /* HELP TIP */
@@ -547,7 +548,7 @@ textarea.form-control { min-height: 80px; resize: vertical; }
 .sso-wave { width: 100%; height: 3px; background: linear-gradient(90deg, #FF5400, rgba(255,84,0,.2)); border-radius: 0 0 20px 20px; margin-top: 28px; }
 .sso-status { font-size: 11px; color: #FF5400; margin-top: 12px; min-height: 16px; }
 </style>
-
+<script src="https://unpkg.com/@azure/msal-browser@2.38.3/lib/msal-browser.min.js"></script>
 </head>
 <body>
 
@@ -585,7 +586,7 @@ textarea.form-control { min-height: 80px; resize: vertical; }
 <!-- SIDEBAR -->
 <aside class="sidebar">
   <div class="sidebar-logo">
-    <div class="app-name" style="color:#FF5400">PeopleTrack</div>
+    <div class="app-name">PeopleTrack</div>
     <div class="app-sub">Objetivos & Carrera</div>
   </div>
   <div class="sidebar-user">
@@ -1375,41 +1376,30 @@ textarea.form-control { min-height: 80px; resize: vertical; }
     <!-- ======== USUARIOS ======== -->
     <section class="section" id="sec-usuarios">
       <div class="section-header">
-        <div>
-          <div class="section-heading">Gestión de Usuarios</div>
-          <div class="section-subheading" style="color:#888580">Alta, baja, modificación y asignación de roles y líderes</div>
-        </div>
-        <button class="btn btn-primary btn-sm" onclick="document.getElementById('modalNuevoUsuario').classList.add('open')">+ Nuevo Usuario</button>
+        <div><div class="section-heading">Gestión de Usuarios</div>
+        <div class="section-subheading" style="color:#888580">Alta, baja y asignación de roles y líderes</div></div>
+        <button class="btn btn-primary btn-sm" onclick="document.getElementById('modalNuevo').classList.add('open')">+ Nuevo Usuario</button>
       </div>
       <div id="usuariosStats" class="grid-4 mb-16"></div>
       <div class="flex gap-8 mb-12" style="flex-wrap:wrap">
         <div style="position:relative;flex:1;min-width:180px">
           <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#888580">🔍</span>
-          <input class="form-control" id="uSearchInput" style="padding-left:30px" placeholder="Buscar nombre o email..." oninput="filtrarUsuarios()">
+          <input class="form-control" id="uSearchInput" style="padding-left:30px" placeholder="Buscar..." oninput="filtrarUsuarios()">
         </div>
-        <select class="form-control" id="uRoleFilter" style="width:160px" onchange="filtrarUsuarios()">
+        <select class="form-control" id="uRoleFilter" style="width:150px" onchange="filtrarUsuarios()">
           <option value="">Todos los roles</option>
-          <option value="admin">Admin</option>
-          <option value="manager">Manager</option>
-          <option value="leader">Líder</option>
-          <option value="employee">Empleado</option>
+          <option value="admin">Admin</option><option value="manager">Manager</option>
+          <option value="leader">Líder</option><option value="employee">Empleado</option>
         </select>
-        <select class="form-control" id="uStatusFilter" style="width:140px" onchange="filtrarUsuarios()">
-          <option value="">Todos</option>
-          <option value="active">Activos</option>
-          <option value="inactive">Inactivos</option>
+        <select class="form-control" id="uStatusFilter" style="width:130px" onchange="filtrarUsuarios()">
+          <option value="">Todos</option><option value="active">Activos</option><option value="inactive">Inactivos</option>
         </select>
-        <button class="btn btn-secondary btn-sm" onclick="exportarUsuariosCSV()">⬇ Exportar CSV</button>
+        <button class="btn btn-secondary btn-sm" onclick="exportCSV()">⬇ CSV</button>
       </div>
       <div class="card" style="padding:0;overflow:hidden">
-        <table class="data-table" id="usuariosTable">
-          <thead><tr>
-            <th>Colaborador</th><th>Email</th><th>Rol</th>
-            <th>Líder técnico</th><th>Manager</th><th>Activo</th><th>Acciones</th>
-          </tr></thead>
-          <tbody id="usuariosTbody">
-            <tr><td colspan="7" style="text-align:center;padding:30px;color:#888580">Cargando usuarios...</td></tr>
-          </tbody>
+        <table class="data-table">
+          <thead><tr><th>Colaborador</th><th>Email</th><th>Rol</th><th>Líder</th><th>Manager</th><th>Activo</th><th>Acción</th></tr></thead>
+          <tbody id="usuariosTbody"><tr><td colspan="7" style="text-align:center;padding:30px;color:#888580">Cargando...</td></tr></tbody>
         </table>
       </div>
       <div class="flex justify-between items-center mt-16">
@@ -1421,13 +1411,11 @@ textarea.form-control { min-height: 80px; resize: vertical; }
     <!-- ======== LIDERES ======== -->
     <section class="section" id="sec-lideres">
       <div class="section-header">
-        <div>
-          <div class="section-heading">Gestión de Líderes</div>
-          <div class="section-subheading" style="color:#888580">Define líderes técnicos y gestiona sus equipos</div>
-        </div>
-        <button class="btn btn-primary btn-sm" onclick="document.getElementById('modalAsignarLider').classList.add('open')">+ Asignar Líder</button>
+        <div><div class="section-heading">Gestión de Líderes</div>
+        <div class="section-subheading" style="color:#888580">Líderes técnicos y sus equipos</div></div>
+        <button class="btn btn-primary btn-sm" onclick="document.getElementById('modalLider').classList.add('open')">+ Asignar Líder</button>
       </div>
-      <div class="help-tip">💡 Los <strong>líderes técnicos</strong> son distintos a los <strong>managers de personas</strong>. Un colaborador puede tener un líder técnico por proyecto y un manager de RRHH diferente.</div>
+      <div class="help-tip">💡 Los <strong>líderes técnicos</strong> son distintos a los <strong>managers de personas</strong>.</div>
       <div id="lideresGrid"></div>
     </section>
 
@@ -1525,104 +1513,9 @@ function renderTeamProgress(){
   const el = document.getElementById('teamProgressList');
   if(!el) return;
   el.innerHTML = teamData.map(p=>{
-    const color = p.status==='success'?'var(--success)':p.status==='warning'?'var(--warning)':'var(--danger)';
-    return `<div style="margin-bottom:12px">
-      <div class="progress-label">
-        <div class="person-chip">
-          <div class="avatar-sm" style="background:${p.color};width:24px;height:24px;font-size:9px">${p.init}</div>
-          <span class="progress-name">${p.name}</span>
-        </div>
-        <span class="progress-pct" style="color:${color}">${p.pct}%</span>
-      </div>
-      <div class="progress-bar"><div class="progress-fill" style="width:${p.pct}%;background:${color}"></div></div>
-    </div>`;
-  }).join('');
-}
-
-function drawDonut(){
-  const canvas = document.getElementById('donutChart');
-  if(!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const w = canvas.width, h = canvas.height, cx = w/2, cy = h/2, r = 60, inner = 38;
-  const data = [{v:3,c:'#E53935'},{v:3,c:'#F57C00'},{v:2,c:'#2E7D32'}];
-  const total = data.reduce((a,d)=>a+d.v,0);
-  let start = -Math.PI/2;
-  ctx.clearRect(0,0,w,h);
-  data.forEach(d=>{
-    const angle = (d.v/total)*2*Math.PI;
-    ctx.beginPath(); ctx.moveTo(cx,cy);
-    ctx.arc(cx,cy,r,start,start+angle);
-    ctx.closePath(); ctx.fillStyle=d.c; ctx.fill();
-    start += angle;
-  });
-  ctx.beginPath(); ctx.arc(cx,cy,inner,0,2*Math.PI);
-  ctx.fillStyle='#fff'; ctx.fill();
-  ctx.fillStyle='#1B3A5C'; ctx.font='bold 13px Plus Jakarta Sans';
-  ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.fillText('8', cx, cy-6);
-  ctx.font='9px Plus Jakarta Sans'; ctx.fillStyle='#6C757D';
-  ctx.fillText('total', cx, cy+8);
-
-  const legend = document.getElementById('donutLegend');
-  if(legend) legend.innerHTML = [
-    {c:'#E53935',l:'En Riesgo',n:3},
-    {c:'#F57C00',l:'En Curso',n:3},
-    {c:'#2E7D32',l:'En Verde',n:2}
-  ].map(d=>`<div class="donut-legend-item"><div class="donut-dot" style="background:${d.c}"></div>${d.l} <strong style="margin-left:auto">${d.n}</strong></div>`).join('');
-}
-
-function showSection(id){
-  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  const sec = document.getElementById('sec-'+id);
-  if(sec) sec.classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(n=>{
-    if(n.getAttribute('onclick') && n.getAttribute('onclick').includes("'"+id+"'")) n.classList.add('active');
-  });
-  document.getElementById('topbarTitle').textContent = titles[id]||id;
-}
-
-function switchTab(prefix, id, el){
-  const parent = el.closest('.tabs');
-  parent.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  el.classList.add('active');
-  const container = parent.nextElementSibling;
-  if(!container) return;
-  // Hide all sibling tab panels
-  const panelId = prefix+'-'+id;
-  // Find all potential panels
-  const allPanels = [container];
-  let sib = container.nextElementSibling;
-  while(sib && !sib.classList.contains('section') && !sib.classList.contains('card') && sib.id && sib.id.startsWith(prefix+'-')){
-    allPanels.push(sib); sib=sib.nextElementSibling;
-  }
-  // Show only matching
-  document.querySelectorAll('[id^="'+prefix+'-"]').forEach(p=>{
-    p.style.display = p.id===panelId?'':'none';
-  });
-  const target = document.getElementById(panelId);
-  if(target) target.style.display='block';
-}
-
-function showModal(id){ document.getElementById(id).classList.add('open'); }
-function closeModal(id){ document.getElementById(id).classList.remove('open'); }
-document.querySelectorAll('.modal-overlay').forEach(m=>{
-  m.addEventListener('click',function(e){ if(e.target===this) this.classList.remove('open'); });
-});
-
-// ── Azure Static Web Apps Built-in Auth ──────────────────────
-// Usa el endpoint /.auth/me que Azure Static Web Apps provee nativamente
-// No requiere MSAL ni configuracion adicional — funciona con el SSO configurado
-
+    const color = p.status==='success'?'var(--success)':p.status==='warning'?'var(// ── Azure Static Web Apps Auth ─────────────────────────────
 async function doLogin() {
-  // Redirigir al endpoint de login de Azure Static Web Apps con Azure AD
-  window.location.href = '/.auth/login/aad?post_login_redirect_uri=' + encodeURIComponent(window.location.pathname);
-}
-
-function demoLogin() {
-  document.getElementById('ssoScreen').style.display = 'none';
-  renderTeamProgress();
-  drawDonut();
+  window.location.href = '/.auth/login/aad?post_login_redirect_uri=/';
 }
 
 function setStatus(msg, color) {
@@ -1639,395 +1532,412 @@ function setButtons(enabled, text) {
   if(bt) bt.textContent = text;
 }
 
-function onLoginSuccess(user) {
+function onLoginSuccess(u) {
   document.getElementById('ssoScreen').style.display = 'none';
-  const name     = user.userDetails || user.userId || 'Usuario';
-  const email    = user.userDetails || '';
-  const initials = name.split(/[ @]/).filter(Boolean).map(n=>n[0]).join('').slice(0,2).toUpperCase();
+  const name = u.userDetails || u.userId || 'Usuario';
+  const email = u.userDetails || '';
+  const ini = name.split(/[ @]/).filter(Boolean).map(n=>n[0]).join('').slice(0,2).toUpperCase();
   document.querySelector('.user-info .name').textContent = name;
   document.querySelector('.user-info .role').textContent = email;
-  document.querySelector('.user-avatar').textContent = initials || 'U';
+  document.querySelector('.user-avatar').textContent = ini || 'U';
   window._userEmail = email;
-  window._userName  = name;
+  window._userName = name;
   renderTeamProgress();
   drawDonut();
 }
 
-// Al cargar: verificar si ya hay sesion via /.auth/me
 window.addEventListener('load', async () => {
-  setStatus('Verificando sesion...', '#888580');
   try {
     const resp = await fetch('/.auth/me');
     if (resp.ok) {
       const data = await resp.json();
-      if (data.clientPrincipal) {
-        // Ya tiene sesion activa
+      if (data && data.clientPrincipal) {
         onLoginSuccess(data.clientPrincipal);
         return;
       }
     }
-  } catch(e) {
-    console.log('No auth endpoint (local dev mode)');
-  }
-  // No hay sesion, mostrar pantalla de login
+  } catch(e) {}
   setButtons(true, 'Iniciar sesion con Azure AD');
   setStatus('');
-}
-);
+});
 
-// ── API Y MÓDULOS USUARIOS/LÍDERES ────────────────────────────
-
+// ── API Y MÓDULOS USUARIOS/LÍDERES ──────────────────────────
 const API_URL = 'https://peopletrack-api-gjbbhhcefjbgc6bd.eastus2-01.azurewebsites.net/api';
 const AVCOLORS = ['#FF5400','#4ade80','#60a5fa','#a78bfa','#f472b6','#34d399','#fbbf24','#cc4400'];
 function avColor(n){let h=0;for(let c of(n||''))h=(h*31+c.charCodeAt(0))%AVCOLORS.length;return AVCOLORS[h];}
 function avIni(n){return(n||'??').split(' ').filter(Boolean).map(p=>p[0]).join('').slice(0,2).toUpperCase();}
 
-let todosLosUsuarios = [];
-let usuariosFiltrados = [];
-let uPagina = 1;
-const U_POR_PAG = 15;
-let editandoUserId = null;
+let todosLosUsuarios=[], usuariosFiltrados=[], uPagina=1;
+const U_POR_PAG=15;
+let editandoUserId=null;
 
-function showT(msg, err) {
-  const t = document.getElementById('toastMsg');
-  if (!t) return;
-  t.textContent = msg;
-  t.style.display = 'block';
-  t.style.borderColor = err ? '#f87171' : '#4ade80';
-  t.style.color = err ? '#f87171' : '#4ade80';
-  setTimeout(function() { t.style.display = 'none'; }, 3000);
+function showT(msg,err){
+  const t=document.getElementById('toastMsg');if(!t)return;
+  t.textContent=msg;t.style.display='block';
+  t.style.borderColor=err?'#f87171':'#4ade80';t.style.color=err?'#f87171':'#4ade80';
+  setTimeout(function(){t.style.display='none';},3000);
 }
 
-async function getAuthHeaders() {
-  // Get the SWA auth token to send to the API
-  try {
-    const r = await fetch('/.auth/me');
-    const d = await r.json();
-    if (d && d.clientPrincipal) {
-      return {
-        'Content-Type': 'application/json',
-        'X-User-Email': d.clientPrincipal.userDetails || '',
-        'X-User-Id': d.clientPrincipal.userId || ''
-      };
-    }
-  } catch(e) {}
-  return { 'Content-Type': 'application/json' };
+async function apiGet(path){
+  const r=await fetch(API_URL+path);
+  if(!r.ok)throw new Error('API '+r.status);
+  return r.json();
 }
-
-async function apiGet(path) {
-  const headers = await getAuthHeaders();
-  const r = await fetch(API_URL + path, { headers });
-  if (!r.ok) throw new Error('API ' + r.status);
+async function apiPut(path,body){
+  const r=await fetch(API_URL+path,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  if(!r.ok)throw new Error('API '+r.status);
+  return r.json();
+}
+async function apiPost(path,body){
+  const r=await fetch(API_URL+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  if(!r.ok)throw new Error('API '+r.status);
   return r.json();
 }
 
-async function apiPut(path, body) {
-  const headers = await getAuthHeaders();
-  const r = await fetch(API_URL + path, {method:'PUT', headers, body:JSON.stringify(body)});
-  if (!r.ok) throw new Error('API ' + r.status);
-  return r.json();
-}
-
-async function apiPost(path, body) {
-  const headers = await getAuthHeaders();
-  const r = await fetch(API_URL + path, {method:'POST', headers, body:JSON.stringify(body)});
-  if (!r.ok) throw new Error('API ' + r.status);
-  return r.json();
-}
-
-// Intercept showSection
-var origShowSection = showSection;
-showSection = function(id) {
-  origShowSection(id);
-  if (id === 'usuarios') cargarSeccionUsuarios();
-  if (id === 'lideres') cargarSeccionLideres();
+var _origShow=showSection;
+showSection=function(id){
+  _origShow(id);
+  if(id==='usuarios')setTimeout(cargarSeccionUsuarios,50);
+  if(id==='lideres')setTimeout(cargarSeccionLideres,50);
 };
 
-async function cargarSeccionUsuarios() {
-  try {
-    if (!todosLosUsuarios.length) todosLosUsuarios = await apiGet('/users/all');
-    filtrarUsuarios();
-    actualizarStatsUsuarios();
-    poblarDropdownsLideres();
-  } catch(e) {
-    const tb = document.getElementById('usuariosTbody');
-    if (tb) tb.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:30px;color:#f87171">Error al cargar usuarios. La API no está disponible.</td></tr>';
+async function cargarSeccionUsuarios(){
+  try{
+    if(!todosLosUsuarios.length)todosLosUsuarios=await apiGet('/users/all');
+    filtrarUsuarios();actualizarStats();poblarDropdowns();
+  }catch(e){
+    var tb=document.getElementById('usuariosTbody');
+    if(tb)tb.innerHTML='<tr><td colspan="7" style="text-align:center;padding:30px;color:#f87171">Error al cargar usuarios.</td></tr>';
   }
 }
 
-function actualizarStatsUsuarios() {
-  const t=todosLosUsuarios.length, a=todosLosUsuarios.filter(u=>u.IsActive).length;
-  const m=todosLosUsuarios.filter(u=>u.AppRole==='manager').length;
-  const s=todosLosUsuarios.filter(u=>u.IsActive&&!u.LeaderName).length;
-  const el = document.getElementById('usuariosStats');
-  if (!el) return;
-  el.innerHTML = '<div class="kpi-card"><div class="kpi-label">Total</div><div class="kpi-value" style="color:#FF5400">'+t+'</div></div>'+
+function actualizarStats(){
+  var t=todosLosUsuarios.length,a=todosLosUsuarios.filter(u=>u.IsActive).length;
+  var m=todosLosUsuarios.filter(u=>u.AppRole==='manager').length;
+  var s=todosLosUsuarios.filter(u=>u.IsActive&&!u.LeaderName).length;
+  var el=document.getElementById('usuariosStats');if(!el)return;
+  el.innerHTML='<div class="kpi-card"><div class="kpi-label">Total</div><div class="kpi-value" style="color:#FF5400">'+t+'</div></div>'+
     '<div class="kpi-card"><div class="kpi-label">Activos</div><div class="kpi-value" style="color:#4ade80">'+a+'</div></div>'+
     '<div class="kpi-card"><div class="kpi-label">Managers</div><div class="kpi-value" style="color:#60a5fa">'+m+'</div></div>'+
-    '<div class="kpi-card"><div class="kpi-label">Sin líder</div><div class="kpi-value" style="color:#fbbf24">'+s+'</div></div>';
+    '<div class="kpi-card"><div class="kpi-label">Sin lider</div><div class="kpi-value" style="color:#fbbf24">'+s+'</div></div>';
 }
 
-function filtrarUsuarios() {
-  var q=(document.getElementById('uSearchInput')||{}).value||'';
-  q=q.toLowerCase();
+function filtrarUsuarios(){
+  var q=((document.getElementById('uSearchInput')||{}).value||'').toLowerCase();
   var rol=(document.getElementById('uRoleFilter')||{}).value||'';
   var st=(document.getElementById('uStatusFilter')||{}).value||'';
-  usuariosFiltrados = todosLosUsuarios.filter(function(u) {
+  usuariosFiltrados=todosLosUsuarios.filter(function(u){
     if(rol&&u.AppRole!==rol)return false;
     if(st==='active'&&!u.IsActive)return false;
     if(st==='inactive'&&u.IsActive)return false;
     if(q&&!(u.FullName||'').toLowerCase().includes(q)&&!(u.Email||'').toLowerCase().includes(q))return false;
     return true;
   });
-  uPagina=1;
-  renderTablaUsuarios();
+  uPagina=1;renderTabla();
 }
 
-function rolBadge(r) {
+function rolBadge(r){
   var m={admin:'badge-info',manager:'badge-primary',leader:'badge-warning',employee:'badge-gray'};
-  var l={admin:'Admin',manager:'Manager',leader:'Líder',employee:'Empleado'};
+  var l={admin:'Admin',manager:'Manager',leader:'Lider',employee:'Empleado'};
   return '<span class="badge '+(m[r]||'badge-gray')+'">'+(l[r]||r)+'</span>';
 }
 
-function renderTablaUsuarios() {
-  var total=usuariosFiltrados.length, pags=Math.max(1,Math.ceil(total/U_POR_PAG));
+function renderTabla(){
+  var tot=usuariosFiltrados.length,pags=Math.max(1,Math.ceil(tot/U_POR_PAG));
   if(uPagina>pags)uPagina=1;
-  var slice=usuariosFiltrados.slice((uPagina-1)*U_POR_PAG, uPagina*U_POR_PAG);
-  var tb=document.getElementById('usuariosTbody');
-  if(!tb)return;
-  tb.innerHTML=slice.map(function(u){
-    return '<tr>'+
-      '<td><div class="person-chip"><div class="avatar-sm" style="background:'+avColor(u.FullName)+'">'+avIni(u.FullName)+'</div>'+
-      '<div><div style="font-weight:600;color:#F0EBE3">'+(u.FullName||'')+'</div><div style="font-size:10px;color:#888580">'+(u.RoleName||'')+'</div></div></div></td>'+
-      '<td style="color:#888580;font-size:11px">'+(u.Email||'')+'</td>'+
-      '<td>'+rolBadge(u.AppRole)+'</td>'+
-      '<td style="font-size:11px">'+(u.LeaderName?'<span style="color:#fbbf24">'+u.LeaderName+'</span>':'<span style="color:#555;font-style:italic">Sin asignar</span>')+'</td>'+
-      '<td style="font-size:11px">'+(u.ManagerName?'<span style="color:#FF5400">'+u.ManagerName+'</span>':'<span style="color:#555">-</span>')+'</td>'+
-      '<td><input type="checkbox" '+(u.IsActive?'checked':'')+' onchange="toggleActivo('+u.UserID+',this.checked)"></td>'+
-      '<td><button class="btn btn-secondary btn-sm" onclick="abrirEditarUsuario('+u.UserID+')">✎ Editar</button></td>'+
-      '</tr>';
-  }).join('');
+  var sl=usuariosFiltrados.slice((uPagina-1)*U_POR_PAG,uPagina*U_POR_PAG);
+  var tb=document.getElementById('usuariosTbody');if(!tb)return;
+  tb.innerHTML=sl.map(function(u){return '<tr>'+
+    '<td><div class="person-chip"><div class="avatar-sm" style="background:'+avColor(u.FullName)+'">'+avIni(u.FullName)+'</div>'+
+    '<div><div style="font-weight:600;color:#F0EBE3">'+(u.FullName||'')+'</div><div style="font-size:10px;color:#888580">'+(u.RoleName||'')+'</div></div></div></td>'+
+    '<td style="color:#888580;font-size:11px">'+(u.Email||'')+'</td>'+
+    '<td>'+rolBadge(u.AppRole)+'</td>'+
+    '<td style="font-size:11px">'+(u.LeaderName?'<span style="color:#fbbf24">'+u.LeaderName+'</span>':'<span style="color:#555;font-style:italic">Sin asignar</span>')+'</td>'+
+    '<td style="font-size:11px">'+(u.ManagerName?'<span style="color:#FF5400">'+u.ManagerName+'</span>':'<span style="color:#555">-</span>')+'</td>'+
+    '<td><input type="checkbox" '+(u.IsActive?'checked':'')+' onchange="toggleActivo('+u.UserID+',this.checked)"></td>'+
+    '<td><button class="btn btn-secondary btn-sm" onclick="editarU('+u.UserID+')">Editar</button></td>'+
+    '</tr>';}).join('');
   var pi=document.getElementById('uPagInfo');
-  if(pi)pi.textContent=total===0?'Sin resultados':'Mostrando '+((uPagina-1)*U_POR_PAG+1)+'-'+Math.min(uPagina*U_POR_PAG,total)+' de '+total;
-  var pb=document.getElementById('uPagBtns');
-  if(!pb)return;
-  pb.innerHTML='';
+  if(pi)pi.textContent=tot===0?'Sin resultados':'Mostrando '+((uPagina-1)*U_POR_PAG+1)+'-'+Math.min(uPagina*U_POR_PAG,tot)+' de '+tot;
+  var pb=document.getElementById('uPagBtns');if(!pb)return;pb.innerHTML='';
   for(var i=1;i<=Math.min(pags,7);i++){
     var b=document.createElement('button');
-    b.className='btn btn-secondary btn-sm';
-    if(i===uPagina)b.style.background='#FF5400';
-    b.textContent=i;
-    (function(pg){b.onclick=function(){uPagina=pg;renderTablaUsuarios();};})(i);
-    pb.appendChild(b);
+    b.className='btn btn-secondary btn-sm'+(i===uPagina?' btn-primary':'');
+    b.textContent=i;(function(p){b.onclick=function(){uPagina=p;renderTabla();};})(i);pb.appendChild(b);
   }
 }
 
-async function toggleActivo(id, activo) {
-  var u=todosLosUsuarios.find(function(x){return x.UserID===id;});
-  if(!u)return;
-  try{await apiPut('/users/'+id,{IsActive:activo});u.IsActive=activo;showT(activo?'Usuario activado':'Usuario desactivado');actualizarStatsUsuarios();}
-  catch(e){showT('Error al actualizar',true);u.IsActive=!activo;}
+async function toggleActivo(id,activo){
+  var u=todosLosUsuarios.find(x=>x.UserID===id);if(!u)return;
+  try{await apiPut('/users/'+id,{IsActive:activo});u.IsActive=activo;showT(activo?'Activado':'Desactivado');actualizarStats();}
+  catch(e){showT('Error',true);u.IsActive=!activo;}
 }
 
-function abrirEditarUsuario(id) {
-  var u=todosLosUsuarios.find(function(x){return x.UserID===id;});
-  if(!u)return;
+function editarU(id){
+  var u=todosLosUsuarios.find(x=>x.UserID===id);if(!u)return;
   editandoUserId=id;
-  var ldrs=todosLosUsuarios.filter(function(x){return x.AppRole==='leader'||x.AppRole==='manager';});
-  var mgrs=todosLosUsuarios.filter(function(x){return x.AppRole==='manager';});
-  document.getElementById('editarUsuarioContenido').innerHTML=
-    '<div class="form-group"><label class="form-label">Nombre completo</label><input class="form-control" id="eu_nombre" value="'+(u.FullName||'')+'"></div>'+
-    '<div class="form-group"><label class="form-label">Email</label><input class="form-control" id="eu_email" value="'+(u.Email||'')+'"></div>'+
-    '<div class="grid-2 gap-8"><div class="form-group"><label class="form-label">Rol</label><select class="form-control" id="eu_rol">'+
-    ['employee','leader','manager','admin'].map(function(r){return '<option value="'+r+'" '+(u.AppRole===r?'selected':'')+'>'+r.charAt(0).toUpperCase()+r.slice(1)+'</option>';}).join('')+
-    '</select></div><div class="form-group"><label class="form-label">Estado</label><select class="form-control" id="eu_activo"><option value="1" '+(u.IsActive?'selected':'')+'>Activo</option><option value="0" '+(!u.IsActive?'selected':'')+'>Inactivo</option></select></div></div>'+
-    '<div class="form-group"><label class="form-label">Líder técnico</label><select class="form-control" id="eu_lider"><option value="">Sin líder</option>'+
-    ldrs.map(function(l){return '<option value="'+l.UserID+'" '+(u.LeaderID===l.UserID?'selected':'')+'>'+l.FullName+'</option>';}).join('')+'</select></div>'+
-    '<div class="form-group"><label class="form-label">Manager</label><select class="form-control" id="eu_manager"><option value="">Sin manager</option>'+
-    mgrs.map(function(m){return '<option value="'+m.UserID+'" '+(u.ManagerID===m.UserID?'selected':'')+'>'+m.FullName+'</option>';}).join('')+'</select></div>';
-  document.getElementById('modalEditarUsuario').classList.add('open');
+  var ldrs=todosLosUsuarios.filter(x=>x.AppRole==='leader'||x.AppRole==='manager');
+  var mgrs=todosLosUsuarios.filter(x=>x.AppRole==='manager');
+  document.getElementById('editarContenido').innerHTML=
+    '<div class="form-group"><label class="form-label">Nombre</label><input class="form-control" id="eu_n" value="'+(u.FullName||'')+'"></div>'+
+    '<div class="form-group"><label class="form-label">Email</label><input class="form-control" id="eu_e" value="'+(u.Email||'')+'"></div>'+
+    '<div class="form-group"><label class="form-label">Rol</label><select class="form-control" id="eu_r">'+
+    ['employee','leader','manager','admin'].map(r=>'<option value="'+r+'" '+(u.AppRole===r?'selected':'')+'>'+r.charAt(0).toUpperCase()+r.slice(1)+'</option>').join('')+
+    '</select></div>'+
+    '<div class="form-group"><label class="form-label">Estado</label><select class="form-control" id="eu_a"><option value="1" '+(u.IsActive?'selected':'')+'>Activo</option><option value="0" '+(!u.IsActive?'selected':'')+'>Inactivo</option></select></div>'+
+    '<div class="form-group"><label class="form-label">Lider tecnico</label><select class="form-control" id="eu_l"><option value="">Sin lider</option>'+
+    ldrs.map(l=>'<option value="'+l.UserID+'" '+(u.LeaderID===l.UserID?'selected':'')+'>'+l.FullName+'</option>').join('')+'</select></div>'+
+    '<div class="form-group"><label class="form-label">Manager</label><select class="form-control" id="eu_m"><option value="">Sin manager</option>'+
+    mgrs.map(m=>'<option value="'+m.UserID+'" '+(u.ManagerID===m.UserID?'selected':'')+'>'+m.FullName+'</option>').join('')+'</select></div>';
+  document.getElementById('modalEditar').classList.add('open');
 }
 
-async function guardarEdicionUsuario() {
-  var u=todosLosUsuarios.find(function(x){return x.UserID===editandoUserId;});
-  if(!u)return;
-  var updates={FullName:document.getElementById('eu_nombre').value,Email:document.getElementById('eu_email').value,AppRole:document.getElementById('eu_rol').value,IsActive:document.getElementById('eu_activo').value==='1'};
-  try{await apiPut('/users/'+editandoUserId,updates);Object.assign(u,updates);document.getElementById('modalEditarUsuario').classList.remove('open');filtrarUsuarios();showT('Usuario actualizado');}
-  catch(e){showT('Error al guardar',true);}
+async function guardarEdicion(){
+  var u=todosLosUsuarios.find(x=>x.UserID===editandoUserId);if(!u)return;
+  var upd={FullName:document.getElementById('eu_n').value,Email:document.getElementById('eu_e').value,
+    AppRole:document.getElementById('eu_r').value,IsActive:document.getElementById('eu_a').value==='1'};
+  try{await apiPut('/users/'+editandoUserId,upd);Object.assign(u,upd);
+    document.getElementById('modalEditar').classList.remove('open');renderTabla();showT('Guardado');}
+  catch(e){showT('Error',true);}
 }
 
-function poblarDropdownsLideres() {
-  var ldrs=todosLosUsuarios.filter(function(u){return u.AppRole==='leader'||u.AppRole==='manager';});
-  var mgrs=todosLosUsuarios.filter(function(u){return u.AppRole==='manager';});
-  var emps=todosLosUsuarios.filter(function(u){return u.IsActive&&u.AppRole==='employee';});
-  ['nu_lider','eu_lider'].forEach(function(id){var el=document.getElementById(id);if(el)el.innerHTML='<option value="">Sin líder</option>'+ldrs.map(function(l){return '<option value="'+l.UserID+'">'+l.FullName+'</option>';}).join('');});
-  ['nu_manager','eu_manager'].forEach(function(id){var el=document.getElementById(id);if(el)el.innerHTML='<option value="">Sin manager</option>'+mgrs.map(function(m){return '<option value="'+m.UserID+'">'+m.FullName+'</option>';}).join('');});
-  var cand=document.getElementById('al_candidato');
-  if(cand)cand.innerHTML='<option value="">Seleccionar</option>'+todosLosUsuarios.filter(function(u){return u.IsActive;}).map(function(u){return '<option value="'+u.UserID+'">'+u.FullName+' ('+u.AppRole+')</option>';}).join('');
-  var eq=document.getElementById('al_equipo');
-  if(eq)eq.innerHTML=emps.map(function(u){return '<option value="'+u.UserID+'">'+u.FullName+'</option>';}).join('');
+function poblarDropdowns(){
+  var ldrs=todosLosUsuarios.filter(u=>u.AppRole==='leader'||u.AppRole==='manager');
+  var mgrs=todosLosUsuarios.filter(u=>u.AppRole==='manager');
+  var emps=todosLosUsuarios.filter(u=>u.IsActive&&u.AppRole==='employee');
+  var nc=document.getElementById('nu_lider');if(nc)nc.innerHTML='<option value="">Sin lider</option>'+ldrs.map(l=>'<option value="'+l.UserID+'">'+l.FullName+'</option>').join('');
+  var nm=document.getElementById('nu_manager');if(nm)nm.innerHTML='<option value="">Sin manager</option>'+mgrs.map(m=>'<option value="'+m.UserID+'">'+m.FullName+'</option>').join('');
+  var ac=document.getElementById('al_cand');if(ac)ac.innerHTML='<option value="">Seleccionar</option>'+todosLosUsuarios.filter(u=>u.IsActive).map(u=>'<option value="'+u.UserID+'">'+u.FullName+'</option>').join('');
+  var at=document.getElementById('al_team');if(at)at.innerHTML=emps.map(u=>'<option value="'+u.UserID+'">'+u.FullName+'</option>').join('');
 }
 
-async function guardarNuevoUsuario() {
-  var fn=document.getElementById('nu_nombre').value, ln=document.getElementById('nu_apellido').value, em=document.getElementById('nu_email').value;
-  if(!em){alert('El email es obligatorio');return;}
+async function guardarNuevo(){
+  var fn=document.getElementById('nu_fn').value,ln=document.getElementById('nu_ln').value,em=document.getElementById('nu_em').value;
+  if(!em){alert('Email obligatorio');return;}
   var body={FullName:(fn+' '+ln).trim(),Email:em,AppRole:document.getElementById('nu_rol').value,IsActive:true};
-  try{
-    var r=await apiPost('/users',body);
-    todosLosUsuarios.push(r);
-  }catch(e){todosLosUsuarios.push(Object.assign({UserID:Date.now()},body));}
-  document.getElementById('modalNuevoUsuario').classList.remove('open');
-  filtrarUsuarios();
-  showT('Usuario '+body.FullName+' creado');
+  try{var r=await apiPost('/users',body);todosLosUsuarios.push(r);}catch(e){todosLosUsuarios.push(Object.assign({UserID:Date.now()},body));}
+  document.getElementById('modalNuevo').classList.remove('open');filtrarUsuarios();showT('Usuario creado');
 }
 
-async function cargarSeccionLideres() {
+async function cargarSeccionLideres(){
   try{
-     if(!todosLosUsuarios.length)todosLosUsuarios=await apiGet('/users/all');
-    poblarDropdownsLideres();
-    var ldrs=todosLosUsuarios.filter(function(u){return u.AppRole==='leader'||u.AppRole==='manager';});
-    var grid=document.getElementById('lideresGrid');
-    if(!grid)return;
-    if(!ldrs.length){grid.innerHTML='<div class="card" style="text-align:center;padding:40px;color:#888580">No hay líderes. Usá + Asignar Líder.</div>';return;}
-    grid.innerHTML=ldrs.map(function(l){
-      var equipo=todosLosUsuarios.filter(function(u){return u.LeaderID===l.UserID||u.ManagerID===l.UserID;});
+    if(!todosLosUsuarios.length)todosLosUsuarios=await apiGet('/users/all');
+    poblarDropdowns();
+    var ldrs=todosLosUsuarios.filter(u=>u.AppRole==='leader'||u.AppRole==='manager');
+    var g=document.getElementById('lideresGrid');if(!g)return;
+    if(!ldrs.length){g.innerHTML='<div class="card" style="text-align:center;padding:40px;color:#888580">No hay lideres. Usa + Asignar Lider.</div>';return;}
+    g.innerHTML=ldrs.map(function(l){
+      var eq=todosLosUsuarios.filter(u=>u.LeaderID===l.UserID||u.ManagerID===l.UserID);
       return '<div class="card" style="margin-bottom:10px">'+
-        '<div class="flex items-center gap-12" style="margin-bottom:10px">'+
+        '<div style="display:flex;align-items:center;gap:11px;margin-bottom:10px">'+
         '<div class="avatar-sm" style="background:'+avColor(l.FullName)+';width:38px;height:38px;font-size:13px">'+avIni(l.FullName)+'</div>'+
         '<div style="flex:1"><div style="font-size:13px;font-weight:600;color:#F0EBE3">'+l.FullName+'</div>'+
         '<div style="font-size:10px;color:#888580">'+(l.RoleName||l.AppRole)+'</div>'+
         '<div style="margin-top:4px">'+rolBadge(l.AppRole)+'</div></div>'+
-        '<div style="text-align:right"><div style="font-size:22px;font-weight:800;color:#FF5400">'+equipo.length+'</div>'+
+        '<div style="text-align:right"><div style="font-size:22px;font-weight:800;color:#FF5400">'+eq.length+'</div>'+
         '<div style="font-size:10px;color:#888580">colaboradores</div></div></div>'+
-        '<div class="flex gap-8" style="flex-wrap:wrap;margin-bottom:10px">'+
-        equipo.slice(0,8).map(function(t){return '<span style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.09);border-radius:5px;padding:2px 7px;font-size:10px;color:#888580">'+t.FullName+'</span>';}).join('')+
-        (equipo.length>8?'<span style="font-size:10px;color:#888580">+'+(equipo.length-8)+' más</span>':'')+
-        (equipo.length===0?'<span style="font-size:11px;color:#555;font-style:italic">Sin colaboradores asignados</span>':'')+
-        '</div><div class="flex gap-8">'+
-        '<button class="btn btn-secondary btn-sm" onclick="abrirEditarUsuario('+l.UserID+')">✎ Editar perfil</button>'+
-        (l.AppRole!=='admin'?'<button class="btn btn-secondary btn-sm" style="color:#f87171;border-color:rgba(248,113,113,.2)" onclick="quitarRolLider('+l.UserID+')">✕ Quitar líder</button>':'')+
+        '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px">'+
+        eq.slice(0,8).map(t=>'<span style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.09);border-radius:5px;padding:2px 7px;font-size:10px;color:#888580">'+t.FullName+'</span>').join('')+
+        (eq.length>8?'<span style="font-size:10px;color:#888580">+'+(eq.length-8)+' mas</span>':'')+
+        (eq.length===0?'<span style="font-size:11px;color:#555;font-style:italic">Sin colaboradores</span>':'')+
+        '</div><div style="display:flex;gap:7px">'+
+        '<button class="btn btn-secondary btn-sm" onclick="editarU('+l.UserID+')">Editar</button>'+
+        (l.AppRole!=='admin'?'<button class="btn btn-secondary btn-sm" style="color:#f87171;border-color:rgba(248,113,113,.2)" onclick="quitarLider('+l.UserID+')">Quitar lider</button>':'')+
         '</div></div>';
     }).join('');
-  }catch(e){
-    var g=document.getElementById('lideresGrid');
-    if(g)g.innerHTML='<div class="card" style="color:#f87171;padding:20px">Error al cargar líderes</div>';
-  }
+  }catch(e){var g=document.getElementById('lideresGrid');if(g)g.innerHTML='<div class="card" style="color:#f87171;padding:20px">Error al cargar</div>';}
 }
 
-async function quitarRolLider(id) {
-  var u=todosLosUsuarios.find(function(x){return x.UserID===id;});
-  if(!u||!confirm('Quitar rol de líder a '+u.FullName+'?'))return;
-  try{await apiPut('/users/'+id,{AppRole:'employee'});u.AppRole='employee';cargarSeccionLideres();showT('Rol removido de '+u.FullName);}
+async function quitarLider(id){
+  var u=todosLosUsuarios.find(x=>x.UserID===id);
+  if(!u||!confirm('Quitar lider a '+u.FullName+'?'))return;
+  try{await apiPut('/users/'+id,{AppRole:'employee'});u.AppRole='employee';cargarSeccionLideres();showT('Rol removido');}
   catch(e){showT('Error',true);}
 }
 
-async function confirmarAsignarLider() {
-  var candId=document.getElementById('al_candidato').value;
-  if(!candId){alert('Seleccioná un usuario');return;}
-  var u=todosLosUsuarios.find(function(x){return x.UserID==candId;});
-  if(!u)return;
-  var teamIds=Array.from(document.getElementById('al_equipo').selectedOptions).map(function(o){return o.value;});
+async function asignarLider(){
+  var cid=document.getElementById('al_cand').value;if(!cid){alert('Selecciona usuario');return;}
+  var u=todosLosUsuarios.find(x=>x.UserID==cid);if(!u)return;
+  var tids=Array.from(document.getElementById('al_team').selectedOptions).map(o=>o.value);
   try{
-    await apiPut('/users/'+candId,{AppRole:'leader'});
-    u.AppRole='leader';
-    for(var i=0;i<teamIds.length;i++){
-      try{
-        await apiPut('/users/'+teamIds[i],{LeaderID:parseInt(candId)});
-        var tm=todosLosUsuarios.find(function(x){return x.UserID==teamIds[i];});
-        if(tm){tm.LeaderID=parseInt(candId);tm.LeaderName=u.FullName;}
+    await apiPut('/users/'+cid,{AppRole:'leader'});u.AppRole='leader';
+    for(var i=0;i<tids.length;i++){
+      try{await apiPut('/users/'+tids[i],{LeaderID:parseInt(cid)});
+        var tm=todosLosUsuarios.find(x=>x.UserID==tids[i]);
+        if(tm){tm.LeaderID=parseInt(cid);tm.LeaderName=u.FullName;}
       }catch(e){}
     }
-    document.getElementById('modalAsignarLider').classList.remove('open');
-    cargarSeccionLideres();
-    showT(u.FullName+' asignado como líder');
-  }catch(e){showT('Error al asignar líder',true);}
+    document.getElementById('modalLider').classList.remove('open');
+    cargarSeccionLideres();showT(u.FullName+' asignado como lider');
+  }catch(e){showT('Error',true);}
 }
 
-function exportarUsuariosCSV() {
+function exportCSV(){
   var h='Nombre,Email,Rol,Lider,Manager,Activo\n';
-  var r=usuariosFiltrados.map(function(u){return '"'+(u.FullName||'')+'",'+(u.Email||'')+','+(u.AppRole||'')+','+(u.LeaderName||'')+','+(u.ManagerName||'')+(u.IsActive?',Si':',No');}).join('\n');
-  var a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob([h+r],{type:'text/csv'}));
-  a.download='usuarios_'+new Date().toISOString().slice(0,10)+'.csv';
-  a.click();
-  showT('CSV exportado');
+  var r=usuariosFiltrados.map(u=>'"'+(u.FullName||'')+'",'+(u.Email||'')+','+(u.AppRole||'')+','+(u.LeaderName||'')+','+(u.ManagerName||'')+(u.IsActive?',Si':',No')).join('\n');
+  var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([h+r],{type:'text/csv'}));
+  a.download='usuarios_'+new Date().toISOString().slice(0,10)+'.csv';a.click();showT('CSV exportado');
+}
+
+document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');}));
+n.microsoftonline.com/0724e2c4-d4b6-49dd-9a1f-e0ec4f0b435c',
+    redirectUri: 'https://yellow-water-0d91cc40f.1.azurestaticapps.net'
+  },
+  cache: { cacheLocation: 'sessionStorage' }
+};
+
+let msalApp = null;
+let msalReady = false;
+
+function setButtons(enabled, text) {
+  const b1 = document.getElementById('btnAzureLogin');
+  const b2 = document.getElementById('btnDemoLogin');
+  const bt = document.getElementById('btnAzureText');
+  if(b1) b1.disabled = !enabled;
+  if(b2) b2.disabled = !enabled;
+  if(bt) bt.textContent = text;
+}
+
+function setStatus(msg, color) {
+  const st = document.getElementById('ssoStatus');
+  if(st){ st.textContent = msg; st.style.color = color||'#FF5400'; }
+}
+
+async function waitForMSAL() {
+  let attempts = 0;
+  // Try both msal and msalBrowser global names
+  while (typeof msal === 'undefined' && typeof msalBrowser === 'undefined' && attempts < 40) {
+    await new Promise(r => setTimeout(r, 200));
+    attempts++;
+  }
+  if (typeof msal === 'undefined' && typeof msalBrowser === 'undefined') {
+    throw new Error('MSAL not loaded after ' + (attempts * 200) + 'ms');
+  }
+}
+
+async function initMSAL() {
+  await waitForMSAL();
+  // Use whichever global is available
+  const msalLib = (typeof msal !== 'undefined') ? msal : msalBrowser;
+  msalApp = new msalLib.PublicClientApplication(msalConfig);
+  await msalApp.initialize();
+  await msalApp.handleRedirectPromise();
+  msalReady = true;
+}
+
+window.addEventListener('load', async () => {
+  setStatus('Conectando con Azure AD...', '#888580');
+  try {
+    await initMSAL();
+    setButtons(true, 'Iniciar sesion con Azure AD');
+    setStatus('');
+    const accounts = msalApp.getAllAccounts();
+    if (accounts.length > 0) {
+      try {
+        const result = await msalApp.acquireTokenSilent({
+          scopes: ['openid','profile','email','User.Read'],
+          account: accounts[0]
+        });
+        onLoginSuccess(result);
+      } catch(e) { setStatus(''); }
+    }
+  } catch(e) {
+    console.error('MSAL init failed:', e);
+    setButtons(true, 'Iniciar sesion con Azure AD');
+    setStatus('Error conectando Azure AD. Reintentando...', '#f87171');
+  }
+});
+
+async function doLogin() {
+  if (!msalReady) {
+    setStatus('Cargando...', '#FF5400');
+    try { await initMSAL(); setButtons(true,'Iniciar sesion con Azure AD'); setStatus(''); }
+    catch(e) { setStatus('No se pudo conectar con Azure AD', '#f87171'); return; }
+  }
+  try {
+    setStatus('Abriendo ventana de login...', '#FF5400');
+    const result = await msalApp.loginPopup({
+      scopes: ['openid','profile','email','User.Read']
+    });
+    setStatus('');
+    onLoginSuccess(result);
+  } catch(e) {
+    if (e.errorCode !== 'user_cancelled') {
+      setStatus('Error: ' + (e.errorMessage || e.message || ''), '#f87171');
+    } else { setStatus(''); }
+  }
+}
+
+function demoLogin() {
+  document.getElementById('ssoScreen').style.display = 'none';
+  renderTeamProgress();
+  drawDonut();
+}
+
+function onLoginSuccess(result) {
+  document.getElementById('ssoScreen').style.display = 'none';
+  const name     = result.account.name || result.account.username;
+  const email    = result.account.username;
+  const initials = name.split(' ').filter(Boolean).map(n=>n[0]).join('').slice(0,2).toUpperCase();
+  document.querySelector('.user-info .name').textContent = name;
+  document.querySelector('.user-info .role').textContent = email;
+  document.querySelector('.user-avatar').textContent = initials;
+  window._accessToken = result.accessToken;
+  window._userEmail   = email;
+  window._userName    = name;
+  renderTeamProgress();
+  drawDonut();
 }
 </script>
 
 <!-- Modal Nuevo Usuario -->
-<div class="modal-overlay" id="modalNuevoUsuario">
+<div class="modal-overlay" id="modalNuevo">
   <div class="modal">
     <div class="modal-title" style="color:#F0EBE3">Nuevo Usuario</div>
-    <div class="grid-2 gap-8">
-      <div class="form-group"><label class="form-label">Nombre</label><input class="form-control" id="nu_nombre" placeholder="Juan"></div>
-      <div class="form-group"><label class="form-label">Apellido</label><input class="form-control" id="nu_apellido" placeholder="Pérez"></div>
+    <div class="grid-2 gap-16">
+      <div class="form-group"><label class="form-label">Nombre</label><input class="form-control" id="nu_fn" placeholder="Juan"></div>
+      <div class="form-group"><label class="form-label">Apellido</label><input class="form-control" id="nu_ln" placeholder="Perez"></div>
     </div>
-    <div class="form-group"><label class="form-label">Email corporativo</label><input class="form-control" id="nu_email" placeholder="jperez@ctrl365.com"></div>
-    <div class="grid-2 gap-8">
-      <div class="form-group"><label class="form-label">Rol en sistema</label>
-        <select class="form-control" id="nu_rol">
-          <option value="employee">Empleado</option>
-          <option value="leader">Líder</option>
-          <option value="manager">Manager</option>
-          <option value="admin">Admin</option>
-        </select>
-      </div>
-      <div class="form-group"><label class="form-label">Área</label>
-        <select class="form-control" id="nu_area">
-          <option value="">Seleccionar área</option>
-          <option>Operations</option><option>People &amp; Culture</option>
-          <option>Administration &amp; Finance</option>
-          <option>Sales &amp; Strategy</option><option>Technology</option>
-        </select>
-      </div>
+    <div class="form-group"><label class="form-label">Email</label><input class="form-control" id="nu_em" placeholder="jperez@ctrl365.com"></div>
+    <div class="form-group"><label class="form-label">Rol</label>
+      <select class="form-control" id="nu_rol"><option value="employee">Empleado</option><option value="leader">Lider</option><option value="manager">Manager</option><option value="admin">Admin</option></select>
     </div>
-    <div class="form-group"><label class="form-label">Líder técnico</label>
-      <select class="form-control" id="nu_lider"><option value="">Sin líder asignado</option></select>
-    </div>
-    <div class="form-group"><label class="form-label">Manager</label>
-      <select class="form-control" id="nu_manager"><option value="">Sin manager asignado</option></select>
-    </div>
+    <div class="form-group"><label class="form-label">Líder técnico</label><select class="form-control" id="nu_lider"><option value="">Sin líder</option></select></div>
+    <div class="form-group"><label class="form-label">Manager</label><select class="form-control" id="nu_manager"><option value="">Sin manager</option></select></div>
     <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="document.getElementById('modalNuevoUsuario').classList.remove('open')">Cancelar</button>
-      <button class="btn btn-primary" onclick="guardarNuevoUsuario()">Crear Usuario</button>
+      <button class="btn btn-secondary" onclick="document.getElementById('modalNuevo').classList.remove('open')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarNuevo()">Crear</button>
     </div>
   </div>
 </div>
 
 <!-- Modal Editar Usuario -->
-<div class="modal-overlay" id="modalEditarUsuario">
+<div class="modal-overlay" id="modalEditar">
   <div class="modal">
     <div class="modal-title" style="color:#F0EBE3">Editar Usuario</div>
-    <div id="editarUsuarioContenido"></div>
+    <div id="editarContenido"></div>
     <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="document.getElementById('modalEditarUsuario').classList.remove('open')">Cancelar</button>
-      <button class="btn btn-primary" onclick="guardarEdicionUsuario()">Guardar Cambios</button>
+      <button class="btn btn-secondary" onclick="document.getElementById('modalEditar').classList.remove('open')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarEdicion()">Guardar</button>
     </div>
   </div>
 </div>
 
 <!-- Modal Asignar Lider -->
-<div class="modal-overlay" id="modalAsignarLider">
+<div class="modal-overlay" id="modalLider">
   <div class="modal">
     <div class="modal-title" style="color:#F0EBE3">Asignar Líder Técnico</div>
-    <div class="help-tip" style="margin-bottom:14px">💡 Al asignar como líder el AppRole cambia a <strong>leader</strong>.</div>
     <div class="form-group"><label class="form-label">Promover como líder</label>
-      <select class="form-control" id="al_candidato"><option value="">Seleccionar usuario</option></select>
-    </div>
-    <div class="form-group"><label class="form-label">Colaboradores a cargo (Ctrl+Click para varios)</label>
-      <select class="form-control" multiple id="al_equipo" style="min-height:100px"></select>
-    </div>
-    <div class="form-group"><label class="form-label">Proyecto / Célula</label>
-      <input class="form-control" id="al_proyecto" placeholder="Ej: Galicia Seguros">
-    </div>
+      <select class="form-control" id="al_cand"><option value="">Seleccionar</option></select></div>
+    <div class="form-group"><label class="form-label">Equipo a cargo (Ctrl+Click)</label>
+      <select class="form-control" multiple id="al_team" style="min-height:100px"></select></div>
     <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="document.getElementById('modalAsignarLider').classList.remove('open')">Cancelar</button>
-      <button class="btn btn-primary" onclick="confirmarAsignarLider()">Asignar como Líder</button>
+      <button class="btn btn-secondary" onclick="document.getElementById('modalLider').classList.remove('open')">Cancelar</button>
+      <button class="btn btn-primary" onclick="asignarLider()">Asignar</button>
     </div>
   </div>
 </div>
 
-<div id="toastMsg" style="display:none;position:fixed;bottom:22px;right:22px;background:#161616;border:1px solid #4ade80;border-radius:8px;padding:10px 16px;font-size:12px;color:#4ade80;z-index:999;box-shadow:0 8px 24px rgba(0,0,0,.4)"></div>
-
+<div id="toastMsg" style="display:none;position:fixed;bottom:22px;right:22px;background:#161616;border:1px solid #4ade80;border-radius:8px;padding:10px 16px;font-size:12px;color:#4ade80;z-index:999"></div>
 </body>
 </html>

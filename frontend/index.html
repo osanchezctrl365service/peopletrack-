@@ -1883,7 +1883,7 @@ async function guardarNuevoUsuario() {
 
 async function cargarSeccionLideres() {
   try{
-    if(!todosLosUsuarios.length)todosLosUsuarios=await apiGet('/users');
+     if(!todosLosUsuarios.length)todosLosUsuarios=await apiGet('/users/all');
     poblarDropdownsLideres();
     var ldrs=todosLosUsuarios.filter(function(u){return u.AppRole==='leader'||u.AppRole==='manager';});
     var grid=document.getElementById('lideresGrid');

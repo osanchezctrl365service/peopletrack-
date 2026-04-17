@@ -548,7 +548,7 @@ textarea.form-control { min-height: 80px; resize: vertical; }
 .sso-wave { width: 100%; height: 3px; background: linear-gradient(90deg, #FF5400, rgba(255,84,0,.2)); border-radius: 0 0 20px 20px; margin-top: 28px; }
 .sso-status { font-size: 11px; color: #FF5400; margin-top: 12px; min-height: 16px; }
 </style>
-<script src="https://unpkg.com/@azure/msal-browser@2.38.3/lib/msal-browser.min.js"></script>
+
 </head>
 <body>
 
@@ -562,18 +562,18 @@ textarea.form-control { min-height: 80px; resize: vertical; }
     <div class="sso-logo" style="margin-top:20px">People<span>Track</span></div>
     <p class="sso-tagline">Gestión de Objetivos, Competencias<br>y Plan de Carrera</p>
 
-    <button class="sso-btn" id="btnAzureLogin" onclick="doLogin()" disabled>
+    <button class="sso-btn" id="btnAzureLogin" onclick="doLogin()">
       <svg width="16" height="16" viewBox="0 0 23 23" fill="none">
         <path d="M11.5 0L0 4.5v14L11.5 23 23 18.5v-14L11.5 0z" fill="#fff" opacity="0.3"/>
         <path d="M11.5 0v23L0 18.5v-14L11.5 0z" fill="#fff" opacity="0.4"/>
         <path d="M11.5 0v11.5L23 4.5 11.5 0z" fill="#fff" opacity="0.6"/>
       </svg>
-      <span id="btnAzureText">Iniciando...</span>
+      Iniciar sesión con Azure AD
     </button>
 
     <div class="sso-divider">— o —</div>
 
-    <button class="sso-btn demo" id="btnDemoLogin" onclick="demoLogin()" disabled>
+    <button class="sso-btn demo" id="btnDemoLogin" onclick="demoLogin()">
       Ingresar sin SSO (modo demo)
     </button>
 
@@ -1373,17 +1373,16 @@ textarea.form-control { min-height: 80px; resize: vertical; }
     </section>
 
 
-    <!-- ======== USUARIOS ======== -->
     <section class="section" id="sec-usuarios">
       <div class="section-header">
         <div><div class="section-heading">Gestión de Usuarios</div>
-        <div class="section-subheading" style="color:#888580">Alta, baja y asignación de roles y líderes</div></div>
-        <button class="btn btn-primary btn-sm" onclick="document.getElementById('modalNuevo').classList.add('open')">+ Nuevo Usuario</button>
+        <div class="section-subheading">Alta, baja y asignación de roles y líderes</div></div>
+        <button class="btn btn-primary btn-sm" onclick="document.getElementById('modalNuevo').classList.add('open')">+ Nuevo</button>
       </div>
       <div id="usuariosStats" class="grid-4 mb-16"></div>
       <div class="flex gap-8 mb-12" style="flex-wrap:wrap">
         <div style="position:relative;flex:1;min-width:180px">
-          <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#888580">🔍</span>
+          <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--gray-500)">🔍</span>
           <input class="form-control" id="uSearchInput" style="padding-left:30px" placeholder="Buscar..." oninput="filtrarUsuarios()">
         </div>
         <select class="form-control" id="uRoleFilter" style="width:150px" onchange="filtrarUsuarios()">
@@ -1399,23 +1398,22 @@ textarea.form-control { min-height: 80px; resize: vertical; }
       <div class="card" style="padding:0;overflow:hidden">
         <table class="data-table">
           <thead><tr><th>Colaborador</th><th>Email</th><th>Rol</th><th>Líder</th><th>Manager</th><th>Activo</th><th>Acción</th></tr></thead>
-          <tbody id="usuariosTbody"><tr><td colspan="7" style="text-align:center;padding:30px;color:#888580">Cargando...</td></tr></tbody>
+          <tbody id="usuariosTbody"><tr><td colspan="7" style="text-align:center;padding:30px;color:var(--gray-500)">Cargando...</td></tr></tbody>
         </table>
       </div>
-      <div class="flex justify-between items-center mt-16">
-        <span id="uPagInfo" style="font-size:11px;color:#888580"></span>
-        <div id="uPagBtns" class="flex gap-8"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px">
+        <span id="uPagInfo" style="font-size:11px;color:var(--gray-500)"></span>
+        <div id="uPagBtns" style="display:flex;gap:8px"></div>
       </div>
     </section>
 
-    <!-- ======== LIDERES ======== -->
     <section class="section" id="sec-lideres">
       <div class="section-header">
         <div><div class="section-heading">Gestión de Líderes</div>
-        <div class="section-subheading" style="color:#888580">Líderes técnicos y sus equipos</div></div>
+        <div class="section-subheading">Líderes técnicos y sus equipos</div></div>
         <button class="btn btn-primary btn-sm" onclick="document.getElementById('modalLider').classList.add('open')">+ Asignar Líder</button>
       </div>
-      <div class="help-tip">💡 Los <strong>líderes técnicos</strong> son distintos a los <strong>managers de personas</strong>.</div>
+      <div class="help-tip"><span class="help-tip-icon">💡</span>Los <strong>líderes técnicos</strong> son distintos a los <strong>managers de personas</strong>.</div>
       <div id="lideresGrid"></div>
     </section>
 
@@ -1513,9 +1511,103 @@ function renderTeamProgress(){
   const el = document.getElementById('teamProgressList');
   if(!el) return;
   el.innerHTML = teamData.map(p=>{
-    const color = p.status==='success'?'var(--success)':p.status==='warning'?'var(// ── Azure Static Web Apps Auth ─────────────────────────────
-async function doLogin() {
+    const color = p.status==='success'?'var(--success)':p.status==='warning'?'var(--warning)':'var(--danger)';
+    return `<div style="margin-bottom:12px">
+      <div class="progress-label">
+        <div class="person-chip">
+          <div class="avatar-sm" style="background:${p.color};width:24px;height:24px;font-size:9px">${p.init}</div>
+          <span class="progress-name">${p.name}</span>
+        </div>
+        <span class="progress-pct" style="color:${color}">${p.pct}%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${p.pct}%;background:${color}"></div></div>
+    </div>`;
+  }).join('');
+}
+
+function drawDonut(){
+  const canvas = document.getElementById('donutChart');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height, cx = w/2, cy = h/2, r = 60, inner = 38;
+  const data = [{v:3,c:'#E53935'},{v:3,c:'#F57C00'},{v:2,c:'#2E7D32'}];
+  const total = data.reduce((a,d)=>a+d.v,0);
+  let start = -Math.PI/2;
+  ctx.clearRect(0,0,w,h);
+  data.forEach(d=>{
+    const angle = (d.v/total)*2*Math.PI;
+    ctx.beginPath(); ctx.moveTo(cx,cy);
+    ctx.arc(cx,cy,r,start,start+angle);
+    ctx.closePath(); ctx.fillStyle=d.c; ctx.fill();
+    start += angle;
+  });
+  ctx.beginPath(); ctx.arc(cx,cy,inner,0,2*Math.PI);
+  ctx.fillStyle='#fff'; ctx.fill();
+  ctx.fillStyle='#1B3A5C'; ctx.font='bold 13px Plus Jakarta Sans';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('8', cx, cy-6);
+  ctx.font='9px Plus Jakarta Sans'; ctx.fillStyle='#6C757D';
+  ctx.fillText('total', cx, cy+8);
+
+  const legend = document.getElementById('donutLegend');
+  if(legend) legend.innerHTML = [
+    {c:'#E53935',l:'En Riesgo',n:3},
+    {c:'#F57C00',l:'En Curso',n:3},
+    {c:'#2E7D32',l:'En Verde',n:2}
+  ].map(d=>`<div class="donut-legend-item"><div class="donut-dot" style="background:${d.c}"></div>${d.l} <strong style="margin-left:auto">${d.n}</strong></div>`).join('');
+}
+
+function showSection(id){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const sec = document.getElementById('sec-'+id);
+  if(sec) sec.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>{
+    if(n.getAttribute('onclick') && n.getAttribute('onclick').includes("'"+id+"'")) n.classList.add('active');
+  });
+  document.getElementById('topbarTitle').textContent = titles[id]||id;
+}
+
+function switchTab(prefix, id, el){
+  const parent = el.closest('.tabs');
+  parent.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  const container = parent.nextElementSibling;
+  if(!container) return;
+  // Hide all sibling tab panels
+  const panelId = prefix+'-'+id;
+  // Find all potential panels
+  const allPanels = [container];
+  let sib = container.nextElementSibling;
+  while(sib && !sib.classList.contains('section') && !sib.classList.contains('card') && sib.id && sib.id.startsWith(prefix+'-')){
+    allPanels.push(sib); sib=sib.nextElementSibling;
+  }
+  // Show only matching
+  document.querySelectorAll('[id^="'+prefix+'-"]').forEach(p=>{
+    p.style.display = p.id===panelId?'':'none';
+  });
+  const target = document.getElementById(panelId);
+  if(target) target.style.display='block';
+}
+
+function showModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(m=>{
+  m.addEventListener('click',function(e){ if(e.target===this) this.classList.remove('open'); });
+});
+
+// ── Azure Static Web Apps Built-in Auth ──────────────────────
+// Usa el endpoint /.auth/me que Azure Static Web Apps provee nativamente
+// No requiere MSAL ni configuracion adicional — funciona con el SSO configurado
+
+function doLogin() {
   window.location.href = '/.auth/login/aad?post_login_redirect_uri=/';
+}
+
+function demoLogin() {
+  document.getElementById('ssoScreen').style.display = 'none';
+  renderTeamProgress();
+  drawDonut();
 }
 
 function setStatus(msg, color) {
@@ -1532,20 +1624,21 @@ function setButtons(enabled, text) {
   if(bt) bt.textContent = text;
 }
 
-function onLoginSuccess(u) {
+function onLoginSuccess(user) {
   document.getElementById('ssoScreen').style.display = 'none';
-  const name = u.userDetails || u.userId || 'Usuario';
-  const email = u.userDetails || '';
-  const ini = name.split(/[ @]/).filter(Boolean).map(n=>n[0]).join('').slice(0,2).toUpperCase();
+  const name     = user.userDetails || user.userId || 'Usuario';
+  const email    = user.userDetails || '';
+  const initials = name.split(/[ @]/).filter(Boolean).map(n=>n[0]).join('').slice(0,2).toUpperCase();
   document.querySelector('.user-info .name').textContent = name;
   document.querySelector('.user-info .role').textContent = email;
-  document.querySelector('.user-avatar').textContent = ini || 'U';
+  document.querySelector('.user-avatar').textContent = initials || 'U';
   window._userEmail = email;
-  window._userName = name;
+  window._userName  = name;
   renderTeamProgress();
   drawDonut();
 }
 
+// Al cargar: verificar si ya hay sesion via /.auth/me
 window.addEventListener('load', async () => {
   try {
     const resp = await fetch('/.auth/me');
@@ -1557,351 +1650,20 @@ window.addEventListener('load', async () => {
       }
     }
   } catch(e) {}
-  setButtons(true, 'Iniciar sesion con Azure AD');
-  setStatus('');
+  // No session - button already enabled, ready to click
 });
-
-// ── API Y MÓDULOS USUARIOS/LÍDERES ──────────────────────────
-const API_URL = 'https://peopletrack-api-gjbbhhcefjbgc6bd.eastus2-01.azurewebsites.net/api';
-const AVCOLORS = ['#FF5400','#4ade80','#60a5fa','#a78bfa','#f472b6','#34d399','#fbbf24','#cc4400'];
-function avColor(n){let h=0;for(let c of(n||''))h=(h*31+c.charCodeAt(0))%AVCOLORS.length;return AVCOLORS[h];}
-function avIni(n){return(n||'??').split(' ').filter(Boolean).map(p=>p[0]).join('').slice(0,2).toUpperCase();}
-
-let todosLosUsuarios=[], usuariosFiltrados=[], uPagina=1;
-const U_POR_PAG=15;
-let editandoUserId=null;
-
-function showT(msg,err){
-  const t=document.getElementById('toastMsg');if(!t)return;
-  t.textContent=msg;t.style.display='block';
-  t.style.borderColor=err?'#f87171':'#4ade80';t.style.color=err?'#f87171':'#4ade80';
-  setTimeout(function(){t.style.display='none';},3000);
-}
-
-async function apiGet(path){
-  const r=await fetch(API_URL+path);
-  if(!r.ok)throw new Error('API '+r.status);
-  return r.json();
-}
-async function apiPut(path,body){
-  const r=await fetch(API_URL+path,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-  if(!r.ok)throw new Error('API '+r.status);
-  return r.json();
-}
-async function apiPost(path,body){
-  const r=await fetch(API_URL+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-  if(!r.ok)throw new Error('API '+r.status);
-  return r.json();
-}
-
-var _origShow=showSection;
-showSection=function(id){
-  _origShow(id);
-  if(id==='usuarios')setTimeout(cargarSeccionUsuarios,50);
-  if(id==='lideres')setTimeout(cargarSeccionLideres,50);
-};
-
-async function cargarSeccionUsuarios(){
-  try{
-    if(!todosLosUsuarios.length)todosLosUsuarios=await apiGet('/users/all');
-    filtrarUsuarios();actualizarStats();poblarDropdowns();
-  }catch(e){
-    var tb=document.getElementById('usuariosTbody');
-    if(tb)tb.innerHTML='<tr><td colspan="7" style="text-align:center;padding:30px;color:#f87171">Error al cargar usuarios.</td></tr>';
-  }
-}
-
-function actualizarStats(){
-  var t=todosLosUsuarios.length,a=todosLosUsuarios.filter(u=>u.IsActive).length;
-  var m=todosLosUsuarios.filter(u=>u.AppRole==='manager').length;
-  var s=todosLosUsuarios.filter(u=>u.IsActive&&!u.LeaderName).length;
-  var el=document.getElementById('usuariosStats');if(!el)return;
-  el.innerHTML='<div class="kpi-card"><div class="kpi-label">Total</div><div class="kpi-value" style="color:#FF5400">'+t+'</div></div>'+
-    '<div class="kpi-card"><div class="kpi-label">Activos</div><div class="kpi-value" style="color:#4ade80">'+a+'</div></div>'+
-    '<div class="kpi-card"><div class="kpi-label">Managers</div><div class="kpi-value" style="color:#60a5fa">'+m+'</div></div>'+
-    '<div class="kpi-card"><div class="kpi-label">Sin lider</div><div class="kpi-value" style="color:#fbbf24">'+s+'</div></div>';
-}
-
-function filtrarUsuarios(){
-  var q=((document.getElementById('uSearchInput')||{}).value||'').toLowerCase();
-  var rol=(document.getElementById('uRoleFilter')||{}).value||'';
-  var st=(document.getElementById('uStatusFilter')||{}).value||'';
-  usuariosFiltrados=todosLosUsuarios.filter(function(u){
-    if(rol&&u.AppRole!==rol)return false;
-    if(st==='active'&&!u.IsActive)return false;
-    if(st==='inactive'&&u.IsActive)return false;
-    if(q&&!(u.FullName||'').toLowerCase().includes(q)&&!(u.Email||'').toLowerCase().includes(q))return false;
-    return true;
-  });
-  uPagina=1;renderTabla();
-}
-
-function rolBadge(r){
-  var m={admin:'badge-info',manager:'badge-primary',leader:'badge-warning',employee:'badge-gray'};
-  var l={admin:'Admin',manager:'Manager',leader:'Lider',employee:'Empleado'};
-  return '<span class="badge '+(m[r]||'badge-gray')+'">'+(l[r]||r)+'</span>';
-}
-
-function renderTabla(){
-  var tot=usuariosFiltrados.length,pags=Math.max(1,Math.ceil(tot/U_POR_PAG));
-  if(uPagina>pags)uPagina=1;
-  var sl=usuariosFiltrados.slice((uPagina-1)*U_POR_PAG,uPagina*U_POR_PAG);
-  var tb=document.getElementById('usuariosTbody');if(!tb)return;
-  tb.innerHTML=sl.map(function(u){return '<tr>'+
-    '<td><div class="person-chip"><div class="avatar-sm" style="background:'+avColor(u.FullName)+'">'+avIni(u.FullName)+'</div>'+
-    '<div><div style="font-weight:600;color:#F0EBE3">'+(u.FullName||'')+'</div><div style="font-size:10px;color:#888580">'+(u.RoleName||'')+'</div></div></div></td>'+
-    '<td style="color:#888580;font-size:11px">'+(u.Email||'')+'</td>'+
-    '<td>'+rolBadge(u.AppRole)+'</td>'+
-    '<td style="font-size:11px">'+(u.LeaderName?'<span style="color:#fbbf24">'+u.LeaderName+'</span>':'<span style="color:#555;font-style:italic">Sin asignar</span>')+'</td>'+
-    '<td style="font-size:11px">'+(u.ManagerName?'<span style="color:#FF5400">'+u.ManagerName+'</span>':'<span style="color:#555">-</span>')+'</td>'+
-    '<td><input type="checkbox" '+(u.IsActive?'checked':'')+' onchange="toggleActivo('+u.UserID+',this.checked)"></td>'+
-    '<td><button class="btn btn-secondary btn-sm" onclick="editarU('+u.UserID+')">Editar</button></td>'+
-    '</tr>';}).join('');
-  var pi=document.getElementById('uPagInfo');
-  if(pi)pi.textContent=tot===0?'Sin resultados':'Mostrando '+((uPagina-1)*U_POR_PAG+1)+'-'+Math.min(uPagina*U_POR_PAG,tot)+' de '+tot;
-  var pb=document.getElementById('uPagBtns');if(!pb)return;pb.innerHTML='';
-  for(var i=1;i<=Math.min(pags,7);i++){
-    var b=document.createElement('button');
-    b.className='btn btn-secondary btn-sm'+(i===uPagina?' btn-primary':'');
-    b.textContent=i;(function(p){b.onclick=function(){uPagina=p;renderTabla();};})(i);pb.appendChild(b);
-  }
-}
-
-async function toggleActivo(id,activo){
-  var u=todosLosUsuarios.find(x=>x.UserID===id);if(!u)return;
-  try{await apiPut('/users/'+id,{IsActive:activo});u.IsActive=activo;showT(activo?'Activado':'Desactivado');actualizarStats();}
-  catch(e){showT('Error',true);u.IsActive=!activo;}
-}
-
-function editarU(id){
-  var u=todosLosUsuarios.find(x=>x.UserID===id);if(!u)return;
-  editandoUserId=id;
-  var ldrs=todosLosUsuarios.filter(x=>x.AppRole==='leader'||x.AppRole==='manager');
-  var mgrs=todosLosUsuarios.filter(x=>x.AppRole==='manager');
-  document.getElementById('editarContenido').innerHTML=
-    '<div class="form-group"><label class="form-label">Nombre</label><input class="form-control" id="eu_n" value="'+(u.FullName||'')+'"></div>'+
-    '<div class="form-group"><label class="form-label">Email</label><input class="form-control" id="eu_e" value="'+(u.Email||'')+'"></div>'+
-    '<div class="form-group"><label class="form-label">Rol</label><select class="form-control" id="eu_r">'+
-    ['employee','leader','manager','admin'].map(r=>'<option value="'+r+'" '+(u.AppRole===r?'selected':'')+'>'+r.charAt(0).toUpperCase()+r.slice(1)+'</option>').join('')+
-    '</select></div>'+
-    '<div class="form-group"><label class="form-label">Estado</label><select class="form-control" id="eu_a"><option value="1" '+(u.IsActive?'selected':'')+'>Activo</option><option value="0" '+(!u.IsActive?'selected':'')+'>Inactivo</option></select></div>'+
-    '<div class="form-group"><label class="form-label">Lider tecnico</label><select class="form-control" id="eu_l"><option value="">Sin lider</option>'+
-    ldrs.map(l=>'<option value="'+l.UserID+'" '+(u.LeaderID===l.UserID?'selected':'')+'>'+l.FullName+'</option>').join('')+'</select></div>'+
-    '<div class="form-group"><label class="form-label">Manager</label><select class="form-control" id="eu_m"><option value="">Sin manager</option>'+
-    mgrs.map(m=>'<option value="'+m.UserID+'" '+(u.ManagerID===m.UserID?'selected':'')+'>'+m.FullName+'</option>').join('')+'</select></div>';
-  document.getElementById('modalEditar').classList.add('open');
-}
-
-async function guardarEdicion(){
-  var u=todosLosUsuarios.find(x=>x.UserID===editandoUserId);if(!u)return;
-  var upd={FullName:document.getElementById('eu_n').value,Email:document.getElementById('eu_e').value,
-    AppRole:document.getElementById('eu_r').value,IsActive:document.getElementById('eu_a').value==='1'};
-  try{await apiPut('/users/'+editandoUserId,upd);Object.assign(u,upd);
-    document.getElementById('modalEditar').classList.remove('open');renderTabla();showT('Guardado');}
-  catch(e){showT('Error',true);}
-}
-
-function poblarDropdowns(){
-  var ldrs=todosLosUsuarios.filter(u=>u.AppRole==='leader'||u.AppRole==='manager');
-  var mgrs=todosLosUsuarios.filter(u=>u.AppRole==='manager');
-  var emps=todosLosUsuarios.filter(u=>u.IsActive&&u.AppRole==='employee');
-  var nc=document.getElementById('nu_lider');if(nc)nc.innerHTML='<option value="">Sin lider</option>'+ldrs.map(l=>'<option value="'+l.UserID+'">'+l.FullName+'</option>').join('');
-  var nm=document.getElementById('nu_manager');if(nm)nm.innerHTML='<option value="">Sin manager</option>'+mgrs.map(m=>'<option value="'+m.UserID+'">'+m.FullName+'</option>').join('');
-  var ac=document.getElementById('al_cand');if(ac)ac.innerHTML='<option value="">Seleccionar</option>'+todosLosUsuarios.filter(u=>u.IsActive).map(u=>'<option value="'+u.UserID+'">'+u.FullName+'</option>').join('');
-  var at=document.getElementById('al_team');if(at)at.innerHTML=emps.map(u=>'<option value="'+u.UserID+'">'+u.FullName+'</option>').join('');
-}
-
-async function guardarNuevo(){
-  var fn=document.getElementById('nu_fn').value,ln=document.getElementById('nu_ln').value,em=document.getElementById('nu_em').value;
-  if(!em){alert('Email obligatorio');return;}
-  var body={FullName:(fn+' '+ln).trim(),Email:em,AppRole:document.getElementById('nu_rol').value,IsActive:true};
-  try{var r=await apiPost('/users',body);todosLosUsuarios.push(r);}catch(e){todosLosUsuarios.push(Object.assign({UserID:Date.now()},body));}
-  document.getElementById('modalNuevo').classList.remove('open');filtrarUsuarios();showT('Usuario creado');
-}
-
-async function cargarSeccionLideres(){
-  try{
-    if(!todosLosUsuarios.length)todosLosUsuarios=await apiGet('/users/all');
-    poblarDropdowns();
-    var ldrs=todosLosUsuarios.filter(u=>u.AppRole==='leader'||u.AppRole==='manager');
-    var g=document.getElementById('lideresGrid');if(!g)return;
-    if(!ldrs.length){g.innerHTML='<div class="card" style="text-align:center;padding:40px;color:#888580">No hay lideres. Usa + Asignar Lider.</div>';return;}
-    g.innerHTML=ldrs.map(function(l){
-      var eq=todosLosUsuarios.filter(u=>u.LeaderID===l.UserID||u.ManagerID===l.UserID);
-      return '<div class="card" style="margin-bottom:10px">'+
-        '<div style="display:flex;align-items:center;gap:11px;margin-bottom:10px">'+
-        '<div class="avatar-sm" style="background:'+avColor(l.FullName)+';width:38px;height:38px;font-size:13px">'+avIni(l.FullName)+'</div>'+
-        '<div style="flex:1"><div style="font-size:13px;font-weight:600;color:#F0EBE3">'+l.FullName+'</div>'+
-        '<div style="font-size:10px;color:#888580">'+(l.RoleName||l.AppRole)+'</div>'+
-        '<div style="margin-top:4px">'+rolBadge(l.AppRole)+'</div></div>'+
-        '<div style="text-align:right"><div style="font-size:22px;font-weight:800;color:#FF5400">'+eq.length+'</div>'+
-        '<div style="font-size:10px;color:#888580">colaboradores</div></div></div>'+
-        '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px">'+
-        eq.slice(0,8).map(t=>'<span style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.09);border-radius:5px;padding:2px 7px;font-size:10px;color:#888580">'+t.FullName+'</span>').join('')+
-        (eq.length>8?'<span style="font-size:10px;color:#888580">+'+(eq.length-8)+' mas</span>':'')+
-        (eq.length===0?'<span style="font-size:11px;color:#555;font-style:italic">Sin colaboradores</span>':'')+
-        '</div><div style="display:flex;gap:7px">'+
-        '<button class="btn btn-secondary btn-sm" onclick="editarU('+l.UserID+')">Editar</button>'+
-        (l.AppRole!=='admin'?'<button class="btn btn-secondary btn-sm" style="color:#f87171;border-color:rgba(248,113,113,.2)" onclick="quitarLider('+l.UserID+')">Quitar lider</button>':'')+
-        '</div></div>';
-    }).join('');
-  }catch(e){var g=document.getElementById('lideresGrid');if(g)g.innerHTML='<div class="card" style="color:#f87171;padding:20px">Error al cargar</div>';}
-}
-
-async function quitarLider(id){
-  var u=todosLosUsuarios.find(x=>x.UserID===id);
-  if(!u||!confirm('Quitar lider a '+u.FullName+'?'))return;
-  try{await apiPut('/users/'+id,{AppRole:'employee'});u.AppRole='employee';cargarSeccionLideres();showT('Rol removido');}
-  catch(e){showT('Error',true);}
-}
-
-async function asignarLider(){
-  var cid=document.getElementById('al_cand').value;if(!cid){alert('Selecciona usuario');return;}
-  var u=todosLosUsuarios.find(x=>x.UserID==cid);if(!u)return;
-  var tids=Array.from(document.getElementById('al_team').selectedOptions).map(o=>o.value);
-  try{
-    await apiPut('/users/'+cid,{AppRole:'leader'});u.AppRole='leader';
-    for(var i=0;i<tids.length;i++){
-      try{await apiPut('/users/'+tids[i],{LeaderID:parseInt(cid)});
-        var tm=todosLosUsuarios.find(x=>x.UserID==tids[i]);
-        if(tm){tm.LeaderID=parseInt(cid);tm.LeaderName=u.FullName;}
-      }catch(e){}
-    }
-    document.getElementById('modalLider').classList.remove('open');
-    cargarSeccionLideres();showT(u.FullName+' asignado como lider');
-  }catch(e){showT('Error',true);}
-}
-
-function exportCSV(){
-  var h='Nombre,Email,Rol,Lider,Manager,Activo\n';
-  var r=usuariosFiltrados.map(u=>'"'+(u.FullName||'')+'",'+(u.Email||'')+','+(u.AppRole||'')+','+(u.LeaderName||'')+','+(u.ManagerName||'')+(u.IsActive?',Si':',No')).join('\n');
-  var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([h+r],{type:'text/csv'}));
-  a.download='usuarios_'+new Date().toISOString().slice(0,10)+'.csv';a.click();showT('CSV exportado');
-}
-
-document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');}));
-n.microsoftonline.com/0724e2c4-d4b6-49dd-9a1f-e0ec4f0b435c',
-    redirectUri: 'https://yellow-water-0d91cc40f.1.azurestaticapps.net'
-  },
-  cache: { cacheLocation: 'sessionStorage' }
-};
-
-let msalApp = null;
-let msalReady = false;
-
-function setButtons(enabled, text) {
-  const b1 = document.getElementById('btnAzureLogin');
-  const b2 = document.getElementById('btnDemoLogin');
-  const bt = document.getElementById('btnAzureText');
-  if(b1) b1.disabled = !enabled;
-  if(b2) b2.disabled = !enabled;
-  if(bt) bt.textContent = text;
-}
-
-function setStatus(msg, color) {
-  const st = document.getElementById('ssoStatus');
-  if(st){ st.textContent = msg; st.style.color = color||'#FF5400'; }
-}
-
-async function waitForMSAL() {
-  let attempts = 0;
-  // Try both msal and msalBrowser global names
-  while (typeof msal === 'undefined' && typeof msalBrowser === 'undefined' && attempts < 40) {
-    await new Promise(r => setTimeout(r, 200));
-    attempts++;
-  }
-  if (typeof msal === 'undefined' && typeof msalBrowser === 'undefined') {
-    throw new Error('MSAL not loaded after ' + (attempts * 200) + 'ms');
-  }
-}
-
-async function initMSAL() {
-  await waitForMSAL();
-  // Use whichever global is available
-  const msalLib = (typeof msal !== 'undefined') ? msal : msalBrowser;
-  msalApp = new msalLib.PublicClientApplication(msalConfig);
-  await msalApp.initialize();
-  await msalApp.handleRedirectPromise();
-  msalReady = true;
-}
-
-window.addEventListener('load', async () => {
-  setStatus('Conectando con Azure AD...', '#888580');
-  try {
-    await initMSAL();
-    setButtons(true, 'Iniciar sesion con Azure AD');
-    setStatus('');
-    const accounts = msalApp.getAllAccounts();
-    if (accounts.length > 0) {
-      try {
-        const result = await msalApp.acquireTokenSilent({
-          scopes: ['openid','profile','email','User.Read'],
-          account: accounts[0]
-        });
-        onLoginSuccess(result);
-      } catch(e) { setStatus(''); }
-    }
-  } catch(e) {
-    console.error('MSAL init failed:', e);
-    setButtons(true, 'Iniciar sesion con Azure AD');
-    setStatus('Error conectando Azure AD. Reintentando...', '#f87171');
-  }
-});
-
-async function doLogin() {
-  if (!msalReady) {
-    setStatus('Cargando...', '#FF5400');
-    try { await initMSAL(); setButtons(true,'Iniciar sesion con Azure AD'); setStatus(''); }
-    catch(e) { setStatus('No se pudo conectar con Azure AD', '#f87171'); return; }
-  }
-  try {
-    setStatus('Abriendo ventana de login...', '#FF5400');
-    const result = await msalApp.loginPopup({
-      scopes: ['openid','profile','email','User.Read']
-    });
-    setStatus('');
-    onLoginSuccess(result);
-  } catch(e) {
-    if (e.errorCode !== 'user_cancelled') {
-      setStatus('Error: ' + (e.errorMessage || e.message || ''), '#f87171');
-    } else { setStatus(''); }
-  }
-}
-
-function demoLogin() {
-  document.getElementById('ssoScreen').style.display = 'none';
-  renderTeamProgress();
-  drawDonut();
-}
-
-function onLoginSuccess(result) {
-  document.getElementById('ssoScreen').style.display = 'none';
-  const name     = result.account.name || result.account.username;
-  const email    = result.account.username;
-  const initials = name.split(' ').filter(Boolean).map(n=>n[0]).join('').slice(0,2).toUpperCase();
-  document.querySelector('.user-info .name').textContent = name;
-  document.querySelector('.user-info .role').textContent = email;
-  document.querySelector('.user-avatar').textContent = initials;
-  window._accessToken = result.accessToken;
-  window._userEmail   = email;
-  window._userName    = name;
-  renderTeamProgress();
-  drawDonut();
-}
 </script>
 
-<!-- Modal Nuevo Usuario -->
 <div class="modal-overlay" id="modalNuevo">
   <div class="modal">
-    <div class="modal-title" style="color:#F0EBE3">Nuevo Usuario</div>
-    <div class="grid-2 gap-16">
+    <div class="modal-title">Nuevo Usuario</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
       <div class="form-group"><label class="form-label">Nombre</label><input class="form-control" id="nu_fn" placeholder="Juan"></div>
       <div class="form-group"><label class="form-label">Apellido</label><input class="form-control" id="nu_ln" placeholder="Perez"></div>
     </div>
     <div class="form-group"><label class="form-label">Email</label><input class="form-control" id="nu_em" placeholder="jperez@ctrl365.com"></div>
     <div class="form-group"><label class="form-label">Rol</label>
-      <select class="form-control" id="nu_rol"><option value="employee">Empleado</option><option value="leader">Lider</option><option value="manager">Manager</option><option value="admin">Admin</option></select>
-    </div>
+      <select class="form-control" id="nu_rol"><option value="employee">Empleado</option><option value="leader">Lider</option><option value="manager">Manager</option><option value="admin">Admin</option></select></div>
     <div class="form-group"><label class="form-label">Líder técnico</label><select class="form-control" id="nu_lider"><option value="">Sin líder</option></select></div>
     <div class="form-group"><label class="form-label">Manager</label><select class="form-control" id="nu_manager"><option value="">Sin manager</option></select></div>
     <div class="modal-actions">
@@ -1911,10 +1673,9 @@ function onLoginSuccess(result) {
   </div>
 </div>
 
-<!-- Modal Editar Usuario -->
 <div class="modal-overlay" id="modalEditar">
   <div class="modal">
-    <div class="modal-title" style="color:#F0EBE3">Editar Usuario</div>
+    <div class="modal-title">Editar Usuario</div>
     <div id="editarContenido"></div>
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="document.getElementById('modalEditar').classList.remove('open')">Cancelar</button>
@@ -1923,13 +1684,12 @@ function onLoginSuccess(result) {
   </div>
 </div>
 
-<!-- Modal Asignar Lider -->
 <div class="modal-overlay" id="modalLider">
   <div class="modal">
-    <div class="modal-title" style="color:#F0EBE3">Asignar Líder Técnico</div>
+    <div class="modal-title">Asignar Líder Técnico</div>
     <div class="form-group"><label class="form-label">Promover como líder</label>
       <select class="form-control" id="al_cand"><option value="">Seleccionar</option></select></div>
-    <div class="form-group"><label class="form-label">Equipo a cargo (Ctrl+Click)</label>
+    <div class="form-group"><label class="form-label">Equipo (Ctrl+Click para varios)</label>
       <select class="form-control" multiple id="al_team" style="min-height:100px"></select></div>
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="document.getElementById('modalLider').classList.remove('open')">Cancelar</button>
@@ -1938,6 +1698,194 @@ function onLoginSuccess(result) {
   </div>
 </div>
 
-<div id="toastMsg" style="display:none;position:fixed;bottom:22px;right:22px;background:#161616;border:1px solid #4ade80;border-radius:8px;padding:10px 16px;font-size:12px;color:#4ade80;z-index:999"></div>
+<div id="toastMsg" style="display:none;position:fixed;bottom:22px;right:22px;background:#fff;border:1px solid #2E7D32;border-radius:8px;padding:10px 16px;font-size:12px;color:#2E7D32;z-index:999;box-shadow:0 4px 16px rgba(0,0,0,.15)"></div>
+
+<script>
+const API_URL='https://peopletrack-api-gjbbhhcefjbgc6bd.eastus2-01.azurewebsites.net/api';
+const AVCOLS=['#FF5400','#1B3A5C','#00A3A3','#7B1FA2','#D84315','#1565C0','#00695C','#4527A0'];
+function avC(n){let h=0;for(let c of(n||''))h=(h*31+c.charCodeAt(0))%AVCOLS.length;return AVCOLS[h];}
+function avI(n){return(n||'??').split(' ').filter(Boolean).map(p=>p[0]).join('').slice(0,2).toUpperCase();}
+let users=[],filtered=[],pg=1;const PP=15;let editId=null;
+
+function showT(msg,err){const t=document.getElementById('toastMsg');if(!t)return;
+  t.textContent=msg;t.style.display='block';t.style.borderColor=err?'#E53935':'#2E7D32';t.style.color=err?'#E53935':'#2E7D32';
+  setTimeout(()=>t.style.display='none',3000);}
+
+async function apiG(p){const r=await fetch(API_URL+p);if(!r.ok)throw new Error(r.status);return r.json();}
+async function apiP(p,b){const r=await fetch(API_URL+p,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});if(!r.ok)throw new Error(r.status);return r.json();}
+async function apiPO(p,b){const r=await fetch(API_URL+p,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});if(!r.ok)throw new Error(r.status);return r.json();}
+
+var _os=showSection;
+showSection=function(id){_os(id);
+  if(id==='usuarios')setTimeout(loadUsers,50);
+  if(id==='lideres')setTimeout(loadLeaders,50);};
+
+async function loadUsers(){
+  try{if(!users.length)users=await apiG('/users/all');doFilter();doStats();doDropdowns();}
+  catch(e){var tb=document.getElementById('usuariosTbody');
+    if(tb)tb.innerHTML='<tr><td colspan="7" style="text-align:center;padding:30px;color:#E53935">Error al cargar usuarios.</td></tr>';}
+}
+
+function doStats(){
+  var t=users.length,a=users.filter(u=>u.IsActive).length,m=users.filter(u=>u.AppRole==='manager').length,s=users.filter(u=>u.IsActive&&!u.LeaderName).length;
+  var el=document.getElementById('usuariosStats');if(!el)return;
+  el.innerHTML='<div class="kpi-card"><div class="kpi-label">Total</div><div class="kpi-value" style="color:#FF5400">'+t+'</div></div>'+
+    '<div class="kpi-card"><div class="kpi-label">Activos</div><div class="kpi-value" style="color:#2E7D32">'+a+'</div></div>'+
+    '<div class="kpi-card"><div class="kpi-label">Managers</div><div class="kpi-value" style="color:#1B3A5C">'+m+'</div></div>'+
+    '<div class="kpi-card"><div class="kpi-label">Sin líder</div><div class="kpi-value" style="color:#F57C00">'+s+'</div></div>';
+}
+
+function doFilter(){
+  var q=((document.getElementById('uSearchInput')||{}).value||'').toLowerCase();
+  var ro=(document.getElementById('uRoleFilter')||{}).value||'';
+  var st=(document.getElementById('uStatusFilter')||{}).value||'';
+  filtered=users.filter(u=>{
+    if(ro&&u.AppRole!==ro)return false;
+    if(st==='active'&&!u.IsActive)return false;
+    if(st==='inactive'&&u.IsActive)return false;
+    if(q&&!(u.FullName||'').toLowerCase().includes(q)&&!(u.Email||'').toLowerCase().includes(q))return false;
+    return true;});
+  pg=1;doTable();
+}
+function filtrarUsuarios(){doFilter();}
+
+function rBadge(r){
+  var m={admin:'badge-info',manager:'badge-primary',leader:'badge-info',employee:'badge-gray'};
+  var l={admin:'Admin',manager:'Manager',leader:'Lider',employee:'Empleado'};
+  return '<span class="badge '+(m[r]||'badge-gray')+'">'+(l[r]||r)+'</span>';
+}
+
+function doTable(){
+  var tot=filtered.length,pgs=Math.max(1,Math.ceil(tot/PP));
+  if(pg>pgs)pg=1;
+  var sl=filtered.slice((pg-1)*PP,pg*PP);
+  var tb=document.getElementById('usuariosTbody');if(!tb)return;
+  tb.innerHTML=sl.map(u=>'<tr>'+
+    '<td><div class="person-chip"><div class="avatar-sm" style="background:'+avC(u.FullName)+'">'+avI(u.FullName)+'</div>'+
+    '<div><div style="font-weight:600">'+(u.FullName||'')+'</div><div class="small" style="color:var(--gray-500)">'+(u.RoleName||'')+'</div></div></div></td>'+
+    '<td class="text-muted" style="font-size:11px">'+(u.Email||'')+'</td>'+
+    '<td>'+rBadge(u.AppRole)+'</td>'+
+    '<td style="font-size:11px">'+(u.LeaderName?'<span style="color:#F57C00">'+u.LeaderName+'</span>':'<span style="color:var(--gray-400);font-style:italic">Sin asignar</span>')+'</td>'+
+    '<td style="font-size:11px">'+(u.ManagerName||'-')+'</td>'+
+    '<td><input type="checkbox" '+(u.IsActive?'checked':'')+' onchange="togA('+u.UserID+',this.checked)"></td>'+
+    '<td><button class="btn btn-secondary btn-sm" onclick="editU('+u.UserID+')">Editar</button></td>'+
+    '</tr>').join('');
+  var pi=document.getElementById('uPagInfo');
+  if(pi)pi.textContent=tot===0?'Sin resultados':'Mostrando '+((pg-1)*PP+1)+'-'+Math.min(pg*PP,tot)+' de '+tot;
+  var pb=document.getElementById('uPagBtns');if(!pb)return;pb.innerHTML='';
+  for(var i=1;i<=Math.min(pgs,7);i++){
+    var b=document.createElement('button');b.className='btn btn-secondary btn-sm'+(i===pg?' btn-primary':'');
+    b.textContent=i;(function(p){b.onclick=()=>{pg=p;doTable();};})(i);pb.appendChild(b);}
+}
+
+async function togA(id,v){
+  var u=users.find(x=>x.UserID===id);if(!u)return;
+  try{await apiP('/users/'+id,{IsActive:v});u.IsActive=v;showT(v?'Activado':'Desactivado');doStats();}
+  catch(e){showT('Error',true);u.IsActive=!v;}
+}
+
+function editU(id){
+  var u=users.find(x=>x.UserID===id);if(!u)return;editId=id;
+  var ld=users.filter(x=>x.AppRole==='leader'||x.AppRole==='manager');
+  var mg=users.filter(x=>x.AppRole==='manager');
+  document.getElementById('editarContenido').innerHTML=
+    '<div class="form-group"><label class="form-label">Nombre</label><input class="form-control" id="eu_n" value="'+(u.FullName||'')+'"></div>'+
+    '<div class="form-group"><label class="form-label">Email</label><input class="form-control" id="eu_e" value="'+(u.Email||'')+'"></div>'+
+    '<div class="form-group"><label class="form-label">Rol</label><select class="form-control" id="eu_r">'+
+    ['employee','leader','manager','admin'].map(r=>'<option value="'+r+'" '+(u.AppRole===r?'selected':'')+'>'+r.charAt(0).toUpperCase()+r.slice(1)+'</option>').join('')+
+    '</select></div>'+
+    '<div class="form-group"><label class="form-label">Estado</label><select class="form-control" id="eu_a"><option value="1" '+(u.IsActive?'selected':'')+'>Activo</option><option value="0" '+(!u.IsActive?'selected':'')+'>Inactivo</option></select></div>'+
+    '<div class="form-group"><label class="form-label">Lider</label><select class="form-control" id="eu_l"><option value="">Sin lider</option>'+
+    ld.map(l=>'<option value="'+l.UserID+'" '+(u.LeaderID===l.UserID?'selected':'')+'>'+l.FullName+'</option>').join('')+'</select></div>';
+  document.getElementById('modalEditar').classList.add('open');
+}
+
+async function guardarEdicion(){
+  var u=users.find(x=>x.UserID===editId);if(!u)return;
+  var upd={FullName:document.getElementById('eu_n').value,Email:document.getElementById('eu_e').value,
+    AppRole:document.getElementById('eu_r').value,IsActive:document.getElementById('eu_a').value==='1'};
+  try{await apiP('/users/'+editId,upd);Object.assign(u,upd);
+    document.getElementById('modalEditar').classList.remove('open');doTable();showT('Guardado');}
+  catch(e){showT('Error',true);}
+}
+
+function doDropdowns(){
+  var ld=users.filter(u=>u.AppRole==='leader'||u.AppRole==='manager');
+  var mg=users.filter(u=>u.AppRole==='manager');
+  var em=users.filter(u=>u.IsActive&&u.AppRole==='employee');
+  ['nu_lider','eu_l'].forEach(id=>{var el=document.getElementById(id);if(el)el.innerHTML='<option value="">Sin lider</option>'+ld.map(l=>'<option value="'+l.UserID+'">'+l.FullName+'</option>').join('');});
+  ['nu_manager'].forEach(id=>{var el=document.getElementById(id);if(el)el.innerHTML='<option value="">Sin manager</option>'+mg.map(m=>'<option value="'+m.UserID+'">'+m.FullName+'</option>').join('');});
+  var ac=document.getElementById('al_cand');if(ac)ac.innerHTML='<option value="">Seleccionar</option>'+users.filter(u=>u.IsActive).map(u=>'<option value="'+u.UserID+'">'+u.FullName+'</option>').join('');
+  var at=document.getElementById('al_team');if(at)at.innerHTML=em.map(u=>'<option value="'+u.UserID+'">'+u.FullName+'</option>').join('');
+}
+
+async function guardarNuevo(){
+  var fn=document.getElementById('nu_fn').value,ln=document.getElementById('nu_ln').value,em=document.getElementById('nu_em').value;
+  if(!em){alert('Email requerido');return;}
+  var b={FullName:(fn+' '+ln).trim(),Email:em,AppRole:document.getElementById('nu_rol').value,IsActive:true};
+  try{var r=await apiPO('/users',b);users.push(r);}catch(e){users.push(Object.assign({UserID:Date.now()},b));}
+  document.getElementById('modalNuevo').classList.remove('open');doFilter();showT('Usuario creado');
+}
+
+async function loadLeaders(){
+  try{
+    if(!users.length)users=await apiG('/users/all');
+    doDropdowns();
+    var ld=users.filter(u=>u.AppRole==='leader'||u.AppRole==='manager');
+    var g=document.getElementById('lideresGrid');if(!g)return;
+    if(!ld.length){g.innerHTML='<div class="card" style="text-align:center;padding:40px">No hay líderes configurados.</div>';return;}
+    g.innerHTML=ld.map(l=>{
+      var eq=users.filter(u=>u.LeaderID===l.UserID||u.ManagerID===l.UserID);
+      return '<div class="card" style="margin-bottom:12px">'+
+        '<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">'+
+        '<div class="avatar-sm" style="background:'+avC(l.FullName)+';width:38px;height:38px;font-size:13px">'+avI(l.FullName)+'</div>'+
+        '<div style="flex:1"><div style="font-size:13px;font-weight:700;color:var(--gray-900)">'+l.FullName+'</div>'+
+        '<div class="text-muted">'+(l.RoleName||l.AppRole)+'</div>'+
+        '<div style="margin-top:4px">'+rBadge(l.AppRole)+'</div></div>'+
+        '<div style="text-align:right"><div style="font-size:22px;font-weight:800;color:#FF5400">'+eq.length+'</div>'+
+        '<div class="text-muted">colaboradores</div></div></div>'+
+        '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">'+
+        eq.slice(0,8).map(t=>'<span class="badge badge-gray">'+t.FullName+'</span>').join('')+
+        (eq.length>8?'<span class="badge badge-gray">+'+(eq.length-8)+' más</span>':'')+
+        (eq.length===0?'<span class="text-muted" style="font-style:italic">Sin colaboradores</span>':'')+
+        '</div><div style="display:flex;gap:8px">'+
+        '<button class="btn btn-secondary btn-sm" onclick="editU('+l.UserID+')">Editar</button>'+
+        (l.AppRole!=='admin'?'<button class="btn btn-danger btn-sm" onclick="quitarL('+l.UserID+')">Quitar líder</button>':'')+
+        '</div></div>';
+    }).join('');
+  }catch(e){var g=document.getElementById('lideresGrid');if(g)g.innerHTML='<div class="card" style="color:#E53935;padding:20px">Error al cargar líderes</div>';}
+}
+
+async function quitarL(id){
+  var u=users.find(x=>x.UserID===id);if(!u||!confirm('Quitar líder a '+u.FullName+'?'))return;
+  try{await apiP('/users/'+id,{AppRole:'employee'});u.AppRole='employee';loadLeaders();showT('Rol removido');}
+  catch(e){showT('Error',true);}
+}
+
+async function asignarLider(){
+  var cid=document.getElementById('al_cand').value;if(!cid){alert('Seleccioná usuario');return;}
+  var u=users.find(x=>x.UserID==cid);if(!u)return;
+  var tids=Array.from(document.getElementById('al_team').selectedOptions).map(o=>o.value);
+  try{
+    await apiP('/users/'+cid,{AppRole:'leader'});u.AppRole='leader';
+    for(var i=0;i<tids.length;i++){
+      try{await apiP('/users/'+tids[i],{LeaderID:parseInt(cid)});
+        var tm=users.find(x=>x.UserID==tids[i]);if(tm){tm.LeaderID=parseInt(cid);tm.LeaderName=u.FullName;}
+      }catch(e){}
+    }
+    document.getElementById('modalLider').classList.remove('open');
+    loadLeaders();showT(u.FullName+' asignado como líder');
+  }catch(e){showT('Error',true);}
+}
+
+function exportCSV(){
+  var h='Nombre,Email,Rol,Lider,Manager,Activo\n';
+  var r=filtered.map(u=>'"'+(u.FullName||'')+'",'+(u.Email||'')+','+(u.AppRole||'')+','+(u.LeaderName||'')+','+(u.ManagerName||'')+(u.IsActive?',Si':',No')).join('\n');
+  var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([h+r],{type:'text/csv'}));
+  a.download='usuarios_'+new Date().toISOString().slice(0,10)+'.csv';a.click();showT('CSV exportado');
+}
+
+document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');}));
+</script>
 </body>
 </html>

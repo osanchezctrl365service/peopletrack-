@@ -3,6 +3,21 @@ const { app } = require('@azure/functions');
 const { query, execute, sql } = require('./db');
 const { validateToken, corsHeaders } = require('./auth');
 
+// ── Health check sin auth ───────────────────────────────────
+app.http('health', {
+  methods: ['GET'],
+  authLevel: 'anonymous',
+  route: 'health',
+  handler: async (req) => {
+    try {
+      const res = await query('SELECT COUNT(*) as cnt FROM FiscalPeriods');
+      return { status: 200, headers: corsHeaders(), body: JSON.stringify({ status: 'ok', periods: res.recordset[0].cnt }) };
+    } catch (e) {
+      return { status: 500, headers: corsHeaders(), body: JSON.stringify({ status: 'error', error: e.message }) };
+    }
+  }
+});
+
 // ── Helper: respuesta estándar ──────────────────────────────
 function ok(data)  { return { status: 200, headers: corsHeaders(), body: JSON.stringify({ ok: true,  data }) }; }
 function err(msg, status = 400) { return { status, headers: corsHeaders(), body: JSON.stringify({ ok: false, error: msg }) }; }

@@ -3,7 +3,8 @@
 // Incluir con: <script src="api-client.js"></script>
 
 const API = {
-  baseUrl: '/api',   // En Azure Static Web App, /api apunta automáticamente a las Functions
+ // baseUrl: '/api',   // En Azure Static Web App, /api apunta automáticamente a las Functions
+  baseUrl: 'https://peopletrack-api-gjbbhhcefjbgc6bd.eastus2-01.azurewebsites.net/api',
   token:   null,
 
   // ── Auth ────────────────────────────────────────────────

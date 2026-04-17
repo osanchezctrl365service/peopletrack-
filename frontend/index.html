@@ -827,6 +827,10 @@ textarea.form-control { min-height: 80px; resize: vertical; }
   </div>
 
   <div class="sidebar-section-label">Sistema</div>
+  <div class="nav-item" onclick="showSection('periods')">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    Períodos
+  </div>
   <div class="nav-item" onclick="showSection('settings')">
     <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
     Configuración
@@ -983,9 +987,10 @@ textarea.form-control { min-height: 80px; resize: vertical; }
     </div>
     <input id="lideresSearch" type="text" placeholder="Buscar líder..." onkeyup="filtrarLideres()" style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:8px 12px;color:#f0ebe3;font-size:12px;width:200px;outline:none;">
   </div>
-  <div id="lideresContainer" style="display:grid;gap:16px;">
+  <div id="lideresContainer" style="display:grid;gap:16px;max-height:65vh;overflow-y:auto;">
     <div style="text-align:center;padding:40px;color:#888;">Cargando líderes...</div>
   </div>
+  <div id="lideresPagination" style="display:flex;justify-content:center;gap:8px;margin-top:16px;flex-wrap:wrap;"></div>
 </div>
 
     <div class="section" id="sec-areas">
@@ -1012,7 +1017,52 @@ textarea.form-control { min-height: 80px; resize: vertical; }
   </div>
 </div>
 
-    <div class="section" id="sec-objectives">
+    
+<div class="section" id="sec-periods">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+    <div><h2 style="font-size:20px;font-weight:800;color:#f0ebe3;">Períodos Fiscales</h2>
+    <p style="font-size:12px;color:#888;margin-top:2px;">Gestión de años y trimestres para objetivos</p></div>
+    <button onclick="abrirModalPeriodo()" style="padding:8px 16px;background:#FF5400;border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;">+ Nuevo Período</button>
+  </div>
+  <div class="card" style="padding:0;overflow:hidden;">
+    <div id="periodsLoading" style="text-align:center;padding:40px;color:#888;">Cargando períodos...</div>
+    <table class="data-table" id="periodsTable" style="display:none;">
+      <thead><tr><th>Período</th><th>Inicio</th><th>Fin</th><th>Estado</th><th>Acciones</th></tr></thead>
+      <tbody id="periodsTbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<div id="modalPeriodo" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:500;align-items:center;justify-content:center;">
+  <div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:16px;padding:32px;width:420px;max-width:95vw;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+      <h3 id="modalPeriodoTitle" style="font-size:16px;font-weight:800;color:#f0ebe3;">Nuevo Período</h3>
+      <button onclick="cerrarModalPeriodo()" style="background:none;border:none;color:#888;font-size:20px;cursor:pointer;">x</button>
+    </div>
+    <input type="hidden" id="editPeriodoId">
+    <div style="display:grid;gap:14px;">
+      <div><label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Nombre *</label>
+      <input id="periodoName" type="text" placeholder="Ej: FY27 — Q1" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div><label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Inicio</label>
+        <input id="periodoStart" type="date" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;"></div>
+        <div><label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Fin</label>
+        <input id="periodoEnd" type="date" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;"></div>
+      </div>
+      <div><label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Estado</label>
+      <select id="periodoActivo" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
+        <option value="1">Activo</option><option value="0">Inactivo</option>
+      </select></div>
+    </div>
+    <div id="modalPeriodoError" style="color:#FF4D4D;font-size:12px;margin-top:12px;display:none;"></div>
+    <div style="display:flex;gap:10px;margin-top:24px;justify-content:flex-end;">
+      <button onclick="cerrarModalPeriodo()" style="padding:10px 20px;background:#222;border:1px solid #333;border-radius:8px;color:#aaa;font-size:13px;cursor:pointer;">Cancelar</button>
+      <button onclick="guardarPeriodo()" id="btnGuardarPeriodo" style="padding:10px 24px;background:#FF5400;border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="section" id="sec-objectives">
       <div class="section-header">
         <div>
           <div class="section-heading">Objetivos</div>
@@ -1618,16 +1668,34 @@ textarea.form-control { min-height: 80px; resize: vertical; }
 
     <!-- ======== AYUDA ======== -->
     <section class="section" id="sec-help">
-      <div class="section-heading mb-16">Centro de Ayuda</div>
-      <div class="help-tip"><span class="help-tip-icon">👋</span>Esta sección explica a detalle cada módulo de PeopleTrack. Está pensada para que cualquier usuario pueda entender la plataforma sin necesidad de capacitación previa.</div>
-
-      <div class="grid-2 gap-16">
-        <div class="card"><div class="card-title">📊 Dashboard</div><p class="text-muted" style="font-size:12px;line-height:1.7">El dashboard muestra un resumen del equipo asignado. Verá tarjetas con el avance promedio, objetivos en riesgo y reuniones pendientes. Haga clic en el nombre de cada colaborador para ver su detalle.</p></div>
-        <div class="card"><div class="card-title">🎯 Objetivos</div><p class="text-muted" style="font-size:12px;line-height:1.7">Los objetivos tienen dos tipos: Core (definidos por la empresa para todos) y Personales (acordados con cada colaborador). Cada objetivo tiene una ponderación que suma 100% por persona. Puede registrar check-ins de avance periódicos.</p></div>
-        <div class="card"><div class="card-title">📈 Plan de Carrera</div><p class="text-muted" style="font-size:12px;line-height:1.7">Define hitos de desarrollo para cada colaborador desde su rol actual hasta el rol objetivo. Cada hito tiene un porcentaje de avance y fecha de revisión. El progreso total se calcula automáticamente.</p></div>
-        <div class="card"><div class="card-title">⭐ Competencias</div><p class="text-muted" style="font-size:12px;line-height:1.7">Se evalúan competencias genéricas (para todos), de liderazgo (para líderes) y personales. La escala es de 0 a 10 y se mapea a 4 niveles: No desarrollado, Sigue trabajando, Viene Bien, Viene Súper.</p></div>
-        <div class="card"><div class="card-title">🤝 Reuniones 1:1</div><p class="text-muted" style="font-size:12px;line-height:1.7">Registre reuniones semanales, mensuales o trimestrales con cada colaborador. Las notas se acumulan cronológicamente (bitácora). Puede enviar la minuta directamente por email haciendo clic en el botón 📧 junto a cada persona.</p></div>
-        <div class="card"><div class="card-title">⚙ Configuración</div><p class="text-muted" style="font-size:12px;line-height:1.7">Configure la conexión SQL, Azure AD para SSO, la API de Claude AI para asistencia inteligente, y el umbral de alertas. En Importación puede descargar el template CSV para cargar usuarios y sus relaciones de liderazgo.</p></div>
+      <div style="max-width:860px;margin:0 auto;">
+        <h2 style="font-size:22px;font-weight:800;color:#f0ebe3;margin-bottom:4px;">Centro de Ayuda</h2>
+        <p style="color:#888;font-size:13px;margin-bottom:24px;">Guía completa de PeopleTrack. Todo lo que necesitás para usar la plataforma desde cero.</p>
+        <div class="card" style="margin-bottom:20px;padding:14px 18px;">
+          <div style="font-size:11px;font-weight:700;color:#FF5400;text-transform:uppercase;margin-bottom:10px;">Ir a módulo</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            <button onclick="document.getElementById('h0').scrollIntoView({behavior:'smooth'})" style="padding:3px 10px;background:#222;border:1px solid #333;border-radius:6px;color:#f0ebe3;font-size:11px;cursor:pointer;">Dashboard</button>
+            <button onclick="document.getElementById('h1').scrollIntoView({behavior:'smooth'})" style="padding:3px 10px;background:#222;border:1px solid #333;border-radius:6px;color:#f0ebe3;font-size:11px;cursor:pointer;">Usuarios</button>
+            <button onclick="document.getElementById('h2').scrollIntoView({behavior:'smooth'})" style="padding:3px 10px;background:#222;border:1px solid #333;border-radius:6px;color:#f0ebe3;font-size:11px;cursor:pointer;">Líderes</button>
+            <button onclick="document.getElementById('h3').scrollIntoView({behavior:'smooth'})" style="padding:3px 10px;background:#222;border:1px solid #333;border-radius:6px;color:#f0ebe3;font-size:11px;cursor:pointer;">Áreas</button>
+            <button onclick="document.getElementById('h4').scrollIntoView({behavior:'smooth'})" style="padding:3px 10px;background:#222;border:1px solid #333;border-radius:6px;color:#f0ebe3;font-size:11px;cursor:pointer;">Objetivos</button>
+            <button onclick="document.getElementById('h5').scrollIntoView({behavior:'smooth'})" style="padding:3px 10px;background:#222;border:1px solid #333;border-radius:6px;color:#f0ebe3;font-size:11px;cursor:pointer;">Plan de Carrera</button>
+            <button onclick="document.getElementById('h6').scrollIntoView({behavior:'smooth'})" style="padding:3px 10px;background:#222;border:1px solid #333;border-radius:6px;color:#f0ebe3;font-size:11px;cursor:pointer;">Competencias</button>
+            <button onclick="document.getElementById('h7').scrollIntoView({behavior:'smooth'})" style="padding:3px 10px;background:#222;border:1px solid #333;border-radius:6px;color:#f0ebe3;font-size:11px;cursor:pointer;">Reuniones 1:1</button>
+            <button onclick="document.getElementById('h8').scrollIntoView({behavior:'smooth'})" style="padding:3px 10px;background:#222;border:1px solid #333;border-radius:6px;color:#f0ebe3;font-size:11px;cursor:pointer;">Reportes</button>
+            <button onclick="document.getElementById('h9').scrollIntoView({behavior:'smooth'})" style="padding:3px 10px;background:#222;border:1px solid #333;border-radius:6px;color:#f0ebe3;font-size:11px;cursor:pointer;">Períodos</button>
+          </div>
+        </div>
+        <div id="h0" class="card" style="margin-bottom:14px;padding:20px;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #2a2a2a;"><span style="font-size:18px;">📊</span><strong style="font-size:14px;color:#f0ebe3;">Dashboard</strong></div><div style="font-size:13px;color:#aaa;line-height:1.8;">Pantalla principal con resumen del equipo en el período activo.<br><strong style="color:#f0ebe3;">Colaboradores:</strong> total de personas activas.<br><strong style="color:#f0ebe3;">Avance promedio:</strong> porcentaje general del equipo.<br><strong style="color:#f0ebe3;">En riesgo:</strong> personas con avance menor al 70%.<br><strong style="color:#f0ebe3;">Barras de progreso:</strong> verde &ge;70%, naranja 40-69%, rojo &lt;40%.<br><strong style="color:#f0ebe3;">Donut:</strong> proporción visual entre en riesgo, en curso y en verde.</div></div>
+        <div id="h1" class="card" style="margin-bottom:14px;padding:20px;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #2a2a2a;"><span style="font-size:18px;">👥</span><strong style="font-size:14px;color:#f0ebe3;">Usuarios</strong></div><div style="font-size:13px;color:#aaa;line-height:1.8;">Lista todas las personas del sistema con sus datos.<br><strong style="color:#f0ebe3;">Buscar:</strong> filtrá en tiempo real por nombre o email.<br><strong style="color:#f0ebe3;">Filtro de estado:</strong> Todos / Activos / Inactivos.<br><strong style="color:#f0ebe3;">Editar:</strong> clic en "Editar" para modificar nombre, email, rol, estado, líder, manager y área. Los dropdowns muestran "Nombre — email" para distinguir personas con el mismo nombre.<br><strong style="color:#f0ebe3;">+ Nuevo usuario:</strong> completá todos los datos para crear una persona nueva en la base de datos.<br><strong style="color:#f0ebe3;">Paginación:</strong> 20 usuarios por página. Navegá con los números al pie.</div></div>
+        <div id="h2" class="card" style="margin-bottom:14px;padding:20px;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #2a2a2a;"><span style="font-size:18px;">🏅</span><strong style="font-size:14px;color:#f0ebe3;">Líderes</strong></div><div style="font-size:13px;color:#aaa;line-height:1.8;">Vista organizada por líder con sus equipos asignados.<br><strong style="color:#f0ebe3;">Cards:</strong> cada card muestra el líder y sus colaboradores. Hacé clic en cualquier miembro para editar sus datos.<br><strong style="color:#f0ebe3;">Editar líder:</strong> botón "Editar" en la esquina superior de la card.<br><strong style="color:#f0ebe3;">Promover a líder (+Nuevo):</strong> buscá un empleado por nombre o email y hacé clic en su nombre para seleccionarlo. Al confirmar, cambia su rol a "Líder" y aparece en esta sección.<br><strong style="color:#f0ebe3;">Buscador:</strong> filtrá líderes por nombre.<br><strong style="color:#f0ebe3;">Paginación:</strong> 10 líderes por página.</div></div>
+        <div id="h3" class="card" style="margin-bottom:14px;padding:20px;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #2a2a2a;"><span style="font-size:18px;">🏢</span><strong style="font-size:14px;color:#f0ebe3;">Áreas</strong></div><div style="font-size:13px;color:#aaa;line-height:1.8;">Departamentos o divisiones de la empresa.<br><strong style="color:#f0ebe3;">+ Nueva Área:</strong> ingresá el nombre del área y una descripción opcional.<br><strong style="color:#f0ebe3;">Editar:</strong> modificá el nombre, descripción o cambiá el estado (activa/inactiva).<br>Las áreas activas aparecen disponibles en los formularios de usuarios y objetivos para asignar pertenencia organizacional.</div></div>
+        <div id="h4" class="card" style="margin-bottom:14px;padding:20px;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #2a2a2a;"><span style="font-size:18px;">🎯</span><strong style="font-size:14px;color:#f0ebe3;">Objetivos</strong></div><div style="font-size:13px;color:#aaa;line-height:1.8;">Metas asignadas a colaboradores por período fiscal.<br><strong style="color:#f0ebe3;">Tipos:</strong> Core empresa (compartido por todos) o Personal (individual por colaborador).<br><strong style="color:#f0ebe3;">Crear (+Nuevo):</strong> completá título, tipo, colaborador, competencia asociada, ponderación (%) y fecha límite.<br><strong style="color:#f0ebe3;">Ponderación:</strong> peso del objetivo en la evaluación total. La suma de todos los objetivos de una persona debería ser 100%.<br><strong style="color:#f0ebe3;">Check-in:</strong> registrá el avance periódicamente actualizando el porcentaje de progreso y el estado.<br><strong style="color:#f0ebe3;">Estados:</strong> No iniciado → En curso → Completado o En riesgo.</div></div>
+        <div id="h5" class="card" style="margin-bottom:14px;padding:20px;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #2a2a2a;"><span style="font-size:18px;">📈</span><strong style="font-size:14px;color:#f0ebe3;">Plan de Carrera</strong></div><div style="font-size:13px;color:#aaa;line-height:1.8;">Define el camino de crecimiento profesional de cada colaborador.<br><strong style="color:#f0ebe3;">Ver plan:</strong> seleccioná un colaborador de la lista para ver o editar su plan.<br><strong style="color:#f0ebe3;">Hitos:</strong> etapas del plan con nombre, fecha objetivo y porcentaje de avance.<br><strong style="color:#f0ebe3;">Progreso general:</strong> se calcula automáticamente como el promedio de todos los hitos.<br><strong style="color:#f0ebe3;">Feedback:</strong> podés agregar comentarios en cada hito para documentar el avance.</div></div>
+        <div id="h6" class="card" style="margin-bottom:14px;padding:20px;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #2a2a2a;"><span style="font-size:18px;">⭐</span><strong style="font-size:14px;color:#f0ebe3;">Competencias</strong></div><div style="font-size:13px;color:#aaa;line-height:1.8;">Habilidades y comportamientos evaluados por período.<br><strong style="color:#f0ebe3;">Genéricas:</strong> comunes a todos (ej: comunicación, trabajo en equipo, orientación a resultados).<br><strong style="color:#f0ebe3;">Liderazgo:</strong> para líderes y managers (ej: gestión de equipos, toma de decisiones).<br><strong style="color:#f0ebe3;">Personales:</strong> específicas de cada colaborador según su rol y acuerdo con el líder.<br><strong style="color:#f0ebe3;">Evaluar:</strong> seleccioná colaborador y período, asigná una puntuación en la escala definida y agregá comentarios de feedback.</div></div>
+        <div id="h7" class="card" style="margin-bottom:14px;padding:20px;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #2a2a2a;"><span style="font-size:18px;">🤝</span><strong style="font-size:14px;color:#f0ebe3;">Reuniones 1:1</strong></div><div style="font-size:13px;color:#aaa;line-height:1.8;">Bitácora de encuentros periódicos entre el líder y cada colaborador.<br><strong style="color:#f0ebe3;">Registrar reunión:</strong> seleccioná el colaborador, la fecha y el tipo (mensual, quincenal, semanal, trimestral).<br><strong style="color:#f0ebe3;">Notas:</strong> podés agregar notas generales, notas vinculadas a un objetivo específico y próximos pasos acordados.<br><strong style="color:#f0ebe3;">Historial:</strong> todas las reuniones se acumulan cronológicamente y quedan disponibles para consulta futura.<br><strong style="color:#f0ebe3;">Minuta por email:</strong> al guardar podés enviar automáticamente un resumen al colaborador.</div></div>
+        <div id="h8" class="card" style="margin-bottom:14px;padding:20px;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #2a2a2a;"><span style="font-size:18px;">📋</span><strong style="font-size:14px;color:#f0ebe3;">Reportes y Organigrama</strong></div><div style="font-size:13px;color:#aaa;line-height:1.8;"><strong style="color:#f0ebe3;">Reportes por colaborador:</strong> avance de objetivos, evaluación de competencias y reuniones 1:1 de una persona específica.<br><strong style="color:#f0ebe3;">Reportes por líder:</strong> resumen de todo el equipo a cargo.<br><strong style="color:#f0ebe3;">Reportes por manager:</strong> visión consolidada de todos los equipos bajo el manager.<br><strong style="color:#f0ebe3;">Exportar a Excel:</strong> todos los reportes se pueden descargar en formato Excel con formato profesional.<br><strong style="color:#f0ebe3;">Organigrama:</strong> jerarquía visual de la empresa con el porcentaje de avance de cada persona.</div></div>
+        <div id="h9" class="card" style="margin-bottom:14px;padding:20px;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #2a2a2a;"><span style="font-size:18px;">📅</span><strong style="font-size:14px;color:#f0ebe3;">Períodos Fiscales</strong></div><div style="font-size:13px;color:#aaa;line-height:1.8;">Definen los ciclos de evaluación de objetivos (ej: FY26 Q2, FY27 Q1).<br><strong style="color:#f0ebe3;">Crear período:</strong> asigná nombre, fecha de inicio y fecha de fin.<br><strong style="color:#f0ebe3;">Período activo:</strong> solo puede haber uno activo a la vez. Es el que se usa por defecto al crear objetivos y evaluaciones. Los demás aparecen en los filtros históricos.<br><strong style="color:#f0ebe3;">Cerrar período:</strong> al iniciar un nuevo período, marcá el anterior como inactivo. Los datos históricos quedan disponibles para consulta en reportes.</div></div>
       </div>
     </section>
 
@@ -2205,8 +2273,9 @@ function abrirModalEditar(userId) {
   allUsuarios.filter(x => x.IsActive && x.UserID !== userId)
     .sort((a,b) => (a.FullName||"").localeCompare(b.FullName||""))
     .forEach(x => {
-      const o1 = new Option(x.FullName||x.Email, x.UserID);
-      const o2 = new Option(x.FullName||x.Email, x.UserID);
+      const label = (x.FullName||x.Email) + ' — ' + (x.Email||'');
+      const o1 = new Option(label, x.UserID);
+      const o2 = new Option(label, x.UserID);
       if (x.UserID === u.LeaderID)  o1.selected = true;
       if (x.UserID === u.ManagerID) o2.selected = true;
       liderSel.add(o1);
@@ -2465,6 +2534,85 @@ async function guardarArea() {
     btn.textContent = 'Guardar'; btn.disabled = false;
   }
 }
+
+
+// ═══ PAGINACIÓN LÍDERES ══════════════════════════════════════
+let lideresPagina = 1;
+const LIDERES_POR_PAG = 10;
+const _origRL = renderLideres;
+renderLideres = function(grupos) {
+  const c = document.getElementById("lideresContainer");
+  const pg = document.getElementById("lideresPagination");
+  if (!c || !grupos.length) { if(c) c.innerHTML="<div style='padding:40px;text-align:center;color:#888;'>Sin líderes</div>"; return; }
+  function ini(n){ return (n||"?").split(" ").map(p=>p[0]).join("").slice(0,2).toUpperCase(); }
+  const COLS=["#FF5400","#2ECC71","#3B82F6","#A855F7","#F59E0B","#EF4444","#10B981","#F97316"];
+  function col(n){ let h=0; for(let ch of(n||""))h=(h*31+ch.charCodeAt(0))%COLS.length; return COLS[h]; }
+  const sorted=[...grupos].sort((a,b)=>a.nombre.localeCompare(b.nombre));
+  const tp=Math.ceil(sorted.length/LIDERES_POR_PAG);
+  const slice=sorted.slice((lideresPagina-1)*LIDERES_POR_PAG,lideresPagina*LIDERES_POR_PAG);
+  c.innerHTML=slice.map(g=>`<div class="card" style="padding:16px 20px;"><div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;border-bottom:1px solid #2a2a2a;padding-bottom:12px;"><div style="width:40px;height:40px;border-radius:50%;background:${col(g.nombre)};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;">${ini(g.nombre)}</div><div><div style="font-weight:700;color:#f0ebe3;font-size:14px;">${g.nombre}</div><div style="font-size:11px;color:#888;">${g.equipo.length} colaborador${g.equipo.length!==1?"es":""}</div></div><div style="margin-left:auto;display:flex;gap:8px;"><span style="background:rgba(255,84,0,0.12);color:#FF5400;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">Lider</span><button onclick="abrirModalEditar(${g.id})" style="padding:3px 10px;background:#222;border:1px solid #333;border-radius:6px;color:#aaa;font-size:11px;cursor:pointer;">Editar</button></div></div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;">${g.equipo.map(u=>`<div onclick="abrirModalEditar(${u.UserID})" style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:#111;border-radius:8px;cursor:pointer;" onmouseover="this.style.background='#1e1e1e'" onmouseout="this.style.background='#111'"><div style="width:26px;height:26px;border-radius:50%;background:${col(u.FullName)};display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;flex-shrink:0;">${ini(u.FullName||u.Email)}</div><div style="min-width:0;"><div style="font-size:11px;font-weight:600;color:#ccc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${u.FullName||u.Email}</div><div style="font-size:10px;color:#555;">${u.IsActive?"Activo":"Inactivo"}</div></div></div>`).join("")}</div></div>`).join("");
+  if(pg){ pg.innerHTML=""; if(tp>1) for(let i=1;i<=tp;i++){const b=document.createElement("button");b.textContent=i;b.style.cssText="padding:4px 10px;border-radius:6px;border:1px solid #333;background:"+(i===lideresPagina?"#FF5400":"#1a1a1a")+";color:#f0ebe3;cursor:pointer;font-size:12px;margin:2px;";b.onclick=(pg=>()=>{lideresPagina=pg;renderLideres(Object.values(allLideres));})(i);pg.appendChild(b);} }
+};
+
+// ═══ PERÍODOS ════════════════════════════════════════════════
+let allPeriods=[];
+async function loadPeriods(){
+  const d=await apiGet("periods");
+  allPeriods=Array.isArray(d)?d:[];
+  renderPeriods();
+}
+function renderPeriods(){
+  const tb=document.getElementById("periodsTbody"),tbl=document.getElementById("periodsTable"),ld=document.getElementById("periodsLoading");
+  if(!tb)return;
+  if(!allPeriods.length){ld.style.display="block";ld.textContent="Sin períodos. Usá + Nuevo para crear uno.";tbl.style.display="none";return;}
+  ld.style.display="none";tbl.style.display="";
+  tb.innerHTML=allPeriods.map(p=>`<tr style="border-bottom:1px solid #222;" onmouseover="this.style.background='#1e1e1e'" onmouseout="this.style.background=''"><td style="padding:10px 12px;font-weight:700;color:#f0ebe3;">${p.PeriodName||"—"}</td><td style="padding:10px 12px;color:#888;font-size:12px;">${p.StartDate?new Date(p.StartDate).toLocaleDateString("es-AR"):"—"}</td><td style="padding:10px 12px;color:#888;font-size:12px;">${p.EndDate?new Date(p.EndDate).toLocaleDateString("es-AR"):"—"}</td><td style="padding:10px 12px;"><span style="padding:2px 10px;border-radius:20px;font-size:10px;font-weight:700;${p.IsActive?"background:rgba(46,204,113,0.15);color:#2ECC71":"background:rgba(255,77,77,0.15);color:#FF4D4D"}">${p.IsActive?"Activo":"Inactivo"}</span></td><td style="padding:10px 12px;"><button onclick="abrirModalPeriodo(${p.PeriodID})" style="padding:4px 12px;background:#222;border:1px solid #333;border-radius:6px;color:#f0ebe3;font-size:11px;cursor:pointer;">Editar</button></td></tr>`).join("");
+}
+function abrirModalPeriodo(id){
+  document.getElementById("editPeriodoId").value=id||"";
+  document.getElementById("modalPeriodoTitle").textContent=id?"Editar Período":"Nuevo Período";
+  document.getElementById("modalPeriodoError").style.display="none";
+  if(id){const p=allPeriods.find(x=>x.PeriodID===id);if(p){document.getElementById("periodoName").value=p.PeriodName||"";document.getElementById("periodoStart").value=p.StartDate?p.StartDate.split("T")[0]:"";document.getElementById("periodoEnd").value=p.EndDate?p.EndDate.split("T")[0]:"";document.getElementById("periodoActivo").value=p.IsActive?"1":"0";}}
+  else{["periodoName","periodoStart","periodoEnd"].forEach(i=>document.getElementById(i).value="");document.getElementById("periodoActivo").value="1";}
+  document.getElementById("modalPeriodo").style.display="flex";
+}
+function cerrarModalPeriodo(){document.getElementById("modalPeriodo").style.display="none";}
+async function guardarPeriodo(){
+  const name=document.getElementById("periodoName").value.trim();
+  const errEl=document.getElementById("modalPeriodoError");
+  const btn=document.getElementById("btnGuardarPeriodo");
+  if(!name){errEl.textContent="Nombre obligatorio";errEl.style.display="block";return;}
+  btn.textContent="Guardando...";btn.disabled=true;
+  mostrarToast("Los períodos se crean desde SSMS por ahora. Próximamente disponible en la app.","info");
+  cerrarModalPeriodo();btn.textContent="Guardar";btn.disabled=false;
+}
+
+// ═══ SHOWSECTION PERIODOS ════════════════════════════════════
+const _origSS=showSection;
+showSection=function(id){_origSS(id);if(id==="periods"&&!allPeriods.length)loadPeriods();};
+
+// ═══ NUEVOCONTEXTUAL MEJORADO ════════════════════════════════
+nuevoContextual=function(){
+  const a=document.querySelector(".section.active");if(!a)return;const id=a.id;
+  if(id==="sec-lideres"){abrirModalPromover();return;}
+  if(id==="sec-usuarios"){abrirModalUsuario();return;}
+  if(id==="sec-areas"){abrirModalArea();return;}
+  if(id==="sec-periods"){abrirModalPeriodo();return;}
+  if(id==="sec-oneononex"){mostrarToast("Seleccioná un colaborador de la lista para registrar la reunión","info");return;}
+  if(id==="sec-competencies"){mostrarToast("Seleccioná un colaborador para evaluar sus competencias","info");return;}
+  if(id==="sec-career"){mostrarToast("Seleccioná un colaborador para gestionar su plan de carrera","info");return;}
+  if(typeof showModal==="function")showModal("newObjectiveModal");
+};
+
+// ═══ TOAST INFO ══════════════════════════════════════════════
+const _origToast=mostrarToast;
+mostrarToast=function(msg,tipo){
+  let t=document.getElementById("globalToast");
+  if(!t){t=document.createElement("div");t.id="globalToast";t.style.cssText="position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:9999;transition:opacity 0.3s;max-width:360px;";document.body.appendChild(t);}
+  t.style.background=tipo==="success"?"#2ECC71":tipo==="info"?"#3B82F6":"#FF4D4D";
+  t.style.color="#fff";t.textContent=msg;t.style.opacity="1";
+  setTimeout(()=>{t.style.opacity="0";},4000);
+};
 
 </script>
 </body>

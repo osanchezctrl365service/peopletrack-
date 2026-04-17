@@ -1411,8 +1411,6 @@ window.addEventListener('load', async () => {
   } catch(e) {}
 });
 
-
-
 function initApp(user) {
   _userName  = user.name;
   _userEmail = user.email;
@@ -2017,118 +2015,6 @@ document.querySelectorAll('.modal-overlay').forEach(m=>{
   m.addEventListener('click',function(e){ if(e.target===this) this.classList.remove('open'); });
 });
 
-// ── MSAL Azure AD SSO ────────────────────────────────────────
-const msalConfig = {
-  auth: {
-    clientId: 'c0b603ae-49f9-4eca-8c0b-1aa157d815f7',
-    authority: 'https://login.microsoftonline.com/0724e2c4-d4b6-49dd-9a1f-e0ec4f0b435c',
-    redirectUri: 'https://yellow-water-0d91cc40f.1.azurestaticapps.net'
-  },
-  cache: { cacheLocation: 'sessionStorage' }
-};
-
-let msalApp = null;
-let msalReady = false;
-
-function setButtons(enabled, text) {
-  const b1 = document.getElementById('btnAzureLogin');
-  const b2 = document.getElementById('btnDemoLogin');
-  const bt = document.getElementById('btnAzureText');
-  if(b1) b1.disabled = !enabled;
-  if(b2) b2.disabled = !enabled;
-  if(bt) bt.textContent = text;
-}
-
-function setStatus(msg, color) {
-  const st = document.getElementById('ssoStatus');
-  if(st){ st.textContent = msg; st.style.color = color||'#FF5400'; }
-}
-
-async function waitForMSAL() {
-  let attempts = 0;
-  // Try both msal and msalBrowser global names
-  while (typeof msal === 'undefined' && typeof msalBrowser === 'undefined' && attempts < 40) {
-    await new Promise(r => setTimeout(r, 200));
-    attempts++;
-  }
-  if (typeof msal === 'undefined' && typeof msalBrowser === 'undefined') {
-    throw new Error('MSAL not loaded after ' + (attempts * 200) + 'ms');
-  }
-}
-
-async function initMSAL() {
-  await waitForMSAL();
-  // Use whichever global is available
-  const msalLib = (typeof msal !== 'undefined') ? msal : msalBrowser;
-  msalApp = new msalLib.PublicClientApplication(msalConfig);
-  await msalApp.initialize();
-  await msalApp.handleRedirectPromise();
-  msalReady = true;
-}
-
-window.addEventListener('load', async () => {
-  setStatus('Conectando con Azure AD...', '#888580');
-  try {
-    await initMSAL();
-    setButtons(true, 'Iniciar sesion con Azure AD');
-    setStatus('');
-    const accounts = msalApp.getAllAccounts();
-    if (accounts.length > 0) {
-      try {
-        const result = await msalApp.acquireTokenSilent({
-          scopes: ['openid','profile','email','User.Read'],
-          account: accounts[0]
-        });
-        onLoginSuccess(result);
-      } catch(e) { setStatus(''); }
-    }
-  } catch(e) {
-    console.error('MSAL init failed:', e);
-    setButtons(true, 'Iniciar sesion con Azure AD');
-    setStatus('Error conectando Azure AD. Reintentando...', '#f87171');
-  }
-});
-
-async function doLogin() {
-  if (!msalReady) {
-    setStatus('Cargando...', '#FF5400');
-    try { await initMSAL(); setButtons(true,'Iniciar sesion con Azure AD'); setStatus(''); }
-    catch(e) { setStatus('No se pudo conectar con Azure AD', '#f87171'); return; }
-  }
-  try {
-    setStatus('Abriendo ventana de login...', '#FF5400');
-    const result = await msalApp.loginPopup({
-      scopes: ['openid','profile','email','User.Read']
-    });
-    setStatus('');
-    onLoginSuccess(result);
-  } catch(e) {
-    if (e.errorCode !== 'user_cancelled') {
-      setStatus('Error: ' + (e.errorMessage || e.message || ''), '#f87171');
-    } else { setStatus(''); }
-  }
-}
-
-function demoLogin() {
-  document.getElementById('ssoScreen').style.display = 'none';
-  renderTeamProgress();
-  drawDonut();
-}
-
-function onLoginSuccess(result) {
-  document.getElementById('ssoScreen').style.display = 'none';
-  const name     = result.account.name || result.account.username;
-  const email    = result.account.username;
-  const initials = name.split(' ').filter(Boolean).map(n=>n[0]).join('').slice(0,2).toUpperCase();
-  document.querySelector('.user-info .name').textContent = name;
-  document.querySelector('.user-info .role').textContent = email;
-  document.querySelector('.user-avatar').textContent = initials;
-  window._accessToken = result.accessToken;
-  window._userEmail   = email;
-  window._userName    = name;
-  renderTeamProgress();
-  drawDonut();
-}
 
 </script>
 </body>

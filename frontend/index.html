@@ -7,55 +7,55 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <style>
 :root {
-  --primary: #1B3A5C;
-  --primary-light: #2A5285;
-  --primary-pale: #E8EFF7;
-  --accent: #00A3A3;
-  --accent-light: #E0F7F7;
-  --accent-dark: #007A7A;
-  --danger: #E53935;
-  --danger-light: #FFEBEE;
-  --warning: #F57C00;
-  --warning-light: #FFF3E0;
-  --success: #2E7D32;
-  --success-light: #E8F5E9;
-  --gray-50: #F8F9FA;
-  --gray-100: #F1F3F5;
-  --gray-200: #E9ECEF;
-  --gray-300: #DEE2E6;
-  --gray-400: #CED4DA;
-  --gray-500: #ADB5BD;
-  --gray-600: #6C757D;
-  --gray-700: #495057;
-  --gray-800: #343A40;
-  --gray-900: #212529;
-  --white: #FFFFFF;
-  --font: 'Plus Jakarta Sans', sans-serif;
-  --font-serif: 'Instrument Serif', serif;
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
-  --shadow-md: 0 4px 16px rgba(0,0,0,0.10);
-  --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
-  --sidebar-w: 240px;
-  --header-h: 60px;
+  --orange:        #FF5400;
+  --orange-dark:   #cc4400;
+  --orange-pale:   rgba(255,84,0,0.12);
+  --primary:       #111111;
+  --primary-light: #1a1a1a;
+  --primary-pale:  rgba(255,84,0,0.08);
+  --accent:        #FF5400;
+  --accent-light:  rgba(255,84,0,0.15);
+  --accent-dark:   #cc4400;
+  --danger:        #FF4D4D;
+  --danger-light:  rgba(255,77,77,0.15);
+  --warning:       #FF9F1C;
+  --warning-light: rgba(255,159,28,0.15);
+  --success:       #2ECC71;
+  --success-light: rgba(46,204,113,0.15);
+  --gray-50:       #0d0d0d;
+  --gray-100:      #111111;
+  --gray-200:      #1a1a1a;
+  --gray-300:      #222222;
+  --gray-400:      #2e2e2e;
+  --gray-500:      #555555;
+  --gray-600:      #888888;
+  --gray-700:      #aaaaaa;
+  --gray-800:      #cccccc;
+  --gray-900:      #f0ebe3;
+  --white:         #1a1a1a;
+  --font:          'Sora', 'Plus Jakarta Sans', sans-serif;
+  --font-serif:    'Instrument Serif', serif;
+  --radius-sm: 6px; --radius-md: 10px; --radius-lg: 14px; --radius-xl: 20px;
+  --shadow-sm: 0 1px 4px rgba(0,0,0,0.5);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.6);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.7);
+  --sidebar-w: 240px; --header-h: 60px;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { height: 100%; }
+html, body { font-family: var(--font); font-size:14px; color:#f0ebe3; background:#0d0d0d; display:flex; overflow:hidden; }
 body { font-family: var(--font); font-size: 14px; color: var(--gray-800); background: var(--gray-50); display: flex; overflow: hidden; }
 
 /* SIDEBAR */
 .sidebar {
   width: var(--sidebar-w);
   height: 100vh;
-  background: var(--primary);
+  background: #111111;
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
   overflow-y: auto;
+  border-right: 1px solid #222;
   position: relative;
   z-index: 10;
 }
@@ -138,15 +138,15 @@ body { font-family: var(--font); font-size: 14px; color: var(--gray-800); backgr
 .main-wrap { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 .topbar {
   height: var(--header-h);
-  background: var(--white);
-  border-bottom: 1px solid var(--gray-200);
+  background: #111111;
+  border-bottom: 1px solid #222;
   display: flex;
   align-items: center;
   padding: 0 24px;
   gap: 16px;
   flex-shrink: 0;
 }
-.topbar-title { font-size: 16px; font-weight: 700; color: var(--primary); flex: 1; }
+.topbar-title { font-size: 16px; font-weight: 700; color: #f0ebe3; flex: 1; }
 .topbar-period {
   background: var(--primary-pale);
   color: var(--primary);
@@ -173,7 +173,7 @@ body { font-family: var(--font); font-size: 14px; color: var(--gray-800); backgr
 .topbar-btn:hover { background: var(--gray-50); }
 .topbar-btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
 .topbar-btn.primary:hover { background: var(--accent-dark); }
-.content { flex: 1; overflow-y: auto; padding: 24px; }
+.content { flex: 1; overflow-y: auto; background:#0d0d0d; padding: 24px; }
 
 /* SECTIONS (pages) */
 .section { display: none; }
@@ -181,8 +181,8 @@ body { font-family: var(--font); font-size: 14px; color: var(--gray-800); backgr
 
 /* CARDS */
 .card {
-  background: var(--white);
-  border: 1px solid var(--gray-200);
+  background: #1a1a1a;
+  border: 1px solid #2a2a2a;
   border-radius: var(--radius-lg);
   padding: 20px;
   box-shadow: var(--shadow-sm);
@@ -190,7 +190,7 @@ body { font-family: var(--font); font-size: 14px; color: var(--gray-800); backgr
 .card-title {
   font-size: 13px;
   font-weight: 700;
-  color: var(--primary);
+  color: var(--orange);
   margin-bottom: 14px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -207,14 +207,14 @@ body { font-family: var(--font); font-size: 14px; color: var(--gray-800); backgr
 
 /* KPI CARDS */
 .kpi-card {
-  background: var(--white);
-  border: 1px solid var(--gray-200);
+  background: #1a1a1a;
+  border: 1px solid #2a2a2a;
   border-radius: var(--radius-lg);
   padding: 18px 20px;
   box-shadow: var(--shadow-sm);
 }
 .kpi-label { font-size: 11px; font-weight: 600; color: var(--gray-600); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
-.kpi-value { font-size: 28px; font-weight: 800; color: var(--primary); line-height: 1; }
+.kpi-value { font-size: 28px; font-weight: 800; color: #f0ebe3; line-height: 1; }
 .kpi-sub { font-size: 11px; color: var(--gray-500); margin-top: 4px; }
 .kpi-bar { height: 4px; background: var(--gray-200); border-radius: 4px; margin-top: 10px; overflow: hidden; }
 .kpi-bar-fill { height: 100%; border-radius: 4px; }
@@ -256,7 +256,7 @@ body { font-family: var(--font); font-size: 14px; color: var(--gray-800); backgr
   text-transform: uppercase;
   letter-spacing: 0.5px;
   border-bottom: 2px solid var(--gray-200);
-  background: var(--gray-50);
+  background: #111111;
 }
 .data-table td {
   padding: 11px 12px;
@@ -553,6 +553,56 @@ textarea.form-control { min-height: 80px; resize: vertical; }
 </head>
 <body>
 
+
+<!-- SECCIÓN USUARIOS -->
+<div class="section" id="section-usuarios">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+    <div>
+      <h2 style="font-size:20px;font-weight:800;color:#f0ebe3;">Usuarios</h2>
+      <p style="font-size:12px;color:#888;margin-top:2px;">Todos los usuarios cargados en la base de datos</p>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <input id="usuariosSearch" type="text" placeholder="Buscar usuario..." onkeyup="filtrarUsuarios()" style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:8px 12px;color:#f0ebe3;font-size:12px;width:200px;outline:none;">
+      <select id="usuariosFilter" onchange="filtrarUsuarios()" style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:8px 12px;color:#f0ebe3;font-size:12px;outline:none;">
+        <option value="">Todos</option>
+        <option value="true">Activos</option>
+        <option value="false">Inactivos</option>
+      </select>
+    </div>
+  </div>
+  <div class="card" style="padding:0;overflow:hidden;">
+    <div id="usuariosLoading" style="text-align:center;padding:40px;color:#888;">Cargando usuarios...</div>
+    <table class="data-table" id="usuariosTable" style="display:none;">
+      <thead>
+        <tr>
+          <th>Usuario</th>
+          <th>Email</th>
+          <th>Líder</th>
+          <th>Manager</th>
+          <th>Área</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody id="usuariosTbody"></tbody>
+    </table>
+  </div>
+  <div id="usuariosPagination" style="display:flex;justify-content:center;gap:8px;margin-top:16px;"></div>
+</div>
+
+<!-- SECCIÓN LÍDERES -->
+<div class="section" id="section-lideres">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+    <div>
+      <h2 style="font-size:20px;font-weight:800;color:#f0ebe3;">Líderes y sus Equipos</h2>
+      <p style="font-size:12px;color:#888;margin-top:2px;">Vista de líderes con sus colaboradores asignados</p>
+    </div>
+    <input id="lideresSearch" type="text" placeholder="Buscar líder..." onkeyup="filtrarLideres()" style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:8px 12px;color:#f0ebe3;font-size:12px;width:200px;outline:none;">
+  </div>
+  <div id="lideresContainer" style="display:grid;gap:16px;">
+    <div style="text-align:center;padding:40px;color:#888;">Cargando líderes...</div>
+  </div>
+</div>
+
 <!-- SSO Login — CTRL365 Dark Style -->
 <div class="sso-screen" id="ssoScreen">
   <div class="sso-card">
@@ -631,6 +681,16 @@ textarea.form-control { min-height: 80px; resize: vertical; }
     Organigrama
   </div>
 
+  <div class="sidebar-section-label">Gestión RR.HH.</div>
+  <div class="nav-item" onclick="showSection('usuarios')">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    Usuarios
+  </div>
+  <div class="nav-item" onclick="showSection('lideres')">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/><path d="M12 12v8"/><path d="M9 17l3 3 3-3"/></svg>
+    Líderes
+  </div>
+
   <div class="sidebar-section-label">Sistema</div>
   <div class="nav-item" onclick="showSection('settings')">
     <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
@@ -639,6 +699,12 @@ textarea.form-control { min-height: 80px; resize: vertical; }
   <div class="nav-item" onclick="showSection('help')">
     <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
     Ayuda
+  </div>
+  <div style="margin-top:auto;padding:12px 10px 16px;border-top:1px solid #222;">
+    <div class="nav-item" onclick="doLogout()" style="color:#FF5400;margin-bottom:0;">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Cerrar sesión
+    </div>
   </div>
 </aside>
 
@@ -1431,7 +1497,7 @@ textarea.form-control { min-height: 80px; resize: vertical; }
 
 <script>
 const titles = {
-  dashboard:'Dashboard',objectives:'Objetivos',career:'Plan de Carrera',
+  dashboard:'Dashboard',usuarios:'Usuarios',lideres:'Líderes',objectives:'Objetivos',career:'Plan de Carrera',
   competencies:'Competencias',oneononex:'Reuniones 1:1',reports:'Reportes',
   orgchart:'Organigrama',alerts:'Alertas',settings:'Configuración',help:'Ayuda'
 };
@@ -1578,6 +1644,8 @@ function drawDonut(){
 }
 
 function showSection(id){
+  if(id==='usuarios' && !allUsuarios.length) loadUsuarios();
+  if(id==='lideres' && !Object.keys(allLideres).length) loadLideres();
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   const sec = document.getElementById('sec-'+id);
@@ -1620,7 +1688,10 @@ document.querySelectorAll('.modal-overlay').forEach(m=>{
 // Usa el endpoint /.auth/me que Azure Static Web Apps provee nativamente
 // No requiere MSAL ni configuracion adicional — funciona con el SSO configurado
 
-async function doLogin() {
+async function doLogout(){
+  window.location.href="/.auth/logout?post_logout_redirect_uri=/";
+}
+function doLogin() {
   // Redirigir al endpoint de login de Azure Static Web Apps con Azure AD
   window.location.href = '/.auth/login/aad?post_login_redirect_uri=' + encodeURIComponent(window.location.pathname);
 }
@@ -1681,6 +1752,141 @@ window.addEventListener('load', async () => {
   setStatus('');
 }
 );
+
+// ══════════════════════════════════════════
+// SECCIÓN USUARIOS
+// ══════════════════════════════════════════
+let allUsuarios = [];
+let usuariosPagina = 1;
+const USUARIOS_POR_PAGINA = 20;
+
+async function loadUsuarios() {
+  const data = await apiGet('users/all');
+  if (!data) return;
+  allUsuarios = data;
+  renderUsuarios(allUsuarios);
+}
+
+function filtrarUsuarios() {
+  const q = document.getElementById('usuariosSearch').value.toLowerCase();
+  const estado = document.getElementById('usuariosFilter').value;
+  let filtered = allUsuarios.filter(u => {
+    const matchQ = !q || (u.FullName||'').toLowerCase().includes(q) || (u.Email||'').toLowerCase().includes(q) || (u.LeaderName||'').toLowerCase().includes(q);
+    const matchE = !estado || String(u.IsActive) === estado;
+    return matchQ && matchE;
+  });
+  usuariosPagina = 1;
+  renderUsuarios(filtered);
+}
+
+function renderUsuarios(data) {
+  const tbody = document.getElementById('usuariosTbody');
+  const table = document.getElementById('usuariosTable');
+  const loading = document.getElementById('usuariosLoading');
+  const pagination = document.getElementById('usuariosPagination');
+  if (!tbody) return;
+
+  loading.style.display = 'none';
+  table.style.display = '';
+
+  const totalPags = Math.ceil(data.length / USUARIOS_POR_PAGINA);
+  const slice = data.slice((usuariosPagina-1)*USUARIOS_POR_PAGINA, usuariosPagina*USUARIOS_POR_PAGINA);
+
+  function ini(n){ return (n||'?').split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase(); }
+  const COLS = ['#FF5400','#2ECC71','#3B82F6','#A855F7','#F59E0B','#EF4444','#10B981','#F97316'];
+  function col(n){ let h=0; for(let c of(n||''))h=(h*31+c.charCodeAt(0))%COLS.length; return COLS[h]; }
+
+  tbody.innerHTML = slice.map(u => `
+    <tr style="border-bottom:1px solid #222;transition:background 0.1s;" onmouseover="this.style.background='#222'" onmouseout="this.style.background=''">
+      <td style="padding:10px 12px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:32px;height:32px;border-radius:50%;background:${col(u.FullName)};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;">${ini(u.FullName||u.Email)}</div>
+          <span style="font-weight:600;color:#f0ebe3;">${u.FullName||'—'}</span>
+        </div>
+      </td>
+      <td style="padding:10px 12px;color:#aaa;font-size:12px;">${u.Email||'—'}</td>
+      <td style="padding:10px 12px;color:#ccc;font-size:12px;">${u.LeaderName||'<span style="color:#555">Sin líder</span>'}</td>
+      <td style="padding:10px 12px;color:#ccc;font-size:12px;">${u.ManagerName||'<span style="color:#555">Sin manager</span>'}</td>
+      <td style="padding:10px 12px;color:#ccc;font-size:12px;">${u.AreaName||'<span style="color:#555">—</span>'}</td>
+      <td style="padding:10px 12px;">
+        <span style="display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;${u.IsActive?'background:rgba(46,204,113,0.15);color:#2ECC71':'background:rgba(255,77,77,0.15);color:#FF4D4D'}">${u.IsActive?'Activo':'Inactivo'}</span>
+      </td>
+    </tr>`).join('');
+
+  // Paginación
+  pagination.innerHTML = '';
+  if (totalPags > 1) {
+    for (let i=1; i<=totalPags; i++) {
+      const btn = document.createElement('button');
+      btn.textContent = i;
+      btn.style.cssText = `padding:4px 10px;border-radius:6px;border:1px solid #333;background:${i===usuariosPagina?'#FF5400':'#1a1a1a'};color:#f0ebe3;cursor:pointer;font-size:12px;`;
+      btn.onclick = () => { usuariosPagina = i; renderUsuarios(data); };
+      pagination.appendChild(btn);
+    }
+  }
+}
+
+// ══════════════════════════════════════════
+// SECCIÓN LÍDERES
+// ══════════════════════════════════════════
+let allLideres = {};
+
+async function loadLideres() {
+  const data = await apiGet('users/all');
+  if (!data) return;
+
+  // Agrupar por líder
+  const grupos = {};
+  data.forEach(u => {
+    if (u.LeaderName && u.LeaderID) {
+      if (!grupos[u.LeaderID]) grupos[u.LeaderID] = { nombre: u.LeaderName, id: u.LeaderID, equipo: [] };
+      grupos[u.LeaderID].equipo.push(u);
+    }
+  });
+  allLideres = grupos;
+  renderLideres(Object.values(grupos));
+}
+
+function filtrarLideres() {
+  const q = document.getElementById('lideresSearch').value.toLowerCase();
+  const filtered = Object.values(allLideres).filter(l => !q || l.nombre.toLowerCase().includes(q));
+  renderLideres(filtered);
+}
+
+function renderLideres(grupos) {
+  const container = document.getElementById('lideresContainer');
+  if (!container) return;
+  if (!grupos.length) {
+    container.innerHTML = '<div style="text-align:center;padding:40px;color:#888;">No se encontraron líderes</div>';
+    return;
+  }
+  function ini(n){ return (n||'?').split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase(); }
+  const COLS = ['#FF5400','#2ECC71','#3B82F6','#A855F7','#F59E0B','#EF4444','#10B981','#F97316'];
+  function col(n){ let h=0; for(let c of(n||''))h=(h*31+c.charCodeAt(0))%COLS.length; return COLS[h]; }
+
+  container.innerHTML = grupos.sort((a,b)=>a.nombre.localeCompare(b.nombre)).map(g => `
+    <div class="card" style="padding:16px 20px;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;border-bottom:1px solid #2a2a2a;padding-bottom:12px;">
+        <div style="width:40px;height:40px;border-radius:50%;background:${col(g.nombre)};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;">${ini(g.nombre)}</div>
+        <div>
+          <div style="font-weight:700;color:#f0ebe3;font-size:14px;">${g.nombre}</div>
+          <div style="font-size:11px;color:#888;margin-top:1px;">${g.equipo.length} colaborador${g.equipo.length!==1?'es':''}</div>
+        </div>
+        <span style="margin-left:auto;background:rgba(255,84,0,0.12);color:#FF5400;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">Líder</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;">
+        ${g.equipo.map(u=>`
+          <div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:#111;border-radius:8px;">
+            <div style="width:26px;height:26px;border-radius:50%;background:${col(u.FullName)};display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;flex-shrink:0;">${ini(u.FullName||u.Email)}</div>
+            <div style="min-width:0;">
+              <div style="font-size:11px;font-weight:600;color:#ccc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${u.FullName||u.Email}</div>
+              <div style="font-size:10px;color:#555;">${u.IsActive?'Activo':'Inactivo'}</div>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
 </script>
 </body>
 </html>

@@ -539,6 +539,7 @@ textarea.form-control { min-height: 80px; resize: vertical; }
 .sso-note { font-size: 10px; color: var(--gray-400); margin-top: 24px; }
 .sso-wave { width: 100%; height: 6px; background: linear-gradient(90deg, var(--primary), var(--accent)); border-radius: 0 0 var(--radius-xl) var(--radius-xl); margin-top: 24px; }
 </style>
+<script src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js"></script>
 </head>
 <body>
 
@@ -1518,11 +1519,80 @@ document.querySelectorAll('.modal-overlay').forEach(m=>{
   m.addEventListener('click',function(e){ if(e.target===this) this.classList.remove('open'); });
 });
 
-function doLogin(){
-  document.getElementById('ssoScreen').style.display='none';
+// ── MSAL Azure AD SSO ────────────────────────────────────────
+const msalConfig = {
+  auth: {
+    clientId: 'c0b603ae-49f9-4eca-8c0b-1aa157d815f7',
+    authority: 'https://login.microsoftonline.com/0724e2c4-d4b6-49dd-9a1f-e0ec4f0b435c',
+    redirectUri: 'https://yellow-water-0d91cc40f.1.azurestaticapps.net'
+  },
+  cache: { cacheLocation: 'sessionStorage' }
+};
+
+let msalApp = null;
+
+async function initMsal() {
+  msalApp = new msal.PublicClientApplication(msalConfig);
+  await msalApp.initialize();
+  // Manejar redirect callback
+  await msalApp.handleRedirectPromise();
+  // Intentar login silencioso si ya hay sesion
+  const accounts = msalApp.getAllAccounts();
+  if (accounts.length > 0) {
+    try {
+      const result = await msalApp.acquireTokenSilent({
+        scopes: ['openid','profile','email','User.Read'],
+        account: accounts[0]
+      });
+      onLoginSuccess(result);
+    } catch(e) {
+      // Token expirado, mostrar pantalla de login
+      console.log('Silent login failed, showing login screen');
+    }
+  }
+}
+
+async function doLogin() {
+  if (!msalApp) {
+    alert('Inicializando... intentá de nuevo en un segundo.');
+    return;
+  }
+  try {
+    const result = await msalApp.loginPopup({
+      scopes: ['openid','profile','email','User.Read']
+    });
+    onLoginSuccess(result);
+  } catch(e) {
+    if (e.errorCode !== 'user_cancelled') {
+      console.error('Login error:', e);
+      alert('Error al iniciar sesion: ' + (e.message || e.errorCode));
+    }
+  }
+}
+
+function onLoginSuccess(result) {
+  // Ocultar pantalla de login
+  document.getElementById('ssoScreen').style.display = 'none';
+  // Datos del usuario logueado
+  const name     = result.account.name || result.account.username;
+  const email    = result.account.username;
+  const initials = name.split(' ').filter(Boolean).map(n=>n[0]).join('').slice(0,2).toUpperCase();
+  // Actualizar sidebar con datos reales
+  document.querySelector('.user-info .name').textContent = name;
+  document.querySelector('.user-info .role').textContent = email;
+  document.querySelector('.user-avatar').textContent = initials;
+  // Guardar token para llamadas a la API
+  window._accessToken = result.accessToken;
+  window._userEmail   = email;
+  window._userName    = name;
+  // Renderizar app
   renderTeamProgress();
   drawDonut();
+  console.log('Login exitoso:', name, email);
 }
+
+// Inicializar MSAL cuando carga la pagina
+window.addEventListener('load', () => { initMsal(); });
 </script>
 </body>
 </html>

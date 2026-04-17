@@ -1410,26 +1410,23 @@ function doLogin() {
 window.addEventListener('load', async () => {
   try {
     const resp = await fetch('/.auth/me');
-    if (resp.ok) {
-      const text = await resp.text();
-      const data = JSON.parse(text);
-      // SWA Simple mode
-      if (data.clientPrincipal) {
-        const u = data.clientPrincipal;
-        initApp({ name: u.userDetails || u.userId || 'Usuario', email: u.userDetails || '' });
-        return;
-      }
-      // SWA Custom mode - returns array
-      if (Array.isArray(data) && data.length > 0) {
-        const u = data[0];
-        const claims = u.userClaims || [];
-        const email = (claims.find(c=>c.typ==='preferred_username')||claims.find(c=>c.typ==='upn')||{val:''}).val || u.userDetails || '';
-        const name  = (claims.find(c=>c.typ==='name')||{val:''}).val || email || 'Usuario';
-        initApp({ name, email });
-        return;
-      }
+    const text = await resp.text();
+    console.log('/.auth/me response:', text);
+    if (resp.ok && text && text !== 'null' && text !== '{}') {
+      try {
+        const data = JSON.parse(text);
+        // Mode Simple: { clientPrincipal: { userDetails, userId, ... } }
+        const cp = data.clientPrincipal || (Array.isArray(data) ? data[0] : null) || data;
+        if (cp && (cp.userDetails || cp.userId || cp.userPrincipalName)) {
+          const email = cp.userDetails || cp.userPrincipalName || cp.userId || '';
+          const name  = cp.userDetails || cp.userId || 'Usuario CTRL365';
+          initApp({ name, email });
+          return;
+        }
+      } catch(e) { console.log('Parse error:', e); }
     }
-  } catch(e) { console.log('Auth check:', e); }
+  } catch(e) { console.log('Auth error:', e); }
+  // Not logged in - ssoScreen is visible by default
 });
 
 function initApp(user) {

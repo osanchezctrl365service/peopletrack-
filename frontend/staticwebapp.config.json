@@ -1,26 +1,13 @@
 {
-  "routes": [
-    {
-      "route": "/api/*",
-      "allowedRoles": ["anonymous"]
-    },
-    {
-      "route": "/*",
-      "serve": "/index.html",
-      "statusCode": 200
+  "auth": {
+    "identityProviders": {
+      "azureActiveDirectory": {
+        "registration": {
+          "openIdIssuer": "https://login.microsoftonline.com/0724e2c4-d4b6-49dd-9a1f-e0ec4f0b435c/v2.0",
+          "clientIdSettingName": "c0b603ae-49f9-4eca-8c0b-1aa157d815f7",
+          "clientSecretSettingName": "Nq~8Q~zK4sF7kdFAxLkxL_otjlq-km3dovaSbaWv"
+        }
+      }
     }
-  ],
-  "navigationFallback": {
-    "rewrite": "/index.html",
-    "exclude": ["/api/*", "*.css", "*.js", "*.ico", "*.png"]
-  },
-  "responseOverrides": {
-    "401": { "redirect": "/login", "statusCode": 302 },
-    "404": { "rewrite": "/index.html" }
-  },
-  "globalHeaders": {
-    "X-Content-Type-Options": "nosniff",
-    "X-Frame-Options": "SAMEORIGIN",
-    "X-XSS-Protection": "1; mode=block"
   }
 }

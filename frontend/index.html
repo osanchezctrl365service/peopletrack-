@@ -1530,33 +1530,55 @@ const msalConfig = {
 };
 
 let msalApp = null;
+let msalReady = false;
 
-async function initMsal() {
-  msalApp = new msal.PublicClientApplication(msalConfig);
-  await msalApp.initialize();
-  // Manejar redirect callback
-  await msalApp.handleRedirectPromise();
-  // Intentar login silencioso si ya hay sesion
-  const accounts = msalApp.getAllAccounts();
-  if (accounts.length > 0) {
-    try {
-      const result = await msalApp.acquireTokenSilent({
-        scopes: ['openid','profile','email','User.Read'],
-        account: accounts[0]
-      });
-      onLoginSuccess(result);
-      return; // Ya logueado, no habilitar botones
-    } catch(e) {
-      // Token expirado, mostrar pantalla de login
-      console.log('Silent login failed, showing login screen');
+// Inicializar MSAL en background al cargar
+window.addEventListener('load', async () => {
+  try {
+    msalApp = new msal.PublicClientApplication(msalConfig);
+    await msalApp.initialize();
+    await msalApp.handleRedirectPromise();
+    msalReady = true;
+    // Habilitar botones
+    const b1 = document.getElementById('btnAzureLogin');
+    const b2 = document.getElementById('btnDemoLogin');
+    const bt = document.getElementById('btnAzureText');
+    if(b1){ b1.disabled=false; b1.style.opacity='1'; b1.style.cursor='pointer'; }
+    if(b2){ b2.disabled=false; b2.style.opacity='1'; b2.style.cursor='pointer'; }
+    if(bt){ bt.textContent='Iniciar sesión con Azure AD'; }
+    // Login silencioso si ya hay sesion
+    const accounts = msalApp.getAllAccounts();
+    if(accounts.length > 0){
+      try {
+        const result = await msalApp.acquireTokenSilent({
+          scopes: ['openid','profile','email','User.Read'],
+          account: accounts[0]
+        });
+        onLoginSuccess(result);
+      } catch(e){ console.log('No silent session'); }
     }
+  } catch(e){
+    console.warn('MSAL init error:', e);
+    msalReady = true;
+    const b1=document.getElementById('btnAzureLogin');
+    const b2=document.getElementById('btnDemoLogin');
+    const bt=document.getElementById('btnAzureText');
+    if(b1){ b1.disabled=false; b1.style.opacity='1'; b1.style.cursor='pointer'; }
+    if(b2){ b2.disabled=false; b2.style.opacity='1'; b2.style.cursor='pointer'; }
+    if(bt){ bt.textContent='Iniciar sesión con Azure AD'; }
   }
-}
+});
 
 async function doLogin() {
-  if (!msalApp) {
-    alert('Inicializando... intentá de nuevo en un segundo.');
-    return;
+  if (!msalReady || !msalApp) {
+    // Si MSAL aun no cargo, esperar 2s y reintentar
+    const bt = document.getElementById('btnAzureText');
+    if(bt) bt.textContent = 'Cargando...';
+    await new Promise(r => setTimeout(r, 2000));
+    if (!msalReady || !msalApp) {
+      alert('Error al cargar la autenticacion. Recarga la pagina.');
+      return;
+    }
   }
   try {
     const result = await msalApp.loginPopup({
@@ -1571,34 +1593,21 @@ async function doLogin() {
   }
 }
 
+
+
 function onLoginSuccess(result) {
-  // Ocultar pantalla de login
   document.getElementById('ssoScreen').style.display = 'none';
-  // Datos del usuario logueado
   const name     = result.account.name || result.account.username;
   const email    = result.account.username;
   const initials = name.split(' ').filter(Boolean).map(n=>n[0]).join('').slice(0,2).toUpperCase();
-  // Actualizar sidebar con datos reales
   document.querySelector('.user-info .name').textContent = name;
   document.querySelector('.user-info .role').textContent = email;
   document.querySelector('.user-avatar').textContent = initials;
-  // Guardar token para llamadas a la API
   window._accessToken = result.accessToken;
   window._userEmail   = email;
   window._userName    = name;
-  // Renderizar app
   renderTeamProgress();
   drawDonut();
-  console.log('Login exitoso:', name, email);
-}
-
-function enableLoginButtons() {
-  const btnAzure = document.getElementById('btnAzureLogin');
-  const btnDemo  = document.getElementById('btnDemoLogin');
-  const btnText  = document.getElementById('btnAzureText');
-  if (btnAzure) { btnAzure.disabled = false; btnAzure.style.opacity = '1'; btnAzure.style.cursor = 'pointer'; }
-  if (btnDemo)  { btnDemo.disabled  = false; btnDemo.style.opacity  = '1'; btnDemo.style.cursor  = 'pointer'; }
-  if (btnText)  { btnText.textContent = 'Iniciar sesión con Azure AD'; }
 }
 
 function demoLogin() {

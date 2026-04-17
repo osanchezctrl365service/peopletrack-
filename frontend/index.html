@@ -1685,7 +1685,7 @@ label { color: #888 !important; }
     </div>
 
     <!-- ======== AYUDA ======== -->
-    <div class="section" id="sec-help">
+    <div class="section" id="sec-help" style="overflow-y:auto;">
       <div style="max-width:860px;margin:0 auto;">
         <h2 style="font-size:22px;font-weight:800;color:#f0ebe3;margin-bottom:4px;">Centro de Ayuda</h2>
         <p style="color:#888;font-size:13px;margin-bottom:24px;">Guía completa de PeopleTrack. Todo lo que necesitás para usar la plataforma desde cero.</p>
@@ -1768,7 +1768,7 @@ label { color: #888 !important; }
     <div class="form-group"><label class="form-label">Próximos pasos</label><textarea class="form-control" placeholder="Acuerdos y acciones a seguir..."></textarea></div>
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeModal('newMeetingModal')">Cancelar</button>
-      <button class="btn btn-primary" onclick="closeModal('newMeetingModal')">Guardar + Enviar Minuta</button>
+      <button class="btn btn-primary" onclick="guardarReunion()">Guardar Reunión</button>
     </div>
   </div>
 </div>
@@ -1952,25 +1952,15 @@ function showSection(id){
 }
 
 function switchTab(prefix, id, el){
+  // Activar tab
   const parent = el.closest('.tabs');
   parent.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
-  const container = parent.nextElementSibling;
-  if(!container) return;
-  // Hide all sibling tab panels
-  const panelId = prefix+'-'+id;
-  // Find all potential panels
-  const allPanels = [container];
-  let sib = container.nextElementSibling;
-  while(sib && !sib.classList.contains('section') && !sib.classList.contains('card') && sib.id && sib.id.startsWith(prefix+'-')){
-    allPanels.push(sib); sib=sib.nextElementSibling;
-  }
-  // Show only matching
-  document.querySelectorAll('[id^="'+prefix+'-"]').forEach(p=>{
-    p.style.display = p.id===panelId?'':'none';
+  // Mostrar panel correcto
+  const panelId = prefix + '-' + id;
+  document.querySelectorAll('[id^="' + prefix + '-"]').forEach(p=>{
+    p.style.display = p.id === panelId ? '' : 'none';
   });
-  const target = document.getElementById(panelId);
-  if(target) target.style.display='block';
 }
 
 function showModal(id){ document.getElementById(id).classList.add('open'); }
@@ -2620,7 +2610,7 @@ async function guardarPeriodo(){
 
 // ═══ SHOWSECTION PERIODOS ════════════════════════════════════
 const _origSS=showSection;
-showSection=function(id){_origSS(id);if(id==="periods"&&!allPeriods.length)loadPeriods();};
+showSection=function(id){_origSS(id);if(id==="periods"&&!allPeriods.length)loadPeriods();if(id==="orgchart")loadOrgChart();};
 
 // ═══ NUEVOCONTEXTUAL MEJORADO ════════════════════════════════
 nuevoContextual=function(){
@@ -2643,6 +2633,148 @@ mostrarToast=function(msg,tipo){
   t.style.background=tipo==="success"?"#2ECC71":tipo==="info"?"#3B82F6":"#FF4D4D";
   t.style.color="#fff";t.textContent=msg;t.style.opacity="1";
   setTimeout(()=>{t.style.opacity="0";},4000);
+};
+
+
+// ═══ GUARDAR REUNIÓN 1:1 ════════════════════════════════════
+async function guardarReunion() {
+  const modal = document.getElementById('newMeetingModal');
+  const colaboradorEl = modal.querySelector('select');
+  const tipoEl = modal.querySelectorAll('select')[1];
+  const fechaEl = modal.querySelector('input[type="date"]');
+  const tituloEl = modal.querySelectorAll('input')[1];
+  const notasEl = modal.querySelectorAll('textarea')[0];
+  const pasosEl = modal.querySelectorAll('textarea')[1];
+  
+  // Obtener valores
+  const colaboradorId = colaboradorEl ? colaboradorEl.value : null;
+  const tipo = tipoEl ? tipoEl.value : 'monthly';
+  const fecha = fechaEl ? fechaEl.value : new Date().toISOString().split('T')[0];
+  const titulo = tituloEl ? tituloEl.value : '';
+  const notas = notasEl ? notasEl.value : '';
+  const pasos = pasosEl ? pasosEl.value : '';
+
+  if (!colaboradorId) {
+    mostrarToast('Seleccioná un colaborador', 'error');
+    return;
+  }
+  if (!fecha) {
+    mostrarToast('Ingresá la fecha de la reunión', 'error');
+    return;
+  }
+
+  try {
+    const res = await fetch(API_BASE + '/meetings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        employeeId: parseInt(colaboradorId),
+        meetingType: tipo,
+        meetingDate: fecha,
+        title: titulo || null,
+        generalNotes: notas || null,
+        nextSteps: pasos || null,
+        status: 'completed',
+        sendEmail: false
+      })
+    });
+    const data = await res.json();
+    if (data.ok === false) throw new Error(data.error || 'Error al guardar');
+    closeModal('newMeetingModal');
+    mostrarToast('Reunión guardada correctamente', 'success');
+    // Limpiar campos
+    if (notasEl) notasEl.value = '';
+    if (pasosEl) pasosEl.value = '';
+    if (tituloEl) tituloEl.value = '';
+  } catch(e) {
+    mostrarToast(e.message || 'Error al guardar la reunión', 'error');
+  }
+}
+
+
+// ═══ ORGANIGRAMA REAL ════════════════════════════════════════
+async function loadOrgChart() {
+  const section = document.getElementById('sec-orgchart');
+  if (!section) return;
+  // Buscar el contenedor del organigrama
+  const container = section.querySelector('.org-chart-wrap') || section.querySelector('[class*="org"]');
+  if (!container) return;
+  container.innerHTML = '<div style="text-align:center;padding:40px;color:#888;">Cargando organigrama...</div>';
+  
+  // Cargar usuarios para construir el organigrama
+  const users = await apiGet('users/all');
+  if (!users || !users.length) {
+    container.innerHTML = '<div style="text-align:center;padding:40px;color:#888;">Sin datos de organigrama</div>';
+    return;
+  }
+  
+  // Construir jerarquía simple: manager → líderes → colaboradores
+  const managers = users.filter(u => u.AppRole === 'manager' || u.AppRole === 'admin');
+  const leaders = users.filter(u => u.AppRole === 'leader');
+  
+  function ini(n){ return (n||'?').split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase(); }
+  const COLS = ['#FF5400','#2ECC71','#3B82F6','#A855F7','#F59E0B'];
+  function col(n){ let h=0; for(let c of(n||''))h=(h*31+c.charCodeAt(0))%COLS.length; return COLS[h]; }
+  
+  let html = '<div style="display:flex;flex-direction:column;align-items:center;gap:24px;padding:20px;">';
+  
+  // Mostrar manager/admin al tope
+  managers.forEach(m => {
+    html += `<div style="background:#1a1a1a;border:2px solid #FF5400;border-radius:12px;padding:14px 24px;text-align:center;min-width:180px;">
+      <div style="font-weight:800;color:#f0ebe3;">${m.FullName||m.Email}</div>
+      <div style="font-size:11px;color:#888;margin-top:2px;">${m.AppRole}</div>
+    </div>`;
+  });
+  
+  // Mostrar líderes
+  if (leaders.length) {
+    html += '<div style="display:flex;flex-wrap:wrap;gap:16px;justify-content:center;">';
+    leaders.forEach(l => {
+      const equipo = users.filter(u => u.LeaderID === l.UserID);
+      html += `<div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:12px;padding:14px 20px;min-width:160px;text-align:center;">
+        <div style="width:36px;height:36px;border-radius:50%;background:${col(l.FullName)};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;margin:0 auto 8px;">${ini(l.FullName||l.Email)}</div>
+        <div style="font-weight:700;color:#f0ebe3;font-size:13px;">${l.FullName||l.Email}</div>
+        <div style="font-size:10px;color:#FF5400;margin-top:2px;">Líder</div>
+        ${equipo.length ? `<div style="font-size:10px;color:#666;margin-top:4px;">${equipo.length} colaborador${equipo.length!==1?'es':''}</div>` : ''}
+      </div>`;
+    });
+    html += '</div>';
+  }
+  
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+
+// ═══ POBLAR SELECT COLABORADORES EN MODAL REUNIÓN ═══════════
+function poblarColaboradoresReunion() {
+  const modal = document.getElementById('newMeetingModal');
+  if (!modal) return;
+  const selects = modal.querySelectorAll('select');
+  if (!selects.length) return;
+  const sel = selects[0]; // primer select = colaborador
+  const current = sel.value;
+  sel.innerHTML = '<option value="">— Seleccionar colaborador —</option>';
+  const activos = allUsuarios.filter(u => u.IsActive)
+    .sort((a,b) => (a.FullName||'').localeCompare(b.FullName||''));
+  activos.forEach(u => {
+    const opt = new Option((u.FullName||u.Email) + ' — ' + (u.Email||''), u.UserID);
+    sel.add(opt);
+  });
+  if (current) sel.value = current;
+}
+
+// Parchar showModal para poblar colaboradores cuando se abre modal reunión
+const _origShowModal = showModal;
+showModal = function(id) {
+  _origShowModal(id);
+  if (id === 'newMeetingModal') {
+    if (!allUsuarios.length) {
+      loadUsuarios().then(poblarColaboradoresReunion);
+    } else {
+      poblarColaboradoresReunion();
+    }
+  }
 };
 
 </script>

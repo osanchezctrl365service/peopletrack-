@@ -869,9 +869,7 @@ label { color: #888 !important; }
 <div class="main-wrap">
   <header class="topbar">
     <span class="topbar-title" id="topbarTitle">Dashboard</span>
-    <span class="topbar-period">FY26 — Q2</span>
-    <button class="topbar-btn" onclick="showModal('exportModal')">⬇ Exportar Excel</button>
-    <button class="topbar-btn primary" onclick="nuevoContextual()">+ Nuevo</button>
+    <span class="topbar-period" id="topbarPeriod">FY26 — Q2</span>
   </header>
 
   <div class="content">
@@ -1188,7 +1186,7 @@ label { color: #888 !important; }
           <div class="section-heading">Plan de Carrera</div>
           <div class="section-subheading">Desarrollo profesional e hitos de crecimiento por colaborador</div>
         </div>
-        <button class="btn btn-primary btn-sm">+ Nuevo Plan</button>
+        <button class="btn btn-primary btn-sm" onclick="abrirModalNuevoPlan()">+ Nuevo Plan</button>
       </div>
 
       <div class="grid-2 gap-16">
@@ -1282,7 +1280,7 @@ label { color: #888 !important; }
           <div class="section-heading">Competencias</div>
           <div class="section-subheading">Evaluación por competencias con ponderaciones globales, por equipo y personales</div>
         </div>
-        <button class="btn btn-primary btn-sm">+ Evaluar</button>
+        <button class="btn btn-primary btn-sm" onclick="abrirModalEvaluar()">+ Evaluar</button>
       </div>
 
       <div class="tabs">
@@ -1510,7 +1508,7 @@ label { color: #888 !important; }
     </div>
 
     <!-- ======== ORGANIGRAMA ======== -->
-    <div class="section" id="sec-orgchart">
+    <div class="section" id="sec-orgchart" style="overflow-y:auto;">
       <div class="section-header">
         <div>
           <div class="section-heading">Organigrama</div>
@@ -2775,6 +2773,240 @@ showModal = function(id) {
       poblarColaboradoresReunion();
     }
   }
+};
+
+
+// ═══ MODAL NUEVO PLAN DE CARRERA ════════════════════════════
+function abrirModalNuevoPlan() {
+  // Modal simple inline para nuevo plan
+  const existente = document.getElementById('modalNuevoPlan');
+  if (existente) { existente.style.display='flex'; return; }
+  
+  const modal = document.createElement('div');
+  modal.id = 'modalNuevoPlan';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:500;display:flex;align-items:center;justify-content:center;';
+  modal.innerHTML = `
+    <div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:16px;padding:28px;width:440px;max-width:95vw;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+        <h3 style="font-size:16px;font-weight:800;color:#f0ebe3;">Nuevo Plan de Carrera</h3>
+        <button onclick="document.getElementById('modalNuevoPlan').style.display='none'" style="background:none;border:none;color:#888;font-size:20px;cursor:pointer;">×</button>
+      </div>
+      <div style="display:grid;gap:14px;">
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Colaborador *</label>
+          <select id="npColaborador" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px;color:#f0ebe3;font-size:13px;outline:none;">
+            <option value="">— Seleccionar —</option>
+            ${allUsuarios.filter(u=>u.IsActive).sort((a,b)=>(a.FullName||'').localeCompare(b.FullName||'')).map(u=>`<option value="${u.UserID}">${u.FullName||u.Email}</option>`).join('')}
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Rol actual</label>
+          <input id="npRolActual" type="text" placeholder="Ej: Developer" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px;color:#f0ebe3;font-size:13px;outline:none;">
+        </div>
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Rol objetivo</label>
+          <input id="npRolObjetivo" type="text" placeholder="Ej: Senior Developer" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px;color:#f0ebe3;font-size:13px;outline:none;">
+        </div>
+      </div>
+      <div id="npError" style="color:#FF4D4D;font-size:12px;margin-top:10px;display:none;"></div>
+      <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end;">
+        <button onclick="document.getElementById('modalNuevoPlan').style.display='none'" style="padding:10px 20px;background:#222;border:1px solid #333;border-radius:8px;color:#aaa;font-size:13px;cursor:pointer;">Cancelar</button>
+        <button onclick="guardarNuevoPlan()" style="padding:10px 24px;background:#FF5400;border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;">Crear Plan</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+}
+
+async function guardarNuevoPlan() {
+  const userId = document.getElementById('npColaborador')?.value;
+  const rolActual = document.getElementById('npRolActual')?.value?.trim();
+  const rolObjetivo = document.getElementById('npRolObjetivo')?.value?.trim();
+  const errEl = document.getElementById('npError');
+  if (!userId) { errEl.textContent='Seleccioná un colaborador'; errEl.style.display='block'; return; }
+  mostrarToast('Plan de carrera: funcionalidad en desarrollo. Próximamente disponible.', 'info');
+  document.getElementById('modalNuevoPlan').style.display='none';
+}
+
+// ═══ MODAL EVALUAR COMPETENCIA ═══════════════════════════════
+function abrirModalEvaluar() {
+  // Scroll al formulario de evaluación que ya existe en la sección
+  const evalSection = document.querySelector('#comp-global') || document.querySelector('[id^="comp-"]');
+  if (evalSection) {
+    evalSection.scrollIntoView({ behavior: 'smooth' });
+    mostrarToast('Seleccioná el colaborador y el período en el formulario de evaluación', 'info');
+  }
+}
+
+// ═══ FIX REUNIÓN: usar LeaderID del usuario actual como fallback ══
+async function guardarReunionFixed() {
+  const modal = document.getElementById('newMeetingModal');
+  if (!modal) return;
+  const selects = modal.querySelectorAll('select');
+  const colaboradorId = selects[0]?.value;
+  const tipo = selects[1]?.value || 'monthly';
+  const fecha = modal.querySelector('input[type="date"]')?.value;
+  const inputs = modal.querySelectorAll('input[type="text"], input:not([type])');
+  const titulo = inputs[0]?.value || '';
+  const textareas = modal.querySelectorAll('textarea');
+  const notas = textareas[0]?.value || '';
+  const pasos = textareas[1]?.value || '';
+
+  if (!colaboradorId) { mostrarToast('Seleccioná un colaborador', 'error'); return; }
+  if (!fecha) { mostrarToast('Ingresá la fecha', 'error'); return; }
+
+  try {
+    // Usar el usuario logueado como líder (no requiere auth token separado)
+    const currentUser = allUsuarios.find(u => u.Email === document.querySelector('.sidebar-user-email')?.textContent?.trim());
+    const leaderId = currentUser?.UserID || 1;
+    
+    const body = {
+      employeeId: parseInt(colaboradorId),
+      leaderId: leaderId,
+      meetingType: tipo,
+      meetingDate: fecha,
+      title: titulo || null,
+      generalNotes: notas || null,
+      nextSteps: pasos || null,
+      status: 'completed',
+      sendEmail: false
+    };
+    
+    const res = await fetch(API_BASE + '/meetings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    
+    if (!res.ok) {
+      const errData = await res.json().catch(()=>({error:'Error de servidor'}));
+      throw new Error(errData.error || 'Error ' + res.status);
+    }
+    
+    const data = await res.json();
+    if (data.ok === false) throw new Error(data.error || 'Error');
+    closeModal('newMeetingModal');
+    // Limpiar
+    textareas.forEach(t => t.value = '');
+    inputs.forEach(i => i.value = '');
+    mostrarToast('Reunión guardada correctamente ✓', 'success');
+  } catch(e) {
+    mostrarToast('Error: ' + e.message, 'error');
+  }
+}
+
+// Reemplazar guardarReunion con la versión corregida
+guardarReunion = guardarReunionFixed;
+
+// ═══ FIX ORGCHART: usar usuarios reales con jerarquía visual ══
+loadOrgChart = async function() {
+  const section = document.getElementById('sec-orgchart');
+  if (!section) return;
+  
+  // Buscar o crear contenedor
+  let container = section.querySelector('.org-chart-wrap');
+  if (!container) {
+    // Buscar el div con el organigrama existente
+    container = section.querySelector('.card') || section.querySelector('div:last-child');
+  }
+  if (!container) return;
+  
+  container.innerHTML = '<div style="text-align:center;padding:40px;color:#888;">Cargando...</div>';
+  
+  const users = allUsuarios.length ? allUsuarios : await apiGet('users/all');
+  if (!users || !users.length) {
+    container.innerHTML = '<div style="text-align:center;padding:40px;color:#888;">Sin datos</div>';
+    return;
+  }
+
+  function ini(n){ return (n||'?').split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase(); }
+  const COLS=['#FF5400','#2ECC71','#3B82F6','#A855F7','#F59E0B','#EF4444'];
+  function col(n){ let h=0; for(let c of(n||''))h=(h*31+c.charCodeAt(0))%COLS.length; return COLS[h]; }
+
+  // Agrupar: managers arriba, luego líderes con sus equipos
+  const managers = users.filter(u => ['manager','admin'].includes(u.AppRole));
+  const leaders = users.filter(u => u.AppRole === 'leader');
+  const employees = users.filter(u => u.AppRole === 'employee');
+
+  let html = '<div style="display:flex;flex-direction:column;align-items:center;gap:20px;padding:16px;overflow-y:auto;">';
+  
+  // Managers
+  if (managers.length) {
+    html += '<div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center;">';
+    managers.forEach(m => {
+      html += `<div style="background:#1e1e1e;border:2px solid #FF5400;border-radius:12px;padding:12px 20px;text-align:center;min-width:160px;">
+        <div style="width:36px;height:36px;border-radius:50%;background:${col(m.FullName)};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;margin:0 auto 8px;">${ini(m.FullName)}</div>
+        <div style="font-weight:800;color:#f0ebe3;font-size:13px;">${m.FullName||m.Email}</div>
+        <div style="font-size:10px;color:#FF5400;margin-top:2px;font-weight:700;">Manager</div>
+      </div>`;
+    });
+    html += '</div>';
+  }
+
+  // Línea conectora
+  if (managers.length && leaders.length) {
+    html += '<div style="width:2px;height:24px;background:#333;"></div>';
+  }
+
+  // Líderes con equipos
+  if (leaders.length) {
+    html += '<div style="display:flex;gap:20px;flex-wrap:wrap;justify-content:center;align-items:flex-start;">';
+    leaders.forEach(l => {
+      const equipo = employees.filter(e => e.LeaderID === l.UserID);
+      html += `<div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+        <div style="background:#1e1e1e;border:1px solid #333;border-radius:12px;padding:10px 16px;text-align:center;min-width:140px;">
+          <div style="width:32px;height:32px;border-radius:50%;background:${col(l.FullName)};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;margin:0 auto 6px;">${ini(l.FullName)}</div>
+          <div style="font-weight:700;color:#f0ebe3;font-size:12px;">${l.FullName||l.Email}</div>
+          <div style="font-size:10px;color:#FF5400;font-weight:700;">Líder</div>
+        </div>
+        ${equipo.length ? `<div style="display:flex;flex-direction:column;gap:4px;align-items:center;">
+          ${equipo.map(e=>`<div style="background:#111;border:1px solid #222;border-radius:8px;padding:5px 10px;text-align:center;min-width:120px;">
+            <div style="font-size:10px;font-weight:600;color:#ccc;">${e.FullName||e.Email}</div>
+            <div style="font-size:9px;color:#666;">${e.IsActive?'Activo':'Inactivo'}</div>
+          </div>`).join('')}
+        </div>` : ''}
+      </div>`;
+    });
+    html += '</div>';
+  }
+  
+  html += '</div>';
+  container.innerHTML = html;
+};
+
+// ═══ FIX REPORTES: tabs y ver reporte ═════════════════════════
+// Los tabs de reportes ya tienen switchTab, solo falta poblar selectores
+async function initReportes() {
+  const section = document.getElementById('sec-reports');
+  if (!section) return;
+  
+  // Poblar select de personas si existe
+  section.querySelectorAll('select').forEach((sel, i) => {
+    if (i === 0 && sel.options.length <= 2) {
+      const current = sel.value;
+      // Solo si es un selector de personas
+      if (!sel.querySelector('option[value=""]')) {
+        sel.innerHTML = '<option value="">— Seleccionar —</option>';
+      }
+      allUsuarios.filter(u=>u.IsActive).sort((a,b)=>(a.FullName||'').localeCompare(b.FullName||'')).forEach(u=>{
+        if (!sel.querySelector(`option[value="${u.UserID}"]`)) {
+          sel.add(new Option(u.FullName||u.Email, u.UserID));
+        }
+      });
+      if (current) sel.value = current;
+    }
+  });
+}
+
+// Cargar reportes cuando se activa la sección
+const _ss2 = showSection;
+showSection = function(id) {
+  _ss2(id);
+  if (id === 'reports') {
+    if (!allUsuarios.length) loadUsuarios().then(initReportes);
+    else initReportes();
+  }
+  if (id === 'career' && !allUsuarios.length) loadUsuarios();
+  if (id === 'competencies' && !allUsuarios.length) loadUsuarios();
 };
 
 </script>

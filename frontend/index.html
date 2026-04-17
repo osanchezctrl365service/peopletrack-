@@ -440,14 +440,14 @@ select.fc option{background:#1a1a1a}
     <div class="sso-logo" style="margin-top:20px">People<span>Track</span></div>
     <p class="sso-tagline">Gestión de Objetivos, Competencias<br>y Plan de Carrera</p>
 
-    <button class="sso-btn" id="btnLogin" onclick="doLogin()" style="margin-top:8px">
+    <a href="/.auth/login/aad?post_login_redirect_uri=/" class="sso-btn" id="btnLogin" style="margin-top:8px;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:10px">
       <svg width="18" height="18" viewBox="0 0 23 23" fill="none">
         <path d="M11.5 0L0 4.5v14L11.5 23 23 18.5v-14L11.5 0z" fill="#fff" opacity="0.3"/>
         <path d="M11.5 0v23L0 18.5v-14L11.5 0z" fill="#fff" opacity="0.4"/>
         <path d="M11.5 0v11.5L23 4.5 11.5 0z" fill="#fff" opacity="0.6"/>
       </svg>
       Iniciar sesión con Azure AD
-    </button>
+    </a>
 
     <div class="sso-status" id="ssoStatus"></div>
     <p class="sso-note" style="margin-top:20px">Solo usuarios autorizados de INSTALNET SRL pueden acceder.</p>

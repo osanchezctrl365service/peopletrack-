@@ -556,6 +556,30 @@ textarea.form-control { min-height: 80px; resize: vertical; }
 
 
 
+
+<!-- MODAL PROMOVER LIDER -->
+<div id="modalPromoverLider" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:500;align-items:center;justify-content:center;">
+  <div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:16px;padding:32px;width:460px;max-width:95vw;position:relative;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <h3 style="font-size:16px;font-weight:800;color:#f0ebe3;">Promover a Lider</h3>
+      <button onclick="document.getElementById('modalPromoverLider').style.display='none'" style="background:none;border:none;color:#888;font-size:20px;cursor:pointer;">x</button>
+    </div>
+    <p style="font-size:12px;color:#888;margin-bottom:16px;line-height:1.6;">Selecciona un empleado para asignarlo como lider. Aparecera en la seccion Lideres con sus colaboradores.</p>
+    <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Buscar usuario</label>
+    <input id="promoverSearch" type="text" placeholder="Nombre o email..." oninput="filtrarPromover()" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;box-sizing:border-box;">
+    <div id="promoverLista" style="background:#111;border:1px solid #222;border-radius:8px;margin-top:8px;max-height:200px;overflow-y:auto;"></div>
+    <div id="promoverSeleccionado" style="display:none;margin-top:12px;padding:10px 14px;background:#0d0d0d;border:1px solid #FF5400;border-radius:8px;">
+      <div style="font-size:11px;color:#888;">Seleccionado:</div>
+      <div id="promoverNombreSeleccionado" style="font-weight:700;color:#f0ebe3;margin-top:2px;"></div>
+    </div>
+    <div id="modalPromoverError" style="color:#FF4D4D;font-size:12px;margin-top:10px;display:none;"></div>
+    <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end;">
+      <button onclick="document.getElementById('modalPromoverLider').style.display='none'" style="padding:10px 20px;background:#222;border:1px solid #333;border-radius:8px;color:#aaa;font-size:13px;cursor:pointer;">Cancelar</button>
+      <button onclick="confirmarPromoverLider()" id="btnConfirmarPromover" disabled style="padding:10px 24px;background:#FF5400;border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;opacity:0.5;">Promover a Lider</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL EDITAR USUARIO -->
 <div id="modalEditarUsuario" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:500;align-items:center;justify-content:center;">
   <div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:16px;padding:32px;width:500px;max-width:95vw;max-height:90vh;overflow-y:auto;">
@@ -778,7 +802,7 @@ textarea.form-control { min-height: 80px; resize: vertical; }
     <span class="topbar-title" id="topbarTitle">Dashboard</span>
     <span class="topbar-period">FY26 — Q2</span>
     <button class="topbar-btn" onclick="showModal('exportModal')">⬇ Exportar Excel</button>
-    <button class="topbar-btn primary" onclick="showModal('newObjectiveModal')">+ Nuevo</button>
+    <button class="topbar-btn primary" onclick="nuevoContextual()">+ Nuevo</button>
   </header>
 
   <div class="content">
@@ -886,7 +910,7 @@ textarea.form-control { min-height: 80px; resize: vertical; }
   </div>
   <div class="card" style="padding:0;overflow:hidden;">
     <div id="usuariosLoading" style="text-align:center;padding:40px;color:#888;">Cargando usuarios...</div>
-    <div style="overflow-x:auto;">
+    <div style="overflow-x:auto;overflow-y:auto;max-height:60vh;">
       <table class="data-table" id="usuariosTable" style="display:none;min-width:700px;">
         <thead>
           <tr>
@@ -2155,6 +2179,106 @@ async function guardarEdicionUsuario() {
   } finally {
     btn.textContent = "Guardar cambios"; btn.disabled = false;
   }
+}
+
+
+// Botón +Nuevo contextual según sección
+function nuevoContextual() {
+  const active = document.querySelector(".section.active");
+  if (!active) return;
+  const id = active.id;
+  if (id === "sec-lideres") { abrirModalPromover(); return; }
+  if (id === "sec-usuarios") { abrirModalUsuario(); return; }
+  showModal("newObjectiveModal");
+}
+
+
+// ── PROMOVER A LIDER ─────────────────────────────────────────────────────────
+let promoverUserId = null;
+
+function abrirModalPromover() {
+  promoverUserId = null;
+  document.getElementById("promoverSearch").value = "";
+  document.getElementById("promoverLista").innerHTML = "";
+  document.getElementById("promoverSeleccionado").style.display = "none";
+  document.getElementById("btnConfirmarPromover").disabled = true;
+  document.getElementById("btnConfirmarPromover").style.opacity = "0.5";
+  document.getElementById("modalPromoverError").style.display = "none";
+  document.getElementById("modalPromoverLider").style.display = "flex";
+  filtrarPromover();
+}
+
+function filtrarPromover() {
+  const q = document.getElementById("promoverSearch").value.toLowerCase();
+  const lista = document.getElementById("promoverLista");
+  const candidates = allUsuarios
+    .filter(u => u.IsActive)
+    .filter(u => !q || (u.FullName||"").toLowerCase().includes(q) || (u.Email||"").toLowerCase().includes(q))
+    .slice(0, 25);
+  if (!candidates.length) {
+    lista.innerHTML = "<div style='padding:12px;color:#555;font-size:12px;text-align:center;'>Sin resultados</div>";
+    return;
+  }
+  const COLS = ["#FF5400","#2ECC71","#3B82F6","#A855F7","#F59E0B","#EF4444","#10B981","#F97316"];
+  function col(n){ let h=0; for(let c of(n||""))h=(h*31+c.charCodeAt(0))%COLS.length; return COLS[h]; }
+  function ini(n){ return (n||"?").split(" ").map(p=>p[0]).join("").slice(0,2).toUpperCase(); }
+  lista.innerHTML = candidates.map(u => {
+    const rol = u.AppRole === "leader" ? " (Lider)" : u.AppRole === "manager" ? " (Manager)" : "";
+    return `<div onclick="seleccionarParaPromover(${u.UserID})"
+      style="padding:10px 12px;cursor:pointer;border-bottom:1px solid #1a1a1a;display:flex;align-items:center;gap:10px;"
+      onmouseover="this.style.background='#1a1a1a'" onmouseout="this.style.background=''">
+      <div style="width:28px;height:28px;border-radius:50%;background:${col(u.FullName)};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0;">${ini(u.FullName||u.Email)}</div>
+      <div>
+        <div style="font-size:12px;font-weight:600;color:#f0ebe3;">${u.FullName||u.Email}${rol}</div>
+        <div style="font-size:10px;color:#666;">${u.Email||""}</div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function seleccionarParaPromover(userId) {
+  const u = allUsuarios.find(x => x.UserID === userId);
+  if (!u) return;
+  promoverUserId = userId;
+  document.getElementById("promoverNombreSeleccionado").innerHTML =
+    "<strong>" + (u.FullName||u.Email) + "</strong> &nbsp;<span style='font-size:11px;color:#888;'>" + (u.Email||"") + "</span>";
+  document.getElementById("promoverSeleccionado").style.display = "block";
+  const btn = document.getElementById("btnConfirmarPromover");
+  btn.disabled = false; btn.style.opacity = "1";
+}
+
+async function confirmarPromoverLider() {
+  if (!promoverUserId) return;
+  const btn = document.getElementById("btnConfirmarPromover");
+  const errEl = document.getElementById("modalPromoverError");
+  btn.textContent = "Promoviendo..."; btn.disabled = true;
+  try {
+    const res = await fetch(API_BASE + "/users/" + promoverUserId, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ AppRole: "leader" })
+    });
+    const data = await res.json();
+    if (data.ok === false) throw new Error(data.error || "Error");
+    document.getElementById("modalPromoverLider").style.display = "none";
+    allUsuarios = []; allLideres = {};
+    await loadUsuarios();
+    await loadLideres();
+    mostrarToast("Usuario promovido a Lider!", "success");
+  } catch(e) {
+    errEl.textContent = e.message; errEl.style.display = "block";
+    btn.disabled = false;
+  }
+  btn.textContent = "Promover a Lider"; btn.style.opacity = "1";
+}
+
+// ── BOTON +NUEVO CONTEXTUAL ───────────────────────────────────────────────────
+function nuevoContextual() {
+  const active = document.querySelector(".section.active");
+  const id = active ? active.id : "";
+  if (id === "sec-lideres")   { abrirModalPromover(); return; }
+  if (id === "sec-usuarios")  { abrirModalUsuario(); return; }
+  showModal("newObjectiveModal");
 }
 
 </script>

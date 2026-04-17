@@ -494,68 +494,90 @@ textarea.form-control { min-height: 80px; resize: vertical; }
 .small { font-size: 11px; }
 .divider { height: 1px; background: var(--gray-200); margin: 16px 0; }
 
-/* SSO Login Screen */
+/* SSO Login Screen — CTRL365 Dark Style */
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&display=swap');
 .sso-screen {
   position: fixed;
   inset: 0;
-  background: var(--primary);
+  background: #0d0d0d;
+  background-image: radial-gradient(ellipse 80% 50% at 20% 0%, rgba(255,84,0,.08) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(27,58,92,.15) 0%, transparent 60%);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 200;
 }
 .sso-card {
-  background: var(--white);
-  border-radius: var(--radius-xl);
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.09);
+  border-radius: 20px;
   padding: 48px 40px;
-  width: 400px;
+  width: 420px;
   text-align: center;
-  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(20px);
 }
-.sso-logo { font-size: 32px; font-weight: 800; color: var(--primary); letter-spacing: -1px; }
-.sso-logo span { color: var(--accent); }
-.sso-tagline { font-size: 13px; color: var(--gray-500); margin: 6px 0 32px; }
+.sso-brand { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 8px; }
+.sso-brand-icon { width: 36px; height: 36px; background: #FF5400; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; color: #fff; font-family: 'Sora', sans-serif; }
+.sso-logo { font-size: 26px; font-weight: 800; color: #F0EBE3; letter-spacing: -0.5px; font-family: 'Sora', sans-serif; }
+.sso-logo span { color: #FF5400; }
+.sso-tagline { font-size: 12px; color: #888580; margin: 8px 0 36px; line-height: 1.5; }
 .sso-btn {
   width: 100%;
   padding: 14px;
-  background: var(--primary);
+  background: #FF5400;
   color: #fff;
   border: none;
-  border-radius: var(--radius-md);
-  font-size: 14px;
-  font-weight: 700;
-  font-family: var(--font);
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: 'Sora', sans-serif;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
   transition: all 0.2s;
+  letter-spacing: 0.02em;
 }
-.sso-btn:hover { background: var(--primary-light); }
-.sso-btn.azure { background: #0078D4; }
-.sso-btn.azure:hover { background: #005FA3; }
-.sso-divider { margin: 16px 0; font-size: 11px; color: var(--gray-400); }
-.sso-note { font-size: 10px; color: var(--gray-400); margin-top: 24px; }
-.sso-wave { width: 100%; height: 6px; background: linear-gradient(90deg, var(--primary), var(--accent)); border-radius: 0 0 var(--radius-xl) var(--radius-xl); margin-top: 24px; }
+.sso-btn:hover:not(:disabled) { background: #cc4400; }
+.sso-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.sso-btn.demo { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1); color: #F0EBE3; margin-top: 10px; }
+.sso-btn.demo:hover:not(:disabled) { background: rgba(255,255,255,.1); border-color: rgba(255,84,0,.3); }
+.sso-divider { margin: 16px 0; font-size: 10px; color: rgba(255,255,255,.2); letter-spacing: 0.15em; }
+.sso-note { font-size: 10px; color: rgba(255,255,255,.25); margin-top: 28px; line-height: 1.6; }
+.sso-wave { width: 100%; height: 3px; background: linear-gradient(90deg, #FF5400, rgba(255,84,0,.2)); border-radius: 0 0 20px 20px; margin-top: 28px; }
+.sso-status { font-size: 11px; color: #FF5400; margin-top: 12px; min-height: 16px; }
 </style>
 <script src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js"></script>
 </head>
 <body>
 
-<!-- SSO Login -->
+<!-- SSO Login — CTRL365 Dark Style -->
 <div class="sso-screen" id="ssoScreen">
   <div class="sso-card">
-    <div class="sso-logo">People<span>Track</span></div>
-    <p class="sso-tagline">Gestión de Objetivos, Competencias y Plan de Carrera</p>
-    <button class="sso-btn azure" id="btnAzureLogin" onclick="doLogin()" disabled style="opacity:0.6;cursor:not-allowed">
-      <svg width="18" height="18" viewBox="0 0 23 23" fill="none"><path d="M11.5 0L0 4.5v14L11.5 23 23 18.5v-14L11.5 0z" fill="#fff" opacity="0.3"/><path d="M11.5 0v23L0 18.5v-14L11.5 0z" fill="#fff" opacity="0.4"/><path d="M11.5 0v11.5L23 4.5 11.5 0z" fill="#fff" opacity="0.6"/></svg>
+    <div class="sso-brand">
+      <div class="sso-brand-icon">C</div>
+      <span style="font-family:'Sora',sans-serif;font-size:15px;font-weight:700;color:#F0EBE3">CTRL<span style="color:#FF5400">365</span></span>
+    </div>
+    <div class="sso-logo" style="margin-top:20px">People<span>Track</span></div>
+    <p class="sso-tagline">Gestión de Objetivos, Competencias<br>y Plan de Carrera</p>
+
+    <button class="sso-btn" id="btnAzureLogin" onclick="doLogin()" disabled>
+      <svg width="16" height="16" viewBox="0 0 23 23" fill="none">
+        <path d="M11.5 0L0 4.5v14L11.5 23 23 18.5v-14L11.5 0z" fill="#fff" opacity="0.3"/>
+        <path d="M11.5 0v23L0 18.5v-14L11.5 0z" fill="#fff" opacity="0.4"/>
+        <path d="M11.5 0v11.5L23 4.5 11.5 0z" fill="#fff" opacity="0.6"/>
+      </svg>
       <span id="btnAzureText">Iniciando...</span>
     </button>
+
     <div class="sso-divider">— o —</div>
-    <button class="sso-btn" id="btnDemoLogin" onclick="demoLogin()" disabled style="opacity:0.6;cursor:not-allowed">
+
+    <button class="sso-btn demo" id="btnDemoLogin" onclick="demoLogin()" disabled>
       Ingresar sin SSO (modo demo)
     </button>
+
+    <div class="sso-status" id="ssoStatus"></div>
     <p class="sso-note">Autenticación SSO via Microsoft Azure Active Directory.<br>Solo usuarios autorizados por la empresa pueden acceder.</p>
     <div class="sso-wave"></div>
   </div>
@@ -1543,9 +1565,11 @@ window.addEventListener('load', async () => {
     const b1 = document.getElementById('btnAzureLogin');
     const b2 = document.getElementById('btnDemoLogin');
     const bt = document.getElementById('btnAzureText');
-    if(b1){ b1.disabled=false; b1.style.opacity='1'; b1.style.cursor='pointer'; }
-    if(b2){ b2.disabled=false; b2.style.opacity='1'; b2.style.cursor='pointer'; }
+    const st = document.getElementById('ssoStatus');
+    if(b1){ b1.disabled=false; }
+    if(b2){ b2.disabled=false; }
     if(bt){ bt.textContent='Iniciar sesión con Azure AD'; }
+    if(st){ st.textContent=''; }
     // Login silencioso si ya hay sesion
     const accounts = msalApp.getAllAccounts();
     if(accounts.length > 0){
@@ -1563,9 +1587,11 @@ window.addEventListener('load', async () => {
     const b1=document.getElementById('btnAzureLogin');
     const b2=document.getElementById('btnDemoLogin');
     const bt=document.getElementById('btnAzureText');
-    if(b1){ b1.disabled=false; b1.style.opacity='1'; b1.style.cursor='pointer'; }
-    if(b2){ b2.disabled=false; b2.style.opacity='1'; b2.style.cursor='pointer'; }
+    if(b1){ b1.disabled=false; }
+    if(b2){ b2.disabled=false; }
     if(bt){ bt.textContent='Iniciar sesión con Azure AD'; }
+    const st2 = document.getElementById('ssoStatus');
+    if(st2){ st2.textContent='⚠ Modo sin autenticacion disponible'; st2.style.color='#F2A16A'; }
   }
 });
 
@@ -1576,7 +1602,13 @@ async function doLogin() {
     if(bt) bt.textContent = 'Cargando...';
     await new Promise(r => setTimeout(r, 2000));
     if (!msalReady || !msalApp) {
-      alert('Error al cargar la autenticacion. Recarga la pagina.');
+      const st3 = document.getElementById('ssoStatus');
+    if(st3){ st3.textContent='Error al cargar. Usá el modo demo.'; st3.style.color='#f87171'; }
+    const b1b = document.getElementById('btnAzureLogin');
+    const btb = document.getElementById('btnAzureText');
+    if(b1b){ b1b.disabled=false; }
+    if(btb){ btb.textContent='Reintentar'; }
+    return;
       return;
     }
   }

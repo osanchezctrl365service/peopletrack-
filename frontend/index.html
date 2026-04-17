@@ -548,7 +548,7 @@ textarea.form-control { min-height: 80px; resize: vertical; }
 .sso-wave { width: 100%; height: 3px; background: linear-gradient(90deg, #FF5400, rgba(255,84,0,.2)); border-radius: 0 0 20px 20px; margin-top: 28px; }
 .sso-status { font-size: 11px; color: #FF5400; margin-top: 12px; min-height: 16px; }
 </style>
-<script src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js"></script>
+<script src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js" crossorigin="anonymous"></script>
 </head>
 <body>
 
@@ -1554,78 +1554,85 @@ const msalConfig = {
 let msalApp = null;
 let msalReady = false;
 
-// Inicializar MSAL en background al cargar
+function setButtons(enabled, text) {
+  const b1 = document.getElementById('btnAzureLogin');
+  const b2 = document.getElementById('btnDemoLogin');
+  const bt = document.getElementById('btnAzureText');
+  if(b1) b1.disabled = !enabled;
+  if(b2) b2.disabled = !enabled;
+  if(bt) bt.textContent = text;
+}
+
+function setStatus(msg, color) {
+  const st = document.getElementById('ssoStatus');
+  if(st){ st.textContent = msg; st.style.color = color||'#FF5400'; }
+}
+
+async function waitForMSAL() {
+  let attempts = 0;
+  while (typeof msal === 'undefined' && attempts < 30) {
+    await new Promise(r => setTimeout(r, 200));
+    attempts++;
+  }
+  if (typeof msal === 'undefined') throw new Error('MSAL not loaded');
+}
+
+async function initMSAL() {
+  await waitForMSAL();
+  msalApp = new msal.PublicClientApplication(msalConfig);
+  await msalApp.initialize();
+  await msalApp.handleRedirectPromise();
+  msalReady = true;
+}
+
 window.addEventListener('load', async () => {
+  setStatus('Conectando con Azure AD...', '#888580');
   try {
-    msalApp = new msal.PublicClientApplication(msalConfig);
-    await msalApp.initialize();
-    await msalApp.handleRedirectPromise();
-    msalReady = true;
-    // Habilitar botones
-    const b1 = document.getElementById('btnAzureLogin');
-    const b2 = document.getElementById('btnDemoLogin');
-    const bt = document.getElementById('btnAzureText');
-    const st = document.getElementById('ssoStatus');
-    if(b1){ b1.disabled=false; }
-    if(b2){ b2.disabled=false; }
-    if(bt){ bt.textContent='Iniciar sesión con Azure AD'; }
-    if(st){ st.textContent=''; }
-    // Login silencioso si ya hay sesion
+    await initMSAL();
+    setButtons(true, 'Iniciar sesion con Azure AD');
+    setStatus('');
     const accounts = msalApp.getAllAccounts();
-    if(accounts.length > 0){
+    if (accounts.length > 0) {
       try {
         const result = await msalApp.acquireTokenSilent({
           scopes: ['openid','profile','email','User.Read'],
           account: accounts[0]
         });
         onLoginSuccess(result);
-      } catch(e){ console.log('No silent session'); }
+      } catch(e) { setStatus(''); }
     }
-  } catch(e){
-    console.warn('MSAL init error:', e);
-    msalReady = true;
-    const b1=document.getElementById('btnAzureLogin');
-    const b2=document.getElementById('btnDemoLogin');
-    const bt=document.getElementById('btnAzureText');
-    if(b1){ b1.disabled=false; }
-    if(b2){ b2.disabled=false; }
-    if(bt){ bt.textContent='Iniciar sesión con Azure AD'; }
-    const st2 = document.getElementById('ssoStatus');
-    if(st2){ st2.textContent='⚠ Modo sin autenticacion disponible'; st2.style.color='#F2A16A'; }
+  } catch(e) {
+    console.error('MSAL init failed:', e);
+    setButtons(true, 'Iniciar sesion con Azure AD');
+    setStatus('Error conectando Azure AD. Reintentando...', '#f87171');
   }
 });
 
 async function doLogin() {
-  if (!msalReady || !msalApp) {
-    // Si MSAL aun no cargo, esperar 2s y reintentar
-    const bt = document.getElementById('btnAzureText');
-    if(bt) bt.textContent = 'Cargando...';
-    await new Promise(r => setTimeout(r, 2000));
-    if (!msalReady || !msalApp) {
-      const st3 = document.getElementById('ssoStatus');
-    if(st3){ st3.textContent='Error al cargar. Usá el modo demo.'; st3.style.color='#f87171'; }
-    const b1b = document.getElementById('btnAzureLogin');
-    const btb = document.getElementById('btnAzureText');
-    if(b1b){ b1b.disabled=false; }
-    if(btb){ btb.textContent='Reintentar'; }
-    return;
-      return;
-    }
+  if (!msalReady) {
+    setStatus('Cargando...', '#FF5400');
+    try { await initMSAL(); setButtons(true,'Iniciar sesion con Azure AD'); setStatus(''); }
+    catch(e) { setStatus('No se pudo conectar con Azure AD', '#f87171'); return; }
   }
   try {
+    setStatus('Abriendo ventana de login...', '#FF5400');
     const result = await msalApp.loginPopup({
       scopes: ['openid','profile','email','User.Read']
     });
+    setStatus('');
     onLoginSuccess(result);
   } catch(e) {
     if (e.errorCode !== 'user_cancelled') {
-      console.error('Login error:', e);
-      alert('Error al iniciar sesion: ' + (e.message || e.errorCode));
-    }
+      setStatus('Error: ' + (e.errorMessage || e.message || ''), '#f87171');
+    } else { setStatus(''); }
   }
 }
 
-
+function demoLogin() {
+  document.getElementById('ssoScreen').style.display = 'none';
+  renderTeamProgress();
+  drawDonut();
+}
 
 function onLoginSuccess(result) {
   document.getElementById('ssoScreen').style.display = 'none';
@@ -1641,24 +1648,6 @@ function onLoginSuccess(result) {
   renderTeamProgress();
   drawDonut();
 }
-
-function demoLogin() {
-  // Modo demo sin SSO — entra directo con el usuario hardcodeado
-  document.getElementById('ssoScreen').style.display = 'none';
-  renderTeamProgress();
-  drawDonut();
-}
-
-// Inicializar MSAL cuando carga la pagina
-window.addEventListener('load', async () => {
-  try {
-    await initMsal();
-  } catch(e) {
-    console.warn('MSAL init error:', e);
-  } finally {
-    enableLoginButtons();
-  }
-});
 </script>
 </body>
 </html>

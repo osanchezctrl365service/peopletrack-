@@ -1397,7 +1397,7 @@ let _userData = null;
 
 // ── AUTH (Azure Static Web Apps built-in) ─────────────────
 function doLogin() {
-  window.location.href = '/.auth/login/aad?post_login_redirect_uri=' + encodeURIComponent(window.location.pathname);
+  window.location.href = '/.auth/login/aad?post_login_redirect_uri=/';
 }
 function demoLogin() {
   document.getElementById('ssoScreen').style.display = 'none';
@@ -1405,20 +1405,16 @@ function demoLogin() {
 }
 
 window.addEventListener('load', async () => {
-  const st = document.getElementById('ssoStatus');
-  if(st) st.textContent = 'Verificando sesion...';
   try {
     const resp = await fetch('/.auth/me');
     if (resp.ok) {
       const data = await resp.json();
-      if (data.clientPrincipal) {
-        const u = data.clientPrincipal;
-        initApp({ name: u.userDetails || u.userId, email: u.userDetails });
+      if (data && data.clientPrincipal) {
+        initApp({ name: data.clientPrincipal.userDetails, email: data.clientPrincipal.userDetails });
         return;
       }
     }
-  } catch(e) { console.log('No SWA auth endpoint'); }
-  if(st) st.textContent = '';
+  } catch(e) {}
 });
 
 function initApp(user) {

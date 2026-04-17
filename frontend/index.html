@@ -1698,20 +1698,39 @@ function showT(msg, err) {
   setTimeout(function() { t.style.display = 'none'; }, 3000);
 }
 
+async function getAuthHeaders() {
+  // Get the SWA auth token to send to the API
+  try {
+    const r = await fetch('/.auth/me');
+    const d = await r.json();
+    if (d && d.clientPrincipal) {
+      return {
+        'Content-Type': 'application/json',
+        'X-User-Email': d.clientPrincipal.userDetails || '',
+        'X-User-Id': d.clientPrincipal.userId || ''
+      };
+    }
+  } catch(e) {}
+  return { 'Content-Type': 'application/json' };
+}
+
 async function apiGet(path) {
-  const r = await fetch(API_URL + path);
+  const headers = await getAuthHeaders();
+  const r = await fetch(API_URL + path, { headers });
   if (!r.ok) throw new Error('API ' + r.status);
   return r.json();
 }
 
 async function apiPut(path, body) {
-  const r = await fetch(API_URL + path, {method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  const headers = await getAuthHeaders();
+  const r = await fetch(API_URL + path, {method:'PUT', headers, body:JSON.stringify(body)});
   if (!r.ok) throw new Error('API ' + r.status);
   return r.json();
 }
 
 async function apiPost(path, body) {
-  const r = await fetch(API_URL + path, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  const headers = await getAuthHeaders();
+  const r = await fetch(API_URL + path, {method:'POST', headers, body:JSON.stringify(body)});
   if (!r.ok) throw new Error('API ' + r.status);
   return r.json();
 }
@@ -1726,7 +1745,7 @@ showSection = function(id) {
 
 async function cargarSeccionUsuarios() {
   try {
-    if (!todosLosUsuarios.length) todosLosUsuarios = await apiGet('/users');
+    if (!todosLosUsuarios.length) todosLosUsuarios = await apiGet('/users/all');
     filtrarUsuarios();
     actualizarStatsUsuarios();
     poblarDropdownsLideres();

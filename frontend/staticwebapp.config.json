@@ -9,5 +9,8 @@
         }
       }
     }
+  },
+  "navigationFallback": {
+    "rewrite": "/index.html"
   }
 }

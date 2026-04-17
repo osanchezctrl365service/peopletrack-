@@ -1404,17 +1404,22 @@ function doLogin() {
 }
 
 window.addEventListener('load', async () => {
-  try {
-    const resp = await fetch('/.auth/me');
-    if (resp.ok) {
-      const data = await resp.json();
-      if (data && data.clientPrincipal) {
-        const u = data.clientPrincipal;
-        initApp({ name: u.userDetails || u.userId, email: u.userDetails || '' });
-        return;
+  // Retry hasta 5 veces con 500ms entre intentos
+  for (let i = 0; i < 5; i++) {
+    try {
+      const resp = await fetch('/.auth/me');
+      if (resp.ok) {
+        const data = await resp.json();
+        if (data && data.clientPrincipal && data.clientPrincipal.userDetails) {
+          const u = data.clientPrincipal;
+          initApp({ name: u.userDetails, email: u.userDetails });
+          return;
+        }
       }
-    }
-  } catch(e) {}
+    } catch(e) {}
+    await new Promise(r => setTimeout(r, 500));
+  }
+  // Sin sesion activa - mostrar pantalla de login
 });
 
 function initApp(user) {

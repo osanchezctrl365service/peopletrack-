@@ -446,7 +446,7 @@ select.fc option{background:#1a1a1a}
         <path d="M11.5 0v23L0 18.5v-14L11.5 0z" fill="#fff" opacity="0.4"/>
         <path d="M11.5 0v11.5L23 4.5 11.5 0z" fill="#fff" opacity="0.6"/>
       </svg>
-      <span id="btnLoginText">Iniciar sesión con Azure AD</span>
+      Iniciar sesión con Azure AD
     </button>
 
     <div class="sso-status" id="ssoStatus"></div>
@@ -1401,11 +1401,12 @@ let _userData = null;
 // ── AUTH (Azure Static Web Apps built-in) ─────────────────
 function doLogin() {
   const btn = document.getElementById('btnLogin');
+  if(btn){ btn.style.opacity='0.7'; btn.disabled=true; }
   const txt = document.getElementById('btnLoginText');
-  if(btn) btn.style.opacity = '0.7';
   if(txt) txt.textContent = 'Redirigiendo...';
   window.location.href = '/.auth/login/aad?post_login_redirect_uri=/';
 }
+
 window.addEventListener('load', async () => {
   const st = document.getElementById('ssoStatus');
   if(st) st.textContent = '';

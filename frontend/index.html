@@ -252,7 +252,7 @@ body { font-family: var(--font); font-size: 14px; color: var(--gray-800); backgr
   padding: 10px 12px;
   font-size: 10px;
   font-weight: 700;
-  color: var(--gray-600);
+  color: #888;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   border-bottom: 2px solid var(--gray-200);
@@ -262,7 +262,7 @@ body { font-family: var(--font); font-size: 14px; color: var(--gray-800); backgr
   padding: 11px 12px;
   border-bottom: 1px solid var(--gray-100);
   font-size: 13px;
-  color: var(--gray-800);
+  color: #ccc;
   vertical-align: middle;
 }
 .data-table tr:hover td { background: var(--gray-50); }
@@ -322,7 +322,7 @@ textarea.form-control { min-height: 80px; resize: vertical; }
   overflow-y: auto;
   box-shadow: var(--shadow-lg);
 }
-.modal-title { font-size: 18px; font-weight: 800; color: var(--primary); margin-bottom: 20px; }
+.modal-title { font-size: 18px; font-weight: 800; color: #f0ebe3; margin-bottom: 20px; }
 .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
 .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 18px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid transparent; transition: all 0.15s; font-family: var(--font); }
 .btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
@@ -344,7 +344,7 @@ textarea.form-control { min-height: 80px; resize: vertical; }
   margin-bottom: -2px;
   transition: all 0.15s;
 }
-.tab:hover { color: var(--primary); }
+.tab:hover { color: var(--orange); }
 .tab.active { color: var(--accent-dark); border-bottom-color: var(--accent); }
 
 /* ALERT BLOCK */
@@ -380,7 +380,7 @@ textarea.form-control { min-height: 80px; resize: vertical; }
 }
 .timeline-date { font-size: 10px; font-weight: 700; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
 .timeline-card { background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: var(--radius-md); padding: 12px; }
-.timeline-card-title { font-size: 13px; font-weight: 700; color: var(--primary); margin-bottom: 6px; }
+.timeline-card-title { font-size: 13px; font-weight: 700; color: #f0ebe3; margin-bottom: 6px; }
 .timeline-card-body { font-size: 12px; color: var(--gray-700); line-height: 1.6; }
 
 /* DONUT CHART */
@@ -403,7 +403,7 @@ textarea.form-control { min-height: 80px; resize: vertical; }
   cursor: pointer;
 }
 .org-node.leader { border-color: var(--accent); }
-.org-node .org-name { font-size: 12px; font-weight: 700; color: var(--primary); }
+.org-node .org-name { font-size: 12px; font-weight: 700; color: #f0ebe3; }
 .org-node .org-role { font-size: 10px; color: var(--gray-500); margin-top: 2px; }
 .org-node .org-progress { font-size: 11px; font-weight: 700; margin-top: 6px; }
 .org-connector { width: 2px; height: 16px; background: var(--gray-300); margin: 0 auto; }
@@ -436,8 +436,8 @@ textarea.form-control { min-height: 80px; resize: vertical; }
 
 /* SECTION HEADER */
 .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-.section-heading { font-size: 20px; font-weight: 800; color: var(--primary); }
-.section-subheading { font-size: 13px; color: var(--gray-500); margin-top: 2px; }
+.section-heading { font-size: 20px; font-weight: 800; color: #f0ebe3; }
+.section-subheading { font-size: 13px; color: #888; margin-top: 2px; }
 
 /* HELP TIP */
 .help-tip {
@@ -548,6 +548,15 @@ textarea.form-control { min-height: 80px; resize: vertical; }
 .sso-note { font-size: 10px; color: rgba(255,255,255,.25); margin-top: 28px; line-height: 1.6; }
 .sso-wave { width: 100%; height: 3px; background: linear-gradient(90deg, #FF5400, rgba(255,84,0,.2)); border-radius: 0 0 20px 20px; margin-top: 28px; }
 .sso-status { font-size: 11px; color: #FF5400; margin-top: 12px; min-height: 16px; }
+
+/* Dark mode inputs override */
+input:not([type=range]), select, textarea {
+  background: #111 !important;
+  border-color: #333 !important;
+  color: #f0ebe3 !important;
+}
+input::placeholder, textarea::placeholder { color: #555 !important; }
+
 </style>
 
 </head>
@@ -987,7 +996,7 @@ textarea.form-control { min-height: 80px; resize: vertical; }
     </div>
     <input id="lideresSearch" type="text" placeholder="Buscar líder..." onkeyup="filtrarLideres()" style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:8px 12px;color:#f0ebe3;font-size:12px;width:200px;outline:none;">
   </div>
-  <div id="lideresContainer" style="display:grid;gap:16px;max-height:65vh;overflow-y:auto;">
+  <div id="lideresContainer" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:16px;overflow-y:auto;max-height:70vh;">
     <div style="text-align:center;padding:40px;color:#888;">Cargando líderes...</div>
   </div>
   <div id="lideresPagination" style="display:flex;justify-content:center;gap:8px;margin-top:16px;flex-wrap:wrap;"></div>
@@ -1775,7 +1784,7 @@ textarea.form-control { min-height: 80px; resize: vertical; }
 const titles = {
   dashboard:'Dashboard',usuarios:'Usuarios',lideres:'Líderes',areas:'Áreas',objectives:'Objetivos',career:'Plan de Carrera',
   competencies:'Competencias',oneononex:'Reuniones 1:1',reports:'Reportes',
-  orgchart:'Organigrama',alerts:'Alertas',settings:'Configuración',help:'Ayuda'
+  orgchart:'Organigrama',alerts:'Alertas',periods:'Períodos',settings:'Configuración',help:'Ayuda'
 };
 
 // ── Datos reales desde Azure SQL ────────────────────────────
@@ -2557,7 +2566,9 @@ renderLideres = function(grupos) {
 // ═══ PERÍODOS ════════════════════════════════════════════════
 let allPeriods=[];
 async function loadPeriods(){
-  const d=await apiGet("periods");
+  // Intentar /periods/all para ver activos e inactivos
+  let d=await apiGet("periods/all");
+  if(!d||!d.length) d=await apiGet("periods");
   allPeriods=Array.isArray(d)?d:[];
   renderPeriods();
 }
@@ -2578,13 +2589,27 @@ function abrirModalPeriodo(id){
 }
 function cerrarModalPeriodo(){document.getElementById("modalPeriodo").style.display="none";}
 async function guardarPeriodo(){
+  const id=document.getElementById("editPeriodoId").value;
   const name=document.getElementById("periodoName").value.trim();
+  const start=document.getElementById("periodoStart").value||null;
+  const end=document.getElementById("periodoEnd").value||null;
+  const active=document.getElementById("periodoActivo").value==="1";
   const errEl=document.getElementById("modalPeriodoError");
   const btn=document.getElementById("btnGuardarPeriodo");
   if(!name){errEl.textContent="Nombre obligatorio";errEl.style.display="block";return;}
-  btn.textContent="Guardando...";btn.disabled=true;
-  mostrarToast("Los períodos se crean desde SSMS por ahora. Próximamente disponible en la app.","info");
-  cerrarModalPeriodo();btn.textContent="Guardar";btn.disabled=false;
+  btn.textContent="Guardando...";btn.disabled=true;errEl.style.display="none";
+  try{
+    const url=id?API_BASE+"/manage/periods/"+id:API_BASE+"/manage/periods";
+    const method=id?"PUT":"POST";
+    const res=await fetch(url,{method,headers:{"Content-Type":"application/json"},body:JSON.stringify({periodName:name,startDate:start,endDate:end,isActive:active})});
+    const data=await res.json();
+    if(data.ok===false)throw new Error(data.error||"Error al guardar");
+    cerrarModalPeriodo();
+    allPeriods=[];
+    await loadPeriods();
+    mostrarToast(id?"Período actualizado":"Período creado correctamente","success");
+  }catch(e){errEl.textContent=e.message;errEl.style.display="block";}
+  finally{btn.textContent="Guardar";btn.disabled=false;}
 }
 
 // ═══ SHOWSECTION PERIODOS ════════════════════════════════════

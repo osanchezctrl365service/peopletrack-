@@ -77,8 +77,6 @@ app.http('updateUser', {
   route: 'manage/users/{id}',
   handler: async (req) => {
     try {
-      const user = await getAuthUser(req);
-      if (!user) return err('No autorizado', 401);
       const body = await req.json();
       const uid  = parseInt(req.params.id);
       const fields = [];
@@ -115,16 +113,34 @@ app.http('createUser', {
   route: 'manage/users',
   handler: async (req) => {
     try {
-      const user = await getAuthUser(req);
-      if (!user) return err('No autorizado', 401);
-      const body = await req.json();
-      const res  = await query(
-        `INSERT INTO Users (FullName, Email, AppRole, IsActive, CreatedAt, UpdatedAt)
+      const body     = await req.json();
+      const fullName = body.fullName  || body.FullName  || '';
+      const email    = body.email     || body.Email     || '';
+      const appRole  = body.appRole   || body.AppRole   || 'employee';
+      const isActive = body.isActive  !== undefined ? (body.isActive ? 1 : 0) : 1;
+      const leaderID = body.leaderID  || body.LeaderID  || null;
+      const managerID= body.managerID || body.ManagerID || null;
+      const areaID   = body.areaID    || body.AreaID    || null;
+      if (!email)    return err('Email requerido', 400);
+      if (!fullName) return err('Nombre requerido', 400);
+      const res = await query(
+        `INSERT INTO Users (FullName, Email, AppRole, IsActive, AreaID, CreatedAt, UpdatedAt)
          OUTPUT INSERTED.UserID
-         VALUES (@name, @email, @role, 1, GETDATE(), GETDATE())`,
-        { name: body.FullName||'', email: body.Email||'', role: body.AppRole||'employee' }
+         VALUES (@name, @email, @role, @active, @areaID, GETDATE(), GETDATE())`,
+        { name: fullName, email, role: appRole, active: isActive, areaID }
       );
-      return ok({ UserID: res.recordset[0].UserID, ...body, IsActive: true });
+      const newID = res.recordset[0].UserID;
+      if (leaderID) await query(
+        `IF NOT EXISTS (SELECT 1 FROM UserRelationships WHERE EmployeeID=@e AND LeaderID=@l AND IsActive=1)
+         INSERT INTO UserRelationships (EmployeeID,LeaderID,IsPrimary,IsActive) VALUES (@e,@l,1,1)`,
+        { e: newID, l: parseInt(leaderID) }
+      );
+      if (managerID) await query(
+        `IF NOT EXISTS (SELECT 1 FROM UserRelationships WHERE EmployeeID=@e AND ManagerID=@m AND IsActive=1)
+         INSERT INTO UserRelationships (EmployeeID,ManagerID,IsPrimary,IsActive) VALUES (@e,@m,1,1)`,
+        { e: newID, m: parseInt(managerID) }
+      );
+      return ok({ UserID: newID, FullName: fullName, Email: email, AppRole: appRole, IsActive: isActive===1 });
     } catch (e) { return err(e.message, 500); }
   }
 });
@@ -653,7 +669,6 @@ app.http('getAreas', {
     } catch (e) { return err(e.message, 500); }
   }
 });
-
 app.http('createArea', {
   methods: ['POST'], authLevel: 'anonymous', route: 'manage/areas',
   handler: async (req) => {
@@ -662,17 +677,16 @@ app.http('createArea', {
       const name = (body.areaName || body.AreaName || '').trim();
       const desc = (body.description || body.Description || '').trim();
       if (!name) return err('Nombre requerido', 400);
-      const exists = await query(`SELECT 1 FROM Areas WHERE AreaName = @name`, { name });
-      if (exists.recordset.length) return err('Ya existe un área con ese nombre', 400);
+      const exists = await query(`SELECT 1 FROM Areas WHERE AreaName=@name`, { name });
+      if (exists.recordset.length) return err('Ya existe', 400);
       const res = await query(
-        `INSERT INTO Areas (AreaName, Description, IsActive) OUTPUT INSERTED.AreaID VALUES (@name, @desc, 1)`,
+        `INSERT INTO Areas (AreaName,Description,IsActive) OUTPUT INSERTED.AreaID VALUES (@name,@desc,1)`,
         { name, desc }
       );
       return ok({ AreaID: res.recordset[0].AreaID, AreaName: name, IsActive: true });
     } catch (e) { return err(e.message, 500); }
   }
 });
-
 app.http('updateArea', {
   methods: ['PUT'], authLevel: 'anonymous', route: 'manage/areas/{id}',
   handler: async (req) => {
@@ -686,6 +700,59 @@ app.http('updateArea', {
       if (!fields.length) return err('Nada que actualizar', 400);
       await query(`UPDATE Areas SET ${fields.join(',')} WHERE AreaID=@id`, params);
       return ok({ updated: true });
+    } catch (e) { return err(e.message, 500); }
+  }
+});
+
+// ============================================================
+// PERÍODOS — crear y editar
+// ============================================================
+app.http('createPeriod', {
+  methods: ['POST'], authLevel: 'anonymous', route: 'manage/periods',
+  handler: async (req) => {
+    try {
+      const body = await req.json();
+      const name   = (body.periodName || body.PeriodName || '').trim();
+      const start  = body.startDate || body.StartDate || null;
+      const end    = body.endDate   || body.EndDate   || null;
+      const active = body.isActive  !== undefined ? (body.isActive ? 1 : 0) : 1;
+      if (!name) return err('Nombre requerido', 400);
+      const res = await query(
+        `INSERT INTO FiscalPeriods (PeriodName, StartDate, EndDate, IsActive, CreatedAt)
+         OUTPUT INSERTED.PeriodID
+         VALUES (@name, @start, @end, @active, GETDATE())`,
+        { name, start, end, active }
+      );
+      return ok({ PeriodID: res.recordset[0].PeriodID, PeriodName: name, IsActive: active===1 });
+    } catch (e) { return err(e.message, 500); }
+  }
+});
+
+app.http('updatePeriod', {
+  methods: ['PUT'], authLevel: 'anonymous', route: 'manage/periods/{id}',
+  handler: async (req) => {
+    try {
+      const body = await req.json();
+      const id   = parseInt(req.params.id);
+      const fields = [], params = { id };
+      if (body.periodName !== undefined) { fields.push('PeriodName=@name');   params.name   = body.periodName; }
+      if (body.startDate  !== undefined) { fields.push('StartDate=@start');   params.start  = body.startDate; }
+      if (body.endDate    !== undefined) { fields.push('EndDate=@end');       params.end    = body.endDate; }
+      if (body.isActive   !== undefined) { fields.push('IsActive=@active');   params.active = body.isActive ? 1 : 0; }
+      if (!fields.length) return err('Nada que actualizar', 400);
+      await query(`UPDATE FiscalPeriods SET ${fields.join(',')} WHERE PeriodID=@id`, params);
+      return ok({ updated: true });
+    } catch (e) { return err(e.message, 500); }
+  }
+});
+
+// GET /api/periods/all — todos (activos e inactivos)
+app.http('getAllPeriods', {
+  methods: ['GET'], authLevel: 'anonymous', route: 'periods/all',
+  handler: async (req) => {
+    try {
+      const res = await query('SELECT * FROM FiscalPeriods ORDER BY StartDate DESC');
+      return ok(res.recordset);
     } catch (e) { return err(e.message, 500); }
   }
 });

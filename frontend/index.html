@@ -1394,7 +1394,7 @@ let _userData = null;
 
 // ── AUTH (Azure Static Web Apps built-in) ─────────────────
 function doLogin() {
-  window.location.href = '/.auth/login/aad?post_login_redirect_uri=' + encodeURIComponent(window.location.pathname);
+  window.location.href = '/.auth/login/aad?post_login_redirect_uri=/';
 }
 function demoLogin() {
   document.getElementById('ssoScreen').style.display = 'none';
@@ -1410,6 +1410,8 @@ window.addEventListener('load', async () => {
     }
   } catch(e) {}
 });
+
+
 
 function initApp(user) {
   _userName  = user.name;

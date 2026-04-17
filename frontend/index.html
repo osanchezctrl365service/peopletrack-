@@ -2151,7 +2151,7 @@ async function guardarNuevoUsuario() {
   errEl.style.display = 'none';
 
   try {
-    const res = await fetch(API_BASE + '/users', {
+    const res = await fetch(API_BASE + '/manage/users', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ fullName: nombre, email, appRole: rol, isActive: activo, leaderID: liderId ? parseInt(liderId) : null, managerID: managerId ? parseInt(managerId) : null, areaName: area || null })
@@ -2236,7 +2236,7 @@ async function guardarEdicionUsuario() {
   if (!nombre || !email) { errEl.textContent="Nombre y email son obligatorios"; errEl.style.display="block"; return; }
   btn.textContent = "Guardando..."; btn.disabled = true;
   try {
-    const res = await fetch(API_BASE + "/users/" + id, {
+    const res = await fetch(API_BASE + "/manage/users/" + id, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ FullName: nombre, Email: email, AppRole: rol, IsActive: activo,
@@ -2331,7 +2331,7 @@ async function confirmarPromoverLider() {
   const errEl = document.getElementById("modalPromoverError");
   btn.textContent = "Promoviendo..."; btn.disabled = true;
   try {
-    const res = await fetch(API_BASE + "/users/" + promoverUserId, {
+    const res = await fetch(API_BASE + "/manage/users/" + promoverUserId, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ AppRole: "leader" })
@@ -2443,12 +2443,12 @@ async function guardarArea() {
   try {
     let res;
     if (id) {
-      res = await fetch(API_BASE + '/areas/' + id, {
+      res = await fetch(API_BASE + '/manage/areas/' + id, {
         method: 'PUT', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ AreaName: name, Description: desc, IsActive: active })
       });
     } else {
-      res = await fetch(API_BASE + '/areas', {
+      res = await fetch(API_BASE + '/manage/areas', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ areaName: name, description: desc })
       });

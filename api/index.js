@@ -77,8 +77,6 @@ app.http('updateUser', {
   route: 'users/{id}',
   handler: async (req) => {
     try {
-      const user = await getAuthUser(req);
-      if (!user) return err('No autorizado', 401);
       const body = await req.json();
       const uid  = parseInt(req.params.id);
       const fields = [];
@@ -115,16 +113,33 @@ app.http('createUser', {
   route: 'users',
   handler: async (req) => {
     try {
-      const user = await getAuthUser(req);
-      if (!user) return err('No autorizado', 401);
       const body = await req.json();
-      const res  = await query(
+      const fullName  = body.fullName  || body.FullName  || '';
+      const email     = body.email     || body.Email     || '';
+      const appRole   = body.appRole   || body.AppRole   || 'employee';
+      const isActive  = body.isActive  !== undefined ? (body.isActive ? 1 : 0) : 1;
+      const leaderID  = body.leaderID  || body.LeaderID  || null;
+      const managerID = body.managerID || body.ManagerID || null;
+      if (!email) return err('Email requerido', 400);
+      if (!fullName) return err('Nombre requerido', 400);
+      const res = await query(
         `INSERT INTO Users (FullName, Email, AppRole, IsActive, CreatedAt, UpdatedAt)
          OUTPUT INSERTED.UserID
-         VALUES (@name, @email, @role, 1, GETDATE(), GETDATE())`,
-        { name: body.FullName||'', email: body.Email||'', role: body.AppRole||'employee' }
+         VALUES (@name, @email, @role, @active, GETDATE(), GETDATE())`,
+        { name: fullName, email, role: appRole, active: isActive }
       );
-      return ok({ UserID: res.recordset[0].UserID, ...body, IsActive: true });
+      const newID = res.recordset[0].UserID;
+      if (leaderID) await query(
+        `IF NOT EXISTS (SELECT 1 FROM UserRelationships WHERE EmployeeID=@e AND LeaderID=@l AND RelationType='leader')
+         INSERT INTO UserRelationships (EmployeeID,LeaderID,RelationType,CreatedAt) VALUES (@e,@l,'leader',GETDATE())`,
+        { e: newID, l: parseInt(leaderID) }
+      );
+      if (managerID) await query(
+        `IF NOT EXISTS (SELECT 1 FROM UserRelationships WHERE EmployeeID=@e AND LeaderID=@m AND RelationType='manager')
+         INSERT INTO UserRelationships (EmployeeID,LeaderID,RelationType,CreatedAt) VALUES (@e,@m,'manager',GETDATE())`,
+        { e: newID, m: parseInt(managerID) }
+      );
+      return ok({ UserID: newID, FullName: fullName, Email: email, AppRole: appRole, IsActive: isActive===1 });
     } catch (e) { return err(e.message, 500); }
   }
 });

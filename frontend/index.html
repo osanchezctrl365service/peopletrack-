@@ -555,6 +555,59 @@ textarea.form-control { min-height: 80px; resize: vertical; }
 
 
 
+
+<!-- MODAL EDITAR USUARIO -->
+<div id="modalEditarUsuario" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:500;align-items:center;justify-content:center;">
+  <div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:16px;padding:32px;width:500px;max-width:95vw;max-height:90vh;overflow-y:auto;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+      <h3 style="font-size:16px;font-weight:800;color:#f0ebe3;">Editar Usuario</h3>
+      <button onclick="cerrarModalEditar()" style="background:none;border:none;color:#888;font-size:20px;cursor:pointer;">x</button>
+    </div>
+    <input type="hidden" id="editUserId">
+    <div style="display:grid;gap:14px;">
+      <div>
+        <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Nombre completo</label>
+        <input id="editNombre" type="text" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
+      </div>
+      <div>
+        <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Email</label>
+        <input id="editEmail" type="email" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Rol</label>
+          <select id="editRol" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
+            <option value="employee">Empleado</option>
+            <option value="leader">Lider</option>
+            <option value="manager">Manager</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Estado</label>
+          <select id="editEstado" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
+            <option value="1">Activo</option>
+            <option value="0">Inactivo</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Lider asignado</label>
+        <select id="editLider" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;"></select>
+      </div>
+      <div>
+        <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Manager asignado</label>
+        <select id="editManager" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;"></select>
+      </div>
+    </div>
+    <div id="modalEditarError" style="color:#FF4D4D;font-size:12px;margin-top:12px;display:none;"></div>
+    <div style="display:flex;gap:10px;margin-top:24px;justify-content:flex-end;">
+      <button onclick="cerrarModalEditar()" style="padding:10px 20px;background:#222;border:1px solid #333;border-radius:8px;color:#aaa;font-size:13px;cursor:pointer;">Cancelar</button>
+      <button onclick="guardarEdicionUsuario()" id="btnGuardarEdicion" style="padding:10px 24px;background:#FF5400;border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL NUEVO USUARIO -->
 <div id="modalUsuario" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:500;align-items:center;justify-content:center;">
   <div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:16px;padding:32px;width:480px;max-width:95vw;max-height:90vh;overflow-y:auto;position:relative;">
@@ -611,56 +664,6 @@ textarea.form-control { min-height: 80px; resize: vertical; }
       <button onclick="cerrarModalUsuario()" style="padding:10px 20px;background:#222;border:1px solid #333;border-radius:8px;color:#aaa;font-size:13px;cursor:pointer;">Cancelar</button>
       <button onclick="guardarNuevoUsuario()" style="padding:10px 24px;background:#FF5400;border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;" id="btnGuardarUsuario">Guardar</button>
     </div>
-  </div>
-</div>
-
-<!-- SECCIÓN USUARIOS -->
-<div class="section" id="sec-usuarios">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-    <div>
-      <h2 style="font-size:20px;font-weight:800;color:#f0ebe3;">Usuarios</h2>
-      <p style="font-size:12px;color:#888;margin-top:2px;">Todos los usuarios cargados en la base de datos</p>
-    </div>
-    <div style="display:flex;gap:8px;">
-      <button onclick="abrirModalUsuario()" style="padding:8px 16px;background:#FF5400;border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;">+ Nuevo</button>
-      <input id="usuariosSearch" type="text" placeholder="Buscar usuario..." onkeyup="filtrarUsuarios()" style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:8px 12px;color:#f0ebe3;font-size:12px;width:200px;outline:none;">
-      <select id="usuariosFilter" onchange="filtrarUsuarios()" style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:8px 12px;color:#f0ebe3;font-size:12px;outline:none;">
-        <option value="">Todos</option>
-        <option value="true">Activos</option>
-        <option value="false">Inactivos</option>
-      </select>
-    </div>
-  </div>
-  <div class="card" style="padding:0;overflow:hidden;">
-    <div id="usuariosLoading" style="text-align:center;padding:40px;color:#888;">Cargando usuarios...</div>
-    <table class="data-table" id="usuariosTable" style="display:none;">
-      <thead>
-        <tr>
-          <th>Usuario</th>
-          <th>Email</th>
-          <th>Líder</th>
-          <th>Manager</th>
-          <th>Área</th>
-          <th>Estado</th>
-        </tr>
-      </thead>
-      <tbody id="usuariosTbody"></tbody>
-    </table>
-  </div>
-  <div id="usuariosPagination" style="display:flex;justify-content:center;gap:8px;margin-top:16px;"></div>
-</div>
-
-<!-- SECCIÓN LÍDERES -->
-<div class="section" id="sec-lideres">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-    <div>
-      <h2 style="font-size:20px;font-weight:800;color:#f0ebe3;">Líderes y sus Equipos</h2>
-      <p style="font-size:12px;color:#888;margin-top:2px;">Vista de líderes con sus colaboradores asignados</p>
-    </div>
-    <input id="lideresSearch" type="text" placeholder="Buscar líder..." onkeyup="filtrarLideres()" style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:8px 12px;color:#f0ebe3;font-size:12px;width:200px;outline:none;">
-  </div>
-  <div id="lideresContainer" style="display:grid;gap:16px;">
-    <div style="text-align:center;padding:40px;color:#888;">Cargando líderes...</div>
   </div>
 </div>
 
@@ -865,7 +868,56 @@ textarea.form-control { min-height: 80px; resize: vertical; }
     </section>
 
     <!-- ======== OBJETIVOS ======== -->
-    <section class="section" id="sec-objectives">
+    <section class="section" <div class="section" id="sec-usuarios">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+    <div>
+      <h2 style="font-size:20px;font-weight:800;color:#f0ebe3;">Usuarios</h2>
+      <p style="font-size:12px;color:#888;margin-top:2px;">Todos los usuarios cargados en la base de datos</p>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <input id="usuariosSearch" type="text" placeholder="Buscar usuario..." onkeyup="filtrarUsuarios()" style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:8px 12px;color:#f0ebe3;font-size:12px;width:200px;outline:none;">
+      <select id="usuariosFilter" onchange="filtrarUsuarios()" style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:8px 12px;color:#f0ebe3;font-size:12px;outline:none;">
+        <option value="">Todos</option>
+        <option value="true">Activos</option>
+        <option value="false">Inactivos</option>
+      </select>
+      <button onclick="abrirModalUsuario()" style="padding:8px 16px;background:#FF5400;border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;">+ Nuevo</button>
+    </div>
+  </div>
+  <div class="card" style="padding:0;overflow:hidden;">
+    <div id="usuariosLoading" style="text-align:center;padding:40px;color:#888;">Cargando usuarios...</div>
+    <div style="overflow-x:auto;">
+      <table class="data-table" id="usuariosTable" style="display:none;min-width:700px;">
+        <thead>
+          <tr>
+            <th>Usuario</th>
+            <th>Email</th>
+            <th>Líder</th>
+            <th>Manager</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="usuariosTbody"></tbody>
+      </table>
+    </div>
+  </div>
+  <div id="usuariosPagination" style="display:flex;justify-content:center;gap:8px;margin-top:16px;flex-wrap:wrap;"></div>
+</div>
+<div class="section" id="sec-lideres">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+    <div>
+      <h2 style="font-size:20px;font-weight:800;color:#f0ebe3;">Líderes y sus Equipos</h2>
+      <p style="font-size:12px;color:#888;margin-top:2px;">Vista de líderes con sus colaboradores asignados</p>
+    </div>
+    <input id="lideresSearch" type="text" placeholder="Buscar líder..." onkeyup="filtrarLideres()" style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:8px 12px;color:#f0ebe3;font-size:12px;width:200px;outline:none;">
+  </div>
+  <div id="lideresContainer" style="display:grid;gap:16px;">
+    <div style="text-align:center;padding:40px;color:#888;">Cargando líderes...</div>
+  </div>
+</div>
+
+    <div class="section" id="sec-objectives">
       <div class="section-header">
         <div>
           <div class="section-heading">Objetivos</div>
@@ -1872,6 +1924,9 @@ function renderUsuarios(data) {
       <td style="padding:10px 12px;">
         <span style="display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;${u.IsActive?'background:rgba(46,204,113,0.15);color:#2ECC71':'background:rgba(255,77,77,0.15);color:#FF4D4D'}">${u.IsActive?'Activo':'Inactivo'}</span>
       </td>
+      <td style="padding:8px 12px;">
+        <button onclick="abrirModalEditar(${u.UserID})" style="padding:4px 12px;background:#222;border:1px solid #333;border-radius:6px;color:#f0ebe3;font-size:11px;cursor:pointer;white-space:nowrap;">Editar</button>
+      </td>
     </tr>`).join('');
 
   // Paginación
@@ -1937,7 +1992,7 @@ function renderLideres(grupos) {
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;">
         ${g.equipo.map(u=>`
-          <div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:#111;border-radius:8px;">
+          <div onclick="abrirModalEditar(${u.UserID})" title="Editar usuario" style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:#111;border-radius:8px;cursor:pointer;">
             <div style="width:26px;height:26px;border-radius:50%;background:${col(u.FullName)};display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;flex-shrink:0;">${ini(u.FullName||u.Email)}</div>
             <div style="min-width:0;">
               <div style="font-size:11px;font-weight:600;color:#ccc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${u.FullName||u.Email}</div>
@@ -2033,6 +2088,73 @@ function mostrarToast(msg, tipo='success') {
   toast.textContent = msg;
   toast.style.opacity = '1';
   setTimeout(() => { toast.style.opacity = '0'; }, 3000);
+}
+
+
+// EDITAR USUARIO
+function abrirModalEditar(userId) {
+  const u = allUsuarios.find(x => x.UserID === userId);
+  if (!u) return;
+  document.getElementById("editUserId").value  = userId;
+  document.getElementById("editNombre").value  = u.FullName || "";
+  document.getElementById("editEmail").value   = u.Email || "";
+  document.getElementById("editRol").value     = u.AppRole || "employee";
+  document.getElementById("editEstado").value  = u.IsActive ? "1" : "0";
+  document.getElementById("modalEditarError").style.display = "none";
+  const liderSel   = document.getElementById("editLider");
+  const managerSel = document.getElementById("editManager");
+  liderSel.innerHTML   = "<option value=''>-- Sin lider --</option>";
+  managerSel.innerHTML = "<option value=''>-- Sin manager --</option>";
+  allUsuarios.filter(x => x.IsActive && x.UserID !== userId)
+    .sort((a,b) => (a.FullName||"").localeCompare(b.FullName||""))
+    .forEach(x => {
+      const o1 = new Option(x.FullName||x.Email, x.UserID);
+      const o2 = new Option(x.FullName||x.Email, x.UserID);
+      if (x.UserID === u.LeaderID)  o1.selected = true;
+      if (x.UserID === u.ManagerID) o2.selected = true;
+      liderSel.add(o1);
+      managerSel.add(o2);
+    });
+  document.getElementById("modalEditarUsuario").style.display = "flex";
+}
+
+function cerrarModalEditar() {
+  document.getElementById("modalEditarUsuario").style.display = "none";
+}
+
+async function guardarEdicionUsuario() {
+  const id      = parseInt(document.getElementById("editUserId").value);
+  const nombre  = document.getElementById("editNombre").value.trim();
+  const email   = document.getElementById("editEmail").value.trim();
+  const rol     = document.getElementById("editRol").value;
+  const activo  = document.getElementById("editEstado").value === "1";
+  const liderId = document.getElementById("editLider").value || null;
+  const managerId = document.getElementById("editManager").value || null;
+  const errEl   = document.getElementById("modalEditarError");
+  const btn     = document.getElementById("btnGuardarEdicion");
+  if (!nombre || !email) { errEl.textContent="Nombre y email son obligatorios"; errEl.style.display="block"; return; }
+  btn.textContent = "Guardando..."; btn.disabled = true;
+  try {
+    const res = await fetch(API_BASE + "/users/" + id, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ FullName: nombre, Email: email, AppRole: rol, IsActive: activo,
+        LeaderID: liderId ? parseInt(liderId) : null,
+        ManagerID: managerId ? parseInt(managerId) : null })
+    });
+    const data = await res.json();
+    if (data.ok === false) throw new Error(data.error || "Error al guardar");
+    cerrarModalEditar();
+    allUsuarios = [];
+    await loadUsuarios();
+    if (rol === "leader" || rol === "manager") { allLideres = {}; }
+    mostrarToast("Usuario actualizado correctamente", "success");
+  } catch(e) {
+    errEl.textContent = e.message || "Error al conectar con la API";
+    errEl.style.display = "block";
+  } finally {
+    btn.textContent = "Guardar cambios"; btn.disabled = false;
+  }
 }
 
 </script>

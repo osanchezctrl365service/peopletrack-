@@ -1404,11 +1404,8 @@ function doLogin() {
   const txt = document.getElementById('btnLoginText');
   if(btn) btn.style.opacity = '0.7';
   if(txt) txt.textContent = 'Redirigiendo...';
-  // Use /.auth/login/aad — Azure Static Web Apps built-in auth
-  const redirectUri = window.location.origin + window.location.pathname;
-  window.location.href = '/.auth/login/aad?post_login_redirect_uri=' + encodeURIComponent(redirectUri);
+  window.location.href = '/.auth/login/aad?post_login_redirect_uri=/';
 }
-
 window.addEventListener('load', async () => {
   const st = document.getElementById('ssoStatus');
   if(st) st.textContent = '';

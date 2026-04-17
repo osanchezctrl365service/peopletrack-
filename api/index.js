@@ -52,8 +52,6 @@ app.http('getAllUsers', {
   route: 'users/all',
   handler: async (req) => {
     try {
-      const user = await getAuthUser(req);
-      if (!user) return err('No autorizado', 401);
       const res = await query(
         `SELECT u.UserID, u.FullName, u.Email, u.AppRole, u.IsActive,
                 a.AreaName, r.RoleName,

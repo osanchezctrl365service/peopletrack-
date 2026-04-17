@@ -548,7 +548,7 @@ textarea.form-control { min-height: 80px; resize: vertical; }
 .sso-wave { width: 100%; height: 3px; background: linear-gradient(90deg, #FF5400, rgba(255,84,0,.2)); border-radius: 0 0 20px 20px; margin-top: 28px; }
 .sso-status { font-size: 11px; color: #FF5400; margin-top: 12px; min-height: 16px; }
 </style>
-<script src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@azure/msal-browser@2.38.3/lib/msal-browser.min.js"></script>
 </head>
 <body>
 
@@ -1570,16 +1570,21 @@ function setStatus(msg, color) {
 
 async function waitForMSAL() {
   let attempts = 0;
-  while (typeof msal === 'undefined' && attempts < 30) {
+  // Try both msal and msalBrowser global names
+  while (typeof msal === 'undefined' && typeof msalBrowser === 'undefined' && attempts < 40) {
     await new Promise(r => setTimeout(r, 200));
     attempts++;
   }
-  if (typeof msal === 'undefined') throw new Error('MSAL not loaded');
+  if (typeof msal === 'undefined' && typeof msalBrowser === 'undefined') {
+    throw new Error('MSAL not loaded after ' + (attempts * 200) + 'ms');
+  }
 }
 
 async function initMSAL() {
   await waitForMSAL();
-  msalApp = new msal.PublicClientApplication(msalConfig);
+  // Use whichever global is available
+  const msalLib = (typeof msal !== 'undefined') ? msal : msalBrowser;
+  msalApp = new msalLib.PublicClientApplication(msalConfig);
   await msalApp.initialize();
   await msalApp.handleRedirectPromise();
   msalReady = true;

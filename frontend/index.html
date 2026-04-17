@@ -1408,20 +1408,28 @@ function doLogin() {
 }
 
 window.addEventListener('load', async () => {
-  const st = document.getElementById('ssoStatus');
-  if(st) st.textContent = '';
   try {
     const resp = await fetch('/.auth/me');
     if (resp.ok) {
-      const data = await resp.json();
+      const text = await resp.text();
+      const data = JSON.parse(text);
+      // SWA Simple mode
       if (data.clientPrincipal) {
         const u = data.clientPrincipal;
-        initApp({ name: u.userDetails || u.userId, email: u.userDetails });
+        initApp({ name: u.userDetails || u.userId || 'Usuario', email: u.userDetails || '' });
+        return;
+      }
+      // SWA Custom mode - returns array
+      if (Array.isArray(data) && data.length > 0) {
+        const u = data[0];
+        const claims = u.userClaims || [];
+        const email = (claims.find(c=>c.typ==='preferred_username')||claims.find(c=>c.typ==='upn')||{val:''}).val || u.userDetails || '';
+        const name  = (claims.find(c=>c.typ==='name')||{val:''}).val || email || 'Usuario';
+        initApp({ name, email });
         return;
       }
     }
-  } catch(e) { console.log('No SWA auth endpoint'); }
-  if(st) st.textContent = '';
+  } catch(e) { console.log('Auth check:', e); }
 });
 
 function initApp(user) {

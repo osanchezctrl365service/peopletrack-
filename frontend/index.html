@@ -436,7 +436,7 @@ textarea.form-control { min-height: 80px; resize: vertical; }
 
 /* SECTION HEADER */
 .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-.section-heading { font-size: 20px; font-weight: 800; color: #f0ebe3; }
+.section-heading { font-size: 20px; font-weight: 800; color: #f0ebe3; margin-bottom: 4px; }
 .section-subheading { font-size: 13px; color: #888; margin-top: 2px; }
 
 /* HELP TIP */
@@ -557,6 +557,15 @@ input:not([type=range]), select, textarea {
 }
 input::placeholder, textarea::placeholder { color: #555 !important; }
 
+
+/* === DARK MODE GLOBAL OVERRIDES === */
+input:not([type=range]):not([type=checkbox]), select, textarea {
+  background: #111 !important;
+  border-color: #333 !important;
+  color: #f0ebe3 !important;
+}
+input::placeholder, textarea::placeholder { color: #555 !important; }
+label { color: #888 !important; }
 </style>
 
 </head>
@@ -868,7 +877,7 @@ input::placeholder, textarea::placeholder { color: #555 !important; }
   <div class="content">
 
     <!-- ======== DASHBOARD ======== -->
-    <section class="section active" id="sec-dashboard">
+    <div class="section active" id="sec-dashboard">
       <div class="section-header">
         <div>
           <div class="section-heading">Mi Equipo</div>
@@ -949,10 +958,10 @@ input::placeholder, textarea::placeholder { color: #555 !important; }
           </tbody>
         </table>
       </div>
-    </section>
+    </div>
 
     <!-- ======== OBJETIVOS ======== -->
-    <section class="section" <div class="section" id="sec-usuarios">
+    <div class="section" id="sec-usuarios">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
     <div>
       <h2 style="font-size:20px;font-weight:800;color:#f0ebe3;">Usuarios</h2>
@@ -1170,10 +1179,10 @@ input::placeholder, textarea::placeholder { color: #555 !important; }
           </tbody>
         </table>
       </div>
-    </section>
+    </div>
 
     <!-- ======== PLAN DE CARRERA ======== -->
-    <section class="section" id="sec-career">
+    <div class="section" id="sec-career">
       <div class="section-header">
         <div>
           <div class="section-heading">Plan de Carrera</div>
@@ -1264,10 +1273,10 @@ input::placeholder, textarea::placeholder { color: #555 !important; }
           </div>
         </div>
       </div>
-    </section>
+    </div>
 
     <!-- ======== COMPETENCIAS ======== -->
-    <section class="section" id="sec-competencies">
+    <div class="section" id="sec-competencies">
       <div class="section-header">
         <div>
           <div class="section-heading">Competencias</div>
@@ -1376,10 +1385,10 @@ input::placeholder, textarea::placeholder { color: #555 !important; }
           <button class="btn btn-primary btn-sm">+ Agregar Competencia Personal</button>
         </div>
       </div>
-    </section>
+    </div>
 
     <!-- ======== 1:1 ======== -->
-    <section class="section" id="sec-oneononex">
+    <div class="section" id="sec-oneononex">
       <div class="section-header">
         <div>
           <div class="section-heading">Reuniones 1:1</div>
@@ -1457,10 +1466,10 @@ input::placeholder, textarea::placeholder { color: #555 !important; }
           </div>
         </div>
       </div>
-    </section>
+    </div>
 
     <!-- ======== REPORTES ======== -->
-    <section class="section" id="sec-reports">
+    <div class="section" id="sec-reports">
       <div class="section-header">
         <div>
           <div class="section-heading">Reportes</div>
@@ -1498,10 +1507,10 @@ input::placeholder, textarea::placeholder { color: #555 !important; }
         <div class="progress-label mb-12"><span class="progress-name">Resultado Final Ponderado</span><span class="progress-pct" style="color:var(--warning)">40%</span></div>
         <div class="progress-bar" style="height:14px"><div class="progress-fill" style="width:40%;background:var(--warning)"></div></div>
       </div>
-    </section>
+    </div>
 
     <!-- ======== ORGANIGRAMA ======== -->
-    <section class="section" id="sec-orgchart">
+    <div class="section" id="sec-orgchart">
       <div class="section-header">
         <div>
           <div class="section-heading">Organigrama</div>
@@ -1557,10 +1566,10 @@ input::placeholder, textarea::placeholder { color: #555 !important; }
           </div>
         </div>
       </div>
-    </section>
+    </div>
 
     <!-- ======== ALERTAS ======== -->
-    <section class="section" id="sec-alerts">
+    <div class="section" id="sec-alerts">
       <div class="section-header">
         <div>
           <div class="section-heading">Alertas</div>
@@ -1583,10 +1592,10 @@ input::placeholder, textarea::placeholder { color: #555 !important; }
         <span class="alert-icon">✓</span>
         <div class="alert-text"><strong>Leila Martínez</strong> — Todos los objetivos en verde (≥70%). Excelente desempeño en el período.</div>
       </div>
-    </section>
+    </div>
 
     <!-- ======== CONFIGURACIÓN ======== -->
-    <section class="section" id="sec-settings">
+    <div class="section" id="sec-settings">
       <div class="section-heading mb-16">Configuración</div>
       <div class="tabs">
         <div class="tab active" onclick="switchTab('cfg','sql',this)">Base de Datos</div>
@@ -1673,10 +1682,10 @@ input::placeholder, textarea::placeholder { color: #555 !important; }
           <button class="btn btn-primary btn-sm">Guardar</button>
         </div>
       </div>
-    </section>
+    </div>
 
     <!-- ======== AYUDA ======== -->
-    <section class="section" id="sec-help">
+    <div class="section" id="sec-help">
       <div style="max-width:860px;margin:0 auto;">
         <h2 style="font-size:22px;font-weight:800;color:#f0ebe3;margin-bottom:4px;">Centro de Ayuda</h2>
         <p style="color:#888;font-size:13px;margin-bottom:24px;">Guía completa de PeopleTrack. Todo lo que necesitás para usar la plataforma desde cero.</p>
@@ -1706,7 +1715,7 @@ input::placeholder, textarea::placeholder { color: #555 !important; }
         <div id="h8" class="card" style="margin-bottom:14px;padding:20px;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #2a2a2a;"><span style="font-size:18px;">📋</span><strong style="font-size:14px;color:#f0ebe3;">Reportes y Organigrama</strong></div><div style="font-size:13px;color:#aaa;line-height:1.8;"><strong style="color:#f0ebe3;">Reportes por colaborador:</strong> avance de objetivos, evaluación de competencias y reuniones 1:1 de una persona específica.<br><strong style="color:#f0ebe3;">Reportes por líder:</strong> resumen de todo el equipo a cargo.<br><strong style="color:#f0ebe3;">Reportes por manager:</strong> visión consolidada de todos los equipos bajo el manager.<br><strong style="color:#f0ebe3;">Exportar a Excel:</strong> todos los reportes se pueden descargar en formato Excel con formato profesional.<br><strong style="color:#f0ebe3;">Organigrama:</strong> jerarquía visual de la empresa con el porcentaje de avance de cada persona.</div></div>
         <div id="h9" class="card" style="margin-bottom:14px;padding:20px;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #2a2a2a;"><span style="font-size:18px;">📅</span><strong style="font-size:14px;color:#f0ebe3;">Períodos Fiscales</strong></div><div style="font-size:13px;color:#aaa;line-height:1.8;">Definen los ciclos de evaluación de objetivos (ej: FY26 Q2, FY27 Q1).<br><strong style="color:#f0ebe3;">Crear período:</strong> asigná nombre, fecha de inicio y fecha de fin.<br><strong style="color:#f0ebe3;">Período activo:</strong> solo puede haber uno activo a la vez. Es el que se usa por defecto al crear objetivos y evaluaciones. Los demás aparecen en los filtros históricos.<br><strong style="color:#f0ebe3;">Cerrar período:</strong> al iniciar un nuevo período, marcá el anterior como inactivo. Los datos históricos quedan disponibles para consulta en reportes.</div></div>
       </div>
-    </section>
+    </div>
 
   </div><!-- /content -->
 </div><!-- /main-wrap -->
@@ -2566,9 +2575,8 @@ renderLideres = function(grupos) {
 // ═══ PERÍODOS ════════════════════════════════════════════════
 let allPeriods=[];
 async function loadPeriods(){
-  // Intentar /periods/all para ver activos e inactivos
   let d=await apiGet("periods/all");
-  if(!d||!d.length) d=await apiGet("periods");
+  if(!d||!Array.isArray(d)||!d.length) d=await apiGet("periods");
   allPeriods=Array.isArray(d)?d:[];
   renderPeriods();
 }
@@ -2600,14 +2608,12 @@ async function guardarPeriodo(){
   btn.textContent="Guardando...";btn.disabled=true;errEl.style.display="none";
   try{
     const url=id?API_BASE+"/manage/periods/"+id:API_BASE+"/manage/periods";
-    const method=id?"PUT":"POST";
-    const res=await fetch(url,{method,headers:{"Content-Type":"application/json"},body:JSON.stringify({periodName:name,startDate:start,endDate:end,isActive:active})});
+    const res=await fetch(url,{method:id?"PUT":"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({periodName:name,startDate:start,endDate:end,isActive:active})});
     const data=await res.json();
-    if(data.ok===false)throw new Error(data.error||"Error al guardar");
-    cerrarModalPeriodo();
-    allPeriods=[];
-    await loadPeriods();
-    mostrarToast(id?"Período actualizado":"Período creado correctamente","success");
+    if(data.ok===false)throw new Error(data.error||"Error");
+    cerrarModalPeriodo();allPeriods=[];await loadPeriods();
+    mostrarToast(id?"Período actualizado":"Período creado","success");
   }catch(e){errEl.textContent=e.message;errEl.style.display="block";}
   finally{btn.textContent="Guardar";btn.disabled=false;}
 }

@@ -74,9 +74,11 @@ app.http('getAllUsers', {
 app.http('updateUser', {
   methods: ['PUT'],
   authLevel: 'anonymous',
-  route: 'users/{id}',
+  route: 'manage/users/{id}',
   handler: async (req) => {
     try {
+      const user = await getAuthUser(req);
+      if (!user) return err('No autorizado', 401);
       const body = await req.json();
       const uid  = parseInt(req.params.id);
       const fields = [];
@@ -110,44 +112,22 @@ app.http('updateUser', {
 app.http('createUser', {
   methods: ['POST'],
   authLevel: 'anonymous',
-  route: 'users',
+  route: 'manage/users',
   handler: async (req) => {
     try {
-      const body     = await req.json();
-      const fullName = body.fullName  || body.FullName  || '';
-      const email    = body.email     || body.Email     || '';
-      const appRole  = body.appRole   || body.AppRole   || 'employee';
-      const isActive = body.isActive  !== undefined ? (body.isActive ? 1 : 0) : 1;
-      const leaderID = body.leaderID  || body.LeaderID  || null;
-      const managerID= body.managerID || body.ManagerID || null;
-      const areaID   = body.areaID    || body.AreaID    || null;
-
-      if (!email)    return err('Email requerido', 400);
-      if (!fullName) return err('Nombre requerido', 400);
-
-      const res = await query(
-        `INSERT INTO Users (FullName, Email, AppRole, IsActive, AreaID, CreatedAt, UpdatedAt)
+      const user = await getAuthUser(req);
+      if (!user) return err('No autorizado', 401);
+      const body = await req.json();
+      const res  = await query(
+        `INSERT INTO Users (FullName, Email, AppRole, IsActive, CreatedAt, UpdatedAt)
          OUTPUT INSERTED.UserID
-         VALUES (@name, @email, @role, @active, @areaID, GETDATE(), GETDATE())`,
-        { name: fullName, email, role: appRole, active: isActive, areaID }
+         VALUES (@name, @email, @role, 1, GETDATE(), GETDATE())`,
+        { name: body.FullName||'', email: body.Email||'', role: body.AppRole||'employee' }
       );
-      const newID = res.recordset[0].UserID;
-
-      if (leaderID) await query(
-        `IF NOT EXISTS (SELECT 1 FROM UserRelationships WHERE EmployeeID=@e AND LeaderID=@l AND RelationType='leader')
-         INSERT INTO UserRelationships (EmployeeID,LeaderID,RelationType,CreatedAt) VALUES (@e,@l,'leader',GETDATE())`,
-        { e: newID, l: parseInt(leaderID) }
-      );
-      if (managerID) await query(
-        `IF NOT EXISTS (SELECT 1 FROM UserRelationships WHERE EmployeeID=@e AND LeaderID=@m AND RelationType='manager')
-         INSERT INTO UserRelationships (EmployeeID,LeaderID,RelationType,CreatedAt) VALUES (@e,@m,'manager',GETDATE())`,
-        { e: newID, m: parseInt(managerID) }
-      );
-      return ok({ UserID: newID, FullName: fullName, Email: email, AppRole: appRole, IsActive: isActive === 1 });
+      return ok({ UserID: res.recordset[0].UserID, ...body, IsActive: true });
     } catch (e) { return err(e.message, 500); }
   }
 });
-
 // ============================================================
 // AUTH
 // ============================================================
@@ -664,69 +644,48 @@ async function sendMinuteEmail(meetingId, leader, body) {
 // ============================================================
 // ÁREAS
 // ============================================================
-
-// GET /api/areas — listar todas las áreas
 app.http('getAreas', {
-  methods: ['GET'],
-  authLevel: 'anonymous',
-  route: 'areas',
+  methods: ['GET'], authLevel: 'anonymous', route: 'areas',
   handler: async (req) => {
     try {
-      const res = await query(
-        `SELECT AreaID, AreaName, Description, IsActive
-         FROM Areas
-         ORDER BY AreaName`
-      );
+      const res = await query(`SELECT AreaID, AreaName, Description, IsActive FROM Areas ORDER BY AreaName`);
       return ok(res.recordset);
     } catch (e) { return err(e.message, 500); }
   }
 });
 
-// POST /api/areas — crear nueva área
 app.http('createArea', {
-  methods: ['POST'],
-  authLevel: 'anonymous',
-  route: 'areas',
+  methods: ['POST'], authLevel: 'anonymous', route: 'manage/areas',
   handler: async (req) => {
     try {
       const body = await req.json();
       const name = (body.areaName || body.AreaName || '').trim();
       const desc = (body.description || body.Description || '').trim();
-      if (!name) return err('Nombre del área requerido', 400);
-      const exists = await query(
-        `SELECT 1 FROM Areas WHERE AreaName = @name`,
-        { name }
-      );
+      if (!name) return err('Nombre requerido', 400);
+      const exists = await query(`SELECT 1 FROM Areas WHERE AreaName = @name`, { name });
       if (exists.recordset.length) return err('Ya existe un área con ese nombre', 400);
       const res = await query(
-        `INSERT INTO Areas (AreaName, Description, IsActive)
-         OUTPUT INSERTED.AreaID
-         VALUES (@name, @desc, 1)`,
+        `INSERT INTO Areas (AreaName, Description, IsActive) OUTPUT INSERTED.AreaID VALUES (@name, @desc, 1)`,
         { name, desc }
       );
-      return ok({ AreaID: res.recordset[0].AreaID, AreaName: name, Description: desc, IsActive: true });
+      return ok({ AreaID: res.recordset[0].AreaID, AreaName: name, IsActive: true });
     } catch (e) { return err(e.message, 500); }
   }
 });
 
-// PUT /api/areas/{id} — editar área
 app.http('updateArea', {
-  methods: ['PUT'],
-  authLevel: 'anonymous',
-  route: 'areas/{id}',
+  methods: ['PUT'], authLevel: 'anonymous', route: 'manage/areas/{id}',
   handler: async (req) => {
     try {
-      const body   = await req.json();
+      const body = await req.json();
       const areaID = parseInt(req.params.id);
       const fields = [], params = { id: areaID };
-      if (body.AreaName    !== undefined) { fields.push('AreaName = @name');    params.name = body.AreaName; }
-      if (body.Description !== undefined) { fields.push('Description = @desc'); params.desc = body.Description; }
-      if (body.IsActive    !== undefined) { fields.push('IsActive = @active');  params.active = body.IsActive ? 1 : 0; }
+      if (body.AreaName    !== undefined) { fields.push('AreaName=@name');    params.name   = body.AreaName; }
+      if (body.Description !== undefined) { fields.push('Description=@desc'); params.desc   = body.Description; }
+      if (body.IsActive    !== undefined) { fields.push('IsActive=@active');  params.active = body.IsActive ? 1 : 0; }
       if (!fields.length) return err('Nada que actualizar', 400);
-      fields.push('UpdatedAt = GETDATE()');
-      await query(`UPDATE Areas SET ${fields.join(', ')} WHERE AreaID = @id`, params);
+      await query(`UPDATE Areas SET ${fields.join(',')} WHERE AreaID=@id`, params);
       return ok({ updated: true });
     } catch (e) { return err(e.message, 500); }
   }
 });
-

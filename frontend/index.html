@@ -557,6 +557,40 @@ textarea.form-control { min-height: 80px; resize: vertical; }
 
 
 
+
+<!-- MODAL ÁREA -->
+<div id="modalArea" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:500;align-items:center;justify-content:center;">
+  <div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:16px;padding:32px;width:420px;max-width:95vw;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+      <h3 id="modalAreaTitle" style="font-size:16px;font-weight:800;color:#f0ebe3;">Nueva Área</h3>
+      <button onclick="cerrarModalArea()" style="background:none;border:none;color:#888;font-size:20px;cursor:pointer;">x</button>
+    </div>
+    <input type="hidden" id="editAreaId">
+    <div style="display:grid;gap:14px;">
+      <div>
+        <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Nombre del área *</label>
+        <input id="areaName" type="text" placeholder="Ej: Tecnología" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
+      </div>
+      <div>
+        <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Descripción</label>
+        <input id="areaDesc" type="text" placeholder="Opcional" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
+      </div>
+      <div>
+        <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Estado</label>
+        <select id="areaEstado" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
+          <option value="1">Activa</option>
+          <option value="0">Inactiva</option>
+        </select>
+      </div>
+    </div>
+    <div id="modalAreaError" style="color:#FF4D4D;font-size:12px;margin-top:12px;display:none;"></div>
+    <div style="display:flex;gap:10px;margin-top:24px;justify-content:flex-end;">
+      <button onclick="cerrarModalArea()" style="padding:10px 20px;background:#222;border:1px solid #333;border-radius:8px;color:#aaa;font-size:13px;cursor:pointer;">Cancelar</button>
+      <button onclick="guardarArea()" id="btnGuardarArea" style="padding:10px 24px;background:#FF5400;border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;">Guardar</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL PROMOVER LIDER -->
 <div id="modalPromoverLider" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:500;align-items:center;justify-content:center;">
   <div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:16px;padding:32px;width:460px;max-width:95vw;position:relative;">
@@ -624,6 +658,13 @@ textarea.form-control { min-height: 80px; resize: vertical; }
         <select id="editManager" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;"></select>
       </div>
     </div>
+      <div>
+        <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Área</label>
+        <select id="editArea" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
+          <option value="">— Sin área —</option>
+        </select>
+      </div>
+    </div>
     <div id="modalEditarError" style="color:#FF4D4D;font-size:12px;margin-top:12px;display:none;"></div>
     <div style="display:flex;gap:10px;margin-top:24px;justify-content:flex-end;">
       <button onclick="cerrarModalEditar()" style="padding:10px 20px;background:#222;border:1px solid #333;border-radius:8px;color:#aaa;font-size:13px;cursor:pointer;">Cancelar</button>
@@ -680,7 +721,9 @@ textarea.form-control { min-height: 80px; resize: vertical; }
       </div>
       <div>
         <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Área</label>
-        <input id="nuevoArea" type="text" placeholder="Ej: Tecnología" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
+        <select id="nuevoArea" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
+          <option value="">— Sin área —</option>
+        </select>
       </div>
     </div>
     <div id="modalUsuarioError" style="color:#FF4D4D;font-size:12px;margin-top:12px;display:none;"></div>
@@ -777,6 +820,10 @@ textarea.form-control { min-height: 80px; resize: vertical; }
   <div class="nav-item" onclick="showSection('lideres')">
     <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/><path d="M12 12v8"/><path d="M9 17l3 3 3-3"/></svg>
     Líderes
+  </div>
+  <div class="nav-item" onclick="showSection('areas')">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+    Áreas
   </div>
 
   <div class="sidebar-section-label">Sistema</div>
@@ -938,6 +985,30 @@ textarea.form-control { min-height: 80px; resize: vertical; }
   </div>
   <div id="lideresContainer" style="display:grid;gap:16px;">
     <div style="text-align:center;padding:40px;color:#888;">Cargando líderes...</div>
+  </div>
+</div>
+
+    <div class="section" id="sec-areas">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+    <div>
+      <h2 style="font-size:20px;font-weight:800;color:#f0ebe3;">Áreas</h2>
+      <p style="font-size:12px;color:#888;margin-top:2px;">Áreas organizacionales de la empresa</p>
+    </div>
+    <button onclick="abrirModalArea()" style="padding:8px 16px;background:#FF5400;border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;">+ Nueva Área</button>
+  </div>
+  <div class="card" style="padding:0;overflow:hidden;">
+    <div id="areasLoading" style="text-align:center;padding:40px;color:#888;">Cargando áreas...</div>
+    <table class="data-table" id="areasTable" style="display:none;">
+      <thead>
+        <tr>
+          <th>Área</th>
+          <th>Descripción</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="areasTbody"></tbody>
+    </table>
   </div>
 </div>
 
@@ -1634,7 +1705,7 @@ textarea.form-control { min-height: 80px; resize: vertical; }
 
 <script>
 const titles = {
-  dashboard:'Dashboard',usuarios:'Usuarios',lideres:'Líderes',objectives:'Objetivos',career:'Plan de Carrera',
+  dashboard:'Dashboard',usuarios:'Usuarios',lideres:'Líderes',areas:'Áreas',objectives:'Objetivos',career:'Plan de Carrera',
   competencies:'Competencias',oneononex:'Reuniones 1:1',reports:'Reportes',
   orgchart:'Organigrama',alerts:'Alertas',settings:'Configuración',help:'Ayuda'
 };
@@ -1783,6 +1854,7 @@ function drawDonut(){
 function showSection(id){
   if(id==='usuarios' && !allUsuarios.length) loadUsuarios();
   if(id==='lideres' && !Object.keys(allLideres).length) loadLideres();
+  if(id==='areas' && !allAreas.length) loadAreas();
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   const sec = document.getElementById('sec-'+id);
@@ -2032,9 +2104,10 @@ function renderLideres(grupos) {
 // MODAL NUEVO USUARIO
 // ══════════════════════════════════════════
 function abrirModalUsuario() {
-  // Poblar selects de líder y manager con usuarios activos
   const modal = document.getElementById('modalUsuario');
   modal.style.display = 'flex';
+  if (allAreas.length) poblarSelectAreas();
+  else loadAreas();
   const liderSel = document.getElementById('nuevoLider');
   const managerSel = document.getElementById('nuevoManager');
   // Limpiar
@@ -2139,6 +2212,10 @@ function abrirModalEditar(userId) {
       liderSel.add(o1);
       managerSel.add(o2);
     });
+  if (allAreas.length) poblarSelectAreas();
+  else loadAreas().then(poblarSelectAreas);
+  const editArea = document.getElementById("editArea");
+  if (editArea && u.AreaID) editArea.value = u.AreaID;
   document.getElementById("modalEditarUsuario").style.display = "flex";
 }
 
@@ -2163,8 +2240,9 @@ async function guardarEdicionUsuario() {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ FullName: nombre, Email: email, AppRole: rol, IsActive: activo,
-        LeaderID: liderId ? parseInt(liderId) : null,
-        ManagerID: managerId ? parseInt(managerId) : null })
+        LeaderID:  liderId   ? parseInt(liderId)  : null,
+        ManagerID: managerId ? parseInt(managerId): null,
+        AreaID:    document.getElementById("editArea")?.value ? parseInt(document.getElementById("editArea").value) : null })
     });
     const data = await res.json();
     if (data.ok === false) throw new Error(data.error || "Error al guardar");
@@ -2279,6 +2357,113 @@ function nuevoContextual() {
   if (id === "sec-lideres")   { abrirModalPromover(); return; }
   if (id === "sec-usuarios")  { abrirModalUsuario(); return; }
   showModal("newObjectiveModal");
+}
+
+
+// ══════════════════════════════════════════
+// SECCIÓN ÁREAS
+// ══════════════════════════════════════════
+let allAreas = [];
+
+async function loadAreas() {
+  const data = await apiGet('areas');
+  if (!data) return;
+  allAreas = Array.isArray(data) ? data : (data.data || []);
+  renderAreas(allAreas);
+  poblarSelectAreas(); // actualizar selects en modales de usuario
+}
+
+function renderAreas(data) {
+  const tbody   = document.getElementById('areasTbody');
+  const table   = document.getElementById('areasTable');
+  const loading = document.getElementById('areasLoading');
+  if (!tbody) return;
+  loading.style.display = 'none';
+  table.style.display = '';
+  tbody.innerHTML = data.map(a => `
+    <tr style="border-bottom:1px solid #222;" onmouseover="this.style.background='#1e1e1e'" onmouseout="this.style.background=''">
+      <td style="padding:10px 12px;font-weight:600;color:#f0ebe3;">${a.AreaName||'—'}</td>
+      <td style="padding:10px 12px;color:#888;font-size:12px;">${a.Description||'—'}</td>
+      <td style="padding:10px 12px;">
+        <span style="padding:2px 10px;border-radius:20px;font-size:10px;font-weight:700;${a.IsActive?'background:rgba(46,204,113,0.15);color:#2ECC71':'background:rgba(255,77,77,0.15);color:#FF4D4D'}">${a.IsActive?'Activa':'Inactiva'}</span>
+      </td>
+      <td style="padding:10px 12px;">
+        <button onclick="abrirModalArea(${a.AreaID})" style="padding:4px 12px;background:#222;border:1px solid #333;border-radius:6px;color:#f0ebe3;font-size:11px;cursor:pointer;">Editar</button>
+      </td>
+    </tr>`).join('');
+}
+
+function poblarSelectAreas() {
+  const selects = ['nuevoArea', 'editArea'];
+  selects.forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    const current = sel.value;
+    sel.innerHTML = '<option value="">— Sin área —</option>';
+    allAreas.filter(a => a.IsActive).forEach(a => {
+      const opt = new Option(a.AreaName, a.AreaID);
+      sel.add(opt);
+    });
+    if (current) sel.value = current;
+  });
+}
+
+function abrirModalArea(areaId) {
+  document.getElementById('editAreaId').value = areaId || '';
+  document.getElementById('modalAreaTitle').textContent = areaId ? 'Editar Área' : 'Nueva Área';
+  document.getElementById('modalAreaError').style.display = 'none';
+  if (areaId) {
+    const a = allAreas.find(x => x.AreaID === areaId);
+    if (a) {
+      document.getElementById('areaName').value    = a.AreaName || '';
+      document.getElementById('areaDesc').value    = a.Description || '';
+      document.getElementById('areaEstado').value  = a.IsActive ? '1' : '0';
+    }
+  } else {
+    document.getElementById('areaName').value   = '';
+    document.getElementById('areaDesc').value   = '';
+    document.getElementById('areaEstado').value = '1';
+  }
+  document.getElementById('modalArea').style.display = 'flex';
+}
+
+function cerrarModalArea() {
+  document.getElementById('modalArea').style.display = 'none';
+}
+
+async function guardarArea() {
+  const id     = document.getElementById('editAreaId').value;
+  const name   = document.getElementById('areaName').value.trim();
+  const desc   = document.getElementById('areaDesc').value.trim();
+  const active = document.getElementById('areaEstado').value === '1';
+  const errEl  = document.getElementById('modalAreaError');
+  const btn    = document.getElementById('btnGuardarArea');
+  if (!name) { errEl.textContent = 'El nombre es obligatorio'; errEl.style.display = 'block'; return; }
+  btn.textContent = 'Guardando...'; btn.disabled = true;
+  try {
+    let res;
+    if (id) {
+      res = await fetch(API_BASE + '/areas/' + id, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ AreaName: name, Description: desc, IsActive: active })
+      });
+    } else {
+      res = await fetch(API_BASE + '/areas', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ areaName: name, description: desc })
+      });
+    }
+    const data = await res.json();
+    if (data.ok === false) throw new Error(data.error || 'Error');
+    cerrarModalArea();
+    allAreas = [];
+    await loadAreas();
+    mostrarToast(id ? 'Área actualizada' : 'Área creada correctamente', 'success');
+  } catch(e) {
+    errEl.textContent = e.message; errEl.style.display = 'block';
+  } finally {
+    btn.textContent = 'Guardar'; btn.disabled = false;
+  }
 }
 
 </script>

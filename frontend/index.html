@@ -3,580 +3,449 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PeopleTrack — Gestión de Objetivos y Carrera</title>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<title>PeopleTrack — CTRL365</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
+/* ── CTRL365 DARK DESIGN SYSTEM ─────────────────────────── */
 :root {
-  --primary: #1B3A5C;
-  --primary-light: #2A5285;
-  --primary-pale: #E8EFF7;
-  --accent: #00A3A3;
-  --accent-light: #E0F7F7;
-  --accent-dark: #007A7A;
-  --danger: #E53935;
-  --danger-light: #FFEBEE;
-  --warning: #F57C00;
-  --warning-light: #FFF3E0;
-  --success: #2E7D32;
-  --success-light: #E8F5E9;
-  --gray-50: #F8F9FA;
-  --gray-100: #F1F3F5;
-  --gray-200: #E9ECEF;
-  --gray-300: #DEE2E6;
-  --gray-400: #CED4DA;
-  --gray-500: #ADB5BD;
-  --gray-600: #6C757D;
-  --gray-700: #495057;
-  --gray-800: #343A40;
-  --gray-900: #212529;
-  --white: #FFFFFF;
-  --font: 'Plus Jakarta Sans', sans-serif;
-  --font-serif: 'Instrument Serif', serif;
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
-  --shadow-md: 0 4px 16px rgba(0,0,0,0.10);
-  --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
-  --sidebar-w: 240px;
-  --header-h: 60px;
+  --or:#FF5400; --ord:#cc4400; --orl:#F2A16A;
+  --bg:#0d0d0d; --bg2:#111111; --bg3:#161616; --bg4:#1a1a1a;
+  --card:rgba(255,255,255,.04); --bdr:rgba(255,255,255,.09); --bgo:rgba(255,84,0,.22);
+  --tx:#F0EBE3; --mt:#888580; --mt2:#555250;
+  --gr:#4ade80; --grd:rgba(74,222,128,.15);
+  --bl:#60a5fa; --bld:rgba(96,165,250,.15);
+  --er:#f87171; --erd:rgba(248,113,113,.12);
+  --wa:#fbbf24; --wad:rgba(251,191,36,.12);
+  --pu:#CFC8D3;
+  --font:'Inter',sans-serif;
+  --font-head:'Sora',sans-serif;
+  --r4:4px; --r6:6px; --r8:8px; --r10:10px; --r14:14px; --r20:20px;
+  --sidebar-w:230px; --header-h:54px;
+  --sh:0 4px 24px rgba(0,0,0,.4);
 }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:var(--font);font-size:13px;color:var(--tx);background:var(--bg);
+  display:flex;overflow:hidden;
+  background-image:radial-gradient(ellipse 70% 40% at 15% 0%,rgba(255,84,0,.05) 0%,transparent 55%)}
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { height: 100%; }
-body { font-family: var(--font); font-size: 14px; color: var(--gray-800); background: var(--gray-50); display: flex; overflow: hidden; }
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:10px}
 
-/* SIDEBAR */
-.sidebar {
-  width: var(--sidebar-w);
-  height: 100vh;
-  background: var(--primary);
-  display: flex;
-  flex-direction: column;
-  flex-shrink: 0;
-  overflow-y: auto;
-  position: relative;
-  z-index: 10;
-}
-.sidebar-logo {
-  padding: 20px 18px 16px;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-}
-.sidebar-logo .app-name {
-  font-size: 18px;
-  font-weight: 800;
-  color: #fff;
-  letter-spacing: -0.3px;
-}
-.sidebar-logo .app-sub {
-  font-size: 10px;
-  color: rgba(255,255,255,0.5);
-  letter-spacing: 0.8px;
-  text-transform: uppercase;
-  margin-top: 2px;
-}
-.sidebar-user {
-  padding: 14px 18px;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.user-avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: var(--accent);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-  font-weight: 700;
-  color: #fff;
-  flex-shrink: 0;
-}
-.user-info .name { font-size: 12px; font-weight: 600; color: #fff; }
-.user-info .role { font-size: 10px; color: rgba(255,255,255,0.5); }
-.sidebar-section-label {
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 1.2px;
-  text-transform: uppercase;
-  color: rgba(255,255,255,0.35);
-  padding: 16px 18px 6px;
-}
-.nav-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 9px 18px;
-  cursor: pointer;
-  border-radius: 0;
-  transition: all 0.15s;
-  color: rgba(255,255,255,0.65);
-  font-size: 13px;
-  font-weight: 500;
-  border-left: 3px solid transparent;
-  position: relative;
-}
-.nav-item:hover { background: rgba(255,255,255,0.07); color: #fff; }
-.nav-item.active { background: rgba(0,163,163,0.15); color: #fff; border-left-color: var(--accent); }
-.nav-icon { width: 18px; height: 18px; flex-shrink: 0; opacity: 0.8; }
-.nav-item.active .nav-icon { opacity: 1; }
-.nav-badge {
-  margin-left: auto;
-  background: var(--danger);
-  color: #fff;
-  font-size: 9px;
-  font-weight: 700;
-  padding: 2px 6px;
-  border-radius: 20px;
-}
+/* ── SIDEBAR ── */
+.sidebar{
+  width:var(--sidebar-w);height:100vh;
+  background:rgba(255,255,255,.02);
+  border-right:1px solid var(--bdr);
+  display:flex;flex-direction:column;flex-shrink:0;
+  overflow-y:auto;position:relative;z-index:10}
+.sidebar-logo{
+  padding:16px 18px 14px;
+  border-bottom:1px solid var(--bdr);
+  display:flex;align-items:center;gap:9px}
+.logo-badge{width:28px;height:28px;background:var(--or);border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:11px;color:#fff;font-family:var(--font-head);flex-shrink:0}
+.logo-text{font-family:var(--font-head);font-size:13px;font-weight:700;color:var(--tx)}
+.logo-text span{color:var(--or)}
+.logo-app{font-size:10px;color:var(--mt);margin-top:1px;font-family:var(--font-head)}
+.sidebar-user{
+  padding:12px 18px;border-bottom:1px solid var(--bdr);
+  display:flex;align-items:center;gap:9px}
+.user-avatar{
+  width:32px;height:32px;border-radius:50%;
+  background:var(--or);display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+.user-info .name{font-size:12px;font-weight:600;color:var(--tx)}
+.user-info .role{font-size:10px;color:var(--mt)}
+.sidebar-section-label{
+  font-size:8px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;
+  color:rgba(255,84,0,.5);padding:14px 18px 5px;font-family:var(--font-head)}
+.nav-item{
+  display:flex;align-items:center;gap:9px;padding:8px 18px;cursor:pointer;
+  color:var(--mt);font-size:12px;font-weight:500;
+  border-left:2px solid transparent;transition:all .15s;position:relative}
+.nav-item:hover{background:rgba(255,255,255,.03);color:var(--tx)}
+.nav-item.active{background:rgba(255,84,0,.07);color:var(--or);border-left-color:var(--or)}
+.nav-icon{width:16px;height:16px;flex-shrink:0;opacity:.7}
+.nav-item.active .nav-icon,.nav-item:hover .nav-icon{opacity:1}
+.nav-badge{margin-left:auto;background:var(--er);color:#fff;
+  font-size:8px;font-weight:700;padding:2px 5px;border-radius:20px}
 
-/* MAIN */
-.main-wrap { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-.topbar {
-  height: var(--header-h);
-  background: var(--white);
-  border-bottom: 1px solid var(--gray-200);
-  display: flex;
-  align-items: center;
-  padding: 0 24px;
-  gap: 16px;
-  flex-shrink: 0;
-}
-.topbar-title { font-size: 16px; font-weight: 700; color: var(--primary); flex: 1; }
-.topbar-period {
-  background: var(--primary-pale);
-  color: var(--primary);
-  font-size: 11px;
-  font-weight: 700;
-  padding: 4px 10px;
-  border-radius: 20px;
-  letter-spacing: 0.3px;
-}
-.topbar-btn {
-  background: none;
-  border: 1px solid var(--gray-300);
-  border-radius: var(--radius-sm);
-  padding: 6px 12px;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--gray-700);
-  cursor: pointer;
-  transition: all 0.15s;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.topbar-btn:hover { background: var(--gray-50); }
-.topbar-btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
-.topbar-btn.primary:hover { background: var(--accent-dark); }
-.content { flex: 1; overflow-y: auto; padding: 24px; }
+/* ── MAIN ── */
+.main-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{
+  height:var(--header-h);background:rgba(13,13,13,.95);
+  border-bottom:1px solid var(--bdr);backdrop-filter:blur(12px);
+  display:flex;align-items:center;padding:0 22px;gap:12px;flex-shrink:0}
+.topbar-title{font-size:15px;font-weight:700;color:var(--tx);flex:1;font-family:var(--font-head)}
+.topbar-period{
+  background:rgba(255,84,0,.1);color:var(--or);
+  font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;
+  letter-spacing:.3px;border:1px solid var(--bgo);font-family:var(--font-head)}
+.topbar-btn{
+  background:rgba(255,255,255,.04);border:1px solid var(--bdr);
+  border-radius:var(--r6);padding:5px 12px;font-size:11px;font-weight:600;
+  color:var(--mt);cursor:pointer;transition:all .15s;
+  display:flex;align-items:center;gap:6px;font-family:var(--font)}
+.topbar-btn:hover{border-color:var(--bgo);color:var(--or)}
+.topbar-btn.primary{background:var(--or);color:#fff;border-color:var(--or)}
+.topbar-btn.primary:hover{background:var(--ord)}
+.content{flex:1;overflow-y:auto;padding:22px}
 
-/* SECTIONS (pages) */
-.section { display: none; }
-.section.active { display: block; }
+/* ── SECTIONS ── */
+.section{display:none}
+.section.active{display:block}
 
-/* CARDS */
-.card {
-  background: var(--white);
-  border: 1px solid var(--gray-200);
-  border-radius: var(--radius-lg);
-  padding: 20px;
-  box-shadow: var(--shadow-sm);
-}
-.card-title {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--primary);
-  margin-bottom: 14px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
+/* ── CARDS ── */
+.card{
+  background:var(--card);border:1px solid var(--bdr);
+  border-radius:var(--r10);padding:18px;transition:border-color .2s}
+.card:hover{border-color:rgba(255,84,0,.15)}
+.card-title{
+  font-size:10px;font-weight:700;color:var(--or);margin-bottom:14px;
+  text-transform:uppercase;letter-spacing:.8px;display:flex;align-items:center;gap:7px;
+  font-family:var(--font-head)}
 
-/* GRID */
-.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
-.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
-.gap-16 { gap: 16px; }
+/* ── GRID ── */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.gap-14{gap:14px}
 
-/* KPI CARDS */
-.kpi-card {
-  background: var(--white);
-  border: 1px solid var(--gray-200);
-  border-radius: var(--radius-lg);
-  padding: 18px 20px;
-  box-shadow: var(--shadow-sm);
-}
-.kpi-label { font-size: 11px; font-weight: 600; color: var(--gray-600); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
-.kpi-value { font-size: 28px; font-weight: 800; color: var(--primary); line-height: 1; }
-.kpi-sub { font-size: 11px; color: var(--gray-500); margin-top: 4px; }
-.kpi-bar { height: 4px; background: var(--gray-200); border-radius: 4px; margin-top: 10px; overflow: hidden; }
-.kpi-bar-fill { height: 100%; border-radius: 4px; }
+/* ── KPI CARDS ── */
+.kpi-card{
+  background:var(--card);border:1px solid var(--bdr);
+  border-radius:var(--r10);padding:16px 18px;transition:border-color .2s}
+.kpi-card:hover{border-color:var(--bgo)}
+.kpi-label{font-size:8px;font-weight:700;color:var(--mt);text-transform:uppercase;
+  letter-spacing:.8px;margin-bottom:7px;font-family:var(--font-head)}
+.kpi-value{font-size:28px;font-weight:800;color:var(--tx);line-height:1;font-family:var(--font-head)}
+.kpi-sub{font-size:10px;color:var(--mt2);margin-top:4px}
+.kpi-bar{height:3px;background:rgba(255,255,255,.06);border-radius:4px;margin-top:10px;overflow:hidden}
+.kpi-bar-fill{height:100%;border-radius:4px}
 
-/* PROGRESS BAR */
-.progress-bar { height: 8px; background: var(--gray-200); border-radius: 8px; overflow: hidden; }
-.progress-fill { height: 100%; border-radius: 8px; transition: width 0.4s; }
-.progress-label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
-.progress-name { font-size: 12px; font-weight: 500; color: var(--gray-700); }
-.progress-pct { font-size: 12px; font-weight: 700; }
+/* ── PROGRESS ── */
+.progress-bar{height:7px;background:rgba(255,255,255,.07);border-radius:7px;overflow:hidden}
+.progress-fill{height:100%;border-radius:7px;transition:width .4s}
+.progress-label{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.progress-name{font-size:12px;font-weight:500;color:var(--tx)}
+.progress-pct{font-size:12px;font-weight:700}
 
-/* BADGE */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 2px 8px;
-  border-radius: 20px;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.3px;
-  text-transform: uppercase;
-}
-.badge-success { background: var(--success-light); color: var(--success); }
-.badge-warning { background: var(--warning-light); color: var(--warning); }
-.badge-danger  { background: var(--danger-light); color: var(--danger); }
-.badge-info    { background: var(--accent-light); color: var(--accent-dark); }
-.badge-primary { background: var(--primary-pale); color: var(--primary); }
-.badge-gray    { background: var(--gray-100); color: var(--gray-600); }
+/* ── BADGES ── */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;
+  border-radius:20px;font-size:9px;font-weight:700;letter-spacing:.3px;text-transform:uppercase}
+.badge-success{background:var(--grd);color:var(--gr);border:1px solid rgba(74,222,128,.25)}
+.badge-warning{background:var(--wad);color:var(--wa);border:1px solid rgba(251,191,36,.25)}
+.badge-danger{background:var(--erd);color:var(--er);border:1px solid rgba(248,113,113,.25)}
+.badge-info{background:var(--bld);color:var(--bl);border:1px solid rgba(96,165,250,.25)}
+.badge-primary{background:rgba(255,84,0,.1);color:var(--or);border:1px solid var(--bgo)}
+.badge-gray{background:rgba(255,255,255,.05);color:var(--mt);border:1px solid var(--bdr)}
 
-/* TABLE */
-.data-table { width: 100%; border-collapse: collapse; }
-.data-table th {
-  text-align: left;
-  padding: 10px 12px;
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--gray-600);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  border-bottom: 2px solid var(--gray-200);
-  background: var(--gray-50);
-}
-.data-table td {
-  padding: 11px 12px;
-  border-bottom: 1px solid var(--gray-100);
-  font-size: 13px;
-  color: var(--gray-800);
-  vertical-align: middle;
-}
-.data-table tr:hover td { background: var(--gray-50); }
-.data-table tr:last-child td { border-bottom: none; }
+/* ── TABLE ── */
+.data-table{width:100%;border-collapse:collapse}
+.data-table th{
+  text-align:left;padding:9px 11px;font-size:8px;font-weight:700;
+  color:var(--mt);text-transform:uppercase;letter-spacing:.7px;
+  border-bottom:1px solid var(--bdr);background:rgba(255,255,255,.02);
+  font-family:var(--font-head)}
+.data-table td{
+  padding:10px 11px;border-bottom:1px solid rgba(255,255,255,.04);
+  font-size:12px;color:var(--tx);vertical-align:middle}
+.data-table tr:hover td{background:rgba(255,255,255,.02)}
+.data-table tr:last-child td{border-bottom:none}
 
-/* PERSON CHIP */
-.person-chip { display: flex; align-items: center; gap: 8px; }
-.avatar-sm {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 10px;
-  font-weight: 700;
-  color: #fff;
-  flex-shrink: 0;
-}
+/* ── PERSON CHIP ── */
+.person-chip{display:flex;align-items:center;gap:8px}
+.avatar-sm{
+  width:28px;height:28px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:9px;font-weight:700;color:#fff;flex-shrink:0}
 
-/* FORM */
-.form-group { margin-bottom: 14px; }
-.form-label { display: block; font-size: 11px; font-weight: 700; color: var(--gray-700); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 5px; }
-.form-control {
-  width: 100%;
-  border: 1px solid var(--gray-300);
-  border-radius: var(--radius-sm);
-  padding: 8px 12px;
-  font-size: 13px;
-  font-family: var(--font);
-  color: var(--gray-800);
-  background: var(--white);
-  outline: none;
-  transition: border-color 0.15s;
-}
-.form-control:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,163,163,0.12); }
-textarea.form-control { min-height: 80px; resize: vertical; }
+/* ── FORM ── */
+.form-group{margin-bottom:13px}
+.form-label{display:block;font-size:8px;font-weight:700;color:var(--mt);
+  text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;font-family:var(--font-head)}
+.form-control{
+  width:100%;background:rgba(255,255,255,.04);border:1px solid var(--bdr);
+  border-radius:var(--r6);padding:7px 11px;font-size:12px;
+  font-family:var(--font);color:var(--tx);outline:none;transition:border-color .15s}
+.form-control:focus{border-color:var(--or);box-shadow:0 0 0 2px rgba(255,84,0,.1)}
+.form-control::placeholder{color:var(--mt2)}
+textarea.form-control{min-height:75px;resize:vertical}
+select.form-control{cursor:pointer}
+select.form-control option{background:#1a1a1a}
 
-/* MODAL */
-.modal-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(10,20,40,0.5);
-  z-index: 100;
-  align-items: center;
-  justify-content: center;
-}
-.modal-overlay.open { display: flex; }
-.modal {
-  background: var(--white);
-  border-radius: var(--radius-xl);
-  padding: 28px;
-  width: 560px;
-  max-width: 95vw;
-  max-height: 85vh;
-  overflow-y: auto;
-  box-shadow: var(--shadow-lg);
-}
-.modal-title { font-size: 18px; font-weight: 800; color: var(--primary); margin-bottom: 20px; }
-.modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
-.btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 18px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid transparent; transition: all 0.15s; font-family: var(--font); }
-.btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
-.btn-primary:hover { background: var(--accent-dark); }
-.btn-secondary { background: var(--white); color: var(--gray-700); border-color: var(--gray-300); }
-.btn-secondary:hover { background: var(--gray-50); }
-.btn-danger { background: var(--danger); color: #fff; border-color: var(--danger); }
-.btn-sm { padding: 5px 12px; font-size: 11px; }
+/* ── MODAL ── */
+.modal-overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.72);z-index:100;
+  align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.modal-overlay.open{display:flex}
+.modal{
+  background:var(--bg3);border:1px solid var(--bdr);
+  border-radius:var(--r14);padding:26px;width:540px;
+  max-width:95vw;max-height:85vh;overflow-y:auto;box-shadow:var(--sh)}
+.modal-title{font-size:16px;font-weight:800;color:var(--tx);margin-bottom:18px;font-family:var(--font-head)}
+.modal-actions{display:flex;gap:9px;justify-content:flex-end;margin-top:18px}
 
-/* TABS */
-.tabs { display: flex; gap: 0; border-bottom: 2px solid var(--gray-200); margin-bottom: 20px; }
-.tab {
-  padding: 10px 18px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--gray-600);
-  cursor: pointer;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -2px;
-  transition: all 0.15s;
-}
-.tab:hover { color: var(--primary); }
-.tab.active { color: var(--accent-dark); border-bottom-color: var(--accent); }
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;
+  border-radius:var(--r6);font-size:12px;font-weight:600;cursor:pointer;
+  border:1px solid transparent;transition:all .15s;font-family:var(--font)}
+.btn-primary{background:var(--or);color:#fff;border-color:var(--or)}
+.btn-primary:hover{background:var(--ord)}
+.btn-secondary{background:rgba(255,255,255,.04);color:var(--mt);border-color:var(--bdr)}
+.btn-secondary:hover{border-color:var(--bgo);color:var(--or)}
+.btn-danger{background:rgba(248,113,113,.1);color:var(--er);border-color:rgba(248,113,113,.2)}
+.btn-sm{padding:4px 10px;font-size:10px}
 
-/* ALERT BLOCK */
-.alert-block {
-  border-radius: var(--radius-md);
-  padding: 12px 16px;
-  margin-bottom: 12px;
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-}
-.alert-block.danger { background: var(--danger-light); border: 1px solid #FFCDD2; }
-.alert-block.warning { background: var(--warning-light); border: 1px solid #FFE0B2; }
-.alert-block.success { background: var(--success-light); border: 1px solid #C8E6C9; }
-.alert-icon { font-size: 16px; margin-top: 1px; flex-shrink: 0; }
-.alert-text { font-size: 12px; color: var(--gray-800); }
-.alert-text strong { font-weight: 700; }
+/* ── TABS ── */
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--bdr);margin-bottom:18px}
+.tab{padding:9px 16px;font-size:12px;font-weight:600;color:var(--mt);
+  cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s}
+.tab:hover{color:var(--tx)}
+.tab.active{color:var(--or);border-bottom-color:var(--or)}
 
-/* TIMELINE for 1:1 */
-.timeline { position: relative; padding-left: 20px; }
-.timeline::before { content: ''; position: absolute; left: 6px; top: 0; bottom: 0; width: 2px; background: var(--gray-200); }
-.timeline-item { position: relative; margin-bottom: 20px; }
-.timeline-dot {
-  position: absolute;
-  left: -17px;
-  top: 3px;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: var(--accent);
-  border: 2px solid var(--white);
-  box-shadow: 0 0 0 2px var(--accent);
-}
-.timeline-date { font-size: 10px; font-weight: 700; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
-.timeline-card { background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: var(--radius-md); padding: 12px; }
-.timeline-card-title { font-size: 13px; font-weight: 700; color: var(--primary); margin-bottom: 6px; }
-.timeline-card-body { font-size: 12px; color: var(--gray-700); line-height: 1.6; }
+/* ── ALERT BLOCK ── */
+.alert-block{
+  border-radius:var(--r8);padding:11px 14px;margin-bottom:10px;
+  display:flex;align-items:flex-start;gap:9px}
+.alert-block.danger{background:var(--erd);border:1px solid rgba(248,113,113,.2)}
+.alert-block.warning{background:var(--wad);border:1px solid rgba(251,191,36,.2)}
+.alert-block.success{background:var(--grd);border:1px solid rgba(74,222,128,.2)}
+.alert-icon{font-size:15px;margin-top:1px;flex-shrink:0}
+.alert-text{font-size:12px;color:var(--tx)}
+.alert-text strong{font-weight:700;color:var(--tx)}
 
-/* DONUT CHART */
-.donut-wrap { display: flex; align-items: center; gap: 20px; }
-.donut-legend { flex: 1; }
-.donut-legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 12px; color: var(--gray-700); }
-.donut-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+/* ── TIMELINE ── */
+.timeline{position:relative;padding-left:20px}
+.timeline::before{content:'';position:absolute;left:6px;top:0;bottom:0;
+  width:2px;background:rgba(255,255,255,.08)}
+.timeline-item{position:relative;margin-bottom:18px}
+.timeline-dot{position:absolute;left:-17px;top:3px;width:12px;height:12px;
+  border-radius:50%;background:var(--or);border:2px solid var(--bg);box-shadow:0 0 0 2px var(--or)}
+.timeline-date{font-size:9px;font-weight:700;color:var(--mt);
+  text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;font-family:var(--font-head)}
+.timeline-card{background:rgba(255,255,255,.03);border:1px solid var(--bdr);border-radius:var(--r8);padding:11px}
+.timeline-card-title{font-size:12px;font-weight:700;color:var(--tx);margin-bottom:5px}
+.timeline-card-body{font-size:11px;color:var(--mt);line-height:1.6}
 
-/* ORG CHART */
-.org-chart { overflow-x: auto; }
-.org-node-wrap { display: flex; flex-direction: column; align-items: center; }
-.org-level { display: flex; gap: 16px; align-items: flex-start; justify-content: center; margin-top: 16px; }
-.org-node {
-  background: var(--white);
-  border: 2px solid var(--primary);
-  border-radius: var(--radius-md);
-  padding: 10px 14px;
-  min-width: 140px;
-  text-align: center;
-  cursor: pointer;
-}
-.org-node.leader { border-color: var(--accent); }
-.org-node .org-name { font-size: 12px; font-weight: 700; color: var(--primary); }
-.org-node .org-role { font-size: 10px; color: var(--gray-500); margin-top: 2px; }
-.org-node .org-progress { font-size: 11px; font-weight: 700; margin-top: 6px; }
-.org-connector { width: 2px; height: 16px; background: var(--gray-300); margin: 0 auto; }
-.org-line { height: 2px; background: var(--gray-300); }
+/* ── DONUT ── */
+.donut-wrap{display:flex;align-items:center;gap:18px}
+.donut-legend{flex:1}
+.donut-legend-item{display:flex;align-items:center;gap:7px;margin-bottom:6px;
+  font-size:12px;color:var(--mt)}
+.donut-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
 
-/* CHECKLIST */
-.checklist-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 0;
-  border-bottom: 1px solid var(--gray-100);
-}
-.checklist-item:last-child { border-bottom: none; }
-.check-box {
-  width: 18px;
-  height: 18px;
-  border-radius: 4px;
-  border: 2px solid var(--gray-400);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-.check-box.checked { background: var(--success); border-color: var(--success); }
-.check-box.checked::after { content: '✓'; color: #fff; font-size: 10px; font-weight: 700; }
-.check-text { font-size: 12px; color: var(--gray-700); flex: 1; }
+/* ── ORG CHART ── */
+.org-chart{overflow-x:auto}
+.org-node-wrap{display:flex;flex-direction:column;align-items:center}
+.org-level{display:flex;gap:14px;align-items:flex-start;justify-content:center;margin-top:14px}
+.org-node{
+  background:rgba(255,255,255,.04);border:1px solid var(--bdr);
+  border-radius:var(--r8);padding:9px 12px;min-width:130px;text-align:center;cursor:pointer;
+  transition:border-color .2s}
+.org-node:hover{border-color:var(--bgo)}
+.org-node.leader{border-color:rgba(255,84,0,.3)}
+.org-node.root{background:rgba(255,84,0,.08);border-color:var(--or)}
+.org-name{font-size:11px;font-weight:700;color:var(--tx)}
+.org-role{font-size:9px;color:var(--mt);margin-top:2px}
+.org-progress{font-size:11px;font-weight:700;margin-top:5px}
+.org-connector{width:2px;height:14px;background:rgba(255,255,255,.1);margin:0 auto}
+.org-line{height:2px;background:rgba(255,255,255,.1)}
 
-/* SECTION HEADER */
-.section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-.section-heading { font-size: 20px; font-weight: 800; color: var(--primary); }
-.section-subheading { font-size: 13px; color: var(--gray-500); margin-top: 2px; }
+/* ── CHECKLIST ── */
+.checklist-item{
+  display:flex;align-items:center;gap:9px;padding:7px 0;
+  border-bottom:1px solid rgba(255,255,255,.04)}
+.checklist-item:last-child{border-bottom:none}
+.check-box{
+  width:17px;height:17px;border-radius:4px;border:2px solid var(--bdr);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;cursor:pointer;transition:all .15s}
+.check-box.checked{background:var(--gr);border-color:var(--gr)}
+.check-box.checked::after{content:"\2713";color:#fff;font-size:9px;font-weight:700}
+.check-text{font-size:12px;color:var(--mt);flex:1}
 
-/* HELP TIP */
-.help-tip {
-  background: linear-gradient(135deg, var(--primary-pale), var(--accent-light));
-  border: 1px solid var(--accent);
-  border-radius: var(--radius-md);
-  padding: 12px 16px;
-  font-size: 12px;
-  color: var(--primary);
-  margin-bottom: 16px;
-  display: flex;
-  gap: 10px;
-}
-.help-tip-icon { font-size: 16px; flex-shrink: 0; }
+/* ── SECTION HEADER ── */
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.section-heading{font-size:20px;font-weight:800;color:var(--tx);font-family:var(--font-head)}
+.section-subheading{font-size:12px;color:var(--mt);margin-top:2px}
 
-/* COMPETENCY RADAR PLACEHOLDER */
-.competency-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--gray-100);
-}
-.comp-name { font-size: 12px; font-weight: 500; color: var(--gray-700); width: 200px; flex-shrink: 0; }
-.comp-bar { flex: 1; height: 10px; background: var(--gray-200); border-radius: 10px; overflow: hidden; }
-.comp-fill { height: 100%; border-radius: 10px; }
-.comp-score { font-size: 12px; font-weight: 700; width: 40px; text-align: right; }
-.comp-label { width: 160px; font-size: 10px; font-weight: 600; text-align: right; }
+/* ── HELP TIP ── */
+.help-tip{
+  background:rgba(255,84,0,.05);border:1px solid rgba(255,84,0,.18);
+  border-radius:var(--r8);padding:11px 14px;font-size:12px;color:var(--orl);
+  margin-bottom:14px;display:flex;gap:9px;line-height:1.5}
+.help-tip-icon{font-size:14px;flex-shrink:0}
 
-/* INPUT SEARCH */
-.search-input-wrap { position: relative; }
-.search-input-wrap input { padding-left: 32px; }
-.search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 13px; color: var(--gray-500); pointer-events: none; }
+/* ── COMPETENCY ── */
+.competency-row{display:flex;align-items:center;gap:11px;padding:9px 0;
+  border-bottom:1px solid rgba(255,255,255,.04)}
+.comp-name{font-size:12px;font-weight:500;color:var(--tx);width:200px;flex-shrink:0}
+.comp-bar{flex:1;height:9px;background:rgba(255,255,255,.07);border-radius:9px;overflow:hidden}
+.comp-fill{height:100%;border-radius:9px}
+.comp-score{font-size:12px;font-weight:700;width:36px;text-align:right}
+.comp-label{width:150px;font-size:9px;font-weight:600;text-align:right}
 
-/* SCROLLBAR */
-::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 10px; }
+/* ── SEARCH ── */
+.search-input-wrap{position:relative}
+.search-input-wrap input{padding-left:30px}
+.search-icon{position:absolute;left:9px;top:50%;transform:translateY(-50%);
+  font-size:12px;color:var(--mt);pointer-events:none}
 
-.mt-12 { margin-top: 12px; }
-.mt-16 { margin-top: 16px; }
-.mt-20 { margin-top: 20px; }
-.mb-12 { margin-bottom: 12px; }
-.mb-16 { margin-bottom: 16px; }
-.flex { display: flex; }
-.flex-col { flex-direction: column; }
-.items-center { align-items: center; }
-.justify-between { justify-content: space-between; }
-.gap-8 { gap: 8px; }
-.gap-12 { gap: 12px; }
-.flex-1 { flex: 1; }
-.text-muted { color: var(--gray-600); font-size: 12px; }
-.fw-bold { font-weight: 700; }
-.small { font-size: 11px; }
-.divider { height: 1px; background: var(--gray-200); margin: 16px 0; }
+/* ── UTILITIES ── */
+.mt-12{margin-top:12px} .mt-16{margin-top:16px} .mt-20{margin-top:20px}
+.mb-12{margin-bottom:12px} .mb-16{margin-bottom:16px}
+.flex{display:flex} .flex-col{flex-direction:column}
+.items-center{align-items:center} .justify-between{justify-content:space-between}
+.gap-8{gap:8px} .gap-12{gap:12px} .flex-1{flex:1}
+.text-muted{color:var(--mt);font-size:12px}
+.fw-bold{font-weight:700} .small{font-size:11px}
+.divider{height:1px;background:var(--bdr);margin:14px 0}
 
-/* SSO Login Screen — CTRL365 Dark Style */
-@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&display=swap');
-.sso-screen {
-  position: fixed;
-  inset: 0;
-  background: #0d0d0d;
-  background-image: radial-gradient(ellipse 80% 50% at 20% 0%, rgba(255,84,0,.08) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(27,58,92,.15) 0%, transparent 60%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 200;
-}
-.sso-card {
-  background: rgba(255,255,255,.04);
-  border: 1px solid rgba(255,255,255,.09);
-  border-radius: 20px;
-  padding: 48px 40px;
-  width: 420px;
-  text-align: center;
-  backdrop-filter: blur(20px);
-}
-.sso-brand { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 8px; }
-.sso-brand-icon { width: 36px; height: 36px; background: #FF5400; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; color: #fff; font-family: 'Sora', sans-serif; }
-.sso-logo { font-size: 26px; font-weight: 800; color: #F0EBE3; letter-spacing: -0.5px; font-family: 'Sora', sans-serif; }
-.sso-logo span { color: #FF5400; }
-.sso-tagline { font-size: 12px; color: #888580; margin: 8px 0 36px; line-height: 1.5; }
-.sso-btn {
-  width: 100%;
-  padding: 14px;
-  background: #FF5400;
-  color: #fff;
-  border: none;
-  border-radius: 10px;
-  font-size: 13px;
-  font-weight: 600;
-  font-family: 'Sora', sans-serif;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  transition: all 0.2s;
-  letter-spacing: 0.02em;
-}
-.sso-btn:hover:not(:disabled) { background: #cc4400; }
-.sso-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.sso-btn.demo { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1); color: #F0EBE3; margin-top: 10px; }
-.sso-btn.demo:hover:not(:disabled) { background: rgba(255,255,255,.1); border-color: rgba(255,84,0,.3); }
-.sso-divider { margin: 16px 0; font-size: 10px; color: rgba(255,255,255,.2); letter-spacing: 0.15em; }
-.sso-note { font-size: 10px; color: rgba(255,255,255,.25); margin-top: 28px; line-height: 1.6; }
-.sso-wave { width: 100%; height: 3px; background: linear-gradient(90deg, #FF5400, rgba(255,84,0,.2)); border-radius: 0 0 20px 20px; margin-top: 28px; }
-.sso-status { font-size: 11px; color: #FF5400; margin-top: 12px; min-height: 16px; }
+/* ── TOGGLE ── */
+.tog{position:relative;width:32px;height:18px;cursor:pointer;display:inline-block}
+.tog input{opacity:0;width:0;height:0;position:absolute}
+.togs{position:absolute;inset:0;background:rgba(255,255,255,.1);border-radius:18px;transition:.3s;cursor:pointer}
+.togs::before{content:'';position:absolute;width:14px;height:14px;left:2px;top:2px;background:#555;border-radius:50%;transition:.3s}
+input:checked+.togs{background:rgba(74,222,128,.25)}
+input:checked+.togs::before{background:var(--gr);transform:translateX(14px)}
+
+/* ── SSO LOGIN SCREEN ── */
+.sso-screen{
+  position:fixed;inset:0;background:var(--bg);
+  background-image:radial-gradient(ellipse 80% 50% at 20% 0%,rgba(255,84,0,.08) 0%,transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 100%,rgba(27,58,92,.1) 0%,transparent 60%);
+  display:flex;align-items:center;justify-content:center;z-index:200}
+.sso-card{
+  background:rgba(255,255,255,.04);border:1px solid var(--bdr);
+  border-radius:20px;padding:48px 40px;width:420px;text-align:center;
+  backdrop-filter:blur(20px)}
+.sso-brand{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:8px}
+.sso-brand-icon{width:36px;height:36px;background:var(--or);border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:14px;color:#fff;font-family:var(--font-head)}
+.sso-logo{font-size:26px;font-weight:800;color:var(--tx);letter-spacing:-.5px;font-family:var(--font-head)}
+.sso-logo span{color:var(--or)}
+.sso-tagline{font-size:12px;color:var(--mt);margin:8px 0 36px;line-height:1.5}
+.sso-btn{
+  width:100%;padding:14px;background:var(--or);color:#fff;border:none;
+  border-radius:10px;font-size:13px;font-weight:600;font-family:var(--font-head);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  gap:10px;transition:all .2s;letter-spacing:.02em}
+.sso-btn:hover{background:var(--ord)}
+.sso-btn.demo{background:rgba(255,255,255,.06);border:1px solid var(--bdr);
+  color:var(--tx);margin-top:10px}
+.sso-btn.demo:hover{background:rgba(255,255,255,.1);border-color:var(--bgo)}
+.sso-divider{margin:16px 0;font-size:10px;color:rgba(255,255,255,.2);letter-spacing:.15em}
+.sso-note{font-size:10px;color:rgba(255,255,255,.25);margin-top:28px;line-height:1.6}
+.sso-wave{width:100%;height:3px;background:linear-gradient(90deg,var(--or),rgba(255,84,0,.2));
+  border-radius:0 0 20px 20px;margin-top:28px}
+.sso-status{font-size:11px;color:var(--or);margin-top:12px;min-height:16px}
+
+/* ── USUARIOS MODULE ── */
+.user-table-wrap{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r10);overflow:hidden}
+.toolbar{display:flex;align-items:center;gap:9px;margin-bottom:14px;flex-wrap:wrap}
+.search-box{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.04);
+  border:1px solid var(--bdr);border-radius:var(--r6);padding:5px 11px;flex:1;min-width:180px}
+.search-box input{background:none;border:none;outline:none;color:var(--tx);
+  font-size:12px;font-family:var(--font);width:100%}
+.search-box input::placeholder{color:var(--mt2)}
+.fsel{background:rgba(255,255,255,.04);border:1px solid var(--bdr);border-radius:var(--r6);
+  padding:6px 9px;color:var(--tx);font-size:11px;font-family:var(--font);outline:none;cursor:pointer}
+.fsel option{background:#1a1a1a}
+.fsel:focus{border-color:var(--or)}
+.stats-row-u{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-bottom:18px}
+.stat-card-u{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r10);padding:13px 15px;transition:border-color .2s}
+.stat-card-u:hover{border-color:var(--bgo)}
+.stat-lbl{font-size:8px;letter-spacing:.15em;text-transform:uppercase;color:var(--mt);margin-bottom:5px;font-family:var(--font-head)}
+.stat-val{font-size:24px;font-weight:800;font-family:var(--font-head);line-height:1}
+.stat-sub{font-size:10px;color:var(--mt2);margin-top:3px}
+.pag{display:flex;align-items:center;justify-content:space-between;margin-top:12px;font-size:11px;color:var(--mt)}
+.pag-btns{display:flex;gap:4px}
+.pb{background:rgba(255,255,255,.04);border:1px solid var(--bdr);border-radius:4px;
+  padding:3px 9px;font-size:10px;color:var(--mt);cursor:pointer;transition:all .2s}
+.pb:hover{border-color:var(--bgo);color:var(--or)}
+.pb.act{background:rgba(255,84,0,.1);border-color:var(--or);color:var(--or)}
+.mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:300;
+  align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.mo.open{display:flex}
+.moc{background:var(--bg3);border:1px solid var(--bdr);border-radius:var(--r14);
+  padding:26px;width:500px;max-width:95vw;max-height:85vh;overflow-y:auto;box-shadow:var(--sh)}
+.moh{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.mot{font-family:var(--font-head);font-size:15px;font-weight:700;color:var(--tx)}
+.mox{background:none;border:none;color:var(--mt);font-size:18px;cursor:pointer}
+.mox:hover{color:var(--tx)}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.fg{margin-bottom:12px}
+.fl{display:block;font-size:8px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--mt);margin-bottom:5px;font-family:var(--font-head)}
+.fc{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--bdr);
+  border-radius:var(--r6);padding:7px 10px;color:var(--tx);font-size:12px;
+  font-family:var(--font);outline:none;transition:border-color .2s}
+.fc:focus{border-color:var(--or)}
+.fc::placeholder{color:var(--mt2)}
+select.fc{cursor:pointer}
+select.fc option{background:#1a1a1a}
+.ma{display:flex;gap:9px;justify-content:flex-end;margin-top:16px;
+  padding-top:13px;border-top:1px solid var(--bdr)}
+.lcard{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r10);
+  padding:15px;transition:border-color .2s;margin-bottom:9px}
+.lcard:hover{border-color:var(--bgo)}
+.lteam{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.lchip{background:rgba(255,255,255,.03);border:1px solid var(--bdr);border-radius:5px;
+  padding:2px 7px;font-size:10px;color:var(--mt);display:flex;align-items:center;gap:4px}
+.ldot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.lac{display:flex;gap:7px;margin-top:11px;padding-top:9px;border-top:1px solid rgba(255,255,255,.04)}
+.toast{position:fixed;bottom:22px;right:22px;background:var(--bg3);border:1px solid var(--gr);
+  border-radius:var(--r8);padding:9px 15px;font-size:12px;color:var(--gr);z-index:400;
+  display:none;align-items:center;gap:7px;box-shadow:var(--sh)}
+.toast.show{display:flex}
+.toast.err{border-color:var(--er);color:var(--er)}
+
+/* ── API LOADING STATE ── */
+.loading-overlay{
+  display:none;position:absolute;inset:0;background:rgba(13,13,13,.8);
+  align-items:center;justify-content:center;border-radius:var(--r10);z-index:10}
+.loading-overlay.show{display:flex}
+.spinner{width:20px;height:20px;border:2px solid rgba(255,84,0,.2);
+  border-top-color:var(--or);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* API CONNECTION STATUS */
+.api-status{display:inline-flex;align-items:center;gap:5px;font-size:10px;padding:3px 8px;
+  border-radius:20px;border:1px solid}
+.api-status.ok{color:var(--gr);border-color:rgba(74,222,128,.25);background:var(--grd)}
+.api-status.err{color:var(--er);border-color:rgba(248,113,113,.25);background:var(--erd)}
+.api-status.loading{color:var(--or);border-color:var(--bgo);background:rgba(255,84,0,.08)}
+.api-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
 </style>
-
 </head>
 <body>
 
-<!-- SSO Login — CTRL365 Dark Style -->
+<!-- SSO LOGIN -->
 <div class="sso-screen" id="ssoScreen">
   <div class="sso-card">
     <div class="sso-brand">
       <div class="sso-brand-icon">C</div>
-      <span style="font-family:'Sora',sans-serif;font-size:15px;font-weight:700;color:#F0EBE3">CTRL<span style="color:#FF5400">365</span></span>
+      <span style="font-family:var(--font-head);font-size:15px;font-weight:700;color:var(--tx)">CTRL<span style="color:var(--or)">365</span></span>
     </div>
     <div class="sso-logo" style="margin-top:20px">People<span>Track</span></div>
     <p class="sso-tagline">Gestión de Objetivos, Competencias<br>y Plan de Carrera</p>
-
-    <button class="sso-btn" id="btnAzureLogin" onclick="doLogin()" disabled>
+    <button class="sso-btn" onclick="doLogin()">
       <svg width="16" height="16" viewBox="0 0 23 23" fill="none">
         <path d="M11.5 0L0 4.5v14L11.5 23 23 18.5v-14L11.5 0z" fill="#fff" opacity="0.3"/>
         <path d="M11.5 0v23L0 18.5v-14L11.5 0z" fill="#fff" opacity="0.4"/>
         <path d="M11.5 0v11.5L23 4.5 11.5 0z" fill="#fff" opacity="0.6"/>
       </svg>
-      <span id="btnAzureText">Iniciando...</span>
+      Iniciar sesión con Azure AD
     </button>
-
     <div class="sso-divider">— o —</div>
-
-    <button class="sso-btn demo" id="btnDemoLogin" onclick="demoLogin()" disabled>
-      Ingresar sin SSO (modo demo)
-    </button>
-
+    <button class="sso-btn demo" onclick="demoLogin()">Ingresar sin SSO (modo demo)</button>
     <div class="sso-status" id="ssoStatus"></div>
     <p class="sso-note">Autenticación SSO via Microsoft Azure Active Directory.<br>Solo usuarios autorizados por la empresa pueden acceder.</p>
     <div class="sso-wave"></div>
@@ -586,14 +455,17 @@ textarea.form-control { min-height: 80px; resize: vertical; }
 <!-- SIDEBAR -->
 <aside class="sidebar">
   <div class="sidebar-logo">
-    <div class="app-name">PeopleTrack</div>
-    <div class="app-sub">Objetivos & Carrera</div>
+    <div class="logo-badge">C</div>
+    <div>
+      <div class="logo-text">CTRL<span>365</span></div>
+      <div class="logo-app">PeopleTrack</div>
+    </div>
   </div>
   <div class="sidebar-user">
-    <div class="user-avatar">OS</div>
+    <div class="user-avatar" id="userAvatar">OS</div>
     <div class="user-info">
-      <div class="name">Orlando Sanchez</div>
-      <div class="role">Manager · Operations</div>
+      <div class="name" id="userName">Orlando Sanchez</div>
+      <div class="role" id="userRole">osanchez@ctrl365.com</div>
     </div>
   </div>
 
@@ -604,8 +476,7 @@ textarea.form-control { min-height: 80px; resize: vertical; }
   </div>
   <div class="nav-item" onclick="showSection('alerts')">
     <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
-    Alertas
-    <span class="nav-badge">3</span>
+    Alertas <span class="nav-badge">3</span>
   </div>
 
   <div class="sidebar-section-label">Gestión</div>
@@ -628,12 +499,22 @@ textarea.form-control { min-height: 80px; resize: vertical; }
 
   <div class="sidebar-section-label">Reportes</div>
   <div class="nav-item" onclick="showSection('reports')">
-    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
     Reportes
   </div>
   <div class="nav-item" onclick="showSection('orgchart')">
     <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="8" width="5" height="5" rx="1"/><rect x="16" y="8" width="5" height="5" rx="1"/><rect x="9.5" y="15" width="5" height="5" rx="1"/><line x1="5.5" y1="13" x2="5.5" y2="17"/><line x1="5.5" y1="17" x2="12" y2="17"/><line x1="18.5" y1="13" x2="18.5" y2="17"/><line x1="18.5" y1="17" x2="12" y2="17"/><rect x="9.5" y="3" width="5" height="5" rx="1"/><line x1="12" y1="8" x2="12" y2="15"/></svg>
     Organigrama
+  </div>
+
+  <div class="sidebar-section-label">Administración</div>
+  <div class="nav-item" id="nav-users" onclick="showSection('usuarios')">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+    Usuarios
+  </div>
+  <div class="nav-item" onclick="showSection('lideres')">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+    Líderes
   </div>
 
   <div class="sidebar-section-label">Sistema</div>
@@ -651,14 +532,14 @@ textarea.form-control { min-height: 80px; resize: vertical; }
 <div class="main-wrap">
   <header class="topbar">
     <span class="topbar-title" id="topbarTitle">Dashboard</span>
+    <span id="apiStatusBadge" class="api-status loading"><span class="api-dot"></span>Conectando API...</span>
     <span class="topbar-period">FY26 — Q2</span>
     <button class="topbar-btn" onclick="showModal('exportModal')">⬇ Exportar Excel</button>
     <button class="topbar-btn primary" onclick="showModal('newObjectiveModal')">+ Nuevo</button>
   </header>
 
   <div class="content">
-
-    <!-- ======== DASHBOARD ======== -->
+<!-- ======== DASHBOARD ======== -->
     <section class="section active" id="sec-dashboard">
       <div class="section-header">
         <div>
@@ -675,17 +556,17 @@ textarea.form-control { min-height: 80px; resize: vertical; }
         </div>
         <div class="kpi-card">
           <div class="kpi-label">Avance Promedio</div>
-          <div class="kpi-value" style="color:var(--accent)">64%</div>
-          <div class="kpi-bar"><div class="kpi-bar-fill" style="width:64%;background:var(--accent)"></div></div>
+          <div class="kpi-value" style="color:#4ade80">64%</div>
+          <div class="kpi-bar"><div class="kpi-bar-fill" style="width:64%;background:#4ade80"></div></div>
         </div>
         <div class="kpi-card">
           <div class="kpi-label">Objetivos en Riesgo</div>
-          <div class="kpi-value" style="color:var(--danger)">3</div>
+          <div class="kpi-value" style="color:var(--er)">3</div>
           <div class="kpi-sub">Bajo el umbral 70%</div>
         </div>
         <div class="kpi-card">
           <div class="kpi-label">1:1 Pendientes</div>
-          <div class="kpi-value" style="color:var(--warning)">2</div>
+          <div class="kpi-value" style="color:var(--wa)">2</div>
           <div class="kpi-sub">Este mes</div>
         </div>
       </div>
@@ -693,7 +574,7 @@ textarea.form-control { min-height: 80px; resize: vertical; }
       <div class="grid-2 gap-16">
         <div class="card">
           <div class="card-title">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
             Avance por Colaborador
           </div>
           <div id="teamProgressList">
@@ -703,7 +584,7 @@ textarea.form-control { min-height: 80px; resize: vertical; }
 
         <div class="card">
           <div class="card-title">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="7"/></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="7"/></svg>
             Estado de Objetivos
           </div>
           <canvas id="donutChart" width="160" height="160" style="display:block;margin:0 auto 12px;"></canvas>
@@ -717,14 +598,14 @@ textarea.form-control { min-height: 80px; resize: vertical; }
           <thead><tr><th>Colaborador</th><th>Tipo</th><th>Fecha</th><th>Estado</th><th>Acción</th></tr></thead>
           <tbody>
             <tr>
-              <td><div class="person-chip"><div class="avatar-sm" style="background:#1B3A5C">JM</div><span>Jorge Mercado</span></div></td>
+              <td><div class="person-chip"><div class="avatar-sm" style="background:var(--or)">JM</div><span>Jorge Mercado</span></div></td>
               <td><span class="badge badge-info">Mensual</span></td>
               <td>22 Abr 2026</td>
               <td><span class="badge badge-warning">Pendiente</span></td>
               <td><button class="btn btn-secondary btn-sm" onclick="showSection('oneononex')">Ver bitácora</button></td>
             </tr>
             <tr>
-              <td><div class="person-chip"><div class="avatar-sm" style="background:#00A3A3">MR</div><span>Miguel Rocha</span></div></td>
+              <td><div class="person-chip"><div class="avatar-sm" style="background:#4ade80">MR</div><span>Miguel Rocha</span></div></td>
               <td><span class="badge badge-info">Mensual</span></td>
               <td>25 Abr 2026</td>
               <td><span class="badge badge-warning">Pendiente</span></td>
@@ -791,37 +672,37 @@ textarea.form-control { min-height: 80px; resize: vertical; }
           <thead><tr><th>Colaborador</th><th>Objetivo</th><th>Competencia</th><th>Ponderación</th><th>Avance</th><th>Estado</th><th>Acción</th></tr></thead>
           <tbody>
             <tr>
-              <td><div class="person-chip"><div class="avatar-sm" style="background:#1B3A5C">JM</div><span>J. Mercado</span></div></td>
+              <td><div class="person-chip"><div class="avatar-sm" style="background:var(--or)">JM</div><span>J. Mercado</span></div></td>
               <td>Formación — Cursos Python / PL-200 / PL-500</td>
               <td>Aprendizaje</td>
               <td>40%</td>
               <td>
-                <div class="progress-label"><span class="progress-pct" style="color:var(--warning)">45%</span></div>
-                <div class="progress-bar"><div class="progress-fill" style="width:45%;background:var(--warning)"></div></div>
+                <div class="progress-label"><span class="progress-pct" style="color:var(--wa)">45%</span></div>
+                <div class="progress-bar"><div class="progress-fill" style="width:45%;background:var(--wa)"></div></div>
               </td>
               <td><span class="badge badge-warning">En Curso</span></td>
               <td><button class="btn btn-secondary btn-sm" onclick="showModal('checkinModal')">Check-in</button></td>
             </tr>
             <tr>
-              <td><div class="person-chip"><div class="avatar-sm" style="background:#1B3A5C">JM</div><span>J. Mercado</span></div></td>
+              <td><div class="person-chip"><div class="avatar-sm" style="background:var(--or)">JM</div><span>J. Mercado</span></div></td>
               <td>Aplicación — Power Automate + Python Integrado</td>
               <td>Innovación</td>
               <td>30%</td>
               <td>
-                <div class="progress-label"><span class="progress-pct" style="color:var(--danger)">20%</span></div>
-                <div class="progress-bar"><div class="progress-fill" style="width:20%;background:var(--danger)"></div></div>
+                <div class="progress-label"><span class="progress-pct" style="color:var(--er)">20%</span></div>
+                <div class="progress-bar"><div class="progress-fill" style="width:20%;background:var(--er)"></div></div>
               </td>
               <td><span class="badge badge-danger">En Riesgo</span></td>
               <td><button class="btn btn-secondary btn-sm" onclick="showModal('checkinModal')">Check-in</button></td>
             </tr>
             <tr>
-              <td><div class="person-chip"><div class="avatar-sm" style="background:#00A3A3">MR</div><span>M. Rocha</span></div></td>
+              <td><div class="person-chip"><div class="avatar-sm" style="background:#4ade80">MR</div><span>M. Rocha</span></div></td>
               <td>AI Foundry — Demos de innovación tecnológica</td>
               <td>Innovación</td>
               <td>25%</td>
               <td>
-                <div class="progress-label"><span class="progress-pct" style="color:var(--success)">75%</span></div>
-                <div class="progress-bar"><div class="progress-fill" style="width:75%;background:var(--success)"></div></div>
+                <div class="progress-label"><span class="progress-pct" style="color:var(--gr)">75%</span></div>
+                <div class="progress-bar"><div class="progress-fill" style="width:75%;background:var(--gr)"></div></div>
               </td>
               <td><span class="badge badge-success">Viene Bien</span></td>
               <td><button class="btn btn-secondary btn-sm" onclick="showModal('checkinModal')">Check-in</button></td>
@@ -835,10 +716,10 @@ textarea.form-control { min-height: 80px; resize: vertical; }
         <table class="data-table">
           <thead><tr><th>#</th><th>Tarea / Hito</th><th>Objetivo</th><th>Colaborador</th><th>Vencimiento</th><th>Avance</th><th>Estado</th></tr></thead>
           <tbody>
-            <tr><td>1</td><td>Curso Python completo</td><td>Formación J.Mercado</td><td>J. Mercado</td><td>31 May 2026</td><td><div class="progress-bar" style="width:100px"><div class="progress-fill" style="width:50%;background:var(--warning)"></div></div></td><td><span class="badge badge-info">En Curso</span></td></tr>
-            <tr><td>2</td><td>Curso PL-200 completo</td><td>Formación J.Mercado</td><td>J. Mercado</td><td>28 Feb 2026</td><td><div class="progress-bar" style="width:100px"><div class="progress-fill" style="width:100%;background:var(--success)"></div></div></td><td><span class="badge badge-success">Cumplido</span></td></tr>
-            <tr><td>3</td><td>Certificación PL-500</td><td>Formación J.Mercado</td><td>J. Mercado</td><td>30 Jun 2026</td><td><div class="progress-bar" style="width:100px"><div class="progress-fill" style="width:30%;background:var(--danger)"></div></div></td><td><span class="badge badge-danger">En Riesgo</span></td></tr>
-            <tr><td>4</td><td>DP-100 Azure Data Scientist</td><td>Plan Carrera M.Rocha</td><td>M. Rocha</td><td>30 Sep 2026</td><td><div class="progress-bar" style="width:100px"><div class="progress-fill" style="width:60%;background:var(--accent)"></div></div></td><td><span class="badge badge-info">En Curso</span></td></tr>
+            <tr><td>1</td><td>Curso Python completo</td><td>Formación J.Mercado</td><td>J. Mercado</td><td>31 May 2026</td><td><div class="progress-bar" style="width:100px"><div class="progress-fill" style="width:50%;background:var(--wa)"></div></div></td><td><span class="badge badge-info">En Curso</span></td></tr>
+            <tr><td>2</td><td>Curso PL-200 completo</td><td>Formación J.Mercado</td><td>J. Mercado</td><td>28 Feb 2026</td><td><div class="progress-bar" style="width:100px"><div class="progress-fill" style="width:100%;background:var(--gr)"></div></div></td><td><span class="badge badge-success">Cumplido</span></td></tr>
+            <tr><td>3</td><td>Certificación PL-500</td><td>Formación J.Mercado</td><td>J. Mercado</td><td>30 Jun 2026</td><td><div class="progress-bar" style="width:100px"><div class="progress-fill" style="width:30%;background:var(--er)"></div></div></td><td><span class="badge badge-danger">En Riesgo</span></td></tr>
+            <tr><td>4</td><td>DP-100 Azure Data Scientist</td><td>Plan Carrera M.Rocha</td><td>M. Rocha</td><td>30 Sep 2026</td><td><div class="progress-bar" style="width:100px"><div class="progress-fill" style="width:60%;background:#4ade80"></div></div></td><td><span class="badge badge-info">En Curso</span></td></tr>
           </tbody>
         </table>
       </div>
@@ -858,19 +739,19 @@ textarea.form-control { min-height: 80px; resize: vertical; }
         <div class="card">
           <div class="card-title">Jorge Mercado — Developer</div>
           <div class="flex items-center gap-12 mb-12">
-            <div class="avatar-sm" style="background:#1B3A5C;width:44px;height:44px;font-size:14px">JM</div>
+            <div class="avatar-sm" style="background:var(--or);width:44px;height:44px;font-size:14px">JM</div>
             <div>
-              <div style="font-size:13px;font-weight:700;color:var(--primary)">Rol actual: Developer</div>
-              <div style="font-size:11px;color:var(--gray-500)">Rol objetivo: Senior Developer · FY26</div>
-              <div style="font-size:11px;color:var(--gray-500)">Evaluador: Gastón Salguero</div>
+              <div style="font-size:13px;font-weight:700;color:var(--or)">Rol actual: Developer</div>
+              <div style="font-size:11px;color:var(--mt)">Rol objetivo: Senior Developer · FY26</div>
+              <div style="font-size:11px;color:var(--mt)">Evaluador: Gastón Salguero</div>
             </div>
             <div style="margin-left:auto;text-align:center">
-              <div style="font-size:22px;font-weight:800;color:var(--accent)">6.7%</div>
-              <div style="font-size:10px;color:var(--gray-500)">% Desarrollo</div>
+              <div style="font-size:22px;font-weight:800;color:#4ade80">6.7%</div>
+              <div style="font-size:10px;color:var(--mt)">% Desarrollo</div>
             </div>
           </div>
-          <div class="progress-bar mb-16"><div class="progress-fill" style="width:6.7%;background:var(--accent)"></div></div>
-          <div style="font-size:12px;font-weight:700;color:var(--gray-600);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">Hitos</div>
+          <div class="progress-bar mb-16"><div class="progress-fill" style="width:6.7%;background:#4ade80"></div></div>
+          <div style="font-size:12px;font-weight:700;color:var(--mt);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">Hitos</div>
           <div class="checklist-item">
             <div class="check-box checked"></div>
             <div class="check-text"><strong>Formación</strong> — Cursos y certificaciones</div>
@@ -896,19 +777,19 @@ textarea.form-control { min-height: 80px; resize: vertical; }
         <div class="card">
           <div class="card-title">Miguel Rocha — SME</div>
           <div class="flex items-center gap-12 mb-12">
-            <div class="avatar-sm" style="background:#00A3A3;width:44px;height:44px;font-size:14px">MR</div>
+            <div class="avatar-sm" style="background:#4ade80;width:44px;height:44px;font-size:14px">MR</div>
             <div>
-              <div style="font-size:13px;font-weight:700;color:var(--primary)">Rol actual: SME</div>
-              <div style="font-size:11px;color:var(--gray-500)">Rol objetivo: Solutions Architect · FY26</div>
-              <div style="font-size:11px;color:var(--gray-500)">Evaluador: Orlando Sanchez</div>
+              <div style="font-size:13px;font-weight:700;color:var(--or)">Rol actual: SME</div>
+              <div style="font-size:11px;color:var(--mt)">Rol objetivo: Solutions Architect · FY26</div>
+              <div style="font-size:11px;color:var(--mt)">Evaluador: Orlando Sanchez</div>
             </div>
             <div style="margin-left:auto;text-align:center">
-              <div style="font-size:22px;font-weight:800;color:var(--success)">48%</div>
-              <div style="font-size:10px;color:var(--gray-500)">% Desarrollo</div>
+              <div style="font-size:22px;font-weight:800;color:var(--gr)">48%</div>
+              <div style="font-size:10px;color:var(--mt)">% Desarrollo</div>
             </div>
           </div>
-          <div class="progress-bar mb-16"><div class="progress-fill" style="width:48%;background:var(--success)"></div></div>
-          <div style="font-size:12px;font-weight:700;color:var(--gray-600);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">Hitos</div>
+          <div class="progress-bar mb-16"><div class="progress-fill" style="width:48%;background:var(--gr)"></div></div>
+          <div style="font-size:12px;font-weight:700;color:var(--mt);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">Hitos</div>
           <div class="checklist-item">
             <div class="check-box checked"></div>
             <div class="check-text"><strong>AI Foundry + Demos</strong> — Conocimientos avanzados AI</div>
@@ -974,44 +855,44 @@ textarea.form-control { min-height: 80px; resize: vertical; }
 
           <div class="competency-row">
             <div class="comp-name">Creatividad y Proactividad</div>
-            <div class="comp-bar"><div class="comp-fill" style="width:75%;background:var(--success)"></div></div>
-            <div class="comp-score" style="color:var(--success)">7.5</div>
+            <div class="comp-bar"><div class="comp-fill" style="width:75%;background:var(--gr)"></div></div>
+            <div class="comp-score" style="color:var(--gr)">7.5</div>
             <div class="comp-label"><span class="badge badge-success">Viene Bien</span></div>
           </div>
           <div class="competency-row">
             <div class="comp-name">Orientación al Cliente</div>
-            <div class="comp-bar"><div class="comp-fill" style="width:60%;background:var(--warning)"></div></div>
-            <div class="comp-score" style="color:var(--warning)">6</div>
+            <div class="comp-bar"><div class="comp-fill" style="width:60%;background:var(--wa)"></div></div>
+            <div class="comp-score" style="color:var(--wa)">6</div>
             <div class="comp-label"><span class="badge badge-warning">Sigue Trabajando</span></div>
           </div>
           <div class="competency-row">
             <div class="comp-name">Adaptabilidad al Cambio</div>
-            <div class="comp-bar"><div class="comp-fill" style="width:80%;background:var(--success)"></div></div>
-            <div class="comp-score" style="color:var(--success)">8</div>
+            <div class="comp-bar"><div class="comp-fill" style="width:80%;background:var(--gr)"></div></div>
+            <div class="comp-score" style="color:var(--gr)">8</div>
             <div class="comp-label"><span class="badge badge-success">Viene Bien</span></div>
           </div>
           <div class="competency-row">
             <div class="comp-name">Capacidad de Análisis</div>
-            <div class="comp-bar"><div class="comp-fill" style="width:90%;background:var(--accent)"></div></div>
-            <div class="comp-score" style="color:var(--accent)">9</div>
+            <div class="comp-bar"><div class="comp-fill" style="width:90%;background:#4ade80"></div></div>
+            <div class="comp-score" style="color:#4ade80">9</div>
             <div class="comp-label"><span class="badge badge-info">Viene Súper</span></div>
           </div>
           <div class="competency-row">
             <div class="comp-name">Flexibilidad y Aprendizaje</div>
-            <div class="comp-bar"><div class="comp-fill" style="width:85%;background:var(--success)"></div></div>
-            <div class="comp-score" style="color:var(--success)">8.5</div>
+            <div class="comp-bar"><div class="comp-fill" style="width:85%;background:var(--gr)"></div></div>
+            <div class="comp-score" style="color:var(--gr)">8.5</div>
             <div class="comp-label"><span class="badge badge-success">Viene Bien</span></div>
           </div>
           <div class="competency-row">
             <div class="comp-name">Colaboración y Trabajo en Equipo</div>
-            <div class="comp-bar"><div class="comp-fill" style="width:70%;background:var(--success)"></div></div>
-            <div class="comp-score" style="color:var(--success)">7</div>
+            <div class="comp-bar"><div class="comp-fill" style="width:70%;background:var(--gr)"></div></div>
+            <div class="comp-score" style="color:var(--gr)">7</div>
             <div class="comp-label"><span class="badge badge-success">Viene Bien</span></div>
           </div>
 
           <div class="divider"></div>
           <div class="flex items-center justify-between">
-            <div><span class="text-muted">Resultado Final Competencias Genéricas:</span> <strong style="color:var(--success);font-size:16px">75 pts</strong></div>
+            <div><span class="text-muted">Resultado Final Competencias Genéricas:</span> <strong style="color:var(--gr);font-size:16px">75 pts</strong></div>
             <button class="btn btn-secondary btn-sm">📧 Enviar Evaluación</button>
           </div>
         </div>
@@ -1022,20 +903,20 @@ textarea.form-control { min-height: 80px; resize: vertical; }
           <div class="card-title">Competencias de Liderazgo</div>
           <div class="competency-row">
             <div class="comp-name">Visión Estratégica</div>
-            <div class="comp-bar"><div class="comp-fill" style="width:90%;background:var(--accent)"></div></div>
-            <div class="comp-score" style="color:var(--accent)">9</div>
+            <div class="comp-bar"><div class="comp-fill" style="width:90%;background:#4ade80"></div></div>
+            <div class="comp-score" style="color:#4ade80">9</div>
             <div class="comp-label"><span class="badge badge-info">Viene Súper</span></div>
           </div>
           <div class="competency-row">
             <div class="comp-name">Gestión de Talento</div>
-            <div class="comp-bar"><div class="comp-fill" style="width:75%;background:var(--success)"></div></div>
-            <div class="comp-score" style="color:var(--success)">7.5</div>
+            <div class="comp-bar"><div class="comp-fill" style="width:75%;background:var(--gr)"></div></div>
+            <div class="comp-score" style="color:var(--gr)">7.5</div>
             <div class="comp-label"><span class="badge badge-success">Viene Bien</span></div>
           </div>
           <div class="competency-row">
             <div class="comp-name">Gestión de Resultados</div>
-            <div class="comp-bar"><div class="comp-fill" style="width:80%;background:var(--success)"></div></div>
-            <div class="comp-score" style="color:var(--success)">8</div>
+            <div class="comp-bar"><div class="comp-fill" style="width:80%;background:var(--gr)"></div></div>
+            <div class="comp-score" style="color:var(--gr)">8</div>
             <div class="comp-label"><span class="badge badge-success">Viene Bien</span></div>
           </div>
         </div>
@@ -1065,19 +946,19 @@ textarea.form-control { min-height: 80px; resize: vertical; }
           <div class="card mb-12">
             <div class="card-title">Colaboradores</div>
             <div id="personList">
-              <div class="checklist-item" style="cursor:pointer;padding:10px 6px;border-radius:8px;background:var(--primary-pale)" onclick="">
-                <div class="avatar-sm" style="background:#1B3A5C">JM</div>
-                <div class="flex-1"><div style="font-size:13px;font-weight:600">Jorge Mercado</div><div style="font-size:11px;color:var(--gray-500)">Developer · Operations</div></div>
+              <div class="checklist-item" style="cursor:pointer;padding:10px 6px;border-radius:8px;background:rgba(255,84,0,.08)" onclick="">
+                <div class="avatar-sm" style="background:var(--or)">JM</div>
+                <div class="flex-1"><div style="font-size:13px;font-weight:600">Jorge Mercado</div><div style="font-size:11px;color:var(--mt)">Developer · Operations</div></div>
                 <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();alert('Abriendo cliente de email...')">📧</button>
               </div>
               <div class="checklist-item" style="cursor:pointer;padding:10px 6px" onclick="">
-                <div class="avatar-sm" style="background:#00A3A3">MR</div>
-                <div class="flex-1"><div style="font-size:13px;font-weight:600">Miguel Rocha</div><div style="font-size:11px;color:var(--gray-500)">SME · Operations</div></div>
+                <div class="avatar-sm" style="background:#4ade80">MR</div>
+                <div class="flex-1"><div style="font-size:13px;font-weight:600">Miguel Rocha</div><div style="font-size:11px;color:var(--mt)">SME · Operations</div></div>
                 <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();alert('Abriendo cliente de email...')">📧</button>
               </div>
               <div class="checklist-item" style="cursor:pointer;padding:10px 6px" onclick="">
                 <div class="avatar-sm" style="background:#7B1FA2">LM</div>
-                <div class="flex-1"><div style="font-size:13px;font-weight:600">Leila Martínez</div><div style="font-size:11px;color:var(--gray-500)">P&C Support · People</div></div>
+                <div class="flex-1"><div style="font-size:13px;font-weight:600">Leila Martínez</div><div style="font-size:11px;color:var(--mt)">P&C Support · People</div></div>
                 <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();alert('Abriendo cliente de email...')">📧</button>
               </div>
             </div>
@@ -1105,7 +986,7 @@ textarea.form-control { min-height: 80px; resize: vertical; }
                 </div>
               </div>
               <div class="timeline-item">
-                <div class="timeline-dot" style="background:var(--primary)"></div>
+                <div class="timeline-dot" style="background:var(--or)"></div>
                 <div class="timeline-date">23 Jul 2025 · Mensual</div>
                 <div class="timeline-card">
                   <div class="timeline-card-title">Ajuste de Objetivos FY25</div>
@@ -1117,7 +998,7 @@ textarea.form-control { min-height: 80px; resize: vertical; }
                 </div>
               </div>
               <div class="timeline-item">
-                <div class="timeline-dot" style="background:var(--success)"></div>
+                <div class="timeline-dot" style="background:var(--gr)"></div>
                 <div class="timeline-date">15 May 2025 · Kick-off</div>
                 <div class="timeline-card">
                   <div class="timeline-card-title">Comunicación de Objetivos FY25</div>
@@ -1154,7 +1035,7 @@ textarea.form-control { min-height: 80px; resize: vertical; }
       <div class="card">
         <div class="flex items-center justify-between mb-16">
           <div>
-            <div style="font-size:16px;font-weight:800;color:var(--primary)">Jorge Mercado — Reporte FY26</div>
+            <div style="font-size:16px;font-weight:800;color:var(--or)">Jorge Mercado — Reporte FY26</div>
             <div class="text-muted">Developer · Operations · Evaluador: Gastón Salguero</div>
           </div>
           <div class="flex gap-8">
@@ -1163,12 +1044,12 @@ textarea.form-control { min-height: 80px; resize: vertical; }
           </div>
         </div>
         <div class="grid-3 gap-16 mb-16">
-          <div class="kpi-card"><div class="kpi-label">Avance Objetivos</div><div class="kpi-value" style="color:var(--warning)">40%</div></div>
-          <div class="kpi-card"><div class="kpi-label">Competencias</div><div class="kpi-value" style="color:var(--success)">75pts</div></div>
-          <div class="kpi-card"><div class="kpi-label">Plan Carrera</div><div class="kpi-value" style="color:var(--accent)">6.7%</div></div>
+          <div class="kpi-card"><div class="kpi-label">Avance Objetivos</div><div class="kpi-value" style="color:var(--wa)">40%</div></div>
+          <div class="kpi-card"><div class="kpi-label">Competencias</div><div class="kpi-value" style="color:var(--gr)">75pts</div></div>
+          <div class="kpi-card"><div class="kpi-label">Plan Carrera</div><div class="kpi-value" style="color:#4ade80">6.7%</div></div>
         </div>
-        <div class="progress-label mb-12"><span class="progress-name">Resultado Final Ponderado</span><span class="progress-pct" style="color:var(--warning)">40%</span></div>
-        <div class="progress-bar" style="height:14px"><div class="progress-fill" style="width:40%;background:var(--warning)"></div></div>
+        <div class="progress-label mb-12"><span class="progress-name">Resultado Final Ponderado</span><span class="progress-pct" style="color:var(--wa)">40%</span></div>
+        <div class="progress-bar" style="height:14px"><div class="progress-fill" style="width:40%;background:var(--wa)"></div></div>
       </div>
     </section>
 
@@ -1183,10 +1064,10 @@ textarea.form-control { min-height: 80px; resize: vertical; }
       <div class="card">
         <div class="org-chart" style="text-align:center;padding:20px 0">
           <div class="org-node-wrap" style="display:inline-block">
-            <div class="org-node" style="background:var(--primary);border-color:var(--primary);color:#fff;min-width:160px">
+            <div class="org-node" style="background:var(--or);border-color:var(--or);color:#fff;min-width:160px">
               <div class="org-name" style="color:#fff">Orlando Sanchez</div>
               <div class="org-role" style="color:rgba(255,255,255,0.6)">Manager</div>
-              <div class="org-progress" style="color:var(--accent)">Equipo: 64%</div>
+              <div class="org-progress" style="color:#4ade80">Equipo: 64%</div>
             </div>
             <div class="org-connector"></div>
             <div class="org-level">
@@ -1194,19 +1075,19 @@ textarea.form-control { min-height: 80px; resize: vertical; }
                 <div class="org-node leader">
                   <div class="org-name">Gastón Salguero</div>
                   <div class="org-role">Líder Técnico</div>
-                  <div class="org-progress" style="color:var(--success)">72%</div>
+                  <div class="org-progress" style="color:var(--gr)">72%</div>
                 </div>
                 <div class="org-connector"></div>
                 <div class="org-level">
                   <div class="org-node">
                     <div class="org-name">Jorge Mercado</div>
                     <div class="org-role">Developer</div>
-                    <div class="org-progress" style="color:var(--warning)">40%</div>
+                    <div class="org-progress" style="color:var(--wa)">40%</div>
                   </div>
                   <div class="org-node">
                     <div class="org-name">Miguel Rocha</div>
                     <div class="org-role">SME</div>
-                    <div class="org-progress" style="color:var(--success)">75%</div>
+                    <div class="org-progress" style="color:var(--gr)">75%</div>
                   </div>
                 </div>
               </div>
@@ -1214,14 +1095,14 @@ textarea.form-control { min-height: 80px; resize: vertical; }
                 <div class="org-node leader">
                   <div class="org-name">Carolina Benítez</div>
                   <div class="org-role">Liderazgo P&C</div>
-                  <div class="org-progress" style="color:var(--success)">80%</div>
+                  <div class="org-progress" style="color:var(--gr)">80%</div>
                 </div>
                 <div class="org-connector"></div>
                 <div class="org-level">
                   <div class="org-node">
                     <div class="org-name">Leila Martínez</div>
                     <div class="org-role">P&C Support</div>
-                    <div class="org-progress" style="color:var(--success)">78%</div>
+                    <div class="org-progress" style="color:var(--gr)">78%</div>
                   </div>
                 </div>
               </div>
@@ -1314,8 +1195,8 @@ textarea.form-control { min-height: 80px; resize: vertical; }
             <button class="btn btn-secondary" onclick="alert('Descargando template CSV...')">⬇ Descargar Template CSV</button>
             <button class="btn btn-primary">↑ Importar CSV de Usuarios</button>
           </div>
-          <div style="font-size:11px;font-weight:700;color:var(--gray-600);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Columnas del template:</div>
-          <code style="display:block;background:var(--gray-100);border-radius:8px;padding:12px;font-size:11px;line-height:1.8;color:var(--gray-800)">
+          <div style="font-size:11px;font-weight:700;color:var(--mt);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Columnas del template:</div>
+          <code style="display:block;background:rgba(255,255,255,.04);border-radius:8px;padding:12px;font-size:11px;line-height:1.8;color:var(--tx)">
             email, full_name, role_name, area_name, app_role (employee/leader/manager/admin),<br>
             leader_email, manager_email, project_name, hire_date (YYYY-MM-DD)
           </code>
@@ -1338,8 +1219,8 @@ textarea.form-control { min-height: 80px; resize: vertical; }
           <div class="grid-2 gap-16">
             <div class="form-group"><label class="form-label">Nombre de la empresa</label><input class="form-control" placeholder="CTRL365"></div>
             <div class="form-group"><label class="form-label">URL del Logo</label><input class="form-control" placeholder="https://...logo.png"></div>
-            <div class="form-group"><label class="form-label">Color Primario</label><input class="form-control" type="color" value="#1B3A5C"></div>
-            <div class="form-group"><label class="form-label">Color Secundario</label><input class="form-control" type="color" value="#00A3A3"></div>
+            <div class="form-group"><label class="form-label">Color Primario</label><input class="form-control" type="color" value="var(--or)"></div>
+            <div class="form-group"><label class="form-label">Color Secundario</label><input class="form-control" type="color" value="#4ade80"></div>
           </div>
           <div class="form-group"><label class="form-label">Email remitente</label><input class="form-control" type="email" placeholder="peopletrack@empresa.com"></div>
           <button class="btn btn-primary btn-sm">Guardar</button>
@@ -1362,8 +1243,17 @@ textarea.form-control { min-height: 80px; resize: vertical; }
       </div>
     </section>
 
+  
   </div><!-- /content -->
 </div><!-- /main-wrap -->
+
+<!-- ======== USUARIOS ======== -->
+<div id="sec-usuarios" class="section" style="display:none">
+</div>
+
+<!-- ======== LIDERES ======== -->
+<div id="sec-lideres" class="section" style="display:none">
+</div>
 
 <!-- MODALS -->
 <div class="modal-overlay" id="newObjectiveModal">
@@ -1434,7 +1324,601 @@ textarea.form-control { min-height: 80px; resize: vertical; }
   </div>
 </div>
 
+
+
+<!-- MODAL EDIT USER -->
+<div class="mo" id="mEditUser">
+  <div class="moc">
+    <div class="moh"><div class="mot">Editar Usuario</div><button class="mox" onclick="closeM('mEditUser')">&#x2715;</button></div>
+    <div id="editUserContent"></div>
+    <div class="ma">
+      <button class="btn btn-secondary" onclick="closeM('mEditUser')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveEditUser()">Guardar Cambios</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL NUEVO USUARIO -->
+<div class="mo" id="mNewUser">
+  <div class="moc">
+    <div class="moh"><div class="mot">Nuevo Usuario</div><button class="mox" onclick="closeM('mNewUser')">&#x2715;</button></div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Nombre</label><input class="fc" id="nu_fn" placeholder="Juan"></div>
+      <div class="fg"><label class="fl">Apellido</label><input class="fc" id="nu_ln" placeholder="Perez"></div>
+    </div>
+    <div class="fg"><label class="fl">Email corporativo</label><input class="fc" id="nu_em" placeholder="jperez@ctrl365.com"></div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Area</label>
+        <select class="fc" id="nu_ar"><option value="">Seleccionar</option><option>Operations</option><option>People &amp; Culture</option><option>Administration &amp; Finance</option><option>Sales &amp; Strategy</option><option>Technology</option></select>
+      </div>
+      <div class="fg"><label class="fl">Rol sistema</label>
+        <select class="fc" id="nu_ro"><option value="employee">Empleado</option><option value="leader">Lider</option><option value="manager">Manager</option><option value="admin">Admin</option></select>
+      </div>
+    </div>
+    <div class="fg"><label class="fl">Cargo / Rol tecnico</label><input class="fc" id="nu_jr" placeholder="Developer, SME..."></div>
+    <div class="fg"><label class="fl">Lider tecnico</label><select class="fc" id="nu_le"><option value="">Sin lider</option></select></div>
+    <div class="fg"><label class="fl">Manager (People)</label><select class="fc" id="nu_ma"><option value="">Sin manager</option></select></div>
+    <div class="fg" style="display:flex;align-items:center;gap:12px">
+      <label class="fl" style="margin:0">Activo</label>
+      <label class="tog"><input type="checkbox" id="nu_ac" checked><span class="togs"></span></label>
+    </div>
+    <div class="ma">
+      <button class="btn btn-secondary" onclick="closeM('mNewUser')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveNewUser()">Crear Usuario</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ASIGNAR LIDER -->
+<div class="mo" id="mAsignarLider">
+  <div class="moc">
+    <div class="moh"><div class="mot">Asignar Lider Tecnico</div><button class="mox" onclick="closeM('mAsignarLider')">&#x2715;</button></div>
+    <div class="help-tip" style="margin-bottom:14px">&#128161; Al asignar como lider el AppRole cambia a <strong>leader</strong>. Podra ver su equipo en el dashboard.</div>
+    <div class="fg"><label class="fl">Promover como lider</label><select class="fc" id="al_cand"><option value="">Seleccionar</option></select></div>
+    <div class="fg"><label class="fl">Colaboradores que liderara (Ctrl+Click para varios)</label>
+      <select class="fc" multiple id="al_team" style="min-height:100px"></select></div>
+    <div class="fg"><label class="fl">Proyecto / Celula</label><input class="fc" id="al_proj" placeholder="Galicia Seguros"></div>
+    <div class="ma">
+      <button class="btn btn-secondary" onclick="closeM('mAsignarLider')">Cancelar</button>
+      <button class="btn btn-primary" onclick="doAsignarLider()">Asignar como Lider</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
 <script>
+// ── CONFIG ────────────────────────────────────────────────
+const API_URL = 'https://peopletrack-api-gjbbhhcefjbgc6bd.eastus2-01.azurewebsites.net/api';
+let _token = null;
+let _userEmail = null;
+let _userName = null;
+let _userData = null;
+
+// ── AUTH (Azure Static Web Apps built-in) ─────────────────
+function doLogin() {
+  window.location.href = '/.auth/login/aad?post_login_redirect_uri=' + encodeURIComponent(window.location.pathname);
+}
+function demoLogin() {
+  document.getElementById('ssoScreen').style.display = 'none';
+  initApp({ name:'Orlando Sanchez (Demo)', email:'osanchez@ctrl365.com' });
+}
+
+window.addEventListener('load', async () => {
+  const st = document.getElementById('ssoStatus');
+  if(st) st.textContent = 'Verificando sesion...';
+  try {
+    const resp = await fetch('/.auth/me');
+    if (resp.ok) {
+      const data = await resp.json();
+      if (data.clientPrincipal) {
+        const u = data.clientPrincipal;
+        initApp({ name: u.userDetails || u.userId, email: u.userDetails });
+        return;
+      }
+    }
+  } catch(e) { console.log('No SWA auth endpoint'); }
+  if(st) st.textContent = '';
+});
+
+function initApp(user) {
+  _userName  = user.name;
+  _userEmail = user.email;
+  document.getElementById('ssoScreen').style.display = 'none';
+  const ini = _userName.split(' ').filter(Boolean).map(n=>n[0]).join('').slice(0,2).toUpperCase();
+  document.getElementById('userAvatar').textContent = ini;
+  document.getElementById('userName').textContent   = _userName;
+  document.getElementById('userRole').textContent   = _userEmail;
+  // Load real data from API
+  loadDashboardData();
+  renderTeamProgress();
+  drawDonut();
+}
+
+// ── API CLIENT ─────────────────────────────────────────────
+async function apiGet(path) {
+  const headers = { 'Content-Type': 'application/json' };
+  if(_token) headers['Authorization'] = 'Bearer ' + _token;
+  const resp = await fetch(API_URL + path, { headers });
+  if(!resp.ok) throw new Error('API error: ' + resp.status);
+  return resp.json();
+}
+async function apiPost(path, body) {
+  const headers = { 'Content-Type': 'application/json' };
+  if(_token) headers['Authorization'] = 'Bearer ' + _token;
+  const resp = await fetch(API_URL + path, { method:'POST', headers, body:JSON.stringify(body) });
+  if(!resp.ok) throw new Error('API error: ' + resp.status);
+  return resp.json();
+}
+async function apiPut(path, body) {
+  const headers = { 'Content-Type': 'application/json' };
+  if(_token) headers['Authorization'] = 'Bearer ' + _token;
+  const resp = await fetch(API_URL + path, { method:'PUT', headers, body:JSON.stringify(body) });
+  if(!resp.ok) throw new Error('API error: ' + resp.status);
+  return resp.json();
+}
+
+// ── DASHBOARD DATA (API real) ──────────────────────────────
+let dashData = null;
+let usersData = [];
+
+async function loadDashboardData() {
+  const badge = document.getElementById('apiStatusBadge');
+  try {
+    badge.className = 'api-status loading';
+    badge.innerHTML = '<span class="api-dot"></span>Conectando...';
+    // Health check
+    await apiGet('/health');
+    badge.className = 'api-status ok';
+    badge.innerHTML = '<span class="api-dot"></span>API conectada';
+    // Load users
+    try {
+      const data = await apiGet('/users');
+      if(data && data.length) {
+        usersData = data;
+        // Re-render team progress with real data
+        renderTeamProgressReal(data);
+        // Update KPI
+        const kpiEl = document.querySelector('.kpi-value');
+        if(kpiEl) kpiEl.textContent = data.filter(u=>u.IsActive).length;
+      }
+    } catch(e) { console.log('Users endpoint:', e.message); }
+    // Load dashboard
+    try {
+      dashData = await apiGet('/dashboard');
+    } catch(e) { console.log('Dashboard endpoint:', e.message); }
+  } catch(e) {
+    badge.className = 'api-status err';
+    badge.innerHTML = '<span class="api-dot"></span>API sin conexion';
+    console.log('API health check failed:', e.message);
+  }
+}
+
+function renderTeamProgressReal(users) {
+  const el = document.getElementById('teamProgressList');
+  if(!el || !users.length) return;
+  const active = users.filter(u=>u.IsActive).slice(0,10);
+  const COLORS = ['#FF5400','#4ade80','#60a5fa','#a78bfa','#f472b6','#34d399','#fbbf24','#cc4400'];
+  function ac(n){let h=0;for(let c of (n||''))h=(h*31+c.charCodeAt(0))%COLORS.length;return COLORS[h];}
+  function ini(n){return (n||'??').split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase();}
+  el.innerHTML = active.map(u => {
+    const pct = u.AvgProgress || Math.floor(Math.random()*60)+20;
+    const color = pct>=70?'var(--gr)':pct>=40?'var(--wa)':'var(--er)';
+    return `<div style="margin-bottom:11px">
+      <div class="progress-label">
+        <div class="person-chip">
+          <div class="avatar-sm" style="background:${ac(u.FullName)};width:24px;height:24px;font-size:9px">${ini(u.FullName)}</div>
+          <span class="progress-name">${u.FullName}</span>
+        </div>
+        <span class="progress-pct" style="color:${color}">${pct}%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${color}"></div></div>
+    </div>`;
+  }).join('');
+}
+
+// ── TEAM DATA (fallback) ───────────────────────────────────
+const teamData = [
+  {name:'Jorge Mercado',init:'JM',color:'var(--or)',pct:40,status:'warning'},
+  {name:'Miguel Rocha',init:'MR',color:'#4ade80',pct:75,status:'success'},
+  {name:'Leila Martinez',init:'LM',color:'#a78bfa',pct:78,status:'success'},
+  {name:'Ana Gomez',init:'AG',color:'#f472b6',pct:65,status:'warning'},
+  {name:'Carlos Vega',init:'CV',color:'#60a5fa',pct:88,status:'success'},
+  {name:'Sol Rios',init:'SR',color:'#34d399',pct:55,status:'warning'},
+  {name:'Pablo Diaz',init:'PD',color:'var(--er)',pct:20,status:'danger'},
+  {name:'Maria Torres',init:'MT',color:'#fbbf24',pct:92,status:'success'},
+];
+
+function renderTeamProgress(){
+  if(usersData.length) return; // Si hay datos reales, no sobreescribir
+  const el=document.getElementById('teamProgressList');
+  if(!el)return;
+  el.innerHTML=teamData.map(p=>{
+    const c=p.status==='success'?'var(--gr)':p.status==='warning'?'var(--wa)':'var(--er)';
+    return `<div style="margin-bottom:11px">
+      <div class="progress-label">
+        <div class="person-chip">
+          <div class="avatar-sm" style="background:${p.color};width:24px;height:24px;font-size:9px">${p.init}</div>
+          <span class="progress-name">${p.name}</span>
+        </div>
+        <span class="progress-pct" style="color:${c}">${p.pct}%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${p.pct}%;background:${c}"></div></div>
+    </div>`;
+  }).join('');
+}
+
+function drawDonut(){
+  const canvas=document.getElementById('donutChart');
+  if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  const w=canvas.width,h=canvas.height,cx=w/2,cy=h/2,r=60,inner=38;
+  const data=[{v:3,c:'#f87171'},{v:3,c:'#fbbf24'},{v:2,c:'#4ade80'}];
+  const total=data.reduce((a,d)=>a+d.v,0);
+  let start=-Math.PI/2;
+  ctx.clearRect(0,0,w,h);
+  data.forEach(d=>{
+    const angle=(d.v/total)*2*Math.PI;
+    ctx.beginPath();ctx.moveTo(cx,cy);
+    ctx.arc(cx,cy,r,start,start+angle);
+    ctx.closePath();ctx.fillStyle=d.c;ctx.fill();
+    start+=angle;
+  });
+  ctx.beginPath();ctx.arc(cx,cy,inner,0,2*Math.PI);
+  ctx.fillStyle='#161616';ctx.fill();
+  ctx.fillStyle='var(--or)';ctx.font='bold 13px Sora';
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText('8',cx,cy-6);
+  ctx.font='9px Inter';ctx.fillStyle='#888580';
+  ctx.fillText('total',cx,cy+8);
+  const legend=document.getElementById('donutLegend');
+  if(legend)legend.innerHTML=[
+    {c:'#f87171',l:'En Riesgo',n:3},
+    {c:'#fbbf24',l:'En Curso',n:3},
+    {c:'#4ade80',l:'En Verde',n:2}
+  ].map(d=>`<div class="donut-legend-item"><div class="donut-dot" style="background:${d.c}"></div>${d.l} <strong style="margin-left:auto">${d.n}</strong></div>`).join('');
+}
+
+// ── SECTION NAVIGATION ─────────────────────────────────────
+const titles={
+  dashboard:'Dashboard',objectives:'Objetivos',career:'Plan de Carrera',
+  competencies:'Competencias',oneononex:'Reuniones 1:1',reports:'Reportes',
+  orgchart:'Organigrama',alerts:'Alertas',settings:'Configuracion',help:'Ayuda',
+  usuarios:'Gestion de Usuarios',lideres:'Gestion de Lideres'
+};
+
+function showSection(id){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const sec=document.getElementById('sec-'+id);
+  if(sec)sec.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>{
+    if(n.getAttribute('onclick')&&n.getAttribute('onclick').includes("'"+id+"'"))n.classList.add('active');
+  });
+  document.getElementById('topbarTitle').textContent=titles[id]||id;
+  if(id==='usuarios')loadUsuariosSection();
+  if(id==='lideres')loadLideresSection();
+}
+
+// ── TAB SWITCHING ──────────────────────────────────────────
+function switchTab(prefix,id,el){
+  const parent=el.closest('.tabs');
+  parent.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('[id^="'+prefix+'-"]').forEach(p=>{p.style.display=p.id===prefix+'-'+id?'block':'none';});
+  const target=document.getElementById(prefix+'-'+id);
+  if(target)target.style.display='block';
+}
+
+// ── MODALS ─────────────────────────────────────────────────
+function showModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function openM(id){document.getElementById(id).classList.add('open');}
+function closeM(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.modal-overlay,.mo').forEach(m=>{
+  m.addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
+});
+
+// ── TOAST ──────────────────────────────────────────────────
+function showT(msg,err=false){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast show'+(err?' err':'');
+  setTimeout(()=>t.className='toast',3000);
+}
+
+// ── USUARIOS SECTION ───────────────────────────────────────
+const AVCOLORS=['#FF5400','#4ade80','#60a5fa','#a78bfa','#f472b6','#34d399','#fbbf24','#cc4400','#e879f9','#2dd4bf'];
+function avColor(n){let h=0;for(let c of(n||''))h=(h*31+c.charCodeAt(0))%AVCOLORS.length;return AVCOLORS[h];}
+function avIni(n){return(n||'??').split(' ').filter(Boolean).map(p=>p[0]).join('').slice(0,2).toUpperCase();}
+
+let uFilter='all',uSearch='',uRole='',uPage=1;
+const PS=15;
+
+function getFiltered(){
+  return usersData.filter(u=>{
+    if(uFilter==='active'&&!u.IsActive)return false;
+    if(uFilter==='inactive'&&u.IsActive)return false;
+    if(uFilter==='manager'&&u.AppRole!=='manager')return false;
+    if(uFilter==='leader'&&u.AppRole!=='leader')return false;
+    if(uFilter==='noLeader'&&u.LeaderName)return false;
+    if(uRole&&u.AppRole!==uRole)return false;
+    if(uSearch){const q=uSearch.toLowerCase();if(!(u.FullName||'').toLowerCase().includes(q)&&!(u.Email||'').toLowerCase().includes(q))return false;}
+    return true;
+  });
+}
+
+function roleBadge(r){
+  const m={admin:'badge-info Admin',manager:'badge-primary Manager',leader:'badge-warning Lider',employee:'badge-gray Empleado'};
+  const p=(m[r]||'badge-gray Empleado').split(' ');
+  return `<span class="badge ${p[0]}">${p[1]}</span>`;
+}
+
+function renderUsersTable(){
+  const f=getFiltered(),tot=f.length,pgs=Math.max(1,Math.ceil(tot/PS));
+  if(uPage>pgs)uPage=1;
+  const sl=f.slice((uPage-1)*PS,uPage*PS);
+  const tbody=document.getElementById('uTbody');
+  if(!tbody)return;
+  tbody.innerHTML=sl.map(u=>`<tr>
+    <td><div class="person-chip">
+      <div class="avatar-sm" style="background:${avColor(u.FullName)}">${avIni(u.FullName)}</div>
+      <div><div style="font-weight:600">${u.FullName||''}</div>
+      <div style="font-size:10px;color:var(--mt)">${u.RoleName||''}</div></div>
+    </div></td>
+    <td style="color:var(--mt);font-size:11px">${u.Email||''}</td>
+    <td style="font-size:11px">${u.AreaName||'-'}</td>
+    <td>${roleBadge(u.AppRole)}</td>
+    <td style="font-size:11px">${u.LeaderName?`<span style="color:var(--wa)">${u.LeaderName}</span>`:'<span style="color:var(--mt2);font-style:italic">Sin asignar</span>'}</td>
+    <td style="font-size:11px">${u.ManagerName?`<span style="color:var(--or)">${u.ManagerName}</span>`:'<span style="color:var(--mt2)">-</span>'}</td>
+    <td><label class="tog" onclick="toggleActive(${u.UserID},event)"><input type="checkbox" ${u.IsActive?'checked':''} readonly><span class="togs"></span></label></td>
+    <td><div style="display:flex;gap:5px">
+      <button class="btn btn-secondary btn-sm" onclick="editUser(${u.UserID})">✎</button>
+      <button class="btn btn-secondary btn-sm" onclick="openM('mAsignarLider')" title="Asignar lider">★</button>
+    </div></td>
+  </tr>`).join('');
+  document.getElementById('uPagInfo').textContent=tot===0?'Sin resultados':`Mostrando ${(uPage-1)*PS+1}-${Math.min(uPage*PS,tot)} de ${tot}`;
+  const pb=document.getElementById('uPagBtns');pb.innerHTML='';
+  for(let i=1;i<=Math.min(pgs,7);i++){
+    const b=document.createElement('button');b.className='pb'+(i===uPage?' act':'');
+    b.textContent=i;b.onclick=()=>{uPage=i;renderUsersTable();};pb.appendChild(b);
+  }
+}
+
+async function loadUsuariosSection(){
+  const sec=document.getElementById('sec-usuarios');
+  if(!sec)return;
+  // Stats
+  const total=usersData.length,active=usersData.filter(u=>u.IsActive).length;
+  const managers=usersData.filter(u=>u.AppRole==='manager').length;
+  const leaders=usersData.filter(u=>u.AppRole==='leader').length;
+  const noLeader=usersData.filter(u=>u.IsActive&&!u.LeaderName).length;
+
+  sec.innerHTML=`
+  <div class="section-header" style="margin-bottom:16px">
+    <div><div class="section-heading">Gestion de Usuarios</div>
+    <div class="section-subheading">Alta, baja, modificacion y asignacion de roles y lideres</div></div>
+  </div>
+  <div class="stats-row-u">
+    <div class="stat-card-u"><div class="stat-lbl">Total</div><div class="stat-val" style="color:var(--or)">${total}</div><div class="stat-sub">En base de datos</div></div>
+    <div class="stat-card-u"><div class="stat-lbl">Activos</div><div class="stat-val" style="color:var(--gr)">${active}</div><div class="stat-sub">Azure AD enabled</div></div>
+    <div class="stat-card-u"><div class="stat-lbl">Managers</div><div class="stat-val" style="color:var(--bl)">${managers}</div><div class="stat-sub">Con equipo asignado</div></div>
+    <div class="stat-card-u"><div class="stat-lbl">Sin lider</div><div class="stat-val" style="color:var(--wa)">${noLeader}</div><div class="stat-sub">Activos sin lider tecnico</div></div>
+  </div>
+  <div style="display:flex;gap:4px;background:rgba(255,255,255,.03);border-radius:8px;padding:3px;margin-bottom:16px;width:fit-content">
+    ${['all:Todos','active:Activos','inactive:Inactivos','manager:Managers','leader:Lideres','noLeader:Sin lider'].map(t=>{
+      const[v,l]=t.split(':');
+      return `<div class="tab ${uFilter===v?'active':''}" onclick="uFilter='${v}';uPage=1;renderUsersTable();document.querySelectorAll('.utab').forEach(x=>x.classList.remove('active'));this.classList.add('active')" style="border-bottom:none;border-radius:5px;padding:5px 12px" class="utab">${l}</div>`;
+    }).join('')}
+  </div>
+  <div class="toolbar">
+    <div class="search-box"><span style="color:var(--mt);font-size:13px">&#128269;</span>
+      <input type="text" placeholder="Buscar nombre o email..." oninput="uSearch=this.value;uPage=1;renderUsersTable()"></div>
+    <select class="fsel" onchange="uRole=this.value;uPage=1;renderUsersTable()">
+      <option value="">Todos los roles</option>
+      <option value="admin">Admin</option><option value="manager">Manager</option>
+      <option value="leader">Lider</option><option value="employee">Empleado</option>
+    </select>
+    <button class="btn btn-secondary btn-sm" onclick="exportUsersCSV()">⬇ Exportar</button>
+    <button class="btn btn-primary btn-sm" onclick="openM('mNewUser')">+ Nuevo Usuario</button>
+  </div>
+  <div class="user-table-wrap">
+    <table class="data-table"><thead><tr>
+      <th>Colaborador</th><th>Email</th><th>Area</th><th>Rol</th>
+      <th>Lider tecnico</th><th>Manager</th><th>Activo</th><th>Acciones</th>
+    </tr></thead><tbody id="uTbody"></tbody></table>
+  </div>
+  <div class="pag"><span id="uPagInfo"></span><div class="pag-btns" id="uPagBtns"></div></div>`;
+
+  // If no data loaded yet, fetch
+  if(!usersData.length){
+    try{
+      usersData=await apiGet('/users');
+    }catch(e){console.log('Users API error:',e);}
+  }
+  renderUsersTable();
+  populateLeaderDropdowns();
+}
+
+function populateLeaderDropdowns(){
+  const leaders=usersData.filter(u=>u.AppRole==='leader'||u.AppRole==='manager');
+  const managers=usersData.filter(u=>u.AppRole==='manager');
+  const emps=usersData.filter(u=>u.IsActive&&u.AppRole==='employee');
+  ['nu_le','eu_leader'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.innerHTML='<option value="">Sin lider</option>'+leaders.map(l=>`<option value="${l.UserID}">${l.FullName}</option>`).join('');
+  });
+  ['nu_ma','eu_manager'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.innerHTML='<option value="">Sin manager</option>'+managers.map(m=>`<option value="${m.UserID}">${m.FullName}</option>`).join('');
+  });
+  const cand=document.getElementById('al_cand');
+  if(cand)cand.innerHTML='<option value="">Seleccionar</option>'+usersData.filter(u=>u.IsActive).map(u=>`<option value="${u.UserID}">${u.FullName} (${u.AppRole})</option>`).join('');
+  const team=document.getElementById('al_team');
+  if(team)team.innerHTML=emps.map(u=>`<option value="${u.UserID}">${u.FullName}</option>`).join('');
+}
+
+// Toggle activo/inactivo
+async function toggleActive(id,e){
+  e.preventDefault();e.stopPropagation();
+  const u=usersData.find(x=>x.UserID===id);if(!u)return;
+  u.IsActive=!u.IsActive;
+  try{
+    await apiPut('/users/'+id,{IsActive:u.IsActive});
+    showT(u.IsActive?'Usuario activado':'Usuario desactivado');
+  }catch(err){showT('Error al actualizar',true);u.IsActive=!u.IsActive;}
+  renderUsersTable();
+}
+
+// Editar usuario
+let editingId=null;
+function editUser(id){
+  const u=usersData.find(x=>x.UserID===id);if(!u)return;
+  editingId=id;
+  const leaders=usersData.filter(x=>x.AppRole==='leader'||x.AppRole==='manager');
+  const managers=usersData.filter(x=>x.AppRole==='manager');
+  document.getElementById('editUserContent').innerHTML=`
+    <div class="fr"><div class="fg"><label class="fl">Nombre completo</label><input class="fc" id="eu_n" value="${u.FullName||''}"></div>
+    <div class="fg"><label class="fl">Email</label><input class="fc" id="eu_e" value="${u.Email||''}"></div></div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Rol sistema</label><select class="fc" id="eu_r">
+        ${['employee','leader','manager','admin'].map(r=>`<option value="${r}" ${u.AppRole===r?'selected':''}>${r.charAt(0).toUpperCase()+r.slice(1)}</option>`).join('')}
+      </select></div>
+      <div class="fg"><label class="fl">Area</label><input class="fc" id="eu_area" value="${u.AreaName||''}"></div>
+    </div>
+    <div class="fg"><label class="fl">Lider tecnico</label><select class="fc" id="eu_leader">
+      <option value="">Sin lider</option>${leaders.map(l=>`<option value="${l.UserID}" ${u.LeaderID===l.UserID?'selected':''}>${l.FullName}</option>`).join('')}
+    </select></div>
+    <div class="fg"><label class="fl">Manager (People)</label><select class="fc" id="eu_manager">
+      <option value="">Sin manager</option>${managers.map(m=>`<option value="${m.UserID}" ${u.ManagerID===m.UserID?'selected':''}>${m.FullName}</option>`).join('')}
+    </select></div>
+    <div class="fg" style="display:flex;align-items:center;gap:12px">
+      <label class="fl" style="margin:0">Activo</label>
+      <label class="tog"><input type="checkbox" id="eu_ac" ${u.IsActive?'checked':''}><span class="togs"></span></label>
+    </div>`;
+  openM('mEditUser');
+}
+
+async function saveEditUser(){
+  const u=usersData.find(x=>x.UserID===editingId);if(!u)return;
+  const updates={
+    FullName:document.getElementById('eu_n').value,
+    Email:document.getElementById('eu_e').value,
+    AppRole:document.getElementById('eu_r').value,
+    IsActive:document.getElementById('eu_ac').checked
+  };
+  try{
+    await apiPut('/users/'+editingId,updates);
+    Object.assign(u,updates);
+    closeM('mEditUser');renderUsersTable();showT('Usuario actualizado');
+  }catch(e){showT('Error al guardar',true);}
+}
+
+async function saveNewUser(){
+  const fn=document.getElementById('nu_fn').value,ln=document.getElementById('nu_ln').value;
+  const em=document.getElementById('nu_em').value;
+  if(!em){alert('El email es obligatorio');return;}
+  const body={
+    FullName:`${fn} ${ln}`.trim(),Email:em,
+    AppRole:document.getElementById('nu_ro').value,
+    IsActive:document.getElementById('nu_ac').checked
+  };
+  try{
+    const result=await apiPost('/users',body);
+    usersData.push(result);
+    closeM('mNewUser');loadUsuariosSection();showT(`Usuario ${fn} ${ln} creado`);
+  }catch(e){
+    // Fallback local
+    usersData.push({UserID:Date.now(),...body});
+    closeM('mNewUser');loadUsuariosSection();showT(`Usuario creado (sin API)`);
+  }
+}
+
+function exportUsersCSV(){
+  const f=getFiltered();
+  const h='Nombre,Email,Area,Rol,Lider,Manager,Activo\n';
+  const r=f.map(u=>`"${u.FullName}","${u.Email}","${u.AreaName||''}","${u.AppRole}","${u.LeaderName||''}","${u.ManagerName||''}","${u.IsActive?'Si':'No'}"`).join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([h+r],{type:'text/csv'}));
+  a.download='usuarios_'+new Date().toISOString().slice(0,10)+'.csv';a.click();
+  showT(`CSV exportado: ${f.length} usuarios`);
+}
+
+// ── LIDERES SECTION ────────────────────────────────────────
+async function loadLideresSection(){
+  const sec=document.getElementById('sec-lideres');if(!sec)return;
+  if(!usersData.length){try{usersData=await apiGet('/users');}catch(e){}}
+  const ldrs=usersData.filter(u=>u.AppRole==='leader'||u.AppRole==='manager');
+  sec.innerHTML=`
+  <div class="section-header" style="margin-bottom:16px">
+    <div><div class="section-heading">Gestion de Lideres</div>
+    <div class="section-subheading">Define lideres tecnicos y gestiona sus equipos</div></div>
+    <button class="btn btn-primary btn-sm" onclick="openM('mAsignarLider')">+ Asignar Lider</button>
+  </div>
+  <div class="help-tip">&#128161; Los <strong>lideres tecnicos</strong> son distintos a los <strong>managers de personas</strong>. Un colaborador puede tener un lider tecnico por proyecto y un manager de RRHH diferente.</div>
+  ${ldrs.length===0?'<div class="card" style="text-align:center;padding:40px;color:var(--mt)">No hay lideres configurados aun. Usa el boton + Asignar Lider.</div>':
+    ldrs.map(l=>{
+      const team=usersData.filter(u=>u.LeaderID===l.UserID||u.ManagerID===l.UserID);
+      return `<div class="lcard">
+        <div style="display:flex;align-items:center;gap:11px;margin-bottom:10px">
+          <div class="avatar-sm" style="background:${avColor(l.FullName)};width:38px;height:38px;font-size:13px">${avIni(l.FullName)}</div>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:600;color:var(--tx)">${l.FullName}</div>
+            <div style="font-size:10px;color:var(--mt)">${l.RoleName||l.AppRole} &middot; ${l.AreaName||''}</div>
+            <div style="margin-top:4px">${roleBadge(l.AppRole)}</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:22px;font-weight:800;color:var(--or);font-family:var(--font-head)">${team.length}</div>
+            <div style="font-size:10px;color:var(--mt)">colaboradores</div>
+          </div>
+        </div>
+        <div class="lteam">
+          ${team.slice(0,8).map(t=>`<div class="lchip"><div class="ldot" style="background:${avColor(t.FullName)}"></div>${t.FullName}</div>`).join('')}
+          ${team.length>8?`<div class="lchip">+${team.length-8} mas</div>`:''}
+          ${team.length===0?'<span style="font-size:11px;color:var(--mt2);font-style:italic">Sin colaboradores asignados aun</span>':''}
+        </div>
+        <div class="lac">
+          <button class="btn btn-secondary btn-sm" onclick="editUser(${l.UserID})">✎ Editar perfil</button>
+          ${l.AppRole!=='admin'?`<button class="btn btn-danger btn-sm" onclick="removeLeader(${l.UserID})">&#x2715; Quitar rol lider</button>`:''}
+        </div>
+      </div>`;
+    }).join('')
+  }`;
+  populateLeaderDropdowns();
+}
+
+async function removeLeader(id){
+  const u=usersData.find(x=>x.UserID===id);if(!u)return;
+  if(!confirm(`Quitar rol de lider a ${u.FullName}?`))return;
+  try{
+    await apiPut('/users/'+id,{AppRole:'employee'});
+    u.AppRole='employee';
+    loadLideresSection();showT(`Rol de lider removido de ${u.FullName}`);
+  }catch(e){showT('Error al actualizar',true);}
+}
+
+async function doAsignarLider(){
+  const candId=document.getElementById('al_cand').value;
+  if(!candId){alert('Selecciona un usuario');return;}
+  const u=usersData.find(x=>x.UserID==candId);if(!u)return;
+  const proj=document.getElementById('al_proj').value;
+  const teamIds=Array.from(document.getElementById('al_team').selectedOptions).map(o=>o.value);
+  try{
+    await apiPut('/users/'+candId,{AppRole:'leader'});
+    u.AppRole='leader';
+    // Assign leader to team members
+    for(const tid of teamIds){
+      const tm=usersData.find(x=>x.UserID==tid);
+      if(tm){
+        try{await apiPut('/users/'+tid,{LeaderID:parseInt(candId)}); tm.LeaderID=parseInt(candId);tm.LeaderName=u.FullName;}
+        catch(e){console.log('Error assigning leader to',tid);}
+      }
+    }
+    closeM('mAsignarLider');loadLideresSection();
+    showT(`${u.FullName} asignado como lider con ${teamIds.length} colaboradores`);
+  }catch(e){showT('Error al asignar lider',true);}
+}
+
+
 const titles = {
   dashboard:'Dashboard',objectives:'Objetivos',career:'Plan de Carrera',
   competencies:'Competencias',oneononex:'Reuniones 1:1',reports:'Reportes',
@@ -1541,25 +2025,18 @@ document.querySelectorAll('.modal-overlay').forEach(m=>{
   m.addEventListener('click',function(e){ if(e.target===this) this.classList.remove('open'); });
 });
 
-// ── Azure Static Web Apps Built-in Auth ──────────────────────
-// Usa el endpoint /.auth/me que Azure Static Web Apps provee nativamente
-// No requiere MSAL ni configuracion adicional — funciona con el SSO configurado
+// ── MSAL Azure AD SSO ────────────────────────────────────────
+const msalConfig = {
+  auth: {
+    clientId: 'c0b603ae-49f9-4eca-8c0b-1aa157d815f7',
+    authority: 'https://login.microsoftonline.com/0724e2c4-d4b6-49dd-9a1f-e0ec4f0b435c',
+    redirectUri: 'https://yellow-water-0d91cc40f.1.azurestaticapps.net'
+  },
+  cache: { cacheLocation: 'sessionStorage' }
+};
 
-async function doLogin() {
-  // Redirigir al endpoint de login de Azure Static Web Apps con Azure AD
-  window.location.href = '/.auth/login/aad?post_login_redirect_uri=' + encodeURIComponent(window.location.pathname);
-}
-
-function demoLogin() {
-  document.getElementById('ssoScreen').style.display = 'none';
-  renderTeamProgress();
-  drawDonut();
-}
-
-function setStatus(msg, color) {
-  const st = document.getElementById('ssoStatus');
-  if(st){ st.textContent = msg; st.style.color = color||'#FF5400'; }
-}
+let msalApp = null;
+let msalReady = false;
 
 function setButtons(enabled, text) {
   const b1 = document.getElementById('btnAzureLogin');
@@ -1570,41 +2047,97 @@ function setButtons(enabled, text) {
   if(bt) bt.textContent = text;
 }
 
-function onLoginSuccess(user) {
+function setStatus(msg, color) {
+  const st = document.getElementById('ssoStatus');
+  if(st){ st.textContent = msg; st.style.color = color||'#FF5400'; }
+}
+
+async function waitForMSAL() {
+  let attempts = 0;
+  // Try both msal and msalBrowser global names
+  while (typeof msal === 'undefined' && typeof msalBrowser === 'undefined' && attempts < 40) {
+    await new Promise(r => setTimeout(r, 200));
+    attempts++;
+  }
+  if (typeof msal === 'undefined' && typeof msalBrowser === 'undefined') {
+    throw new Error('MSAL not loaded after ' + (attempts * 200) + 'ms');
+  }
+}
+
+async function initMSAL() {
+  await waitForMSAL();
+  // Use whichever global is available
+  const msalLib = (typeof msal !== 'undefined') ? msal : msalBrowser;
+  msalApp = new msalLib.PublicClientApplication(msalConfig);
+  await msalApp.initialize();
+  await msalApp.handleRedirectPromise();
+  msalReady = true;
+}
+
+window.addEventListener('load', async () => {
+  setStatus('Conectando con Azure AD...', '#888580');
+  try {
+    await initMSAL();
+    setButtons(true, 'Iniciar sesion con Azure AD');
+    setStatus('');
+    const accounts = msalApp.getAllAccounts();
+    if (accounts.length > 0) {
+      try {
+        const result = await msalApp.acquireTokenSilent({
+          scopes: ['openid','profile','email','User.Read'],
+          account: accounts[0]
+        });
+        onLoginSuccess(result);
+      } catch(e) { setStatus(''); }
+    }
+  } catch(e) {
+    console.error('MSAL init failed:', e);
+    setButtons(true, 'Iniciar sesion con Azure AD');
+    setStatus('Error conectando Azure AD. Reintentando...', '#f87171');
+  }
+});
+
+async function doLogin() {
+  if (!msalReady) {
+    setStatus('Cargando...', '#FF5400');
+    try { await initMSAL(); setButtons(true,'Iniciar sesion con Azure AD'); setStatus(''); }
+    catch(e) { setStatus('No se pudo conectar con Azure AD', '#f87171'); return; }
+  }
+  try {
+    setStatus('Abriendo ventana de login...', '#FF5400');
+    const result = await msalApp.loginPopup({
+      scopes: ['openid','profile','email','User.Read']
+    });
+    setStatus('');
+    onLoginSuccess(result);
+  } catch(e) {
+    if (e.errorCode !== 'user_cancelled') {
+      setStatus('Error: ' + (e.errorMessage || e.message || ''), '#f87171');
+    } else { setStatus(''); }
+  }
+}
+
+function demoLogin() {
   document.getElementById('ssoScreen').style.display = 'none';
-  const name     = user.userDetails || user.userId || 'Usuario';
-  const email    = user.userDetails || '';
-  const initials = name.split(/[ @]/).filter(Boolean).map(n=>n[0]).join('').slice(0,2).toUpperCase();
-  document.querySelector('.user-info .name').textContent = name;
-  document.querySelector('.user-info .role').textContent = email;
-  document.querySelector('.user-avatar').textContent = initials || 'U';
-  window._userEmail = email;
-  window._userName  = name;
   renderTeamProgress();
   drawDonut();
 }
 
-// Al cargar: verificar si ya hay sesion via /.auth/me
-window.addEventListener('load', async () => {
-  setStatus('Verificando sesion...', '#888580');
-  try {
-    const resp = await fetch('/.auth/me');
-    if (resp.ok) {
-      const data = await resp.json();
-      if (data.clientPrincipal) {
-        // Ya tiene sesion activa
-        onLoginSuccess(data.clientPrincipal);
-        return;
-      }
-    }
-  } catch(e) {
-    console.log('No auth endpoint (local dev mode)');
-  }
-  // No hay sesion, mostrar pantalla de login
-  setButtons(true, 'Iniciar sesion con Azure AD');
-  setStatus('');
+function onLoginSuccess(result) {
+  document.getElementById('ssoScreen').style.display = 'none';
+  const name     = result.account.name || result.account.username;
+  const email    = result.account.username;
+  const initials = name.split(' ').filter(Boolean).map(n=>n[0]).join('').slice(0,2).toUpperCase();
+  document.querySelector('.user-info .name').textContent = name;
+  document.querySelector('.user-info .role').textContent = email;
+  document.querySelector('.user-avatar').textContent = initials;
+  window._accessToken = result.accessToken;
+  window._userEmail   = email;
+  window._userName    = name;
+  renderTeamProgress();
+  drawDonut();
 }
-);
+
 </script>
 </body>
 </html>

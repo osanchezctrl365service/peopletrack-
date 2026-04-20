@@ -1084,14 +1084,15 @@ label { color: #888 !important; }
       </div>
 
       <div id="obj-core">
-        <div class="flex gap-8 mb-12">
-          <div class="search-input-wrap flex-1">
+        <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center;">
+          <div class="search-input-wrap" style="flex:1;min-width:180px;">
             <span class="search-icon">🔍</span>
-            <input id="objCoreSearch" class="form-control" type="text" placeholder="Buscar objetivo..." oninput="filtrarTablaObjetivos('core',this.value)">
+            <input id="objCoreSearch" class="form-control" type="text" placeholder="Buscar objetivo core..." oninput="filtrarTablaObjetivos('core',this.value)">
           </div>
           <select id="objCoreArea" class="form-control" style="width:160px" onchange="filtrarTablaObjetivos('core','')">
             <option value="">Todas las áreas</option>
           </select>
+          <button class="btn btn-primary btn-sm" onclick="abrirNuevoObjetivoCore()">+ Nuevo Core</button>
         </div>
         <div id="objCoreTbody">
           <div style="text-align:center;padding:30px;color:#888;">Cargando objetivos...</div>
@@ -1099,13 +1100,17 @@ label { color: #888 !important; }
       </div>
 
       <div id="obj-personal" style="display:none">
-        <div class="flex gap-8 mb-12">
-          <select id="objPersonalColab" class="form-control" style="width:240px" onchange="cargarObjetivosPersonales()">
-            <option value="">— Seleccionar colaborador —</option>
-          </select>
-          <select id="objPersonalPeriodo" class="form-control" style="width:140px" onchange="cargarObjetivosPersonales()">
+        <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:flex-end;">
+          <div style="flex:1;min-width:200px;">
+            <input id="objPersonalBuscar" type="text" class="form-control" placeholder="🔍 Buscar colaborador..." style="margin-bottom:4px;" oninput="filtrarColabPersonal(this.value)">
+            <select id="objPersonalColab" class="form-control" onchange="cargarObjetivosPersonales()">
+              <option value="">— Seleccionar colaborador —</option>
+            </select>
+          </div>
+          <select id="objPersonalPeriodo" class="form-control" style="width:140px;" onchange="cargarObjetivosPersonales()">
             <option value="">— Período —</option>
           </select>
+          <button class="btn btn-primary btn-sm" onclick="abrirNuevoObjetivoPersonal()">+ Nuevo Personal</button>
         </div>
         <div id="objPersonalTbody">
           <div style="text-align:center;padding:30px;color:#888;">Seleccioná un colaborador</div>
@@ -1113,9 +1118,16 @@ label { color: #888 !important; }
       </div>
 
       <div id="obj-tasks" style="display:none">
-        <p style="color:#888;margin-bottom:12px;font-size:13px;">Seguimiento detallado de tareas / hitos por objetivo</p>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <p style="color:#888;font-size:13px;">Check-ins y seguimiento de avance por objetivo</p>
+          <div style="display:flex;gap:8px;">
+            <select id="objTasksColab" class="form-control" style="width:200px;" onchange="cargarTareasColaborador()">
+              <option value="">— Colaborador —</option>
+            </select>
+          </div>
+        </div>
         <div id="objTasksTbody">
-          <div style="text-align:center;padding:30px;color:#888;">Cargando tareas...</div>
+          <div style="text-align:center;padding:30px;color:#888;">Seleccioná un colaborador para ver sus check-ins</div>
         </div>
       </div>
     </div>
@@ -3443,5 +3455,45 @@ poblarModalObjetivo = function() {
 };
 
 </script>
+
+<!-- MODAL EDITAR OBJETIVO -->
+<div class="modal-overlay" id="editObjectiveModal">
+  <div class="modal">
+    <div class="modal-title">Editar Objetivo</div>
+    <input type="hidden" id="editObjId">
+    <div class="grid-2 gap-16">
+      <div class="form-group" style="grid-column:1/-1">
+        <label class="form-label">Título del Objetivo</label>
+        <input id="editObjTitulo" class="form-control" type="text" placeholder="Título del objetivo">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Avance (%)</label>
+        <input id="editObjAvance" class="form-control" type="number" min="0" max="100" value="0">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Estado</label>
+        <select id="editObjEstado" class="form-control">
+          <option value="not_started">No Iniciado</option>
+          <option value="in_progress">En Curso</option>
+          <option value="completed">Completado</option>
+          <option value="at_risk">En Riesgo</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Ponderación (%)</label>
+        <input id="editObjPeso" class="form-control" type="number" min="0" max="100" value="20">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Fecha Límite</label>
+        <input id="editObjFecha" class="form-control" type="date">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('editObjectiveModal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarEdicionObjetivo()">Guardar Cambios</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>

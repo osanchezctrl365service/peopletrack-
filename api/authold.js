@@ -68,11 +68,10 @@ async function validateToken(req) {
 
 function corsHeaders() {
   return {
-    'Access-Control-Allow-Origin':  '*',
+    'Access-Control-Allow-Origin':  process.env.ALLOWED_ORIGIN || '*',
     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-MS-CLIENT-PRINCIPAL, x-user-email',
-    'Access-Control-Max-Age':       '86400',
-    'Content-Type':                 'application/json'
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-MS-CLIENT-PRINCIPAL',
+    'Content-Type': 'application/json'
   };
 }
 

@@ -251,6 +251,8 @@ app.http('getObjectives', {
   route: 'objectives',
   handler: async (req) => {
     try {
+      const user = await getAuthUser(req);
+      if (!user) return err('No autorizado', 401);
       const userId = req.query.get('userId') || null;
       const periodId = req.query.get('periodId') || null;
       const type = req.query.get('type') || null;
@@ -278,17 +280,17 @@ app.http('createObjective', {
   route: 'objectives',
   handler: async (req) => {
     try {
+      const user = await getAuthUser(req);
+      if (!user) return err('No autorizado', 401);
       const body = await req.json();
-      let createdBy = body.createdBy || body.userId || 1;
-      try { const u = await getAuthUser(req); if(u) createdBy = u.UserID; } catch(e) {}
       const res = await execute('sp_UpsertObjective', {
         ObjectiveID: null, Title: body.title, Description: body.description||null,
         ObjectiveType: body.objectiveType||'personal', PeriodID: body.periodId,
         UserID: body.userId||null, AreaID: body.areaId||null, Weight: body.weight||0,
         Status: body.status||'not_started', Progress: body.progress||0,
-        DueDate: body.dueDate||null, CreatedBy: createdBy
+        DueDate: body.dueDate||null, CreatedBy: user.UserID
       });
-      return ok({ objectiveId: res.recordset[0]?.NewObjectiveID });
+      return ok({ objectiveId: res.recordset[0].NewObjectiveID });
     } catch (e) { return err(e.message, 500); }
   }
 });
@@ -298,15 +300,15 @@ app.http('updateObjective', {
   route: 'objectives/{id}',
   handler: async (req) => {
     try {
+      const user = await getAuthUser(req);
+      if (!user) return err('No autorizado', 401);
       const body = await req.json();
-      let createdBy = body.createdBy || 1;
-      try { const u = await getAuthUser(req); if(u) createdBy = u.UserID; } catch(e) {}
       await execute('sp_UpsertObjective', {
         ObjectiveID: parseInt(req.params.id), Title: body.title,
         Description: body.description||null, ObjectiveType: body.objectiveType||'personal',
         PeriodID: body.periodId, UserID: body.userId||null, AreaID: body.areaId||null,
         Weight: body.weight||0, Status: body.status, Progress: body.progress,
-        DueDate: body.dueDate||null, CreatedBy: createdBy
+        DueDate: body.dueDate||null, CreatedBy: user.UserID
       });
       return ok({ updated: true });
     } catch (e) { return err(e.message, 500); }
@@ -754,190 +756,5 @@ app.http('getAllPeriods', {
       const res = await query('SELECT * FROM FiscalPeriods ORDER BY StartDate DESC');
       return ok(res.recordset);
     } catch (e) { return err(e.message, 500); }
-  }
-});
-
-// ============================================================
-// FEEDBACK 360
-// ============================================================
-app.http('createFeedback360', {
-  methods: ['POST'], authLevel: 'anonymous', route: 'feedback360',
-  handler: async (req) => {
-    try {
-      const body = await req.json();
-      const { evaluatorId, evaluatedId, periodId, category, score, comment, isAnonymous } = body;
-      if (!evaluatorId || !evaluatedId) return err('Datos incompletos', 400);
-      if (score < 1 || score > 5) return err('Score debe ser 1-5', 400);
-      const res = await query(
-        `INSERT INTO Feedback360 (EvaluatorID, EvaluatedID, PeriodID, Category, Score, Comment, IsAnonymous)
-         OUTPUT INSERTED.FeedbackID
-         VALUES (@evId, @evedId, @perId, @cat, @score, @comment, @anon)`,
-        { evId: evaluatorId, evedId: evaluatedId, perId: periodId||null,
-          cat: category||'general', score, comment: comment||null, anon: isAnonymous?1:0 }
-      );
-      return ok({ feedbackId: res.recordset[0].FeedbackID });
-    } catch(e) { return err(e.message, 500); }
-  }
-});
-
-app.http('getFeedbackReceived', {
-  methods: ['GET'], authLevel: 'anonymous', route: 'feedback360/received/{userId}',
-  handler: async (req) => {
-    try {
-      // Solo admins pueden ver feedback individual
-      let isAdmin = false;
-      try {
-        const user = await getAuthUser(req);
-        if (user && user.AppRole === 'admin') isAdmin = true;
-      } catch(e) {}
-      
-      const userId = parseInt(req.params.userId);
-      const periodId = req.query.get('periodId') || null;
-      
-      const res = await query(
-        `SELECT 
-          f.FeedbackID, f.Category, f.Score, f.Comment, f.IsAnonymous,
-          f.CreatedAt, f.PeriodID,
-          fp.PeriodName,
-          CASE WHEN f.IsAnonymous = 1 THEN 'Anónimo' 
-               ELSE u.FullName END AS EvaluatorName,
-          CASE WHEN f.IsAnonymous = 1 THEN NULL 
-               ELSE u.Email END AS EvaluatorEmail
-         FROM Feedback360 f
-         LEFT JOIN Users u ON f.EvaluatorID = u.UserID
-         LEFT JOIN FiscalPeriods fp ON f.PeriodID = fp.PeriodID
-         WHERE f.EvaluatedID = @uid
-           AND (@perId IS NULL OR f.PeriodID = @perId)
-         ORDER BY f.CreatedAt DESC`,
-        { uid: userId, perId: periodId }
-      );
-      
-      // Si no es admin, solo devolver promedios (sin nombres ni comentarios)
-      if (!isAdmin) {
-        const rows = res.recordset;
-        const byCategory = {};
-        rows.forEach(r => {
-          if (!byCategory[r.Category]) byCategory[r.Category] = { scores: [], count: 0 };
-          byCategory[r.Category].scores.push(r.Score);
-          byCategory[r.Category].count++;
-        });
-        const summary = Object.entries(byCategory).map(([cat, data]) => ({
-          category: cat,
-          avgScore: Math.round(data.scores.reduce((a,b)=>a+b,0)/data.scores.length * 10) / 10,
-          count: data.count
-        }));
-        return ok({ summary, totalResponses: rows.length, isAdmin: false });
-      }
-      
-      return ok({ feedback: res.recordset, totalResponses: res.recordset.length, isAdmin: true });
-    } catch(e) { return err(e.message, 500); }
-  }
-});
-
-app.http('getFeedbackGiven', {
-  methods: ['GET'], authLevel: 'anonymous', route: 'feedback360/given/{userId}',
-  handler: async (req) => {
-    try {
-      const userId = parseInt(req.params.userId);
-      const res = await query(
-        `SELECT f.FeedbackID, f.Category, f.Score, f.Comment, f.IsAnonymous,
-                f.CreatedAt, u.FullName AS EvaluatedName, fp.PeriodName
-         FROM Feedback360 f
-         LEFT JOIN Users u ON f.EvaluatedID = u.UserID
-         LEFT JOIN FiscalPeriods fp ON f.PeriodID = fp.PeriodID
-         WHERE f.EvaluatorID = @uid
-         ORDER BY f.CreatedAt DESC`,
-        { uid: userId }
-      );
-      return ok(res.recordset);
-    } catch(e) { return err(e.message, 500); }
-  }
-});
-
-app.http('getFeedbackSummary', {
-  methods: ['GET'], authLevel: 'anonymous', route: 'feedback360/summary',
-  handler: async (req) => {
-    try {
-      // Solo admins
-      let isAdmin = false;
-      try { const u = await getAuthUser(req); if(u?.AppRole==='admin') isAdmin=true; } catch(e) {}
-      if (!isAdmin) return err('Sin permisos', 403);
-      
-      const periodId = req.query.get('periodId') || null;
-      const res = await query(
-        `SELECT 
-          u.UserID, u.FullName, u.AppRole,
-          COUNT(f.FeedbackID) AS TotalFeedbacks,
-          AVG(CAST(f.Score AS FLOAT)) AS AvgScore,
-          SUM(CASE WHEN f.IsAnonymous=1 THEN 1 ELSE 0 END) AS AnonCount
-         FROM Users u
-         LEFT JOIN Feedback360 f ON u.UserID = f.EvaluatedID
-           AND (@perId IS NULL OR f.PeriodID = @perId)
-         WHERE u.AppRole IN ('leader','manager')
-         GROUP BY u.UserID, u.FullName, u.AppRole
-         ORDER BY AvgScore DESC`,
-        { perId: periodId }
-      );
-      return ok(res.recordset);
-    } catch(e) { return err(e.message, 500); }
-  }
-});
-
-// ============================================================
-// HELP ARTICLES
-// ============================================================
-app.http('getHelpArticles', {
-  methods: ['GET'], authLevel: 'anonymous', route: 'help/articles',
-  handler: async (req) => {
-    try {
-      const section = req.query.get('section') || null;
-      const res = await query(
-        `SELECT ArticleID, Section, Title, Content, SortOrder, UpdatedAt
-         FROM HelpArticles
-         WHERE IsActive = 1
-           AND (@section IS NULL OR Section = @section)
-         ORDER BY SortOrder ASC`,
-        { section }
-      );
-      return ok(res.recordset);
-    } catch(e) { return err(e.message, 500); }
-  }
-});
-
-app.http('updateHelpArticle', {
-  methods: ['PUT'], authLevel: 'anonymous', route: 'help/articles/{id}',
-  handler: async (req) => {
-    try {
-      let isAdmin = false;
-      try { const u = await getAuthUser(req); if(u?.AppRole==='admin') isAdmin=true; } catch(e) {}
-      if (!isAdmin) return err('Sin permisos', 403);
-      const body = await req.json();
-      const id = parseInt(req.params.id);
-      await query(
-        `UPDATE HelpArticles SET Title=@title, Content=@content, UpdatedAt=GETDATE(), UpdatedBy=@by
-         WHERE ArticleID=@id`,
-        { title: body.title, content: body.content, by: body.updatedBy||'admin', id }
-      );
-      return ok({ updated: true });
-    } catch(e) { return err(e.message, 500); }
-  }
-});
-
-// ============================================================
-// NOTAS DE EMPLEADO EN OBJETIVOS
-// ============================================================
-app.http('saveEmployeeNote', {
-  methods: ['PUT'], authLevel: 'anonymous', route: 'objectives/{id}/note',
-  handler: async (req) => {
-    try {
-      const body = await req.json();
-      const id = parseInt(req.params.id);
-      await query(
-        `UPDATE Objectives SET EmployeeNotes=@notes, EmployeeNoteDate=GETDATE()
-         WHERE ObjectiveID=@id`,
-        { notes: body.note||'', id }
-      );
-      return ok({ saved: true });
-    } catch(e) { return err(e.message, 500); }
   }
 });

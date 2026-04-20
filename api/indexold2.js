@@ -74,7 +74,7 @@ app.http('getAllUsers', {
 app.http('updateUser', {
   methods: ['PUT'],
   authLevel: 'anonymous',
-  route: 'manage/users/{id}',
+  route: 'users/{id}',
   handler: async (req) => {
     try {
       const body = await req.json();
@@ -110,34 +110,33 @@ app.http('updateUser', {
 app.http('createUser', {
   methods: ['POST'],
   authLevel: 'anonymous',
-  route: 'manage/users',
+  route: 'users',
   handler: async (req) => {
     try {
-      const body     = await req.json();
-      const fullName = body.fullName  || body.FullName  || '';
-      const email    = body.email     || body.Email     || '';
-      const appRole  = body.appRole   || body.AppRole   || 'employee';
-      const isActive = body.isActive  !== undefined ? (body.isActive ? 1 : 0) : 1;
-      const leaderID = body.leaderID  || body.LeaderID  || null;
-      const managerID= body.managerID || body.ManagerID || null;
-      const areaID   = body.areaID    || body.AreaID    || null;
-      if (!email)    return err('Email requerido', 400);
+      const body = await req.json();
+      const fullName  = body.fullName  || body.FullName  || '';
+      const email     = body.email     || body.Email     || '';
+      const appRole   = body.appRole   || body.AppRole   || 'employee';
+      const isActive  = body.isActive  !== undefined ? (body.isActive ? 1 : 0) : 1;
+      const leaderID  = body.leaderID  || body.LeaderID  || null;
+      const managerID = body.managerID || body.ManagerID || null;
+      if (!email) return err('Email requerido', 400);
       if (!fullName) return err('Nombre requerido', 400);
       const res = await query(
-        `INSERT INTO Users (FullName, Email, AppRole, IsActive, AreaID, CreatedAt, UpdatedAt)
+        `INSERT INTO Users (FullName, Email, AppRole, IsActive, CreatedAt, UpdatedAt)
          OUTPUT INSERTED.UserID
-         VALUES (@name, @email, @role, @active, @areaID, GETDATE(), GETDATE())`,
-        { name: fullName, email, role: appRole, active: isActive, areaID }
+         VALUES (@name, @email, @role, @active, GETDATE(), GETDATE())`,
+        { name: fullName, email, role: appRole, active: isActive }
       );
       const newID = res.recordset[0].UserID;
       if (leaderID) await query(
-        `IF NOT EXISTS (SELECT 1 FROM UserRelationships WHERE EmployeeID=@e AND LeaderID=@l AND IsActive=1)
-         INSERT INTO UserRelationships (EmployeeID,LeaderID,IsPrimary,IsActive) VALUES (@e,@l,1,1)`,
+        `IF NOT EXISTS (SELECT 1 FROM UserRelationships WHERE EmployeeID=@e AND LeaderID=@l AND RelationType='leader')
+         INSERT INTO UserRelationships (EmployeeID,LeaderID,RelationType,CreatedAt) VALUES (@e,@l,'leader',GETDATE())`,
         { e: newID, l: parseInt(leaderID) }
       );
       if (managerID) await query(
-        `IF NOT EXISTS (SELECT 1 FROM UserRelationships WHERE EmployeeID=@e AND ManagerID=@m AND IsActive=1)
-         INSERT INTO UserRelationships (EmployeeID,ManagerID,IsPrimary,IsActive) VALUES (@e,@m,1,1)`,
+        `IF NOT EXISTS (SELECT 1 FROM UserRelationships WHERE EmployeeID=@e AND LeaderID=@m AND RelationType='manager')
+         INSERT INTO UserRelationships (EmployeeID,LeaderID,RelationType,CreatedAt) VALUES (@e,@m,'manager',GETDATE())`,
         { e: newID, m: parseInt(managerID) }
       );
       return ok({ UserID: newID, FullName: fullName, Email: email, AppRole: appRole, IsActive: isActive===1 });
@@ -251,6 +250,8 @@ app.http('getObjectives', {
   route: 'objectives',
   handler: async (req) => {
     try {
+      const user = await getAuthUser(req);
+      if (!user) return err('No autorizado', 401);
       const userId = req.query.get('userId') || null;
       const periodId = req.query.get('periodId') || null;
       const type = req.query.get('type') || null;
@@ -278,17 +279,17 @@ app.http('createObjective', {
   route: 'objectives',
   handler: async (req) => {
     try {
+      const user = await getAuthUser(req);
+      if (!user) return err('No autorizado', 401);
       const body = await req.json();
-      let createdBy = body.createdBy || body.userId || 1;
-      try { const u = await getAuthUser(req); if(u) createdBy = u.UserID; } catch(e) {}
       const res = await execute('sp_UpsertObjective', {
         ObjectiveID: null, Title: body.title, Description: body.description||null,
         ObjectiveType: body.objectiveType||'personal', PeriodID: body.periodId,
         UserID: body.userId||null, AreaID: body.areaId||null, Weight: body.weight||0,
         Status: body.status||'not_started', Progress: body.progress||0,
-        DueDate: body.dueDate||null, CreatedBy: createdBy
+        DueDate: body.dueDate||null, CreatedBy: user.UserID
       });
-      return ok({ objectiveId: res.recordset[0]?.NewObjectiveID });
+      return ok({ objectiveId: res.recordset[0].NewObjectiveID });
     } catch (e) { return err(e.message, 500); }
   }
 });
@@ -298,15 +299,15 @@ app.http('updateObjective', {
   route: 'objectives/{id}',
   handler: async (req) => {
     try {
+      const user = await getAuthUser(req);
+      if (!user) return err('No autorizado', 401);
       const body = await req.json();
-      let createdBy = body.createdBy || 1;
-      try { const u = await getAuthUser(req); if(u) createdBy = u.UserID; } catch(e) {}
       await execute('sp_UpsertObjective', {
         ObjectiveID: parseInt(req.params.id), Title: body.title,
         Description: body.description||null, ObjectiveType: body.objectiveType||'personal',
         PeriodID: body.periodId, UserID: body.userId||null, AreaID: body.areaId||null,
         Weight: body.weight||0, Status: body.status, Progress: body.progress,
-        DueDate: body.dueDate||null, CreatedBy: createdBy
+        DueDate: body.dueDate||null, CreatedBy: user.UserID
       });
       return ok({ updated: true });
     } catch (e) { return err(e.message, 500); }
@@ -438,12 +439,14 @@ app.http('getMeetings', {
   route: 'meetings/{employeeId}',
   handler: async (req) => {
     try {
+      const user = await getAuthUser(req);
+      if (!user) return err('No autorizado', 401);
       const res = await query(
         `SELECT m.*, n.NoteID, n.NoteText, n.NoteType, n.IsPrivate, n.ObjectiveID
          FROM OneOnOneMeetings m LEFT JOIN OneOnOneNotes n ON m.MeetingID=n.MeetingID
-         WHERE m.EmployeeID=@empId
+         WHERE m.EmployeeID=@empId AND (m.LeaderID=@lid OR @role IN ('manager','admin'))
          ORDER BY m.MeetingDate DESC`,
-        { empId: parseInt(req.params.employeeId) }
+        { empId: parseInt(req.params.employeeId), lid: user.UserID, role: user.AppRole }
       );
       const meetings = {};
       for (const row of res.recordset) {
@@ -467,15 +470,11 @@ app.http('createMeeting', {
   route: 'meetings',
   handler: async (req) => {
     try {
+      const user = await getAuthUser(req);
+      if (!user) return err('No autorizado', 401);
       const body = await req.json();
-      // Intentar auth, si falla usar leaderId del body
-      let leaderID = body.leaderId || body.LeaderID || 1;
-      try {
-        const user = await getAuthUser(req);
-        if (user) leaderID = user.UserID;
-      } catch(e) {}
       const res = await execute('sp_SaveOneOnOneMeeting', {
-        MeetingID: null, LeaderID: leaderID, EmployeeID: body.employeeId,
+        MeetingID: null, LeaderID: user.UserID, EmployeeID: body.employeeId,
         MeetingDate: body.meetingDate, MeetingType: body.meetingType||'monthly',
         Title: body.title||null, GeneralNotes: body.generalNotes||null,
         NextSteps: body.nextSteps||null, Status: body.status||'completed'
@@ -656,288 +655,3 @@ async function sendMinuteEmail(meetingId, leader, body) {
     await query(`UPDATE OneOnOneMeetings SET SendMinuteEmail=1,MinuteSentAt=GETDATE() WHERE MeetingID=@id`, { id: meetingId });
   } catch (e) { console.error('Error email:', e.message); }
 }
-
-// ============================================================
-// ÁREAS
-// ============================================================
-app.http('getAreas', {
-  methods: ['GET'], authLevel: 'anonymous', route: 'areas',
-  handler: async (req) => {
-    try {
-      const res = await query(`SELECT AreaID, AreaName, Description, IsActive FROM Areas ORDER BY AreaName`);
-      return ok(res.recordset);
-    } catch (e) { return err(e.message, 500); }
-  }
-});
-app.http('createArea', {
-  methods: ['POST'], authLevel: 'anonymous', route: 'manage/areas',
-  handler: async (req) => {
-    try {
-      const body = await req.json();
-      const name = (body.areaName || body.AreaName || '').trim();
-      const desc = (body.description || body.Description || '').trim();
-      if (!name) return err('Nombre requerido', 400);
-      const exists = await query(`SELECT 1 FROM Areas WHERE AreaName=@name`, { name });
-      if (exists.recordset.length) return err('Ya existe', 400);
-      const res = await query(
-        `INSERT INTO Areas (AreaName,Description,IsActive) OUTPUT INSERTED.AreaID VALUES (@name,@desc,1)`,
-        { name, desc }
-      );
-      return ok({ AreaID: res.recordset[0].AreaID, AreaName: name, IsActive: true });
-    } catch (e) { return err(e.message, 500); }
-  }
-});
-app.http('updateArea', {
-  methods: ['PUT'], authLevel: 'anonymous', route: 'manage/areas/{id}',
-  handler: async (req) => {
-    try {
-      const body = await req.json();
-      const areaID = parseInt(req.params.id);
-      const fields = [], params = { id: areaID };
-      if (body.AreaName    !== undefined) { fields.push('AreaName=@name');    params.name   = body.AreaName; }
-      if (body.Description !== undefined) { fields.push('Description=@desc'); params.desc   = body.Description; }
-      if (body.IsActive    !== undefined) { fields.push('IsActive=@active');  params.active = body.IsActive ? 1 : 0; }
-      if (!fields.length) return err('Nada que actualizar', 400);
-      await query(`UPDATE Areas SET ${fields.join(',')} WHERE AreaID=@id`, params);
-      return ok({ updated: true });
-    } catch (e) { return err(e.message, 500); }
-  }
-});
-
-// ============================================================
-// PERÍODOS — crear y editar
-// ============================================================
-app.http('createPeriod', {
-  methods: ['POST'], authLevel: 'anonymous', route: 'manage/periods',
-  handler: async (req) => {
-    try {
-      const body = await req.json();
-      const name   = (body.periodName || body.PeriodName || '').trim();
-      const start  = body.startDate || body.StartDate || null;
-      const end    = body.endDate   || body.EndDate   || null;
-      const active = body.isActive  !== undefined ? (body.isActive ? 1 : 0) : 1;
-      if (!name) return err('Nombre requerido', 400);
-      const res = await query(
-        `INSERT INTO FiscalPeriods (PeriodName, StartDate, EndDate, IsActive, CreatedAt)
-         OUTPUT INSERTED.PeriodID
-         VALUES (@name, @start, @end, @active, GETDATE())`,
-        { name, start, end, active }
-      );
-      return ok({ PeriodID: res.recordset[0].PeriodID, PeriodName: name, IsActive: active===1 });
-    } catch (e) { return err(e.message, 500); }
-  }
-});
-
-app.http('updatePeriod', {
-  methods: ['PUT'], authLevel: 'anonymous', route: 'manage/periods/{id}',
-  handler: async (req) => {
-    try {
-      const body = await req.json();
-      const id   = parseInt(req.params.id);
-      const fields = [], params = { id };
-      if (body.periodName !== undefined) { fields.push('PeriodName=@name');   params.name   = body.periodName; }
-      if (body.startDate  !== undefined) { fields.push('StartDate=@start');   params.start  = body.startDate; }
-      if (body.endDate    !== undefined) { fields.push('EndDate=@end');       params.end    = body.endDate; }
-      if (body.isActive   !== undefined) { fields.push('IsActive=@active');   params.active = body.isActive ? 1 : 0; }
-      if (!fields.length) return err('Nada que actualizar', 400);
-      await query(`UPDATE FiscalPeriods SET ${fields.join(',')} WHERE PeriodID=@id`, params);
-      return ok({ updated: true });
-    } catch (e) { return err(e.message, 500); }
-  }
-});
-
-// GET /api/periods/all — todos (activos e inactivos)
-app.http('getAllPeriods', {
-  methods: ['GET'], authLevel: 'anonymous', route: 'periods/all',
-  handler: async (req) => {
-    try {
-      const res = await query('SELECT * FROM FiscalPeriods ORDER BY StartDate DESC');
-      return ok(res.recordset);
-    } catch (e) { return err(e.message, 500); }
-  }
-});
-
-// ============================================================
-// FEEDBACK 360
-// ============================================================
-app.http('createFeedback360', {
-  methods: ['POST'], authLevel: 'anonymous', route: 'feedback360',
-  handler: async (req) => {
-    try {
-      const body = await req.json();
-      const { evaluatorId, evaluatedId, periodId, category, score, comment, isAnonymous } = body;
-      if (!evaluatorId || !evaluatedId) return err('Datos incompletos', 400);
-      if (score < 1 || score > 5) return err('Score debe ser 1-5', 400);
-      const res = await query(
-        `INSERT INTO Feedback360 (EvaluatorID, EvaluatedID, PeriodID, Category, Score, Comment, IsAnonymous)
-         OUTPUT INSERTED.FeedbackID
-         VALUES (@evId, @evedId, @perId, @cat, @score, @comment, @anon)`,
-        { evId: evaluatorId, evedId: evaluatedId, perId: periodId||null,
-          cat: category||'general', score, comment: comment||null, anon: isAnonymous?1:0 }
-      );
-      return ok({ feedbackId: res.recordset[0].FeedbackID });
-    } catch(e) { return err(e.message, 500); }
-  }
-});
-
-app.http('getFeedbackReceived', {
-  methods: ['GET'], authLevel: 'anonymous', route: 'feedback360/received/{userId}',
-  handler: async (req) => {
-    try {
-      // Solo admins pueden ver feedback individual
-      let isAdmin = false;
-      try {
-        const user = await getAuthUser(req);
-        if (user && user.AppRole === 'admin') isAdmin = true;
-      } catch(e) {}
-      
-      const userId = parseInt(req.params.userId);
-      const periodId = req.query.get('periodId') || null;
-      
-      const res = await query(
-        `SELECT 
-          f.FeedbackID, f.Category, f.Score, f.Comment, f.IsAnonymous,
-          f.CreatedAt, f.PeriodID,
-          fp.PeriodName,
-          CASE WHEN f.IsAnonymous = 1 THEN 'Anónimo' 
-               ELSE u.FullName END AS EvaluatorName,
-          CASE WHEN f.IsAnonymous = 1 THEN NULL 
-               ELSE u.Email END AS EvaluatorEmail
-         FROM Feedback360 f
-         LEFT JOIN Users u ON f.EvaluatorID = u.UserID
-         LEFT JOIN FiscalPeriods fp ON f.PeriodID = fp.PeriodID
-         WHERE f.EvaluatedID = @uid
-           AND (@perId IS NULL OR f.PeriodID = @perId)
-         ORDER BY f.CreatedAt DESC`,
-        { uid: userId, perId: periodId }
-      );
-      
-      // Si no es admin, solo devolver promedios (sin nombres ni comentarios)
-      if (!isAdmin) {
-        const rows = res.recordset;
-        const byCategory = {};
-        rows.forEach(r => {
-          if (!byCategory[r.Category]) byCategory[r.Category] = { scores: [], count: 0 };
-          byCategory[r.Category].scores.push(r.Score);
-          byCategory[r.Category].count++;
-        });
-        const summary = Object.entries(byCategory).map(([cat, data]) => ({
-          category: cat,
-          avgScore: Math.round(data.scores.reduce((a,b)=>a+b,0)/data.scores.length * 10) / 10,
-          count: data.count
-        }));
-        return ok({ summary, totalResponses: rows.length, isAdmin: false });
-      }
-      
-      return ok({ feedback: res.recordset, totalResponses: res.recordset.length, isAdmin: true });
-    } catch(e) { return err(e.message, 500); }
-  }
-});
-
-app.http('getFeedbackGiven', {
-  methods: ['GET'], authLevel: 'anonymous', route: 'feedback360/given/{userId}',
-  handler: async (req) => {
-    try {
-      const userId = parseInt(req.params.userId);
-      const res = await query(
-        `SELECT f.FeedbackID, f.Category, f.Score, f.Comment, f.IsAnonymous,
-                f.CreatedAt, u.FullName AS EvaluatedName, fp.PeriodName
-         FROM Feedback360 f
-         LEFT JOIN Users u ON f.EvaluatedID = u.UserID
-         LEFT JOIN FiscalPeriods fp ON f.PeriodID = fp.PeriodID
-         WHERE f.EvaluatorID = @uid
-         ORDER BY f.CreatedAt DESC`,
-        { uid: userId }
-      );
-      return ok(res.recordset);
-    } catch(e) { return err(e.message, 500); }
-  }
-});
-
-app.http('getFeedbackSummary', {
-  methods: ['GET'], authLevel: 'anonymous', route: 'feedback360/summary',
-  handler: async (req) => {
-    try {
-      // Solo admins
-      let isAdmin = false;
-      try { const u = await getAuthUser(req); if(u?.AppRole==='admin') isAdmin=true; } catch(e) {}
-      if (!isAdmin) return err('Sin permisos', 403);
-      
-      const periodId = req.query.get('periodId') || null;
-      const res = await query(
-        `SELECT 
-          u.UserID, u.FullName, u.AppRole,
-          COUNT(f.FeedbackID) AS TotalFeedbacks,
-          AVG(CAST(f.Score AS FLOAT)) AS AvgScore,
-          SUM(CASE WHEN f.IsAnonymous=1 THEN 1 ELSE 0 END) AS AnonCount
-         FROM Users u
-         LEFT JOIN Feedback360 f ON u.UserID = f.EvaluatedID
-           AND (@perId IS NULL OR f.PeriodID = @perId)
-         WHERE u.AppRole IN ('leader','manager')
-         GROUP BY u.UserID, u.FullName, u.AppRole
-         ORDER BY AvgScore DESC`,
-        { perId: periodId }
-      );
-      return ok(res.recordset);
-    } catch(e) { return err(e.message, 500); }
-  }
-});
-
-// ============================================================
-// HELP ARTICLES
-// ============================================================
-app.http('getHelpArticles', {
-  methods: ['GET'], authLevel: 'anonymous', route: 'help/articles',
-  handler: async (req) => {
-    try {
-      const section = req.query.get('section') || null;
-      const res = await query(
-        `SELECT ArticleID, Section, Title, Content, SortOrder, UpdatedAt
-         FROM HelpArticles
-         WHERE IsActive = 1
-           AND (@section IS NULL OR Section = @section)
-         ORDER BY SortOrder ASC`,
-        { section }
-      );
-      return ok(res.recordset);
-    } catch(e) { return err(e.message, 500); }
-  }
-});
-
-app.http('updateHelpArticle', {
-  methods: ['PUT'], authLevel: 'anonymous', route: 'help/articles/{id}',
-  handler: async (req) => {
-    try {
-      let isAdmin = false;
-      try { const u = await getAuthUser(req); if(u?.AppRole==='admin') isAdmin=true; } catch(e) {}
-      if (!isAdmin) return err('Sin permisos', 403);
-      const body = await req.json();
-      const id = parseInt(req.params.id);
-      await query(
-        `UPDATE HelpArticles SET Title=@title, Content=@content, UpdatedAt=GETDATE(), UpdatedBy=@by
-         WHERE ArticleID=@id`,
-        { title: body.title, content: body.content, by: body.updatedBy||'admin', id }
-      );
-      return ok({ updated: true });
-    } catch(e) { return err(e.message, 500); }
-  }
-});
-
-// ============================================================
-// NOTAS DE EMPLEADO EN OBJETIVOS
-// ============================================================
-app.http('saveEmployeeNote', {
-  methods: ['PUT'], authLevel: 'anonymous', route: 'objectives/{id}/note',
-  handler: async (req) => {
-    try {
-      const body = await req.json();
-      const id = parseInt(req.params.id);
-      await query(
-        `UPDATE Objectives SET EmployeeNotes=@notes, EmployeeNoteDate=GETDATE()
-         WHERE ObjectiveID=@id`,
-        { notes: body.note||'', id }
-      );
-      return ok({ saved: true });
-    } catch(e) { return err(e.message, 500); }
-  }
-});

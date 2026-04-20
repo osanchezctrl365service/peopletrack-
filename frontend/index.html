@@ -3429,8 +3429,50 @@ function poblarSelectoresTabObjetivos() {
   }
 }
 
-function editarObjetivo(id) {
-  mostrarToast('Edición de objetivo: próximamente disponible', 'info');
+async function editarObjetivo(id) {
+  const modal = document.getElementById('editObjectiveModal');
+  if (!modal) { mostrarToast('Modal no disponible', 'error'); return; }
+  document.getElementById('editObjId').value = id;
+  // Buscar en los datos cargados
+  const allObjsLoaded = [...(allObjetivosCore||[])];
+  const obj = allObjsLoaded.find(o => String(o.ObjectiveID||o.objectiveId) === String(id));
+  if (obj) {
+    document.getElementById('editObjTitulo').value = obj.Title || '';
+    document.getElementById('editObjAvance').value = obj.Progress || 0;
+    document.getElementById('editObjEstado').value = obj.Status || 'not_started';
+    document.getElementById('editObjPeso').value = obj.Weight || 0;
+    document.getElementById('editObjFecha').value = obj.DueDate ? obj.DueDate.split('T')[0] : '';
+  }
+  showModal('editObjectiveModal');
+}
+
+async function guardarEdicionObjetivo() {
+  const id = document.getElementById('editObjId')?.value;
+  if (!id) return;
+  const titulo = document.getElementById('editObjTitulo')?.value?.trim();
+  const avance = parseInt(document.getElementById('editObjAvance')?.value || '0');
+  const estado = document.getElementById('editObjEstado')?.value;
+  const peso = parseFloat(document.getElementById('editObjPeso')?.value || '0');
+  const fecha = document.getElementById('editObjFecha')?.value || null;
+  if (!titulo) { mostrarToast('El título es obligatorio', 'error'); return; }
+  const btn = document.querySelector('#editObjectiveModal .btn-primary');
+  if (btn) { btn.textContent = 'Guardando...'; btn.disabled = true; }
+  try {
+    const res = await fetch(API_BASE + '/objectives/' + id, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: titulo, progress: avance, status: estado, weight: peso, dueDate: fecha })
+    });
+    const data = await res.json();
+    if (data.ok === false) throw new Error(data.error || 'Error');
+    closeModal('editObjectiveModal');
+    mostrarToast('Objetivo actualizado ✓', 'success');
+    cargarObjetivosCoreEmpresa();
+  } catch(e) {
+    mostrarToast('Error: ' + e.message, 'error');
+  } finally {
+    if (btn) { btn.textContent = 'Guardar Cambios'; btn.disabled = false; }
+  }
 }
 
 // Fix para poblarModalObjetivo: cargar períodos si faltan
@@ -3454,6 +3496,116 @@ poblarModalObjetivo = function() {
   }
 };
 
+
+
+// ═══ FILTRAR COLABORADORES EN OBJETIVOS PERSONALES ═══════════
+function filtrarColabPersonal(q) {
+  const sel = document.getElementById('objPersonalColab');
+  if (!sel) return;
+  const query = (q||'').toLowerCase();
+  sel.innerHTML = '<option value="">— Seleccionar colaborador —</option>';
+  allUsuarios.filter(u => u.IsActive && (!query ||
+    (u.FullName||'').toLowerCase().includes(query) ||
+    (u.Email||'').toLowerCase().includes(query)
+  )).sort((a,b)=>(a.FullName||'').localeCompare(b.FullName||''))
+  .forEach(u => sel.add(new Option((u.FullName||u.Email)+' — '+(u.Email||''), u.UserID)));
+}
+
+// ═══ ABRIR NUEVO OBJETIVO CORE ═══════════════════════════════
+function abrirNuevoObjetivoCore() {
+  const modal = document.getElementById('newObjectiveModal');
+  if (!modal) return;
+  const tipoSel = modal.querySelectorAll('select')[0];
+  if (tipoSel) {
+    Array.from(tipoSel.options).forEach(opt => {
+      if (opt.text.toLowerCase().includes('core') || opt.text.toLowerCase().includes('empresa')) {
+        tipoSel.value = opt.value;
+      }
+    });
+  }
+  showModal('newObjectiveModal');
+}
+
+// ═══ ABRIR NUEVO OBJETIVO PERSONAL ═══════════════════════════
+function abrirNuevoObjetivoPersonal() {
+  const colabSel = document.getElementById('objPersonalColab');
+  const userId = colabSel?.value;
+  const modal = document.getElementById('newObjectiveModal');
+  if (!modal) return;
+  const tipoSel = modal.querySelectorAll('select')[0];
+  if (tipoSel) {
+    Array.from(tipoSel.options).forEach(opt => {
+      if (opt.text.toLowerCase().includes('personal')) tipoSel.value = opt.value;
+    });
+  }
+  showModal('newObjectiveModal');
+  if (userId) setTimeout(() => {
+    const s = document.getElementById('objColabSel');
+    if (s) s.value = userId;
+  }, 100);
+}
+
+// ═══ CARGAR TAREAS / CHECKINS POR COLABORADOR ════════════════
+async function cargarTareasColaborador() {
+  const sel = document.getElementById('objTasksColab');
+  const container = document.getElementById('objTasksTbody');
+  const userId = sel?.value;
+  if (!container) return;
+  if (!userId) {
+    container.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Seleccioná un colaborador</div>';
+    return;
+  }
+  container.innerHTML = '<div style="text-align:center;padding:20px;color:#888;">Cargando...</div>';
+  try {
+    const objs = await apiGet('objectives?userId=' + userId);
+    const lista = Array.isArray(objs) ? objs : [];
+    if (!lista.length) {
+      container.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Sin objetivos para este colaborador</div>';
+      return;
+    }
+    container.innerHTML = '<table class="data-table"><thead><tr><th>#</th><th>Objetivo</th><th>Tipo</th><th>Ponderación</th><th>Avance</th><th>Estado</th><th>Acción</th></tr></thead><tbody>' +
+      lista.map((o,i) => {
+        const av = o.Progress||0;
+        const color = av>=70?'#2ECC71':av>=40?'#F59E0B':'#FF4D4D';
+        const tipo = o.ObjectiveType==='company'?'Core':'Personal';
+        const estado = (o.Status||'').replace(/_/g,' ');
+        return '<tr><td style="color:#888;">'+(i+1)+'</td>'+
+          '<td><strong>'+(o.Title||'—')+'</strong><br><span style="font-size:10px;color:#666;">'+(o.PeriodName||'')+'</span></td>'+
+          '<td><span class="badge badge-primary" style="font-size:10px;">'+tipo+'</span></td>'+
+          '<td>'+(o.Weight||0)+'%</td>'+
+          '<td><span style="color:'+color+';font-weight:700;">'+av+'%</span>'+
+          '<div style="height:3px;background:#222;border-radius:2px;margin-top:3px;"><div style="height:3px;background:'+color+';width:'+av+'%;border-radius:2px;"></div></div></td>'+
+          '<td><span style="font-size:10px;font-weight:700;color:'+color+';">'+estado+'</span></td>'+
+          '<td><button class="btn btn-secondary btn-sm" onclick="editarObjetivo('+o.ObjectiveID+')">Editar</button></td></tr>';
+      }).join('') + '</tbody></table>';
+  } catch(e) {
+    container.innerHTML = '<div style="padding:20px;color:#F44;">Error: '+e.message+'</div>';
+  }
+}
+
+// ═══ OVERRIDE SWITCHTAB PARA POBLAR AL CAMBIAR TAB ═══════════
+const _origST = switchTab;
+switchTab = function(prefix, id, el) {
+  _origST(prefix, id, el);
+  if (prefix === 'obj' && id === 'tasks') {
+    const tc = document.getElementById('objTasksColab');
+    if (tc && tc.options.length <= 1 && allUsuarios.length) {
+      allUsuarios.filter(u=>u.IsActive).sort((a,b)=>(a.FullName||'').localeCompare(b.FullName||'')).forEach(u=>{
+        tc.add(new Option((u.FullName||u.Email)+' — '+(u.Email||''), u.UserID));
+      });
+    }
+  }
+  if (prefix === 'obj' && id === 'personal') {
+    const cs = document.getElementById('objPersonalColab');
+    if (cs && cs.options.length <= 1 && allUsuarios.length) filtrarColabPersonal('');
+    const ps = document.getElementById('objPersonalPeriodo');
+    if (ps && ps.options.length <= 1 && allPeriods.length) {
+      allPeriods.forEach(p=>ps.add(new Option(p.PeriodName, p.PeriodID)));
+      const act = allPeriods.find(p=>p.IsActive);
+      if (act) ps.value = act.PeriodID;
+    }
+  }
+};
 </script>
 
 <!-- MODAL EDITAR OBJETIVO -->

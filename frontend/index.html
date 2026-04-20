@@ -1441,7 +1441,11 @@ label { color: #888 !important; }
             <div>
               <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Puntuación *</label>
               <div id="fbStars" style="display:flex;gap:8px;margin-top:8px;">
-                ${[1,2,3,4,5].map(i=>`<button onclick="setFbScore(${i})" id="fbStar${i}" style="width:40px;height:40px;border-radius:8px;border:1px solid #333;background:#111;color:#888;font-size:18px;cursor:pointer;">☆</button>`).join('')}
+                <button onclick="setFbScore(1)" id="fbStar1" style="width:40px;height:40px;border-radius:8px;border:1px solid #333;background:#111;color:#888;font-size:18px;cursor:pointer;">☆</button>
+                <button onclick="setFbScore(2)" id="fbStar2" style="width:40px;height:40px;border-radius:8px;border:1px solid #333;background:#111;color:#888;font-size:18px;cursor:pointer;">☆</button>
+                <button onclick="setFbScore(3)" id="fbStar3" style="width:40px;height:40px;border-radius:8px;border:1px solid #333;background:#111;color:#888;font-size:18px;cursor:pointer;">☆</button>
+                <button onclick="setFbScore(4)" id="fbStar4" style="width:40px;height:40px;border-radius:8px;border:1px solid #333;background:#111;color:#888;font-size:18px;cursor:pointer;">☆</button>
+                <button onclick="setFbScore(5)" id="fbStar5" style="width:40px;height:40px;border-radius:8px;border:1px solid #333;background:#111;color:#888;font-size:18px;cursor:pointer;">☆</button>
               </div>
               <input type="hidden" id="fbScore" value="0">
               <div id="fbScoreLabel" style="font-size:11px;color:#888;margin-top:6px;"></div>

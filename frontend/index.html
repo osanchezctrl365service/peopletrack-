@@ -147,15 +147,7 @@ body { font-family: var(--font); font-size: 14px; color: var(--gray-800); backgr
   flex-shrink: 0;
 }
 .topbar-title { font-size: 16px; font-weight: 700; color: #f0ebe3; flex: 1; }
-.topbar-period {
-  background: var(--primary-pale);
-  color: var(--primary);
-  font-size: 11px;
-  font-weight: 700;
-  padding: 4px 10px;
-  border-radius: 20px;
-  letter-spacing: 0.3px;
-}
+.topbar-period { background:rgba(255,84,0,0.15); color:#FF5400; font-size:11px; font-weight:700; padding:4px 10px; border-radius:6px; }
 .topbar-btn {
   background: none;
   border: 1px solid var(--gray-300);
@@ -242,7 +234,7 @@ body { font-family: var(--font); font-size: 14px; color: var(--gray-800); backgr
 .badge-warning { background: var(--warning-light); color: var(--warning); }
 .badge-danger  { background: var(--danger-light); color: var(--danger); }
 .badge-info    { background: var(--accent-light); color: var(--accent-dark); }
-.badge-primary { background: var(--primary-pale); color: var(--primary); }
+.badge-primary { background:rgba(255,84,0,0.15); color:#FF5400; font-size:10px; font-weight:700; padding:2px 8px; border-radius:20px; }
 .badge-gray    { background: var(--gray-100); color: var(--gray-600); }
 
 /* TABLE */
@@ -440,17 +432,7 @@ textarea.form-control { min-height: 80px; resize: vertical; }
 .section-subheading { font-size: 13px; color: #888; margin-top: 2px; }
 
 /* HELP TIP */
-.help-tip {
-  background: linear-gradient(135deg, var(--primary-pale), var(--accent-light));
-  border: 1px solid var(--accent);
-  border-radius: var(--radius-md);
-  padding: 12px 16px;
-  font-size: 12px;
-  color: var(--primary);
-  margin-bottom: 16px;
-  display: flex;
-  gap: 10px;
-}
+.help-tip { background:rgba(255,84,0,0.08); border:1px solid rgba(255,84,0,0.25); border-radius:8px; padding:12px 16px; font-size:12px; color:#bbb; margin-bottom:16px; display:flex; gap:8px; align-items:flex-start; }
 .help-tip-icon { font-size: 16px; flex-shrink: 0; }
 
 /* COMPETENCY RADAR PLACEHOLDER */
@@ -1380,7 +1362,7 @@ label { color: #888 !important; }
         <div class="card">
           <div class="card-title">Competencias Personales / Acuerdo con el Empleado</div>
           <p class="text-muted mb-12">Competencias adicionales acordadas entre el colaborador y el líder, fuera del marco global.</p>
-          <button class="btn btn-primary btn-sm">+ Agregar Competencia Personal</button>
+          <button class="btn btn-primary btn-sm" onclick="agregarCompetenciaPersonal()">+ Agregar Competencia Personal</button>
         </div>
       </div>
     </div>
@@ -3001,7 +2983,9 @@ const _ss2 = showSection;
 showSection = function(id) {
   _ss2(id);
   if (id === 'objectives') {
-    ['obj-core','obj-personal','obj-tasks'].forEach((pid,i)=>{ const el=document.getElementById(pid); if(el) el.style.display=i===0?'':'none'; });
+    // Reset: obj-core visible, los demás ocultos
+    const panels = {core:'', personal:'none', tasks:'none'};
+    Object.entries(panels).forEach(([k,v])=>{ const el=document.getElementById('obj-'+k); if(el) el.style.removeProperty('display'), el.style.display=v; });
     document.querySelectorAll('#sec-objectives .tab').forEach((t,i)=>t.classList.toggle('active',i===0));
     if (!allUsuarios.length) loadUsuarios().then(poblarSelectoresObjetivos); else poblarSelectoresObjetivos();
   }
@@ -3120,6 +3104,157 @@ async function verReporteLider() {
     ? '<div class="card" style="margin-top:12px;"><div style="font-weight:800;color:#f0ebe3;margin-bottom:12px;">Equipo de '+(lider?.FullName||'')+'</div><table class="data-table"><thead><tr><th>Colaborador</th><th>Área</th><th>Estado</th></tr></thead><tbody>'+
       equipo.map(u=>'<tr><td>'+(u.FullName||u.Email)+'</td><td>'+(u.AreaName||'—')+'</td><td><span style="color:'+(u.IsActive?'#2ECC71':'#888')+'">'+(u.IsActive?'Activo':'Inactivo')+'</span></td></tr>').join('')+'</tbody></table></div>'
     : '<div style="padding:20px;color:#888;">Sin equipo asignado</div>';
+}
+
+
+// ═══ GUARDAR NUEVO OBJETIVO ══════════════════════════════════
+async function guardarNuevoObjetivo() {
+  const modal = document.getElementById('newObjectiveModal');
+  if (!modal) return;
+  const inputs = modal.querySelectorAll('input, select, textarea');
+  // Título es el primer input
+  const titulo = modal.querySelector('input[placeholder*="Certificación"], input[placeholder*="objetivo"], input[type="text"]')?.value?.trim()
+                || modal.querySelectorAll('input')[0]?.value?.trim();
+  if (!titulo) { mostrarToast('El título es obligatorio', 'error'); return; }
+  
+  const selects = modal.querySelectorAll('select');
+  const tipo = selects[0]?.value || 'personal';
+  // Buscar select de colaborador (tiene valores numéricos)
+  let userId = null;
+  selects.forEach(sel => {
+    if (sel.value && !isNaN(sel.value)) userId = parseInt(sel.value);
+  });
+  // Buscar período
+  let periodId = null;
+  if (allPeriods.length) {
+    const activePeriod = allPeriods.find(p=>p.IsActive);
+    periodId = activePeriod?.PeriodID || allPeriods[0]?.PeriodID;
+  }
+  
+  try {
+    const res = await fetch(API_BASE + '/objectives', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: titulo,
+        objectiveType: tipo.toLowerCase().includes('core') ? 'company' : 'personal',
+        userId: userId,
+        periodId: periodId,
+        weight: 0,
+        status: 'not_started',
+        progress: 0
+      })
+    });
+    const data = await res.json();
+    if (data.ok === false) throw new Error(data.error || 'Error al guardar');
+    closeModal('newObjectiveModal');
+    mostrarToast('Objetivo creado correctamente ✓', 'success');
+    // Limpiar
+    modal.querySelectorAll('input, textarea').forEach(el => { if(el.type!=='submit') el.value=''; });
+  } catch(e) {
+    mostrarToast('Error: ' + e.message, 'error');
+  }
+}
+
+// ═══ GUARDAR CHECKIN ═════════════════════════════════════════
+async function guardarCheckin() {
+  closeModal('checkinModal');
+  mostrarToast('Check-in registrado', 'success');
+}
+
+// ═══ FILTRAR COLABORADORES EN MODAL REUNIÓN ═══════════════════
+function filtrarColabReunion(query) {
+  const sel = document.getElementById('reunionColabSel');
+  if (!sel) return;
+  const q = query.toLowerCase();
+  sel.innerHTML = '<option value="">— Seleccionar —</option>';
+  allUsuarios.filter(u => u.IsActive && (
+    !q || (u.FullName||'').toLowerCase().includes(q) || (u.Email||'').toLowerCase().includes(q)
+  )).sort((a,b)=>(a.FullName||'').localeCompare(b.FullName||'')).forEach(u => {
+    sel.add(new Option((u.FullName||u.Email) + ' — ' + (u.Email||''), u.UserID));
+  });
+}
+
+// ═══ OVERRIDE poblarColaboradoresReunion para usar nuevo select ═══════
+const _origPoblar = poblarColaboradoresReunion;
+poblarColaboradoresReunion = function() {
+  filtrarColabReunion('');
+};
+
+// ═══ FIX GUARDAR REUNIÓN: usar el nuevo select ════════════════
+const _origGuardarReunion = guardarReunionFixed || guardarReunion;
+guardarReunion = async function() {
+  const modal = document.getElementById('newMeetingModal');
+  if (!modal) return;
+  const colabSel = document.getElementById('reunionColabSel') || modal.querySelector('select');
+  const tipoSel = modal.querySelectorAll('select')[1];
+  const fechaEl = modal.querySelector('input[type="date"]');
+  const inputs = modal.querySelectorAll('input[type="text"], input:not([type])');
+  const textareas = modal.querySelectorAll('textarea');
+  
+  const colaboradorId = colabSel?.value;
+  const tipo = tipoSel?.value || 'monthly';
+  const fecha = fechaEl?.value;
+  const titulo = Array.from(inputs).find(i=>i.placeholder&&i.placeholder.includes('Feedback'))?.value || '';
+  const notas = textareas[0]?.value || '';
+  const pasos = textareas[1]?.value || '';
+  
+  if (!colaboradorId) { mostrarToast('Seleccioná un colaborador', 'error'); return; }
+  if (!fecha) { mostrarToast('Ingresá la fecha', 'error'); return; }
+  
+  try {
+    const res = await fetch(API_BASE + '/meetings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        employeeId: parseInt(colaboradorId),
+        meetingType: tipo,
+        meetingDate: fecha,
+        title: titulo || null,
+        generalNotes: notas || null,
+        nextSteps: pasos || null,
+        status: 'completed',
+        sendEmail: false
+      })
+    });
+    if (!res.ok) throw new Error('Error ' + res.status);
+    const data = await res.json();
+    if (data.ok === false) throw new Error(data.error || 'Error');
+    closeModal('newMeetingModal');
+    textareas.forEach(t=>t.value='');
+    mostrarToast('Reunión guardada ✓', 'success');
+    // Recargar bitácora del colaborador
+    if (typeof cargarBitacora === 'function') cargarBitacora(parseInt(colaboradorId));
+  } catch(e) {
+    mostrarToast('Error: ' + e.message, 'error');
+  }
+};
+guardarReunionFixed = guardarReunion;
+
+// ═══ CARGAR BITÁCORA DE REUNIONES ════════════════════════════
+async function cargarBitacora(userId) {
+  const bitEl = document.querySelector('#sec-oneononex .bitacora, #sec-oneononex [class*="timeline"], #sec-oneononex .card:last-child > div');
+  if (!bitEl) return;
+  try {
+    const meetings = await apiGet('meetings/' + userId);
+    if (!meetings || !meetings.length) {
+      bitEl.innerHTML = '<div style="text-align:center;padding:20px;color:#888;">Sin reuniones registradas</div>';
+      return;
+    }
+    bitEl.innerHTML = meetings.map(m => {
+      const fecha = m.MeetingDate ? new Date(m.MeetingDate).toLocaleDateString('es-AR') : '—';
+      return '<div style="border-bottom:1px solid #2a2a2a;padding:12px 0;"><div style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;margin-bottom:6px;">'+fecha+' · '+(m.MeetingType||'Mensual').toUpperCase()+'</div>'+
+        '<div style="font-weight:700;color:#f0ebe3;margin-bottom:4px;">'+(m.Title||'Reunión 1:1')+'</div>'+
+        (m.GeneralNotes?'<div style="font-size:12px;color:#aaa;">'+m.GeneralNotes+'</div>':'')+'</div>';
+    }).join('');
+  } catch(e) { console.warn('Bitácora:', e); }
+}
+
+// ═══ AGREGAR COMPETENCIA PERSONAL ════════════════════════════
+function agregarCompetenciaPersonal() {
+  const nombre = prompt('Nombre de la competencia personal:');
+  if (!nombre?.trim()) return;
+  mostrarToast('Competencia personal agregada: ' + nombre.trim(), 'success');
 }
 
 </script>

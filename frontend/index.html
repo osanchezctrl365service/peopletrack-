@@ -1791,6 +1791,170 @@ label { color: #888 !important; }
   </div>
 </div>
 
+
+<!-- ═══ MODAL: NUEVO/EDITAR OBJETIVO ═══════════════════════════ -->
+<div class="modal-overlay" id="newObjectiveModal">
+  <div class="modal" style="max-width:600px;">
+    <div class="modal-title" id="newObjModalTitle">Nuevo Objetivo</div>
+    <div style="display:flex;gap:8px;margin-bottom:20px;">
+      <button id="btnTipoCore" onclick="setTipoObjetivo('company')" class="btn btn-primary" style="flex:1;">🏢 Core Empresa</button>
+      <button id="btnTipoPersonal" onclick="setTipoObjetivo('personal')" class="btn btn-secondary" style="flex:1;">👤 Personal</button>
+    </div>
+    <input type="hidden" id="newObjTipo" value="company">
+    <div class="grid-2 gap-16">
+      <div class="form-group" style="grid-column:1/-1">
+        <label class="form-label">Título del Objetivo *</label>
+        <input id="newObjTitulo" class="form-control" placeholder="Ej: Certificación MS oficial anual">
+      </div>
+      <div id="camposCore" style="grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div class="form-group">
+          <label class="form-label">Ponderación (%)</label>
+          <input id="newObjPeso" class="form-control" type="number" value="20" min="0" max="100">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Área aplicable</label>
+          <select id="newObjArea" class="form-control"><option value="">Todas las áreas</option></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Período</label>
+          <select id="objPeriodoSel" class="form-control"><option value="">— Período —</option></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Fecha Límite</label>
+          <input id="newObjFechaCore" class="form-control" type="date">
+        </div>
+        <div class="form-group" style="grid-column:1/-1">
+          <label class="form-label">Descripción</label>
+          <textarea id="newObjDescCore" class="form-control" rows="2" placeholder="Descripción del objetivo core..."></textarea>
+        </div>
+      </div>
+      <div id="camposPersonal" style="grid-column:1/-1;display:none;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div class="form-group" style="grid-column:1/-1">
+            <label class="form-label">Colaborador *</label>
+            <input id="objColabBuscar" type="text" class="form-control" placeholder="🔍 Buscar..." style="margin-bottom:4px;" oninput="filtrarColabObj(this.value)">
+            <select id="objColabSel" class="form-control"><option value="">— Seleccionar —</option></select>
+          </div>
+          <div class="form-group" style="grid-column:1/-1">
+            <label class="form-label">Basado en Core (opcional)</label>
+            <select id="newObjCoreRef" class="form-control" onchange="precargarDesdeCore(this.value)">
+              <option value="">— Sin referencia core —</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Ponderación (%)</label>
+            <input id="newObjPesoPersonal" class="form-control" type="number" value="20" min="0" max="100">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Período</label>
+            <select id="objPeriodoSelPersonal" class="form-control"><option value="">— Período —</option></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Fecha Límite</label>
+            <input id="newObjFechaPersonal" class="form-control" type="date">
+          </div>
+          <div class="form-group" style="grid-column:1/-1">
+            <label class="form-label">Descripción</label>
+            <textarea id="newObjDescPersonal" class="form-control" rows="2" placeholder="Descripción..."></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="newObjError" style="color:#FF4D4D;font-size:12px;margin-top:8px;display:none;"></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('newObjectiveModal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarNuevoObjetivo()">Guardar Objetivo</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: EDITAR OBJETIVO ══════════════════════════════════ -->
+<div class="modal-overlay" id="editObjectiveModal">
+  <div class="modal" style="max-width:520px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <div class="modal-title" id="editObjModalTitle" style="margin:0;">Editar Objetivo</div>
+      <span id="editObjTipoBadge" style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:rgba(255,84,0,0.15);color:#FF5400;"></span>
+    </div>
+    <input type="hidden" id="editObjId">
+    <input type="hidden" id="editObjTipoHidden">
+    <div class="form-group">
+      <label class="form-label">Título del Objetivo</label>
+      <input id="editObjTitulo" class="form-control" type="text" placeholder="Título del objetivo">
+    </div>
+    <div id="editCoreFields" style="display:none;">
+      <div class="grid-2 gap-16">
+        <div class="form-group">
+          <label class="form-label">Ponderación (%)</label>
+          <input id="editObjPeso" class="form-control" type="number" min="0" max="100" value="20">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Período</label>
+          <select id="editObjPeriodo" class="form-control"><option value="">— Período —</option></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Fecha Límite</label>
+          <input id="editObjFecha" class="form-control" type="date">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Estado Organizacional</label>
+          <select id="editObjEstadoOrg" class="form-control">
+            <option value="active">Activo</option>
+            <option value="approved">Aprobado por Dirección</option>
+            <option value="paused">Pausado</option>
+            <option value="cancelled">Cancelado por Dirección</option>
+          </select>
+        </div>
+        <div class="form-group" style="grid-column:1/-1">
+          <label class="form-label">Nota de dirección</label>
+          <textarea id="editObjNotaDir" class="form-control" rows="2" placeholder="Motivo del cambio..."></textarea>
+        </div>
+      </div>
+    </div>
+    <div id="editPersonalFields" style="display:none;">
+      <div class="grid-2 gap-16">
+        <div class="form-group">
+          <label class="form-label">Avance (%)</label>
+          <input id="editObjAvance" class="form-control" type="number" min="0" max="100" value="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Estado</label>
+          <select id="editObjEstado" class="form-control">
+            <option value="not_started">No Iniciado</option>
+            <option value="in_progress">En Curso</option>
+            <option value="at_risk">En Riesgo</option>
+            <option value="completed">Completado</option>
+            <option value="not_met">No Cumplido</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Ponderación (%)</label>
+          <input id="editObjPesoPersonal" class="form-control" type="number" min="0" max="100" value="20">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Fecha Límite</label>
+          <input id="editObjFechaPersonal" class="form-control" type="date">
+        </div>
+      </div>
+    </div>
+    <div id="editObjError" style="color:#FF4D4D;font-size:12px;margin-top:8px;display:none;"></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('editObjectiveModal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarEdicionObjetivo()">Guardar Cambios</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: IMPORTAR ══════════════════════════════════════════ -->
+<div class="modal-overlay" id="importModal">
+  <div class="modal">
+    <div class="modal-title">Importar Objetivos</div>
+    <p style="color:#888;font-size:13px;margin-bottom:16px;">Funcionalidad de importación próximamente disponible.</p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('importModal')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const titles = {
   dashboard:'Dashboard',usuarios:'Usuarios',lideres:'Líderes',areas:'Áreas',objectives:'Objetivos',career:'Plan de Carrera',
@@ -2176,6 +2340,8 @@ function renderLideres(grupos) {
           <div style="font-size:11px;color:#888;margin-top:1px;">${g.equipo.length} colaborador${g.equipo.length!==1?'es':''}</div>
         </div>
         <span style="margin-left:auto;background:rgba(255,84,0,0.12);color:#FF5400;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">Líder</span>
+        <button onclick="abrirEditarLider(${g.liderId},'${g.nombre.replace(/'/g,"\'")}','${g.email||''}')" style="padding:4px 10px;background:#222;border:1px solid #333;border-radius:6px;color:#aaa;font-size:11px;cursor:pointer;">Editar</button>
+        <button onclick="despromoverLider(${g.liderId},'${g.nombre.replace(/'/g,"\'")}')" style="padding:4px 10px;background:rgba(255,77,77,0.1);border:1px solid rgba(255,77,77,0.3);border-radius:6px;color:#FF4D4D;font-size:11px;cursor:pointer;">Despromover</button>
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;">
         ${g.equipo.map(u=>`
@@ -4736,6 +4902,96 @@ function abrirEditarReunion(meetingId, titulo, notas, pasos) {
   var modal = document.getElementById('editMeetingModal');
   if (modal) modal.style.display='flex';
 }
+
+
+// ═══ LIDERES: DESPROMOVER Y EDITAR ═══════════════════════════
+async function despromoverLider(userId, nombre) {
+  if (!confirm('Despromover a ' + nombre + ' de Lider? Pasara a rol de empleado.')) return;
+  try {
+    var res = await fetch(API_BASE + '/users/' + userId, {
+      method: 'PUT', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ appRole: 'employee' })
+    });
+    var data = await res.json();
+    if (data.ok === false) throw new Error(data.error || 'Error');
+    mostrarToast(nombre + ' fue despromovido correctamente', 'success');
+    loadLideres();
+  } catch(e) { mostrarToast('Error: ' + e.message, 'error'); }
+}
+
+function abrirEditarLider(userId, nombre, email) {
+  abrirModalEditar(userId);
+}
+
+// ═══ OBJETIVOS: PRECARGAR DESDE CORE ═════════════════════════
+function precargarDesdeCore(coreId) {
+  if (!coreId) return;
+  var core = allObjetivosCache ? allObjetivosCache[coreId] : null;
+  if (!core && typeof allObjetivosCore !== 'undefined') {
+    core = allObjetivosCore.find(function(o){ return String(o.ObjectiveID)===String(coreId); });
+  }
+  if (!core) return;
+  var titulo = document.getElementById('newObjTitulo');
+  if (titulo) titulo.value = core.Title || core.title || '';
+  var peso = document.getElementById('newObjPesoPersonal');
+  if (peso) peso.value = core.Weight || core.weight || 20;
+  mostrarToast('Datos del Core precargados', 'info');
+}
+
+// ═══ OBJETIVOS: ESTADO COLOR ══════════════════════════════════
+function estadoColor(status) {
+  var s = (status||'').toLowerCase();
+  if (s.includes('complet')) return '#2ECC71';
+  if (s.includes('progress') || s.includes('curso')) return '#FF5400';
+  if (s.includes('risk') || s.includes('riesgo')) return '#FF4D4D';
+  return '#888';
+}
+function estadoLabel(status) {
+  var map = {
+    'not_started':'No Iniciado','in_progress':'En Curso',
+    'at_risk':'En Riesgo','completed':'Completado','not_met':'No Cumplido',
+    'active':'Activo','approved':'Aprobado','paused':'Pausado','cancelled':'Cancelado'
+  };
+  return map[(status||'').toLowerCase()] || (status||'—').replace(/_/g,' ');
+}
+
+// ═══ FIX showSection para cargar datos dinámicamente ══════════
+var _ssMain = showSection;
+showSection = function(id) {
+  _ssMain(id);
+  if (id === 'objectives') {
+    var panels = ['obj-core','obj-personal','obj-tasks'];
+    panels.forEach(function(pid, i) {
+      var el = document.getElementById(pid);
+      if (el) el.style.display = i===0 ? '' : 'none';
+    });
+    document.querySelectorAll('#sec-objectives .tab').forEach(function(t,i){ t.classList.toggle('active',i===0); });
+    if (!allUsuarios.length) {
+      loadUsuarios().then(function() {
+        cargarObjetivosCoreEmpresa();
+        poblarSelectoresTabObjetivos();
+        if (!allPeriods.length) loadPeriods().then(poblarModalObjetivo);
+        else poblarModalObjetivo();
+      });
+    } else {
+      cargarObjetivosCoreEmpresa();
+      poblarSelectoresTabObjetivos();
+      if (!allPeriods.length) loadPeriods().then(poblarModalObjetivo);
+      else poblarModalObjetivo();
+    }
+  }
+  if (id === 'feedback360') {
+    if (!allUsuarios.length) loadUsuarios().then(initFeedback360);
+    else initFeedback360();
+    if (!allPeriods.length) loadPeriods();
+  }
+  if (id === 'help') loadHelpArticles();
+  if (id === 'orgchart' && !orgData.length) loadOrgChartDynamic();
+  if (id === 'alerts') loadAlertas();
+  if (id === 'oneononex') {
+    if (!allColabReuniones || !allColabReuniones.length) initReuniones();
+  }
+};
 
 </script>
 

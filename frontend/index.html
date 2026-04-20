@@ -1725,11 +1725,14 @@ label { color: #888 !important; }
             <input id="objColabBuscar" type="text" class="form-control" placeholder="🔍 Buscar colaborador..." style="margin-bottom:4px;" oninput="filtrarColabObj(this.value)">
             <select id="objColabSel" class="form-control"><option value="">— Seleccionar colaborador —</option></select>
           </div>
-          <div class="form-group" style="grid-column:1/-1">
-            <label class="form-label">Basado en objetivo Core (opcional)</label>
-            <select id="newObjCoreRef" class="form-control">
-              <option value="">— Sin referencia core —</option>
-            </select>
+          <div class="form-group" style="grid-column:1/-1;">
+            <div style="background:rgba(255,84,0,0.06);border:1px solid rgba(255,84,0,0.2);border-radius:8px;padding:12px 14px;">
+              <div style="font-size:11px;font-weight:700;color:#FF5400;text-transform:uppercase;margin-bottom:6px;">📌 Asignar desde objetivos Core de la empresa</div>
+              <select id="newObjCoreRef" class="form-control" onchange="precargarDesdeCore(this.value)">
+                <option value="">— Crear objetivo personal nuevo desde cero —</option>
+              </select>
+              <div style="font-size:11px;color:#888;margin-top:6px;">Al seleccionar un Core, el título y ponderación se precargan automáticamente</div>
+            </div>
           </div>
           <div class="form-group">
             <label class="form-label">Ponderación (%)</label>
@@ -3427,13 +3430,31 @@ function renderObjetivosCore(objs) {
     return;
   }
   container.innerHTML = '<table class="data-table"><thead><tr><th>Objetivo Core</th><th>Pond.</th><th>Período</th><th>Área</th><th>Vigencia</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>' +
-    objs.map(o => `<tr>
-      <td><strong>${o.Title||o.title||'—'}</strong>${o.Description?'<br><span style="font-size:11px;color:#666;">'+o.Description+'</span>':''}</td>
+    objs.map(o => {
+    const orgStatus = o.Status||o.status||'active';
+    const orgMap = {
+      'active':    {label:'✅ Activo',    color:'#2ECC71'},
+      'approved':  {label:'🏛️ Aprobado', color:'#3B82F6'},
+      'paused':    {label:'⏸️ Pausado',   color:'#F59E0B'},
+      'cancelled': {label:'❌ Cancelado', color:'#FF4D4D'},
+      'not_started':{label:'✅ Activo',   color:'#2ECC71'},
+      'in_progress':{label:'✅ Activo',   color:'#2ECC71'},
+      'completed':  {label:'✅ Activo',   color:'#2ECC71'},
+    };
+    const st = orgMap[orgStatus] || {label:'✅ Activo', color:'#2ECC71'};
+    return `<tr>
+      <td><strong>${o.Title||o.title||'—'}</strong>${o.Description?'<br><span style="font-size:11px;color:#888;font-style:italic;">'+o.Description+'</span>':''}</td>
       <td>${o.Weight||o.weight||0}%</td>
       <td>${o.PeriodName||o.periodName||'—'}</td>
-      <td>${o.AreaName||o.areaName||'—'}</td>
-      <td><button class="btn btn-secondary btn-sm" onclick="editarObjetivo(${o.ObjectiveID||o.objectiveId})">Editar</button></td>
-    </tr>`).join('') + '</tbody></table>';
+      <td>${o.AreaName||o.areaName||'Todas'}</td>
+      <td>${o.DueDate?new Date(o.DueDate).toLocaleDateString('es-AR'):'—'}</td>
+      <td><span style="font-size:11px;font-weight:700;color:${st.color};">${st.label}</span></td>
+      <td style="display:flex;gap:4px;">
+        <button class="btn btn-secondary btn-sm" onclick="editarObjetivo(${o.ObjectiveID||o.objectiveId})">Editar</button>
+        <button class="btn btn-sm" style="background:rgba(255,84,0,0.1);border:1px solid rgba(255,84,0,0.3);color:#FF5400;padding:3px 8px;border-radius:6px;font-size:10px;cursor:pointer;" onclick="asignarCoreAUsuario(${o.ObjectiveID||o.objectiveId})">Asignar →</button>
+      </td>
+    </tr>`;
+  }).join('') + '</tbody></table>';
 }
 
 function filtrarTablaObjetivos(tipo, query) {
@@ -3840,10 +3861,30 @@ function setTipoObjetivo(tipo) {
       const act = allPeriods.find(p=>p.IsActive);
       if(act) perSel.value = act.PeriodID;
     }
-    // Poblar referencia a core
+    // Poblar referencia a core - cargar desde API si no hay datos
     const coreRef = document.getElementById('newObjCoreRef');
-    if (coreRef && coreRef.options.length <= 1 && allObjetivosCore.length) {
-      allObjetivosCore.forEach(o => coreRef.add(new Option(o.Title||o.title, o.ObjectiveID)));
+    if (coreRef) {
+      const poblarCoreRef = (cores) => {
+        coreRef.innerHTML = '<option value="">— Crear objetivo personal nuevo desde cero —</option>';
+        cores.filter(o => {
+          // Solo mostrar cores activos (no cancelados)
+          const s = o.Status||o.status||'active';
+          return !['cancelled'].includes(s);
+        }).forEach(o => {
+          coreRef.add(new Option('📌 ' + (o.Title||o.title), o.ObjectiveID));
+        });
+      };
+      if (allObjetivosCore.length) {
+        poblarCoreRef(allObjetivosCore);
+      } else {
+        // Cargar desde API
+        apiGet('objectives?type=company').then(data => {
+          const cores = Array.isArray(data) ? data : [];
+          allObjetivosCore = cores;
+          cores.forEach(o => { if(o.ObjectiveID) allObjetivosCache[o.ObjectiveID] = o; });
+          poblarCoreRef(cores);
+        }).catch(() => {});
+      }
     }
     // Poblar colaboradores
     if (!allUsuarios.length) loadUsuarios().then(()=>filtrarColabObj(''));
@@ -3941,6 +3982,63 @@ poblarModalObjetivo = function() {
       if(act) perSel.value = act.PeriodID;
     }
   }
+};
+
+// ═══ PRECARGAR DESDE OBJETIVO CORE ═══════════════════════════
+function precargarDesdeCore(coreId) {
+  if (!coreId) {
+    // Limpiar si deseleccionan
+    const titulo = document.getElementById('newObjTitulo');
+    const peso = document.getElementById('newObjPesoPersonal');
+    if(titulo && !titulo.dataset.manual) titulo.value = '';
+    return;
+  }
+  const core = allObjetivosCache[coreId] ||
+               allObjetivosCore.find(o => String(o.ObjectiveID) === String(coreId));
+  if (!core) return;
+  
+  // Precargar título (editable por el usuario)
+  const titulo = document.getElementById('newObjTitulo');
+  if (titulo) { titulo.value = core.Title || core.title || ''; titulo.dataset.manual = ''; }
+  
+  // Precargar ponderación
+  const peso = document.getElementById('newObjPesoPersonal');
+  if (peso) peso.value = core.Weight || core.weight || 20;
+  
+  // Precargar período
+  const perSel = document.getElementById('objPeriodoSelPersonal');
+  if (perSel && (core.PeriodID || core.periodId)) {
+    perSel.value = core.PeriodID || core.periodId;
+  }
+  
+  // Precargar fecha límite
+  const fecha = document.getElementById('newObjFechaPersonal');
+  if (fecha && core.DueDate) fecha.value = core.DueDate.split('T')[0];
+  
+  mostrarToast('Datos del Core precargados — podés editar antes de guardar', 'info');
+}
+
+// ═══ FIX: guardarNuevoObjetivo personal - incluir referencia core ════════
+// La referencia core se guarda en el body para traceabilidad
+const _origGuardarObjPers = guardarNuevoObjetivo;
+guardarNuevoObjetivo = async function() {
+  // Agregar coreRefId al body si está seleccionado
+  const tipo = document.getElementById('newObjTipo')?.value || 'company';
+  if (tipo === 'personal') {
+    const coreRefId = document.getElementById('newObjCoreRef')?.value;
+    if (coreRefId) {
+      // Se guardará como areaId o como campo adicional
+      // Por ahora lo incluimos en la descripción para traceabilidad
+      const descEl = document.getElementById('newObjDescPersonal');
+      if (descEl && !descEl.value.includes('[Core ref:')) {
+        const core = allObjetivosCache[coreRefId] || allObjetivosCore.find(o=>String(o.ObjectiveID)===String(coreRefId));
+        if (core) {
+          descEl.value = (descEl.value ? descEl.value + '\n' : '') + '[Core ref: ' + (core.Title||core.title) + ']';
+        }
+      }
+    }
+  }
+  await _origGuardarObjPers();
 };
 </script>
 

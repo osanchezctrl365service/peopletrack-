@@ -1099,7 +1099,7 @@ label { color: #888 !important; }
         </table>
       </div>
 
-      <div id="obj-personal" style="display:none">
+      <div id="obj-personal" style="display:none" data-tab="obj">
         <div class="flex gap-8 mb-12">
           <select class="form-control" style="width:200px"><option>— Seleccionar colaborador —</option><option>Jorge Mercado</option><option>Miguel Rocha</option><option>Leila Martínez</option></select>
           <select class="form-control" style="width:160px"><option>FY26</option><option>H1-FY26</option><option>H2-FY26</option></select>
@@ -1147,7 +1147,7 @@ label { color: #888 !important; }
         </table>
       </div>
 
-      <div id="obj-tasks" style="display:none">
+      <div id="obj-tasks" style="display:none" data-tab="obj">
         <p class="text-muted mb-12">Seguimiento detallado de tareas / hitos por objetivo</p>
         <table class="data-table">
           <thead><tr><th>#</th><th>Tarea / Hito</th><th>Objetivo</th><th>Colaborador</th><th>Vencimiento</th><th>Avance</th><th>Estado</th></tr></thead>
@@ -1715,7 +1715,7 @@ label { color: #888 !important; }
     </div>
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeModal('newObjectiveModal')">Cancelar</button>
-      <button class="btn btn-primary" onclick="closeModal('newObjectiveModal')">Guardar Objetivo</button>
+      <button class="btn btn-primary" onclick="guardarNuevoObjetivo()">Guardar Objetivo</button>
     </div>
   </div>
 </div>
@@ -2984,9 +2984,12 @@ showSection = function(id) {
   _ss2(id);
   if (id === 'objectives') {
     // Reset: obj-core visible, los demás ocultos
-    const panels = {core:'', personal:'none', tasks:'none'};
-    Object.entries(panels).forEach(([k,v])=>{ const el=document.getElementById('obj-'+k); if(el) el.style.removeProperty('display'), el.style.display=v; });
-    document.querySelectorAll('#sec-objectives .tab').forEach((t,i)=>t.classList.toggle('active',i===0));
+    const objPanels = ['obj-core','obj-personal','obj-tasks'];
+    objPanels.forEach((pid,i) => {
+      const el = document.getElementById(pid);
+      if (el) el.style.display = i === 0 ? '' : 'none';
+    });
+    document.querySelectorAll('#sec-objectives .tab').forEach((t,i) => t.classList.toggle('active', i===0));
     if (!allUsuarios.length) loadUsuarios().then(poblarSelectoresObjetivos); else poblarSelectoresObjetivos();
   }
   if (id === 'reports') {
@@ -3111,48 +3114,80 @@ async function verReporteLider() {
 async function guardarNuevoObjetivo() {
   const modal = document.getElementById('newObjectiveModal');
   if (!modal) return;
-  const inputs = modal.querySelectorAll('input, select, textarea');
-  // Título es el primer input
-  const titulo = modal.querySelector('input[placeholder*="Certificación"], input[placeholder*="objetivo"], input[type="text"]')?.value?.trim()
-                || modal.querySelectorAll('input')[0]?.value?.trim();
-  if (!titulo) { mostrarToast('El título es obligatorio', 'error'); return; }
-  
-  const selects = modal.querySelectorAll('select');
-  const tipo = selects[0]?.value || 'personal';
-  // Buscar select de colaborador (tiene valores numéricos)
-  let userId = null;
-  selects.forEach(sel => {
-    if (sel.value && !isNaN(sel.value)) userId = parseInt(sel.value);
-  });
-  // Buscar período
-  let periodId = null;
-  if (allPeriods.length) {
-    const activePeriod = allPeriods.find(p=>p.IsActive);
-    periodId = activePeriod?.PeriodID || allPeriods[0]?.PeriodID;
+
+  // Buscar título - primer input de texto del modal
+  let titulo = '';
+  const allInputs = modal.querySelectorAll('input');
+  for (const inp of allInputs) {
+    const v = inp.value?.trim();
+    if (v && inp.type !== 'hidden' && inp.type !== 'number') { titulo = v; break; }
   }
-  
+  if (!titulo) {
+    mostrarToast('El título del objetivo es obligatorio', 'error');
+    return;
+  }
+
+  // Tipo de objetivo
+  const selects = modal.querySelectorAll('select');
+  let tipo = 'personal';
+  let userId = null;
+  let periodId = null;
+  let peso = 0;
+  let competenciaId = null;
+
+  selects.forEach(sel => {
+    const v = sel.value;
+    const opts = Array.from(sel.options).map(o=>o.text.toLowerCase());
+    if (opts.some(o=>o.includes('personal') || o.includes('core'))) {
+      tipo = v.toLowerCase().includes('core') ? 'company' : 'personal';
+    } else if (v && !isNaN(v) && parseInt(v) > 0) {
+      if (!userId) userId = parseInt(v);
+    }
+  });
+
+  // Período activo
+  if (allPeriods.length) {
+    const active = allPeriods.find(p => p.IsActive) || allPeriods[0];
+    if (active) periodId = active.PeriodID;
+  }
+
+  // Ponderación
+  const numInput = modal.querySelector('input[type="number"]');
+  if (numInput?.value) peso = parseFloat(numInput.value) || 0;
+
+  const btn = modal.querySelector('.btn-primary');
+  if (btn) { btn.textContent = 'Guardando...'; btn.disabled = true; }
+
   try {
     const res = await fetch(API_BASE + '/objectives', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         title: titulo,
-        objectiveType: tipo.toLowerCase().includes('core') ? 'company' : 'personal',
+        objectiveType: tipo,
         userId: userId,
         periodId: periodId,
-        weight: 0,
+        weight: peso,
         status: 'not_started',
         progress: 0
       })
     });
-    const data = await res.json();
-    if (data.ok === false) throw new Error(data.error || 'Error al guardar');
+
+    let data;
+    try { data = await res.json(); } catch(e) { data = {}; }
+
+    if (!res.ok || data.ok === false) {
+      throw new Error(data.error || 'Error ' + res.status);
+    }
+
     closeModal('newObjectiveModal');
-    mostrarToast('Objetivo creado correctamente ✓', 'success');
-    // Limpiar
-    modal.querySelectorAll('input, textarea').forEach(el => { if(el.type!=='submit') el.value=''; });
+    modal.querySelectorAll('input, textarea').forEach(el => { if (el.type !== 'submit' && el.type !== 'number') el.value = ''; });
+    mostrarToast('Objetivo "' + titulo + '" creado ✓', 'success');
+
   } catch(e) {
-    mostrarToast('Error: ' + e.message, 'error');
+    mostrarToast('No se pudo guardar: ' + e.message, 'error');
+  } finally {
+    if (btn) { btn.textContent = 'Guardar Objetivo'; btn.disabled = false; }
   }
 }
 

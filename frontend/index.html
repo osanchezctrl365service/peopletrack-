@@ -1468,46 +1468,45 @@ label { color: #888 !important; }
 
     <!-- ======== REPORTES ======== -->
     <div class="section" id="sec-reports">
-      <div class="section-header">
-        <div>
-          <div class="section-heading">Reportes</div>
-          <div class="section-subheading">Reportes individuales y de equipo exportables a Excel con formato de marca</div>
+      <div class="section-header" style="margin-bottom:16px;">
+        <div><div class="section-heading">Reportes</div>
+        <div class="section-subheading">Reportes individuales y de equipo por colaborador, líder o manager</div></div>
+      </div>
+      <div class="tabs" id="rep-tabs">
+        <div class="tab active" onclick="switchTab('rep','persona',this);initReporteTab('persona')">Por Persona</div>
+        <div class="tab" onclick="switchTab('rep','lider',this);initReporteTab('lider')">Por Líder</div>
+        <div class="tab" onclick="switchTab('rep','manager',this);initReporteTab('manager')">Por Manager</div>
+        <div class="tab" onclick="switchTab('rep','empresa',this);initReporteTab('empresa')">General Empresa</div>
+      </div>
+      <div id="rep-persona" style="margin-top:16px;">
+        <div class="flex gap-8 mb-16">
+          <select id="repPersonaSel" class="form-control" style="width:260px" onchange="verReportePersona()"><option value="">— Seleccionar colaborador —</option></select>
+          <select id="repPeriodoSel" class="form-control" style="width:140px" onchange="verReportePersona()"><option value="">— Período —</option></select>
         </div>
-        <button class="btn btn-primary btn-sm" onclick="showModal('exportModal')">⬇ Exportar</button>
-      </div>
-      <div class="tabs">
-        <div class="tab active">Por Persona</div>
-        <div class="tab">Por Líder</div>
-        <div class="tab">Por Manager</div>
-        <div class="tab">General Empresa</div>
-      </div>
-      <div class="flex gap-8 mb-16">
-        <select class="form-control" style="width:220px"><option>Jorge Mercado</option><option>Miguel Rocha</option></select>
-        <select class="form-control" style="width:140px"><option>FY26</option><option>FY25</option></select>
-        <button class="btn btn-primary">Ver Reporte</button>
-      </div>
-      <div class="card">
-        <div class="flex items-center justify-between mb-16">
-          <div>
-            <div style="font-size:16px;font-weight:800;color:var(--primary)">Jorge Mercado — Reporte FY26</div>
-            <div class="text-muted">Developer · Operations · Evaluador: Gastón Salguero</div>
-          </div>
-          <div class="flex gap-8">
-            <button class="btn btn-secondary btn-sm">⬇ PDF</button>
-            <button class="btn btn-primary btn-sm">⬇ Excel</button>
+        <div id="repPersonaEmpty" style="text-align:center;padding:40px;color:#888;">Seleccioná un colaborador para ver el reporte</div>
+        <div id="repPersonaResult" class="card" style="display:none;">
+          <div style="font-size:15px;font-weight:800;color:#f0ebe3;margin-bottom:4px;" id="repPersonaNombre"></div>
+          <div class="text-muted mb-16" id="repPersonaInfo"></div>
+          <div class="grid-3 gap-16 mb-16">
+            <div class="kpi-card"><div class="kpi-label">Avance Objetivos</div><div id="repAvance" class="kpi-value" style="color:#F59E0B;">—</div></div>
+            <div class="kpi-card"><div class="kpi-label">Competencias</div><div id="repCompetencias" class="kpi-value" style="color:#2ECC71;">—</div></div>
+            <div class="kpi-card"><div class="kpi-label">Plan Carrera</div><div id="repCarrera" class="kpi-value" style="color:#FF5400;">—</div></div>
           </div>
         </div>
-        <div class="grid-3 gap-16 mb-16">
-          <div class="kpi-card"><div class="kpi-label">Avance Objetivos</div><div class="kpi-value" style="color:var(--warning)">40%</div></div>
-          <div class="kpi-card"><div class="kpi-label">Competencias</div><div class="kpi-value" style="color:var(--success)">75pts</div></div>
-          <div class="kpi-card"><div class="kpi-label">Plan Carrera</div><div class="kpi-value" style="color:var(--accent)">6.7%</div></div>
-        </div>
-        <div class="progress-label mb-12"><span class="progress-name">Resultado Final Ponderado</span><span class="progress-pct" style="color:var(--warning)">40%</span></div>
-        <div class="progress-bar" style="height:14px"><div class="progress-fill" style="width:40%;background:var(--warning)"></div></div>
       </div>
-    </div>
-
-    <!-- ======== ORGANIGRAMA ======== -->
+      <div id="rep-lider" style="display:none;margin-top:16px;">
+        <div class="flex gap-8 mb-16">
+          <select id="repLiderSel" class="form-control" style="width:260px" onchange="verReporteLider()"><option value="">— Seleccionar líder —</option></select>
+        </div>
+        <div id="repLiderResult"></div>
+      </div>
+      <div id="rep-manager" style="display:none;margin-top:16px;">
+        <div id="repManagerResult" class="grid-2 gap-16"></div>
+      </div>
+      <div id="rep-empresa" style="display:none;margin-top:16px;">
+        <div class="card"><div style="font-size:14px;font-weight:700;color:#f0ebe3;margin-bottom:12px;">KPIs de empresa</div>
+        <div id="repEmpresaKPIs" class="grid-3 gap-16"></div></div>
+      </div>
     <div class="section" id="sec-orgchart" style="overflow-y:auto;">
       <div class="section-header">
         <div>
@@ -1683,8 +1682,8 @@ label { color: #888 !important; }
     </div>
 
     <!-- ======== AYUDA ======== -->
-    <div class="section" id="sec-help" style="overflow-y:auto;">
-      <div style="max-width:860px;margin:0 auto;">
+    <div class="section" id="sec-help">
+      <div style="max-width:860px;margin:0 auto;padding-bottom:60px;">
         <h2 style="font-size:22px;font-weight:800;color:#f0ebe3;margin-bottom:4px;">Centro de Ayuda</h2>
         <p style="color:#888;font-size:13px;margin-bottom:24px;">Guía completa de PeopleTrack. Todo lo que necesitás para usar la plataforma desde cero.</p>
         <div class="card" style="margin-bottom:20px;padding:14px 18px;">
@@ -3001,13 +3000,127 @@ async function initReportes() {
 const _ss2 = showSection;
 showSection = function(id) {
   _ss2(id);
-  if (id === 'reports') {
-    if (!allUsuarios.length) loadUsuarios().then(initReportes);
-    else initReportes();
+  if (id === 'objectives') {
+    ['obj-core','obj-personal','obj-tasks'].forEach((pid,i)=>{ const el=document.getElementById(pid); if(el) el.style.display=i===0?'':'none'; });
+    document.querySelectorAll('#sec-objectives .tab').forEach((t,i)=>t.classList.toggle('active',i===0));
+    if (!allUsuarios.length) loadUsuarios().then(poblarSelectoresObjetivos); else poblarSelectoresObjetivos();
   }
-  if (id === 'career' && !allUsuarios.length) loadUsuarios();
-  if (id === 'competencies' && !allUsuarios.length) loadUsuarios();
+  if (id === 'reports') {
+    if (!allUsuarios.length) loadUsuarios().then(initReportes); else initReportes();
+  }
+  if (id === 'competencies') {
+    if (!allUsuarios.length) loadUsuarios().then(poblarSelectoresCompetencias); else poblarSelectoresCompetencias();
+  }
+  if (id === 'oneononex') {
+    if (!allUsuarios.length) loadUsuarios().then(poblarColaboradoresReunion); else poblarColaboradoresReunion();
+  }
 };
+
+function poblarSelectoresObjetivos() {
+  const modal = document.getElementById('newObjectiveModal');
+  if (!modal) return;
+  modal.querySelectorAll('select').forEach(sel => {
+    const first = sel.querySelector('option');
+    if (!first) return;
+    const txt = first.textContent;
+    if (txt.includes('Mercado') || txt.includes('Rocha') || txt.includes('Seleccionar col')) {
+      const cur = sel.value;
+      sel.innerHTML = '<option value="">— Colaborador —</option>';
+      allUsuarios.filter(u=>u.IsActive).sort((a,b)=>(a.FullName||'').localeCompare(b.FullName||'')).forEach(u=>sel.add(new Option(u.FullName||u.Email, u.UserID)));
+      if (cur) sel.value = cur;
+    }
+  });
+}
+
+function poblarSelectoresCompetencias() {
+  document.querySelectorAll('#sec-competencies select').forEach(sel => {
+    const first = sel.querySelector('option');
+    if (!first) return;
+    const txt = first.textContent;
+    if (txt.includes('Mercado') || txt.includes('Rocha')) {
+      const cur = sel.value;
+      sel.innerHTML = '<option value="">— Colaborador —</option>';
+      allUsuarios.filter(u=>u.IsActive).sort((a,b)=>(a.FullName||'').localeCompare(b.FullName||'')).forEach(u=>sel.add(new Option(u.FullName||u.Email, u.UserID)));
+      if (cur) sel.value = cur;
+    }
+  });
+}
+
+
+// ═══ REPORTES ════════════════════════════════════════════════
+function initReportes() {
+  const pSel = document.getElementById('repPersonaSel');
+  const lSel = document.getElementById('repLiderSel');
+  const perSel = document.getElementById('repPeriodoSel');
+  if (pSel && pSel.options.length <= 1) {
+    allUsuarios.filter(u=>u.IsActive).sort((a,b)=>(a.FullName||'').localeCompare(b.FullName||'')).forEach(u=>pSel.add(new Option(u.FullName||u.Email, u.UserID)));
+  }
+  if (lSel && lSel.options.length <= 1) {
+    allUsuarios.filter(u=>u.IsActive&&['leader','manager','admin'].includes(u.AppRole)).sort((a,b)=>(a.FullName||'').localeCompare(b.FullName||'')).forEach(u=>lSel.add(new Option(u.FullName||u.Email, u.UserID)));
+  }
+  if (perSel && perSel.options.length <= 1 && allPeriods.length) {
+    allPeriods.forEach(p=>perSel.add(new Option(p.PeriodName, p.PeriodID)));
+  }
+}
+
+function initReporteTab(tipo) {
+  if (tipo === 'manager') {
+    const c = document.getElementById('repManagerResult');
+    if (c && !c.innerHTML.trim()) {
+      const managers = allUsuarios.filter(u=>['manager','admin'].includes(u.AppRole));
+      c.innerHTML = managers.length ? managers.map(m=>{
+        const eq = allUsuarios.filter(u=>u.ManagerID==m.UserID||u.LeaderID==m.UserID);
+        return '<div class="card"><div style="font-weight:800;color:#FF5400;margin-bottom:8px;">'+m.FullName+'</div><div style="font-size:12px;color:#888;">'+eq.length+' personas</div></div>';
+      }).join('') : '<div style="padding:20px;color:#888;">Sin managers</div>';
+    }
+  }
+  if (tipo === 'empresa') {
+    const k = document.getElementById('repEmpresaKPIs');
+    if (k && !k.innerHTML.trim()) {
+      const act = allUsuarios.filter(u=>u.IsActive).length;
+      k.innerHTML = '<div class="kpi-card"><div class="kpi-label">Total usuarios</div><div class="kpi-value" style="color:#f0ebe3;">'+allUsuarios.length+'</div></div>'+
+        '<div class="kpi-card"><div class="kpi-label">Activos</div><div class="kpi-value" style="color:#2ECC71;">'+act+'</div></div>'+
+        '<div class="kpi-card"><div class="kpi-label">Períodos activos</div><div class="kpi-value" style="color:#FF5400;">'+(allPeriods.filter(p=>p.IsActive).length)+'</div></div>';
+    }
+  }
+}
+
+async function verReportePersona() {
+  const userId = document.getElementById('repPersonaSel')?.value;
+  const periodId = document.getElementById('repPeriodoSel')?.value;
+  const res = document.getElementById('repPersonaResult');
+  const emp = document.getElementById('repPersonaEmpty');
+  if (!userId) { if(res)res.style.display='none'; if(emp)emp.style.display='block'; return; }
+  const user = allUsuarios.find(u=>String(u.UserID)===String(userId));
+  if (!user || !res) return;
+  res.style.display='block'; if(emp)emp.style.display='none';
+  const period = allPeriods.find(p=>String(p.PeriodID)===String(periodId));
+  document.getElementById('repPersonaNombre').textContent = (user.FullName||user.Email) + (period?' — '+period.PeriodName:'');
+  document.getElementById('repPersonaInfo').textContent = [user.RoleName,user.AreaName].filter(Boolean).join(' · ');
+  if (periodId) {
+    try {
+      const data = await apiGet('users/'+userId+'/report?periodId='+periodId);
+      if (data) {
+        const av = data.objectives?.length ? Math.round(data.objectives.reduce((s,o)=>s+(o.Progress||0),0)/data.objectives.length) : '—';
+        const cp = data.competencies?.length ? Math.round(data.competencies.reduce((s,c)=>s+(c.Score||0),0)/data.competencies.length) : '—';
+        document.getElementById('repAvance').textContent = av+(typeof av==='number'?'%':'');
+        document.getElementById('repCompetencias').textContent = cp+(typeof cp==='number'?'pts':'');
+      }
+    } catch(e) { console.warn('Reporte error:', e); }
+  }
+}
+
+async function verReporteLider() {
+  const userId = document.getElementById('repLiderSel')?.value;
+  const c = document.getElementById('repLiderResult');
+  if (!userId || !c) return;
+  const lider = allUsuarios.find(u=>String(u.UserID)===String(userId));
+  const equipo = allUsuarios.filter(u=>String(u.LeaderID)===String(userId)&&u.IsActive);
+  c.innerHTML = equipo.length
+    ? '<div class="card" style="margin-top:12px;"><div style="font-weight:800;color:#f0ebe3;margin-bottom:12px;">Equipo de '+(lider?.FullName||'')+'</div><table class="data-table"><thead><tr><th>Colaborador</th><th>Área</th><th>Estado</th></tr></thead><tbody>'+
+      equipo.map(u=>'<tr><td>'+(u.FullName||u.Email)+'</td><td>'+(u.AreaName||'—')+'</td><td><span style="color:'+(u.IsActive?'#2ECC71':'#888')+'">'+(u.IsActive?'Activo':'Inactivo')+'</span></td></tr>').join('')+'</tbody></table></div>'
+    : '<div style="padding:20px;color:#888;">Sin equipo asignado</div>';
+}
 
 </script>
 </body>

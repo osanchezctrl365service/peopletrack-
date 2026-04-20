@@ -1706,10 +1706,14 @@ label { color: #888 !important; }
     <div class="grid-2 gap-16">
       <div class="form-group" style="grid-column:1/-1"><label class="form-label">Título del Objetivo</label><input class="form-control" placeholder="Ej: Certificación PL-500 completa"></div>
       <div class="form-group"><label class="form-label">Tipo</label><select class="form-control"><option>Personal</option><option>Core (Empresa)</option></select></div>
-      <div class="form-group"><label class="form-label">Colaborador</label><select class="form-control"><option>Jorge Mercado</option><option>Miguel Rocha</option></select></div>
+      <div class="form-group" style="grid-column:1/-1">
+        <label class="form-label">Colaborador</label>
+        <input id="objColabBuscar" type="text" class="form-control" placeholder="🔍 Buscar colaborador..." style="margin-bottom:4px;" oninput="filtrarColabObj(this.value)">
+        <select id="objColabSel" class="form-control"><option value="">— Seleccionar colaborador —</option></select>
+      </div>
       <div class="form-group"><label class="form-label">Competencia</label><select class="form-control"><option>Aprendizaje</option><option>Innovación</option><option>Orientación al Cliente</option></select></div>
       <div class="form-group"><label class="form-label">Ponderación (%)</label><input class="form-control" type="number" value="20"></div>
-      <div class="form-group"><label class="form-label">Período</label><select class="form-control"><option>FY26</option><option>H1-FY26</option><option>Q2-FY26</option></select></div>
+      <div class="form-group"><label class="form-label">Período</label><select id="objPeriodoSel" class="form-control"><option value="">— Período —</option></select></div>
       <div class="form-group"><label class="form-label">Fecha Límite</label><input class="form-control" type="date"></div>
       <div class="form-group" style="grid-column:1/-1"><label class="form-label">Descripción</label><textarea class="form-control" placeholder="Detalle del objetivo..."></textarea></div>
     </div>
@@ -1738,7 +1742,11 @@ label { color: #888 !important; }
   <div class="modal">
     <div class="modal-title">Nueva Reunión 1:1</div>
     <div class="grid-2 gap-16">
-      <div class="form-group"><label class="form-label">Colaborador</label><select class="form-control"><option>Jorge Mercado</option><option>Miguel Rocha</option></select></div>
+      <div class="form-group" style="grid-column:1/-1">
+        <label class="form-label">Colaborador</label>
+        <input id="objColabBuscar" type="text" class="form-control" placeholder="🔍 Buscar colaborador..." style="margin-bottom:4px;" oninput="filtrarColabObj(this.value)">
+        <select id="objColabSel" class="form-control"><option value="">— Seleccionar colaborador —</option></select>
+      </div>
       <div class="form-group"><label class="form-label">Tipo</label><select class="form-control"><option>Mensual</option><option>Semanal</option><option>Trimestral</option></select></div>
       <div class="form-group"><label class="form-label">Fecha</label><input class="form-control" type="date"></div>
       <div class="form-group"><label class="form-label">Título</label><input class="form-control" placeholder="Ej: Feedback Q1"></div>
@@ -1931,13 +1939,13 @@ function showSection(id){
 }
 
 function switchTab(prefix, id, el){
-  // Activar tab
   const parent = el.closest('.tabs');
   parent.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
-  // Mostrar panel correcto
   const panelId = prefix + '-' + id;
-  document.querySelectorAll('[id^="' + prefix + '-"]').forEach(p=>{
+  // Scope: buscar en el contenedor padre del div de tabs
+  const container = parent.parentElement;
+  container.querySelectorAll('[id^="' + prefix + '-"]').forEach(p=>{
     p.style.display = p.id === panelId ? '' : 'none';
   });
 }
@@ -3128,26 +3136,18 @@ async function guardarNuevoObjetivo() {
   }
 
   // Tipo de objetivo
-  const selects = modal.querySelectorAll('select');
-  let tipo = 'personal';
-  let userId = null;
-  let periodId = null;
-  let peso = 0;
-  let competenciaId = null;
+  const tipoSel = modal.querySelectorAll('select')[0];
+  const tipo = tipoSel?.value?.toLowerCase().includes('core') ? 'company' : 'personal';
 
-  selects.forEach(sel => {
-    const v = sel.value;
-    const opts = Array.from(sel.options).map(o=>o.text.toLowerCase());
-    if (opts.some(o=>o.includes('personal') || o.includes('core'))) {
-      tipo = v.toLowerCase().includes('core') ? 'company' : 'personal';
-    } else if (v && !isNaN(v) && parseInt(v) > 0) {
-      if (!userId) userId = parseInt(v);
-    }
-  });
+  // Colaborador del selector con buscador
+  const colabSel = document.getElementById('objColabSel') || modal.querySelectorAll('select')[1];
+  const userId = colabSel?.value ? parseInt(colabSel.value) : null;
 
-  // Período activo
-  if (allPeriods.length) {
-    const active = allPeriods.find(p => p.IsActive) || allPeriods[0];
+  // Período del selector con IDs reales
+  const perSel = document.getElementById('objPeriodoSel') || modal.querySelectorAll('select')[2];
+  let periodId = perSel?.value ? parseInt(perSel.value) : null;
+  if (!periodId && allPeriods.length) {
+    const active = allPeriods.find(p=>p.IsActive) || allPeriods[0];
     if (active) periodId = active.PeriodID;
   }
 
@@ -3291,6 +3291,45 @@ function agregarCompetenciaPersonal() {
   if (!nombre?.trim()) return;
   mostrarToast('Competencia personal agregada: ' + nombre.trim(), 'success');
 }
+
+
+// ═══ POBLAR MODAL NUEVO OBJETIVO ════════════════════════════
+function filtrarColabObj(q) {
+  const sel = document.getElementById('objColabSel');
+  if (!sel) return;
+  const query = q.toLowerCase();
+  sel.innerHTML = '<option value="">— Seleccionar colaborador —</option>';
+  allUsuarios.filter(u => u.IsActive && (!query || 
+    (u.FullName||'').toLowerCase().includes(query) || 
+    (u.Email||'').toLowerCase().includes(query)
+  )).sort((a,b)=>(a.FullName||'').localeCompare(b.FullName||''))
+  .forEach(u => sel.add(new Option((u.FullName||u.Email) + ' — ' + (u.Email||''), u.UserID)));
+}
+
+function poblarModalObjetivo() {
+  filtrarColabObj('');
+  const perSel = document.getElementById('objPeriodoSel');
+  if (perSel && perSel.options.length <= 1 && allPeriods.length) {
+    allPeriods.forEach(p => perSel.add(new Option(p.PeriodName, p.PeriodID)));
+    // Seleccionar período activo por defecto
+    const active = allPeriods.find(p=>p.IsActive);
+    if (active) perSel.value = active.PeriodID;
+  }
+}
+
+// Parchar showModal para poblar cuando se abre newObjectiveModal
+const _origShowModalObj = showModal;
+showModal = function(id) {
+  _origShowModal ? _origShowModal(id) : _origShowModalObj(id);
+  if (id === 'newObjectiveModal') {
+    if (!allUsuarios.length) loadUsuarios().then(poblarModalObjetivo);
+    else poblarModalObjetivo();
+  }
+  if (id === 'newMeetingModal') {
+    if (!allUsuarios.length) loadUsuarios().then(poblarColaboradoresReunion);
+    else poblarColaboradoresReunion();
+  }
+};
 
 </script>
 </body>

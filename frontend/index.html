@@ -1118,12 +1118,15 @@ label { color: #888 !important; }
       </div>
 
       <div id="obj-tasks" style="display:none">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
           <p style="color:#888;font-size:13px;">Check-ins y seguimiento de avance por objetivo</p>
-          <div style="display:flex;gap:8px;">
-            <select id="objTasksColab" class="form-control" style="width:200px;" onchange="cargarTareasColaborador()">
-              <option value="">— Colaborador —</option>
-            </select>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;">
+            <div>
+              <input id="objTasksBuscar" type="text" class="form-control" placeholder="🔍 Buscar colaborador..." style="margin-bottom:4px;width:220px;" oninput="filtrarColabTareas(this.value)">
+              <select id="objTasksColab" class="form-control" style="width:220px;" onchange="cargarTareasColaborador()">
+                <option value="">— Seleccionar colaborador —</option>
+              </select>
+            </div>
           </div>
         </div>
         <div id="objTasksTbody">
@@ -3323,6 +3326,7 @@ showModal = function(id) {
 // ═══ DATOS DE OBJETIVOS ══════════════════════════════════════
 let allObjetivosCore = [];
 let allObjetivosPersonales = [];
+let allObjetivosCache = {}; // cache por ObjectiveID → objeto completo
 
 async function cargarObjetivosCoreEmpresa() {
   const container = document.getElementById('objCoreTbody');
@@ -3348,6 +3352,8 @@ async function cargarObjetivosCoreEmpresa() {
 function renderObjetivosCore(objs) {
   const container = document.getElementById('objCoreTbody');
   if (!container) return;
+  // Guardar en cache global
+  objs.forEach(o => { if(o.ObjectiveID) allObjetivosCache[o.ObjectiveID] = o; });
   if (!objs.length) {
     container.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">No hay objetivos core. Usá + Nuevo Objetivo para crear uno.</div>';
     return;
@@ -3391,6 +3397,9 @@ async function cargarObjetivosPersonales() {
     const url = 'objectives?type=personal&userId=' + userId + (periodId ? '&periodId=' + periodId : '');
     const data = await apiGet(url);
     const objs = Array.isArray(data) ? data : [];
+    // Guardar en cache y en allObjetivosPersonales
+    allObjetivosPersonales = objs;
+    objs.forEach(o => { if(o.ObjectiveID) allObjetivosCache[o.ObjectiveID] = o; });
     if (!objs.length) {
       container.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Sin objetivos personales para este colaborador</div>';
       return;
@@ -3433,9 +3442,10 @@ async function editarObjetivo(id) {
   const modal = document.getElementById('editObjectiveModal');
   if (!modal) { mostrarToast('Modal no disponible', 'error'); return; }
   document.getElementById('editObjId').value = id;
-  // Buscar en los datos cargados
-  const allObjsLoaded = [...(allObjetivosCore||[])];
-  const obj = allObjsLoaded.find(o => String(o.ObjectiveID||o.objectiveId) === String(id));
+  // Buscar en cache global (incluye core y personales)
+  const obj = allObjetivosCache[id] || 
+              (allObjetivosCore||[]).find(o => String(o.ObjectiveID) === String(id)) ||
+              (allObjetivosPersonales||[]).find(o => String(o.ObjectiveID) === String(id));
   if (obj) {
     document.getElementById('editObjTitulo').value = obj.Title || '';
     document.getElementById('editObjAvance').value = obj.Progress || 0;
@@ -3458,18 +3468,44 @@ async function guardarEdicionObjetivo() {
   const btn = document.querySelector('#editObjectiveModal .btn-primary');
   if (btn) { btn.textContent = 'Guardando...'; btn.disabled = true; }
   try {
+    // Obtener datos originales del cache para campos requeridos por el SP
+    const orig = allObjetivosCache[id] || {};
+    const body = {
+      title: titulo,
+      progress: avance,
+      status: estado,
+      weight: peso,
+      dueDate: fecha,
+      // Campos requeridos por sp_UpsertObjective
+      objectiveType: orig.ObjectiveType || orig.objectiveType || 'personal',
+      periodId: orig.PeriodID || orig.periodId || null,
+      userId: orig.UserID || orig.userId || null,
+      areaId: orig.AreaID || orig.areaId || null,
+    };
     const res = await fetch(API_BASE + '/objectives/' + id, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title: titulo, progress: avance, status: estado, weight: peso, dueDate: fecha })
+      body: JSON.stringify(body)
     });
-    const data = await res.json();
-    if (data.ok === false) throw new Error(data.error || 'Error');
+    let data = {};
+    try { data = await res.json(); } catch(e) {}
+    if (!res.ok || data.ok === false) throw new Error(data.error || 'Error ' + res.status);
+    // Actualizar cache local
+    if (allObjetivosCache[id]) {
+      allObjetivosCache[id] = {...allObjetivosCache[id], Title: titulo, Progress: avance, Status: estado, Weight: peso};
+    }
     closeModal('editObjectiveModal');
     mostrarToast('Objetivo actualizado ✓', 'success');
-    cargarObjetivosCoreEmpresa();
+    // Recargar la vista activa
+    const activeTab = document.querySelector('#sec-objectives .tab.active');
+    if (activeTab) {
+      const tabText = activeTab.textContent;
+      if (tabText.includes('Core')) cargarObjetivosCoreEmpresa();
+      else if (tabText.includes('Personal')) cargarObjetivosPersonales();
+      else if (tabText.includes('Seguimiento')) cargarTareasColaborador();
+    }
   } catch(e) {
-    mostrarToast('Error: ' + e.message, 'error');
+    mostrarToast('Error al guardar: ' + e.message, 'error');
   } finally {
     if (btn) { btn.textContent = 'Guardar Cambios'; btn.disabled = false; }
   }
@@ -3559,6 +3595,8 @@ async function cargarTareasColaborador() {
   try {
     const objs = await apiGet('objectives?userId=' + userId);
     const lista = Array.isArray(objs) ? objs : [];
+    // Guardar en cache
+    lista.forEach(o => { if(o.ObjectiveID) allObjetivosCache[o.ObjectiveID] = o; });
     if (!lista.length) {
       container.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Sin objetivos para este colaborador</div>';
       return;
@@ -3589,11 +3627,7 @@ switchTab = function(prefix, id, el) {
   _origST(prefix, id, el);
   if (prefix === 'obj' && id === 'tasks') {
     const tc = document.getElementById('objTasksColab');
-    if (tc && tc.options.length <= 1 && allUsuarios.length) {
-      allUsuarios.filter(u=>u.IsActive).sort((a,b)=>(a.FullName||'').localeCompare(b.FullName||'')).forEach(u=>{
-        tc.add(new Option((u.FullName||u.Email)+' — '+(u.Email||''), u.UserID));
-      });
-    }
+    if (tc && tc.options.length <= 1 && allUsuarios.length) filtrarColabTareas('');
   }
   if (prefix === 'obj' && id === 'personal') {
     const cs = document.getElementById('objPersonalColab');
@@ -3606,6 +3640,28 @@ switchTab = function(prefix, id, el) {
     }
   }
 };
+
+// ═══ FILTRAR COLABORADOR EN TAREAS ═══════════════════════════
+function filtrarColabTareas(q) {
+  const sel = document.getElementById('objTasksColab');
+  if (!sel) return;
+  const query = (q||'').toLowerCase();
+  sel.innerHTML = '<option value="">— Seleccionar colaborador —</option>';
+  allUsuarios.filter(u => u.IsActive && (!query ||
+    (u.FullName||'').toLowerCase().includes(query) ||
+    (u.Email||'').toLowerCase().includes(query)
+  )).sort((a,b)=>(a.FullName||'').localeCompare(b.FullName||''))
+  .forEach(u => sel.add(new Option((u.FullName||u.Email)+' — '+(u.Email||''), u.UserID)));
+}
+
+// ═══ ASIGNAR OBJETIVO CORE A USUARIOS ════════════════════════
+// Cuando un objetivo tiene type=company se aplica a todos
+// Agregar función para ver/gestionar asignaciones
+function verAsignacionesCore(objId) {
+  const obj = allObjetivosCache[objId];
+  if (!obj) { mostrarToast('Objetivo no encontrado', 'error'); return; }
+  mostrarToast('Los objetivos Core se aplican automáticamente a todos los colaboradores activos.', 'info');
+}
 </script>
 
 <!-- MODAL EDITAR OBJETIVO -->

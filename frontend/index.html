@@ -803,6 +803,10 @@ label { color: #888 !important; }
   </div>
 
   <div class="sidebar-section-label">Reportes</div>
+  <div class="nav-item" onclick="showSection('feedback360')">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg>
+    Feedback 360°
+  </div>
   <div class="nav-item" onclick="showSection('reports')">
     <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
     Reportes
@@ -1388,7 +1392,128 @@ label { color: #888 !important; }
     </div>
 
     <!-- ======== REPORTES ======== -->
-    <div class="section" id="sec-reports">
+    <div class="section" id="sec-feedback360">
+      <div class="section-header" style="margin-bottom:16px;">
+        <div>
+          <div class="section-heading">Feedback 360°</div>
+          <div class="section-subheading">Evaluación anónima o identificada de líderes y managers</div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="abrirModalFeedback()">+ Dar Feedback</button>
+      </div>
+
+      <!-- Descripción -->
+      <div style="background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.2);border-radius:8px;padding:14px 16px;margin-bottom:20px;font-size:13px;color:#aaa;line-height:1.7;">
+        <strong style="color:#3B82F6;">¿Cómo funciona?</strong><br>
+        Podés dar feedback sobre tu líder o manager de forma <strong style="color:#f0ebe3;">anónima</strong> (sin que sepan que fuiste vos) o <strong style="color:#f0ebe3;">identificada</strong> (con tu nombre).<br>
+        <strong style="color:#3B82F6;">Confidencialidad:</strong> Los resultados individuales solo los puede ver el equipo de <strong style="color:#f0ebe3;">People / Admin</strong>. Los evaluados solo ven promedios globales.
+      </div>
+
+      <!-- TABS: Dar Feedback / Ver Resultados (admin) / Mi Feedback Dado -->
+      <div class="tabs" id="fb-tabs">
+        <div class="tab active" onclick="switchTab('fb','dar',this)">📝 Dar Feedback</div>
+        <div class="tab" onclick="switchTab('fb','resultados',this);loadFeedbackResultados()">📊 Resultados (Admin)</div>
+        <div class="tab" onclick="switchTab('fb','dado',this);loadMiFeedback()">📋 Mi Feedback Dado</div>
+      </div>
+
+      <!-- TAB: DAR FEEDBACK -->
+      <div id="fb-dar" style="margin-top:16px;">
+        <div class="card" style="max-width:600px;">
+          <div style="font-size:14px;font-weight:700;color:#f0ebe3;margin-bottom:16px;">Evaluar a mi Líder o Manager</div>
+          <div style="display:grid;gap:14px;">
+            <div>
+              <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">¿A quién evaluás? *</label>
+              <select id="fbEvaluado" class="form-control" style="margin-top:6px;">
+                <option value="">— Seleccionar —</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Categoría *</label>
+              <select id="fbCategoria" class="form-control" style="margin-top:6px;">
+                <option value="liderazgo">Liderazgo y dirección</option>
+                <option value="comunicacion">Comunicación y claridad</option>
+                <option value="apoyo">Apoyo y desarrollo</option>
+                <option value="feedback_recibido">Calidad del feedback recibido</option>
+                <option value="ambiente">Ambiente de trabajo</option>
+                <option value="reconocimiento">Reconocimiento y valoración</option>
+                <option value="general">General</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Puntuación *</label>
+              <div id="fbStars" style="display:flex;gap:8px;margin-top:8px;">
+                ${[1,2,3,4,5].map(i=>`<button onclick="setFbScore(${i})" id="fbStar${i}" style="width:40px;height:40px;border-radius:8px;border:1px solid #333;background:#111;color:#888;font-size:18px;cursor:pointer;">☆</button>`).join('')}
+              </div>
+              <input type="hidden" id="fbScore" value="0">
+              <div id="fbScoreLabel" style="font-size:11px;color:#888;margin-top:6px;"></div>
+            </div>
+            <div>
+              <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Comentario (opcional)</label>
+              <textarea id="fbComment" class="form-control" rows="3" placeholder="Compartí tu experiencia de forma constructiva..." style="margin-top:6px;resize:vertical;"></textarea>
+            </div>
+            <div>
+              <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Período</label>
+              <select id="fbPeriodo" class="form-control" style="margin-top:6px;">
+                <option value="">— Período actual —</option>
+              </select>
+            </div>
+            <!-- Toggle anónimo/identificado -->
+            <div style="background:#111;border:1px solid #2a2a2a;border-radius:10px;padding:14px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div>
+                  <div style="font-weight:700;color:#f0ebe3;font-size:13px;">Enviar de forma anónima</div>
+                  <div style="font-size:11px;color:#888;margin-top:2px;">El evaluado no sabrá que fuiste vos</div>
+                </div>
+                <label style="position:relative;display:inline-block;width:48px;height:26px;cursor:pointer;">
+                  <input type="checkbox" id="fbAnonimo" checked style="opacity:0;width:0;height:0;">
+                  <span id="fbToggle" onclick="toggleFbAnonimo()" style="position:absolute;inset:0;background:#FF5400;border-radius:26px;transition:0.3s;display:flex;align-items:center;padding:3px;">
+                    <span id="fbToggleDot" style="width:20px;height:20px;background:#fff;border-radius:50%;transition:0.3s;margin-left:auto;"></span>
+                  </span>
+                </label>
+              </div>
+              <div id="fbAnonimoLabel" style="font-size:11px;color:#FF5400;margin-top:8px;font-weight:600;">🔒 Tu identidad será ocultada</div>
+            </div>
+          </div>
+          <div id="fbError" style="color:#FF4D4D;font-size:12px;margin-top:10px;display:none;"></div>
+          <div style="display:flex;gap:10px;margin-top:20px;">
+            <button onclick="enviarFeedback360()" class="btn btn-primary" style="flex:1;">Enviar Feedback</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: RESULTADOS (solo admin) -->
+      <div id="fb-resultados" style="display:none;margin-top:16px;">
+        <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+          <select id="fbResumenPeriodo" class="form-control" style="width:160px;" onchange="loadFeedbackResultados()">
+            <option value="">Todos los períodos</option>
+          </select>
+          <input id="fbResumenBuscador" type="text" class="form-control" placeholder="🔍 Buscar..." style="flex:1;" oninput="filtrarResultadosFb(this.value)">
+        </div>
+        <div id="fbResultadosContainer">
+          <div style="text-align:center;padding:30px;color:#888;">Cargando resultados...</div>
+        </div>
+      </div>
+
+      <!-- TAB: MI FEEDBACK DADO -->
+      <div id="fb-dado" style="display:none;margin-top:16px;">
+        <div id="fbDadoContainer">
+          <div style="text-align:center;padding:30px;color:#888;">Cargando...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL FEEDBACK (alternativa compacta) -->
+    <div class="modal-overlay" id="modalFeedback360" style="display:none;">
+      <div class="modal" style="max-width:500px;">
+        <div class="modal-title">Dar Feedback 360°</div>
+        <p style="font-size:12px;color:#888;margin-bottom:16px;">Usá el formulario completo en la sección Feedback 360° del menú.</p>
+        <div class="modal-actions">
+          <button class="btn btn-secondary" onclick="closeModal('modalFeedback360')">Cerrar</button>
+          <button class="btn btn-primary" onclick="closeModal('modalFeedback360');showSection('feedback360')">Ir a Feedback 360°</button>
+        </div>
+      </div>
+    </div>
+
+<div class="section" id="sec-reports">
       <div class="section-header" style="margin-bottom:16px;">
         <div><div class="section-heading">Reportes</div>
         <div class="section-subheading">Reportes individuales y de equipo por colaborador, líder o manager</div></div>
@@ -1585,188 +1710,29 @@ label { color: #888 !important; }
     <!-- ======== AYUDA ======== -->
     <div class="section" id="sec-help">
       <div style="max-width:860px;margin:0 auto;padding-bottom:60px;">
-        <h2 style="font-size:22px;font-weight:800;color:#f0ebe3;margin-bottom:4px;">Centro de Ayuda</h2>
-        <p style="color:#888;font-size:13px;margin-bottom:24px;">Guía completa de PeopleTrack. Todo lo que necesitás para usar la plataforma desde cero.</p>
-        <div class="card" style="margin-bottom:20px;padding:14px 18px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;">
+          <div>
+            <h2 style="font-size:22px;font-weight:800;color:#f0ebe3;margin-bottom:4px;">Centro de Ayuda</h2>
+            <p style="color:#888;font-size:13px;">Guía completa de PeopleTrack. Todo lo que necesitás para usar la plataforma.</p>
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="loadHelpArticles()">⟳ Actualizar</button>
+        </div>
+        <!-- Índice de navegación rápida -->
+        <div class="card" style="margin-bottom:20px;padding:14px 18px;" id="helpIndex">
           <div style="font-size:11px;font-weight:700;color:#FF5400;text-transform:uppercase;margin-bottom:10px;">Ir a módulo</div>
-          <div style="display:flex;flex-wrap:wrap;gap:6px;">
-            <button onclick="document.getElementById('h0').scrollIntoView({behavior:'smooth'})" style="padding:3px 10px;background:#222;border:1px solid #333;border-radius:6px;color:#f0ebe3;font-size:11px;cursor:pointer;">Dashboard</button>
-            <button onclick="document.getElementById('h1').scrollIntoView({behavior:'smooth'})" style="padding:3px 10px;background:#222;border:1px solid #333;border-radius:6px;color:#f0ebe3;font-size:11px;cursor:pointer;">Usuarios</button>
-            <button onclick="document.getElementById('h2').scrollIntoView({behavior:'smooth'})" style="padding:3px 10px;background:#222;border:1px solid #333;border-radius:6px;color:#f0ebe3;font-size:11px;cursor:pointer;">Líderes</button>
-            <button onclick="document.getElementById('h3').scrollIntoView({behavior:'smooth'})" style="padding:3px 10px;background:#222;border:1px solid #333;border-radius:6px;color:#f0ebe3;font-size:11px;cursor:pointer;">Áreas</button>
-            <button onclick="document.getElementById('h4').scrollIntoView({behavior:'smooth'})" style="padding:3px 10px;background:#222;border:1px solid #333;border-radius:6px;color:#f0ebe3;font-size:11px;cursor:pointer;">Objetivos</button>
-            <button onclick="document.getElementById('h5').scrollIntoView({behavior:'smooth'})" style="padding:3px 10px;background:#222;border:1px solid #333;border-radius:6px;color:#f0ebe3;font-size:11px;cursor:pointer;">Plan de Carrera</button>
-            <button onclick="document.getElementById('h6').scrollIntoView({behavior:'smooth'})" style="padding:3px 10px;background:#222;border:1px solid #333;border-radius:6px;color:#f0ebe3;font-size:11px;cursor:pointer;">Competencias</button>
-            <button onclick="document.getElementById('h7').scrollIntoView({behavior:'smooth'})" style="padding:3px 10px;background:#222;border:1px solid #333;border-radius:6px;color:#f0ebe3;font-size:11px;cursor:pointer;">Reuniones 1:1</button>
-            <button onclick="document.getElementById('h8').scrollIntoView({behavior:'smooth'})" style="padding:3px 10px;background:#222;border:1px solid #333;border-radius:6px;color:#f0ebe3;font-size:11px;cursor:pointer;">Reportes</button>
-            <button onclick="document.getElementById('h9').scrollIntoView({behavior:'smooth'})" style="padding:3px 10px;background:#222;border:1px solid #333;border-radius:6px;color:#f0ebe3;font-size:11px;cursor:pointer;">Períodos</button>
+          <div id="helpIndexButtons" style="display:flex;flex-wrap:wrap;gap:6px;">
+            <div style="color:#888;font-size:12px;">Cargando...</div>
           </div>
         </div>
-        <div id="h0" class="card" style="margin-bottom:14px;padding:20px;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #2a2a2a;"><span style="font-size:18px;">📊</span><strong style="font-size:14px;color:#f0ebe3;">Dashboard</strong></div><div style="font-size:13px;color:#aaa;line-height:1.8;">Pantalla principal con resumen del equipo en el período activo.<br><strong style="color:#f0ebe3;">Colaboradores:</strong> total de personas activas.<br><strong style="color:#f0ebe3;">Avance promedio:</strong> porcentaje general del equipo.<br><strong style="color:#f0ebe3;">En riesgo:</strong> personas con avance menor al 70%.<br><strong style="color:#f0ebe3;">Barras de progreso:</strong> verde &ge;70%, naranja 40-69%, rojo &lt;40%.<br><strong style="color:#f0ebe3;">Donut:</strong> proporción visual entre en riesgo, en curso y en verde.</div></div>
-        <div id="h1" class="card" style="margin-bottom:14px;padding:20px;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #2a2a2a;"><span style="font-size:18px;">👥</span><strong style="font-size:14px;color:#f0ebe3;">Usuarios</strong></div><div style="font-size:13px;color:#aaa;line-height:1.8;">Lista todas las personas del sistema con sus datos.<br><strong style="color:#f0ebe3;">Buscar:</strong> filtrá en tiempo real por nombre o email.<br><strong style="color:#f0ebe3;">Filtro de estado:</strong> Todos / Activos / Inactivos.<br><strong style="color:#f0ebe3;">Editar:</strong> clic en "Editar" para modificar nombre, email, rol, estado, líder, manager y área. Los dropdowns muestran "Nombre — email" para distinguir personas con el mismo nombre.<br><strong style="color:#f0ebe3;">+ Nuevo usuario:</strong> completá todos los datos para crear una persona nueva en la base de datos.<br><strong style="color:#f0ebe3;">Paginación:</strong> 20 usuarios por página. Navegá con los números al pie.</div></div>
-        <div id="h2" class="card" style="margin-bottom:14px;padding:20px;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #2a2a2a;"><span style="font-size:18px;">🏅</span><strong style="font-size:14px;color:#f0ebe3;">Líderes</strong></div><div style="font-size:13px;color:#aaa;line-height:1.8;">Vista organizada por líder con sus equipos asignados.<br><strong style="color:#f0ebe3;">Cards:</strong> cada card muestra el líder y sus colaboradores. Hacé clic en cualquier miembro para editar sus datos.<br><strong style="color:#f0ebe3;">Editar líder:</strong> botón "Editar" en la esquina superior de la card.<br><strong style="color:#f0ebe3;">Promover a líder (+Nuevo):</strong> buscá un empleado por nombre o email y hacé clic en su nombre para seleccionarlo. Al confirmar, cambia su rol a "Líder" y aparece en esta sección.<br><strong style="color:#f0ebe3;">Buscador:</strong> filtrá líderes por nombre.<br><strong style="color:#f0ebe3;">Paginación:</strong> 10 líderes por página.</div></div>
-        <div id="h3" class="card" style="margin-bottom:14px;padding:20px;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #2a2a2a;"><span style="font-size:18px;">🏢</span><strong style="font-size:14px;color:#f0ebe3;">Áreas</strong></div><div style="font-size:13px;color:#aaa;line-height:1.8;">Departamentos o divisiones de la empresa.<br><strong style="color:#f0ebe3;">+ Nueva Área:</strong> ingresá el nombre del área y una descripción opcional.<br><strong style="color:#f0ebe3;">Editar:</strong> modificá el nombre, descripción o cambiá el estado (activa/inactiva).<br>Las áreas activas aparecen disponibles en los formularios de usuarios y objetivos para asignar pertenencia organizacional.</div></div>
-        <div id="h4" class="card" style="margin-bottom:14px;padding:20px;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #2a2a2a;"><span style="font-size:18px;">🎯</span><strong style="font-size:14px;color:#f0ebe3;">Objetivos</strong></div><div style="font-size:13px;color:#aaa;line-height:1.8;">Metas asignadas a colaboradores por período fiscal.<br><strong style="color:#f0ebe3;">Tipos:</strong> Core empresa (compartido por todos) o Personal (individual por colaborador).<br><strong style="color:#f0ebe3;">Crear (+Nuevo):</strong> completá título, tipo, colaborador, competencia asociada, ponderación (%) y fecha límite.<br><strong style="color:#f0ebe3;">Ponderación:</strong> peso del objetivo en la evaluación total. La suma de todos los objetivos de una persona debería ser 100%.<br><strong style="color:#f0ebe3;">Check-in:</strong> registrá el avance periódicamente actualizando el porcentaje de progreso y el estado.<br><strong style="color:#f0ebe3;">Estados:</strong> No iniciado → En curso → Completado o En riesgo.</div></div>
-        <div id="h5" class="card" style="margin-bottom:14px;padding:20px;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #2a2a2a;"><span style="font-size:18px;">📈</span><strong style="font-size:14px;color:#f0ebe3;">Plan de Carrera</strong></div><div style="font-size:13px;color:#aaa;line-height:1.8;">Define el camino de crecimiento profesional de cada colaborador.<br><strong style="color:#f0ebe3;">Ver plan:</strong> seleccioná un colaborador de la lista para ver o editar su plan.<br><strong style="color:#f0ebe3;">Hitos:</strong> etapas del plan con nombre, fecha objetivo y porcentaje de avance.<br><strong style="color:#f0ebe3;">Progreso general:</strong> se calcula automáticamente como el promedio de todos los hitos.<br><strong style="color:#f0ebe3;">Feedback:</strong> podés agregar comentarios en cada hito para documentar el avance.</div></div>
-        <div id="h6" class="card" style="margin-bottom:14px;padding:20px;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #2a2a2a;"><span style="font-size:18px;">⭐</span><strong style="font-size:14px;color:#f0ebe3;">Competencias</strong></div><div style="font-size:13px;color:#aaa;line-height:1.8;">Habilidades y comportamientos evaluados por período.<br><strong style="color:#f0ebe3;">Genéricas:</strong> comunes a todos (ej: comunicación, trabajo en equipo, orientación a resultados).<br><strong style="color:#f0ebe3;">Liderazgo:</strong> para líderes y managers (ej: gestión de equipos, toma de decisiones).<br><strong style="color:#f0ebe3;">Personales:</strong> específicas de cada colaborador según su rol y acuerdo con el líder.<br><strong style="color:#f0ebe3;">Evaluar:</strong> seleccioná colaborador y período, asigná una puntuación en la escala definida y agregá comentarios de feedback.</div></div>
-        <div id="h7" class="card" style="margin-bottom:14px;padding:20px;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #2a2a2a;"><span style="font-size:18px;">🤝</span><strong style="font-size:14px;color:#f0ebe3;">Reuniones 1:1</strong></div><div style="font-size:13px;color:#aaa;line-height:1.8;">Bitácora de encuentros periódicos entre el líder y cada colaborador.<br><strong style="color:#f0ebe3;">Registrar reunión:</strong> seleccioná el colaborador, la fecha y el tipo (mensual, quincenal, semanal, trimestral).<br><strong style="color:#f0ebe3;">Notas:</strong> podés agregar notas generales, notas vinculadas a un objetivo específico y próximos pasos acordados.<br><strong style="color:#f0ebe3;">Historial:</strong> todas las reuniones se acumulan cronológicamente y quedan disponibles para consulta futura.<br><strong style="color:#f0ebe3;">Minuta por email:</strong> al guardar podés enviar automáticamente un resumen al colaborador.</div></div>
-        <div id="h8" class="card" style="margin-bottom:14px;padding:20px;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #2a2a2a;"><span style="font-size:18px;">📋</span><strong style="font-size:14px;color:#f0ebe3;">Reportes y Organigrama</strong></div><div style="font-size:13px;color:#aaa;line-height:1.8;"><strong style="color:#f0ebe3;">Reportes por colaborador:</strong> avance de objetivos, evaluación de competencias y reuniones 1:1 de una persona específica.<br><strong style="color:#f0ebe3;">Reportes por líder:</strong> resumen de todo el equipo a cargo.<br><strong style="color:#f0ebe3;">Reportes por manager:</strong> visión consolidada de todos los equipos bajo el manager.<br><strong style="color:#f0ebe3;">Exportar a Excel:</strong> todos los reportes se pueden descargar en formato Excel con formato profesional.<br><strong style="color:#f0ebe3;">Organigrama:</strong> jerarquía visual de la empresa con el porcentaje de avance de cada persona.</div></div>
-        <div id="h9" class="card" style="margin-bottom:14px;padding:20px;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #2a2a2a;"><span style="font-size:18px;">📅</span><strong style="font-size:14px;color:#f0ebe3;">Períodos Fiscales</strong></div><div style="font-size:13px;color:#aaa;line-height:1.8;">Definen los ciclos de evaluación de objetivos (ej: FY26 Q2, FY27 Q1).<br><strong style="color:#f0ebe3;">Crear período:</strong> asigná nombre, fecha de inicio y fecha de fin.<br><strong style="color:#f0ebe3;">Período activo:</strong> solo puede haber uno activo a la vez. Es el que se usa por defecto al crear objetivos y evaluaciones. Los demás aparecen en los filtros históricos.<br><strong style="color:#f0ebe3;">Cerrar período:</strong> al iniciar un nuevo período, marcá el anterior como inactivo. Los datos históricos quedan disponibles para consulta en reportes.</div></div>
-      </div>
-    </div>
-
-  </div><!-- /content -->
-</div><!-- /main-wrap -->
-
-<!-- MODALS -->
-<div class="modal-overlay" id="newObjectiveModal">
-  <div class="modal" style="max-width:600px;">
-    <div class="modal-title" id="newObjModalTitle">Nuevo Objetivo</div>
-    
-    <!-- SELECTOR DE TIPO -->
-    <div style="display:flex;gap:8px;margin-bottom:20px;">
-      <button id="btnTipoCore" onclick="setTipoObjetivo('company')" style="flex:1;padding:10px;border-radius:8px;border:2px solid #FF5400;background:rgba(255,84,0,0.15);color:#FF5400;font-weight:700;font-size:13px;cursor:pointer;">🏢 Core Empresa</button>
-      <button id="btnTipoPersonal" onclick="setTipoObjetivo('personal')" style="flex:1;padding:10px;border-radius:8px;border:2px solid #333;background:#111;color:#888;font-weight:700;font-size:13px;cursor:pointer;">👤 Personal</button>
-    </div>
-    <input type="hidden" id="newObjTipo" value="company">
-    
-    <div class="grid-2 gap-16">
-      <div class="form-group" style="grid-column:1/-1">
-        <label class="form-label">Título del Objetivo *</label>
-        <input id="newObjTitulo" class="form-control" placeholder="Ej: Certificación MS oficial anual">
-      </div>
-      
-      <!-- CAMPOS CORE -->
-      <div id="camposCore" class="grid-2 gap-16" style="grid-column:1/-1;display:grid;">
-        <div class="form-group">
-          <label class="form-label">Ponderación (%)</label>
-          <input id="newObjPeso" class="form-control" type="number" value="20" min="0" max="100">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Área aplicable</label>
-          <select id="newObjArea" class="form-control">
-            <option value="">Todas las áreas</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Período</label>
-          <select id="objPeriodoSel" class="form-control"><option value="">— Período —</option></select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Fecha Límite</label>
-          <input id="newObjFechaCore" class="form-control" type="date">
-        </div>
-        <div class="form-group" style="grid-column:1/-1">
-          <label class="form-label">Descripción</label>
-          <textarea id="newObjDescCore" class="form-control" placeholder="Descripción del objetivo core..." rows="2"></textarea>
-        </div>
-      </div>
-      
-      <!-- CAMPOS PERSONAL -->
-      <div id="camposPersonal" style="grid-column:1/-1;display:none;">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-          <div class="form-group" style="grid-column:1/-1">
-            <label class="form-label">Colaborador *</label>
-            <input id="objColabBuscar" type="text" class="form-control" placeholder="🔍 Buscar colaborador..." style="margin-bottom:4px;" oninput="filtrarColabObj(this.value)">
-            <select id="objColabSel" class="form-control"><option value="">— Seleccionar colaborador —</option></select>
-          </div>
-          <div class="form-group" style="grid-column:1/-1;">
-            <div style="background:rgba(255,84,0,0.06);border:1px solid rgba(255,84,0,0.2);border-radius:8px;padding:12px 14px;">
-              <div style="font-size:11px;font-weight:700;color:#FF5400;text-transform:uppercase;margin-bottom:6px;">📌 Asignar desde objetivos Core de la empresa</div>
-              <select id="newObjCoreRef" class="form-control" onchange="precargarDesdeCore(this.value)">
-                <option value="">— Crear objetivo personal nuevo desde cero —</option>
-              </select>
-              <div style="font-size:11px;color:#888;margin-top:6px;">Al seleccionar un Core, el título y ponderación se precargan automáticamente</div>
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Ponderación (%)</label>
-            <input id="newObjPesoPersonal" class="form-control" type="number" value="20" min="0" max="100">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Competencia</label>
-            <select id="newObjCompetencia" class="form-control">
-              <option value="">— Competencia —</option>
-              <option>Aprendizaje</option><option>Innovación</option><option>Orientación al Cliente</option>
-              <option>Comunicación</option><option>Liderazgo</option><option>Adaptabilidad</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Período</label>
-            <select id="objPeriodoSelPersonal" class="form-control"><option value="">— Período —</option></select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Fecha Límite</label>
-            <input id="newObjFechaPersonal" class="form-control" type="date">
-          </div>
-          <div class="form-group" style="grid-column:1/-1">
-            <label class="form-label">Descripción</label>
-            <textarea id="newObjDescPersonal" class="form-control" placeholder="Descripción del objetivo personal..." rows="2"></textarea>
-          </div>
+        <!-- Artículos -->
+        <div id="helpArticlesContainer">
+          <div style="text-align:center;padding:40px;color:#888;">Cargando ayuda...</div>
         </div>
       </div>
     </div>
-    <div id="newObjError" style="color:#FF4D4D;font-size:12px;margin-top:8px;display:none;"></div>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="closeModal('newObjectiveModal')">Cancelar</button>
-      <button class="btn btn-primary" onclick="guardarNuevoObjetivo()">Guardar Objetivo</button>
-    </div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="checkinModal">
-  <div class="modal">
-    <div class="modal-title">Registrar Check-in</div>
-    <div class="form-group"><label class="form-label">Objetivo</label><input class="form-control" value="Formación — Cursos Python / PL-200 / PL-500" readonly></div>
-    <div class="form-group"><label class="form-label">Avance actual (%)</label><input class="form-control" type="number" value="45" min="0" max="100"></div>
-    <div class="form-group"><label class="form-label">Estado</label><select class="form-control"><option>En Curso</option><option>Cumplido</option><option>No Cumplido</option><option>No Iniciado</option><option>En Riesgo</option></select></div>
-    <div class="form-group"><label class="form-label">Notas / Comentarios</label><textarea class="form-control" placeholder="¿Qué avanzó? ¿Hay obstáculos?"></textarea></div>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="closeModal('checkinModal')">Cancelar</button>
-      <button class="btn btn-primary" onclick="closeModal('checkinModal')">Registrar</button>
-    </div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="newMeetingModal">
-  <div class="modal">
-    <div class="modal-title">Nueva Reunión 1:1</div>
-    <div class="grid-2 gap-16">
-      <div class="form-group" style="grid-column:1/-1">
-        <label class="form-label">Colaborador</label>
-        <input id="reunionBuscarInput" type="text" class="form-control" placeholder="🔍 Buscar colaborador..." style="margin-bottom:4px;" oninput="filtrarColabReunion(this.value)">
-        <select id="reunionColabSel" class="form-control" onchange="onSeleccionColabReunion()"><option value="">— Seleccionar colaborador —</option></select>
-      </div>
-      <div class="form-group"><label class="form-label">Tipo</label><select class="form-control"><option>Mensual</option><option>Semanal</option><option>Trimestral</option></select></div>
-      <div class="form-group"><label class="form-label">Fecha</label><input class="form-control" type="date"></div>
-      <div class="form-group"><label class="form-label">Título</label><input class="form-control" placeholder="Ej: Feedback Q1"></div>
-    </div>
-    <div class="form-group"><label class="form-label">Notas Generales</label><textarea class="form-control" placeholder="Temas tratados en la reunión..."></textarea></div>
-    <div class="form-group"><label class="form-label">Próximos pasos</label><textarea class="form-control" placeholder="Acuerdos y acciones a seguir..."></textarea></div>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="closeModal('newMeetingModal')">Cancelar</button>
-      <button class="btn btn-primary" onclick="guardarReunion()">Guardar Reunión</button>
-    </div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="exportModal">
-  <div class="modal">
-    <div class="modal-title">Exportar Datos</div>
-    <div class="grid-2 gap-16">
-      <div class="form-group"><label class="form-label">Tipo de Reporte</label><select class="form-control"><option>Por Persona</option><option>Por Líder (todo su equipo)</option><option>Por Manager</option><option>General Empresa</option></select></div>
-      <div class="form-group"><label class="form-label">Período</label><select class="form-control"><option>FY26</option><option>H1-FY26</option><option>FY25</option></select></div>
-      <div class="form-group"><label class="form-label">Persona (si aplica)</label><select class="form-control"><option>Todos</option><option>Jorge Mercado</option><option>Miguel Rocha</option></select></div>
-      <div class="form-group"><label class="form-label">Formato</label><select class="form-control"><option>Excel (.xlsx)</option><option>PDF</option><option>CSV</option></select></div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="closeModal('exportModal')">Cancelar</button>
-      <button class="btn btn-primary" onclick="closeModal('exportModal')">⬇ Exportar</button>
-    </div>
-  </div>
-</div>
 
 <script>
+
 const titles = {
   dashboard:'Dashboard',usuarios:'Usuarios',lideres:'Líderes',areas:'Áreas',objectives:'Objetivos',career:'Plan de Carrera',
   competencies:'Competencias',oneononex:'Reuniones 1:1',reports:'Reportes',
@@ -1797,47 +1763,35 @@ async function apiGet(path) {
   }
 }
 
-async async function loadDashboardFromAPI() {
+async function loadDashboardFromAPI() {
   const data = await apiGet('users/all');
   if (!data || !data.length) return;
 
-  // Solo usuarios activos con lider asignado (el equipo del manager logueado)
   const active = data.filter(u => u.IsActive);
+
+  // Guardar en allUsuarios para uso global
+  if (!allUsuarios.length) allUsuarios = data;
 
   // KPIs
   const kpiEl = (id) => document.querySelector('[data-kpi="' + id + '"]');
   if (kpiEl('colaboradores')) kpiEl('colaboradores').textContent = active.length;
-
-  const atRisk = active.filter(u => (u.AvgProgress || 0) < 40).length;
+  const atRisk = active.filter(u => (u.AvgProgress || 0) < 70).length;
   if (kpiEl('riesgo')) kpiEl('riesgo').textContent = atRisk;
 
-  // Equipo — top 10 para el panel
-  // Guardar todos para paginación
+  // Paginación del equipo
   window.allTeamData = active.map((u, i) => ({
-    name:   u.FullName || u.Email,
-    init:   ini(u.FullName || u.Email),
-    color:  colorFor(i),
-    pct:    u.AvgProgress || 0,
-    status: statusFor(u.AvgProgress || 0),
-    userId: u.UserID,
-    leader: u.LeaderName,
+    name:    u.FullName || u.Email,
+    init:    ini(u.FullName || u.Email),
+    color:   colorFor(i),
+    pct:     u.AvgProgress || 0,
+    status:  statusFor(u.AvgProgress || 0),
+    userId:  u.UserID,
+    leader:  u.LeaderName,
     manager: u.ManagerName,
   }));
   window.dashPage = 1;
   window.dashPageSize = 20;
   renderDashboardPage();
-
-  // Donut usa todos
-    name:   u.FullName || u.Email,
-    init:   ini(u.FullName || u.Email),
-    color:  colorFor(i),
-    pct:    u.AvgProgress || 0,
-    status: statusFor(u.AvgProgress || 0),
-    userId: u.UserID,
-    leader: u.LeaderName,
-    manager: u.ManagerName,
-  }));
-
 
   // Donut con datos reales
   const verde  = active.filter(u => (u.AvgProgress||0) >= 70).length;
@@ -1879,46 +1833,21 @@ function drawDonutReal(rojo, naranja, verde, total) {
 }
 
 function renderTeamProgress(){
-  // Legacy - redirigir a nueva función paginada
-  if (window.allTeamData) renderDashboardPage();
-}
-
-function renderDashboardPage() {
   const el = document.getElementById('teamProgressList');
-  const pgEl = document.getElementById('dashPagination');
-  if (!el || !window.allTeamData) return;
-  const all = window.allTeamData;
-  const ps = window.dashPageSize || 20;
-  const pg = window.dashPage || 1;
-  const total = Math.ceil(all.length / ps);
-  const slice = all.slice((pg-1)*ps, pg*ps);
-  el.innerHTML = slice.map(p=>{
-    const color = p.pct>=70?'var(--success)':p.pct>=40?'var(--warning)':'var(--danger)';
-    return `<div style="margin-bottom:10px;">
+  if(!el) return;
+  el.innerHTML = teamData.map(p=>{
+    const color = p.status==='success'?'var(--success)':p.status==='warning'?'var(--warning)':'var(--danger)';
+    return `<div style="margin-bottom:12px">
       <div class="progress-label">
         <div class="person-chip">
-          <div class="avatar-sm" style="background:${p.color};width:24px;height:24px;font-size:9px;">${p.init}</div>
+          <div class="avatar-sm" style="background:${p.color};width:24px;height:24px;font-size:9px">${p.init}</div>
           <span class="progress-name">${p.name}</span>
-          ${p.leader?'<span style="font-size:9px;color:#555;margin-left:4px;">'+p.leader+'</span>':''}
         </div>
-        <span class="progress-pct" style="color:${color};">${p.pct}%</span>
+        <span class="progress-pct" style="color:${color}">${p.pct}%</span>
       </div>
-      <div class="progress-bar"><div class="progress-fill" style="width:${p.pct}%;background:${color};"></div></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${p.pct}%;background:${color}"></div></div>
     </div>`;
   }).join('');
-  // Paginación
-  if (pgEl) {
-    pgEl.innerHTML = '';
-    if (total > 1) {
-      for (let i=1; i<=total; i++) {
-        const b = document.createElement('button');
-        b.textContent = i;
-        b.style.cssText = 'padding:3px 9px;border-radius:6px;border:1px solid #333;background:'+(i===pg?'#FF5400':'#1a1a1a')+';color:#f0ebe3;cursor:pointer;font-size:11px;margin:2px;';
-        b.onclick = (function(pg){ return function(){ window.dashPage=pg; renderDashboardPage(); }; })(i);
-        pgEl.appendChild(b);
-      }
-    }
-  }
 }
 
 function drawDonut(){
@@ -2043,19 +1972,16 @@ window.addEventListener('load', async () => {
     if (resp.ok) {
       const data = await resp.json();
       if (data.clientPrincipal) {
-        // Ya tiene sesion activa
         onLoginSuccess(data.clientPrincipal);
         return;
       }
     }
   } catch(e) {
-    console.log('No auth endpoint (local dev mode)');
+    console.log('Auth check:', e.message);
   }
-  // No hay sesion, mostrar pantalla de login
   setButtons(true, 'Iniciar sesion con Azure AD');
   setStatus('');
-}
-);
+});
 
 // ══════════════════════════════════════════
 // SECCIÓN USUARIOS
@@ -3947,12 +3873,14 @@ guardarNuevoObjetivo = async function() {
 // ═══ FIX MODAL EDIT: agregar estado "No Cumplido" ════════════
 // Agregar al select de estado
 document.addEventListener('DOMContentLoaded', function() {
-  const estSel = document.getElementById('editObjEstado');
-  if (estSel && !Array.from(estSel.options).find(o=>o.value==='not_met')) {
-    estSel.add(new Option('No Cumplido', 'not_met'));
-  }
-  // Poblar selector de objetivos personales con período por defecto
-  setTipoObjetivo('company'); // iniciar en modo Core
+  // Solo agregar opción si existe el select (no lanzar errores)
+  try {
+    const estSel = document.getElementById('editObjEstado');
+    if (estSel && !Array.from(estSel.options).find(o=>o.value==='not_met')) {
+      estSel.add(new Option('No Cumplido', 'not_met'));
+    }
+  } catch(e) {}
+  // setTipoObjetivo se llama lazy cuando se abre el modal, no en DOMContentLoaded
 });
 
 // ═══ OVERRIDE poblarModalObjetivo: llamar setTipoObjetivo ════
@@ -4326,306 +4254,297 @@ async function actualizarBadgeAlertas() {
   } catch(e) {}
 }
 
-// ═══ ORGANIGRAMA DINÁMICO ════════════════════════════════════
-let orgData = []; // todos los usuarios
+// ═══ FEEDBACK 360 ════════════════════════════════════════════
+const FB_SCORE_LABELS = ['','Muy malo','Malo','Regular','Bueno','Excelente'];
+let fbScoreVal = 0;
+let fbResultadosData = [];
 
-async function loadOrgChart() {
-  const container = document.getElementById('orgChartContainer');
+function setFbScore(n) {
+  fbScoreVal = n;
+  document.getElementById('fbScore').value = n;
+  document.getElementById('fbScoreLabel').textContent = FB_SCORE_LABELS[n] || '';
+  for (let i=1;i<=5;i++) {
+    const btn = document.getElementById('fbStar'+i);
+    if (btn) btn.textContent = i<=n ? '★' : '☆';
+    if (btn) btn.style.color = i<=n ? '#FF5400' : '#888';
+    if (btn) btn.style.background = i<=n ? 'rgba(255,84,0,0.1)' : '#111';
+  }
+}
+
+function toggleFbAnonimo() {
+  const cb = document.getElementById('fbAnonimo');
+  const dot = document.getElementById('fbToggleDot');
+  const toggle = document.getElementById('fbToggle');
+  const label = document.getElementById('fbAnonimoLabel');
+  cb.checked = !cb.checked;
+  if (cb.checked) {
+    dot.style.marginLeft = 'auto'; dot.style.marginRight = '0';
+    toggle.style.background = '#FF5400';
+    label.textContent = '🔒 Tu identidad será ocultada';
+    label.style.color = '#FF5400';
+  } else {
+    dot.style.marginLeft = '0'; dot.style.marginRight = 'auto';
+    toggle.style.background = '#333';
+    label.textContent = '👤 Tu nombre será visible para People';
+    label.style.color = '#3B82F6';
+  }
+}
+
+function abrirModalFeedback() {
+  showSection('feedback360');
+}
+
+async function initFeedback360() {
+  // Poblar select de evaluado (líderes y managers)
+  const sel = document.getElementById('fbEvaluado');
+  if (sel && sel.options.length <= 1) {
+    if (!allUsuarios.length) await loadUsuarios();
+    const lideres = allUsuarios.filter(u => u.IsActive && ['leader','manager','admin'].includes(u.AppRole));
+    lideres.sort((a,b)=>(a.FullName||'').localeCompare(b.FullName||'')).forEach(u => {
+      sel.add(new Option((u.FullName||u.Email)+' — '+(u.AppRole==='manager'?'Manager':'Líder'), u.UserID));
+    });
+  }
+  // Poblar períodos
+  const perSel = document.getElementById('fbPeriodo');
+  if (perSel && perSel.options.length <= 1 && allPeriods.length) {
+    allPeriods.forEach(p => perSel.add(new Option(p.PeriodName, p.PeriodID)));
+    const act = allPeriods.find(p=>p.IsActive);
+    if (act) perSel.value = act.PeriodID;
+  }
+}
+
+async function enviarFeedback360() {
+  const evaluadoId = document.getElementById('fbEvaluado')?.value;
+  const categoria = document.getElementById('fbCategoria')?.value;
+  const score = parseInt(document.getElementById('fbScore')?.value||'0');
+  const comment = document.getElementById('fbComment')?.value?.trim();
+  const isAnon = document.getElementById('fbAnonimo')?.checked;
+  const periodId = document.getElementById('fbPeriodo')?.value||null;
+  const errEl = document.getElementById('fbError');
+
+  if (!evaluadoId) { errEl.textContent='Seleccioná a quién evaluás'; errEl.style.display='block'; return; }
+  if (!score || score < 1) { errEl.textContent='Seleccioná una puntuación (1-5 estrellas)'; errEl.style.display='block'; return; }
+  errEl.style.display='none';
+
+  // Obtener el ID del usuario logueado desde allUsuarios
+  const emailEl = document.querySelector('.sidebar-user-email');
+  const myEmail = emailEl?.textContent?.trim();
+  const me = allUsuarios.find(u => u.Email === myEmail);
+  const evaluatorId = me?.UserID || 1;
+
+  try {
+    const res = await fetch(API_BASE + '/feedback360', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ evaluatorId, evaluatedId: parseInt(evaluadoId), periodId: periodId?parseInt(periodId):null, category: categoria, score, comment: comment||null, isAnonymous: isAnon })
+    });
+    const data = await res.json();
+    if (data.ok === false) throw new Error(data.error||'Error');
+    // Limpiar
+    document.getElementById('fbComment').value = '';
+    document.getElementById('fbEvaluado').value = '';
+    setFbScore(0);
+    mostrarToast(isAnon ? '✓ Feedback enviado de forma anónima' : '✓ Feedback enviado con tu nombre', 'success');
+  } catch(e) {
+    errEl.textContent = 'Error: ' + e.message; errEl.style.display='block';
+  }
+}
+
+let fbResultadosFull = [];
+async function loadFeedbackResultados() {
+  const container = document.getElementById('fbResultadosContainer');
+  if (!container) return;
+  container.innerHTML = '<div style="text-align:center;padding:20px;color:#888;">Cargando...</div>';
+  try {
+    const data = await apiGet('feedback360/summary');
+    if (!data) { container.innerHTML = '<div style="padding:20px;color:#888;">Solo visible para administradores</div>'; return; }
+    fbResultadosFull = Array.isArray(data) ? data : [];
+    renderResultadosFb(fbResultadosFull);
+    // Poblar período
+    const perSel = document.getElementById('fbResumenPeriodo');
+    if (perSel && perSel.options.length <= 1 && allPeriods.length) {
+      allPeriods.forEach(p=>perSel.add(new Option(p.PeriodName, p.PeriodID)));
+    }
+  } catch(e) {
+    container.innerHTML = '<div style="padding:20px;color:#888;">Solo visible para administradores</div>';
+  }
+}
+
+function renderResultadosFb(data) {
+  const container = document.getElementById('fbResultadosContainer');
+  if (!container) return;
+  if (!data.length) { container.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Sin feedback registrado aún</div>'; return; }
+  function ini(n){ return (n||'?').split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase(); }
+  const COLS=['#FF5400','#2ECC71','#3B82F6','#A855F7','#F59E0B'];
+  function col(n){ let h=0; for(let c of(n||''))h=(h*31+c.charCodeAt(0))%COLS.length; return COLS[h]; }
+  container.innerHTML = '<div class="grid-2 gap-16">' + data.map(u => {
+    const avg = u.AvgScore ? Math.round(u.AvgScore*10)/10 : '—';
+    const color = avg>=4?'#2ECC71':avg>=3?'#F59E0B':'#FF4D4D';
+    const stars = avg !== '—' ? '★'.repeat(Math.round(avg)) + '☆'.repeat(5-Math.round(avg)) : '—';
+    return `<div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:10px;padding:14px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <div style="width:36px;height:36px;border-radius:50%;background:${col(u.FullName)};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;">${ini(u.FullName||'')}</div>
+        <div><div style="font-weight:700;color:#f0ebe3;">${u.FullName||'—'}</div>
+        <div style="font-size:10px;color:#888;">${u.AppRole==='manager'?'Manager':'Líder'}</div></div>
+        <div style="margin-left:auto;text-align:right;">
+          <div style="font-size:20px;font-weight:800;color:${color};">${avg}</div>
+          <div style="font-size:11px;color:#FF5400;">${stars}</div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:#666;border-top:1px solid #2a2a2a;padding-top:8px;margin-top:4px;">
+        <span>${u.TotalFeedbacks||0} respuestas</span>
+        <span>${u.AnonCount||0} anónimas</span>
+        <button onclick="verDetalleFeedback(${u.UserID},'${(u.FullName||'').replace(/'/g,"\'")}')" style="padding:2px 8px;background:#222;border:1px solid #333;border-radius:6px;color:#aaa;font-size:10px;cursor:pointer;">Ver detalle</button>
+      </div>
+    </div>`;
+  }).join('') + '</div>';
+}
+
+function filtrarResultadosFb(q) {
+  const query = q.toLowerCase();
+  renderResultadosFb(fbResultadosFull.filter(u => !query || (u.FullName||'').toLowerCase().includes(query)));
+}
+
+async function verDetalleFeedback(userId, nombre) {
+  const container = document.getElementById('fbResultadosContainer');
+  container.innerHTML = `<button onclick="loadFeedbackResultados()" style="margin-bottom:12px;padding:4px 12px;background:#222;border:1px solid #333;border-radius:6px;color:#aaa;font-size:11px;cursor:pointer;">← Volver</button>
+    <div style="font-weight:800;color:#f0ebe3;margin-bottom:14px;">Detalle de feedback — ${nombre}</div>
+    <div id="fbDetalleInner" style="padding:20px;text-align:center;color:#888;">Cargando...</div>`;
+  try {
+    const data = await apiGet('feedback360/received/'+userId);
+    const inner = document.getElementById('fbDetalleInner');
+    if (!inner) return;
+    if (!data?.feedback?.length) { inner.innerHTML = 'Sin feedback registrado'; return; }
+    inner.innerHTML = data.feedback.map(f => {
+      const fecha = f.CreatedAt ? new Date(f.CreatedAt).toLocaleDateString('es-AR') : '—';
+      const stars = '★'.repeat(f.Score||0) + '☆'.repeat(5-(f.Score||0));
+      return `<div style="background:#111;border:1px solid #2a2a2a;border-radius:8px;padding:12px;margin-bottom:8px;text-align:left;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+          <span style="font-size:11px;font-weight:700;color:#888;">${f.EvaluatorName||'Anónimo'}${f.IsAnonymous?' 🔒':''}</span>
+          <span style="font-size:11px;color:#888;">${fecha} · ${f.PeriodName||''}</span>
+        </div>
+        <div style="margin-bottom:4px;"><span style="color:#FF5400;">${stars}</span> <span style="font-size:12px;color:#aaa;font-weight:600;">${f.Category||'general'}</span></div>
+        ${f.Comment?`<div style="font-size:12px;color:#ccc;line-height:1.5;">${f.Comment}</div>`:''}
+      </div>`;
+    }).join('');
+  } catch(e) { document.getElementById('fbDetalleInner').innerHTML = 'Error al cargar'; }
+}
+
+async function loadMiFeedback() {
+  const container = document.getElementById('fbDadoContainer');
+  if (!container) return;
+  const emailEl = document.querySelector('.sidebar-user-email');
+  const myEmail = emailEl?.textContent?.trim();
+  const me = allUsuarios.find(u => u.Email === myEmail);
+  if (!me) { container.innerHTML = '<div style="padding:20px;color:#888;">Iniciá sesión para ver tu feedback dado</div>'; return; }
+  try {
+    const data = await apiGet('feedback360/given/'+me.UserID);
+    const lista = Array.isArray(data) ? data : [];
+    if (!lista.length) { container.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Todavía no diste feedback. Usá el formulario para comenzar.</div>'; return; }
+    container.innerHTML = lista.map(f => {
+      const fecha = f.CreatedAt ? new Date(f.CreatedAt).toLocaleDateString('es-AR') : '—';
+      const stars = '★'.repeat(f.Score||0) + '☆'.repeat(5-(f.Score||0));
+      return `<div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:12px;margin-bottom:8px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+          <span style="font-weight:700;color:#f0ebe3;">${f.EvaluatedName||'—'}</span>
+          <span style="font-size:11px;color:#888;">${fecha}</span>
+        </div>
+        <div><span style="color:#FF5400;">${stars}</span> <span style="font-size:11px;color:#888;">${f.Category||'general'} · ${f.PeriodName||''}</span> ${f.IsAnonymous?'<span style="font-size:10px;color:#666;">🔒 Anónimo</span>':''}</div>
+        ${f.Comment?`<div style="font-size:12px;color:#aaa;margin-top:4px;">${f.Comment}</div>`:''}
+      </div>`;
+    }).join('');
+  } catch(e) { container.innerHTML = '<div style="padding:20px;color:#888;">Error al cargar</div>'; }
+}
+
+// ═══ AYUDA DINÁMICA DESDE BD ══════════════════════════════════
+async function loadHelpArticles() {
+  const container = document.getElementById('helpArticlesContainer');
+  const indexBtns = document.getElementById('helpIndexButtons');
   if (!container) return;
   container.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Cargando...</div>';
-  if (!allUsuarios.length) await loadUsuarios();
-  orgData = allUsuarios;
-  renderOrgCompleto(orgData);
-}
-
-function buscarEnOrganigrama(q) {
-  if (!orgData.length) { loadOrgChart(); return; }
-  const query = q.toLowerCase().trim();
-  const rol = document.getElementById('orgFiltroRol')?.value;
-  if (!query && !rol) { renderOrgCompleto(orgData); return; }
-  
-  // Buscar el usuario
-  let matches = orgData.filter(u =>
-    (!rol || u.AppRole === rol) &&
-    (!query || (u.FullName||'').toLowerCase().includes(query) || (u.Email||'').toLowerCase().includes(query))
-  );
-  
-  if (!matches.length) {
-    document.getElementById('orgChartContainer').innerHTML = 
-      '<div style="text-align:center;padding:30px;color:#888;">Sin resultados para "'+q+'"</div>';
-    return;
+  try {
+    const data = await apiGet('help/articles');
+    const articles = Array.isArray(data) ? data : [];
+    if (!articles.length) {
+      container.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Sin artículos de ayuda cargados</div>';
+      return;
+    }
+    // Índice
+    if (indexBtns) {
+      indexBtns.innerHTML = articles.map(a =>
+        `<button onclick="document.getElementById('help-art-${a.ArticleID}').scrollIntoView({behavior:'smooth'})"
+          style="padding:3px 10px;background:#222;border:1px solid #333;border-radius:6px;color:#f0ebe3;font-size:11px;cursor:pointer;">${a.Title}</button>`
+      ).join('');
+    }
+    // Artículos
+    const icons = {dashboard:'📊',usuarios:'👥',lideres:'🏅',areas:'🏢',objetivos:'🎯',carrera:'📈',competencias:'⭐',reuniones:'🤝',reportes:'📋',periodos:'📅',feedback360:'💬',configuracion:'⚙️'};
+    container.innerHTML = articles.map(a => `
+      <div id="help-art-${a.ArticleID}" class="card" style="margin-bottom:14px;padding:20px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #2a2a2a;">
+          <span style="font-size:18px;">${icons[a.Section]||'📄'}</span>
+          <strong style="font-size:14px;color:#f0ebe3;">${a.Title}</strong>
+          <span style="margin-left:auto;font-size:10px;color:#555;">Actualizado: ${a.UpdatedAt?new Date(a.UpdatedAt).toLocaleDateString('es-AR'):'—'}</span>
+        </div>
+        <div style="font-size:13px;color:#aaa;line-height:1.8;">${a.Content.replace(/
+/g,'<br>')}</div>
+      </div>`).join('');
+  } catch(e) {
+    container.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Error al cargar la ayuda</div>';
   }
-  
-  // Si hay exactamente uno, mostrar su jerarquía completa
-  if (matches.length === 1) { renderJerarquiaUsuario(matches[0]); return; }
-  
-  // Si hay varios, mostrar lista para seleccionar
-  const container = document.getElementById('orgChartContainer');
-  function ini(n){ return (n||'?').split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase(); }
-  const COLS=['#FF5400','#2ECC71','#3B82F6','#A855F7','#F59E0B'];
-  function col(n){ let h=0; for(let c of(n||''))h=(h*31+c.charCodeAt(0))%COLS.length; return COLS[h]; }
-  container.innerHTML = '<div style="margin-bottom:12px;font-size:12px;color:#888;">'+matches.length+' resultados — hacé click para ver la jerarquía</div>' +
-    matches.map(u => `<div onclick="renderJerarquiaUsuario(orgData.find(x=>x.UserID===${u.UserID}))"
-      style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;margin-bottom:6px;cursor:pointer;"
-      onmouseover="this.style.borderColor='#FF5400'" onmouseout="this.style.borderColor='#2a2a2a'">
-      <div style="width:36px;height:36px;border-radius:50%;background:${col(u.FullName)};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;">${ini(u.FullName||u.Email)}</div>
-      <div>
-        <div style="font-weight:700;color:#f0ebe3;">${u.FullName||u.Email}</div>
-        <div style="font-size:11px;color:#888;">${u.AppRole||''} · ${u.AreaName||''}</div>
-      </div>
-      <div style="margin-left:auto;font-size:11px;color:#FF5400;font-weight:700;">${u.AppRole==='manager'?'Manager':u.AppRole==='leader'?'Líder':'Colaborador'}</div>
-    </div>`).join('');
 }
 
-function renderJerarquiaUsuario(usuario) {
-  if (!usuario) return;
-  const container = document.getElementById('orgChartContainer');
-  function ini(n){ return (n||'?').split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase(); }
-  const COLS=['#FF5400','#2ECC71','#3B82F6','#A855F7','#F59E0B'];
-  function col(n){ let h=0; for(let c of(n||''))h=(h*31+c.charCodeAt(0))%COLS.length; return COLS[h]; }
-  
-  const rol = usuario.AppRole;
-  let html = '<button onclick="renderOrgCompleto(orgData)" style="margin-bottom:16px;padding:4px 12px;background:#222;border:1px solid #333;border-radius:6px;color:#aaa;font-size:11px;cursor:pointer;">← Ver todos</button>';
-  
-  if (rol === 'manager' || rol === 'admin') {
-    // Mostrar: usuario → sus líderes → colaboradores de cada líder
-    const lideres = orgData.filter(u => u.ManagerID === usuario.UserID || u.LeaderName === usuario.FullName);
-    html += tarjetaPersona(usuario, 'Manager', '#FF5400', ini, col, true);
-    html += '<div style="margin:12px 0 0 24px;border-left:2px solid #333;padding-left:16px;">';
-    if (!lideres.length) html += '<div style="color:#888;font-size:12px;padding:8px;">Sin líderes asignados</div>';
-    lideres.forEach(lider => {
-      const colaboradores = orgData.filter(u => u.LeaderID === lider.UserID);
-      html += tarjetaPersona(lider, 'Líder', '#3B82F6', ini, col);
-      if (colaboradores.length) {
-        html += '<div style="margin:8px 0 8px 24px;border-left:2px solid #2a2a2a;padding-left:16px;">';
-        colaboradores.forEach(c => { html += tarjetaPersona(c, 'Colaborador', '#888', ini, col, false, true); });
-        html += '</div>';
-      }
-    });
-    html += '</div>';
-  } else if (rol === 'leader') {
-    // Mostrar: manager → usuario → colaboradores
-    const manager = orgData.find(u => u.UserID === usuario.ManagerID);
-    const colaboradores = orgData.filter(u => u.LeaderID === usuario.UserID);
-    if (manager) { html += tarjetaPersona(manager, 'Manager', '#FF5400', ini, col); html += '<div style="margin:8px 0 0 24px;border-left:2px solid #333;padding-left:16px;">'; }
-    html += tarjetaPersona(usuario, 'Líder', '#3B82F6', ini, col, true);
-    html += '<div style="margin:8px 0 0 24px;border-left:2px solid #2a2a2a;padding-left:16px;">';
-    if (!colaboradores.length) html += '<div style="color:#888;font-size:12px;padding:8px;">Sin colaboradores asignados</div>';
-    colaboradores.forEach(c => { html += tarjetaPersona(c, 'Colaborador', '#888', ini, col, false, true); });
-    html += '</div>';
-    if (manager) html += '</div>';
-  } else {
-    // Colaborador: mostrar líder y manager
-    const lider = orgData.find(u => u.UserID === usuario.LeaderID);
-    const manager = lider ? orgData.find(u => u.UserID === lider.ManagerID) : null;
-    if (manager) { html += tarjetaPersona(manager, 'Manager', '#FF5400', ini, col); html += '<div style="margin:8px 0 0 24px;border-left:2px solid #333;padding-left:16px;">'; }
-    if (lider) { html += tarjetaPersona(lider, 'Líder', '#3B82F6', ini, col); html += '<div style="margin:8px 0 0 24px;border-left:2px solid #2a2a2a;padding-left:16px;">'; }
-    html += tarjetaPersona(usuario, 'Colaborador', '#888', ini, col, true);
-    if (lider) html += '</div>';
-    if (manager) html += '</div>';
+// Cargar al entrar a las secciones
+const _ssFb = showSection;
+showSection = function(id) {
+  _ssFb(id);
+  if (id === 'feedback360') {
+    if (!allUsuarios.length) loadUsuarios().then(initFeedback360);
+    else initFeedback360();
+    if (!allPeriods.length) loadPeriods();
   }
-  container.innerHTML = html;
-}
+  if (id === 'help') loadHelpArticles();
+};
 
-function tarjetaPersona(u, rol, color, ini, col, destacado=false, compact=false) {
-  const bg = destacado ? 'rgba(255,84,0,0.08)' : '#1a1a1a';
-  const border = destacado ? '1px solid rgba(255,84,0,0.3)' : '1px solid #2a2a2a';
-  const size = compact ? '28px' : '36px';
-  const fs = compact ? '10px' : '12px';
-  return `<div style="display:flex;align-items:center;gap:10px;padding:${compact?'7px':'10px'} 14px;background:${bg};border:${border};border-radius:8px;margin-bottom:6px;">
-    <div style="width:${size};height:${size};border-radius:50%;background:${col(u.FullName)};display:flex;align-items:center;justify-content:center;font-size:${fs};font-weight:700;color:#fff;flex-shrink:0;">${ini(u.FullName||u.Email)}</div>
-    <div style="flex:1;min-width:0;">
-      <div style="font-weight:${destacado?800:600};color:#f0ebe3;font-size:${compact?12:13}px;">${u.FullName||u.Email}</div>
-      <div style="font-size:10px;color:#666;">${[u.RoleName,u.AreaName].filter(Boolean).join(' · ')}</div>
-    </div>
-    <span style="font-size:10px;font-weight:700;color:${color};">${rol.toUpperCase()}</span>
-  </div>`;
-}
 
-function renderOrgCompleto(data) {
-  const container = document.getElementById('orgChartContainer');
-  if (!container) return;
-  const managers = data.filter(u => ['manager','admin'].includes(u.AppRole));
-  if (!managers.length) { container.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Sin managers cargados</div>'; return; }
-  function ini(n){ return (n||'?').split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase(); }
-  const COLS=['#FF5400','#2ECC71','#3B82F6','#A855F7','#F59E0B'];
-  function col(n){ let h=0; for(let c of(n||''))h=(h*31+c.charCodeAt(0))%COLS.length; return COLS[h]; }
-  container.innerHTML = managers.map(m => {
-    const lideres = data.filter(u => u.ManagerID===m.UserID || u.LeaderName===m.FullName);
-    return `<div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:10px;padding:14px;margin-bottom:12px;cursor:pointer;" onclick="renderJerarquiaUsuario(orgData.find(x=>x.UserID===${m.UserID}))">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:${lideres.length?'12px':'0'};">
-        <div style="width:40px;height:40px;border-radius:50%;background:#FF5400;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;">${ini(m.FullName||m.Email)}</div>
-        <div><div style="font-weight:800;color:#f0ebe3;">${m.FullName||m.Email}</div><div style="font-size:11px;color:#888;">Manager · ${lideres.length} líder${lideres.length!==1?'es':''}</div></div>
-        <span style="margin-left:auto;font-size:10px;font-weight:700;color:#FF5400;">MANAGER</span>
+// ═══ DASHBOARD PAGINACIÓN ════════════════════════════════════
+function renderDashboardPage() {
+  const el = document.getElementById('teamProgressList');
+  const pgEl = document.getElementById('dashPagination');
+  if (!el || !window.allTeamData) return;
+  const ps = window.dashPageSize || 20;
+  const pg = window.dashPage || 1;
+  const all = window.allTeamData;
+  const total = Math.ceil(all.length / ps);
+  const slice = all.slice((pg-1)*ps, pg*ps);
+
+  el.innerHTML = slice.map(p => {
+    const color = p.pct>=70?'var(--success)':p.pct>=40?'var(--warning)':'var(--danger)';
+    return `<div style="margin-bottom:10px;">
+      <div class="progress-label">
+        <div class="person-chip">
+          <div class="avatar-sm" style="background:${p.color};width:24px;height:24px;font-size:9px;">${p.init}</div>
+          <span class="progress-name">${p.name}</span>
+          ${p.leader?`<span style="font-size:9px;color:#555;margin-left:4px;">${p.leader}</span>`:''}
+        </div>
+        <span class="progress-pct" style="color:${color};">${p.pct}%</span>
       </div>
-      ${lideres.length?`<div style="display:flex;flex-wrap:wrap;gap:6px;">${lideres.map(l=>{
-        const colab = data.filter(u=>u.LeaderID===l.UserID).length;
-        return '<div style="background:#111;border:1px solid #2a2a2a;border-radius:6px;padding:5px 10px;font-size:11px;"><span style="color:#3B82F6;font-weight:700;">'+l.FullName+'</span> <span style="color:#555;">('+colab+' colab.)</span></div>';
-      }).join('')}</div>`:''}
+      <div class="progress-bar"><div class="progress-fill" style="width:${p.pct}%;background:${color};"></div></div>
     </div>`;
   }).join('');
-}
 
-// Cargar organigrama al entrar
-const _ssOrg = showSection;
-showSection = function(id) {
-  _ssOrg(id);
-  if (id === 'orgchart') {
-    if (!orgData.length) loadOrgChart();
-  }
-};
-
-// ═══ REPORTES: poblar Por Persona con buscador ═══════════════
-function initReportesPersona() {
-  const pSel = document.getElementById('repPersonaSel');
-  if (!pSel) return;
-  // Reemplazar con input+select estilo buscador
-  const parent = pSel.parentElement;
-  if (!document.getElementById('repPersonaBuscar')) {
-    const inp = document.createElement('input');
-    inp.id = 'repPersonaBuscar';
-    inp.type = 'text';
-    inp.className = 'form-control';
-    inp.placeholder = '🔍 Buscar colaborador...';
-    inp.style.marginBottom = '4px';
-    inp.oninput = function() { filtrarRepPersona(this.value); };
-    parent.insertBefore(inp, pSel);
-  }
-  if (pSel.options.length <= 1 && allUsuarios.length) {
-    pSel.innerHTML = '<option value="">— Seleccionar colaborador —</option>';
-    allUsuarios.filter(u=>u.IsActive).sort((a,b)=>(a.FullName||'').localeCompare(b.FullName||'')).forEach(u=>{
-      pSel.add(new Option((u.FullName||u.Email)+' — '+(u.Email||''), u.UserID));
-    });
+  if (pgEl) {
+    pgEl.innerHTML = '';
+    if (total > 1) {
+      for (let i=1; i<=total; i++) {
+        const b = document.createElement('button');
+        b.textContent = i;
+        b.style.cssText = 'padding:3px 9px;border-radius:6px;border:1px solid #333;background:'+(i===pg?'#FF5400':'#1a1a1a')+';color:#f0ebe3;cursor:pointer;font-size:11px;margin:2px;';
+        b.onclick = (function(p){ return function(){ window.dashPage=p; renderDashboardPage(); }; })(i);
+        pgEl.appendChild(b);
+      }
+    }
   }
 }
-
-function filtrarRepPersona(q) {
-  const sel = document.getElementById('repPersonaSel');
-  if (!sel) return;
-  const query = q.toLowerCase();
-  sel.innerHTML = '<option value="">— Seleccionar colaborador —</option>';
-  allUsuarios.filter(u => u.IsActive && (!query || (u.FullName||'').toLowerCase().includes(query) || (u.Email||'').toLowerCase().includes(query)))
-    .sort((a,b)=>(a.FullName||'').localeCompare(b.FullName||''))
-    .forEach(u => sel.add(new Option((u.FullName||u.Email)+' — '+(u.Email||''), u.UserID)));
-}
-
-// Hacer que initReportes llame a initReportesPersona
-const _origIR2 = initReportes;
-initReportes = function() {
-  _origIR2();
-  initReportesPersona();
-};
-
-// ═══ REPORTE POR LÍDER: mostrar equipo completo ══════════════
-const _origVRL = verReporteLider;
-verReporteLider = async function() {
-  const userId = document.getElementById('repLiderSel')?.value;
-  const container = document.getElementById('repLiderResult');
-  if (!userId || !container) return;
-  const lider = allUsuarios.find(u=>String(u.UserID)===String(userId));
-  const equipo = allUsuarios.filter(u=>String(u.LeaderID)===String(userId) && u.IsActive);
-  function ini(n){ return (n||'?').split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase(); }
-  const COLS=['#FF5400','#2ECC71','#3B82F6','#A855F7','#F59E0B'];
-  function col(n){ let h=0; for(let c of(n||''))h=(h*31+c.charCodeAt(0))%COLS.length; return COLS[h]; }
-  container.innerHTML = equipo.length
-    ? `<div style="margin-top:12px;">
-        <div style="font-weight:800;color:#f0ebe3;margin-bottom:12px;">Equipo de ${lider?.FullName||''} — ${equipo.length} colaboradores</div>
-        <div class="grid-2 gap-16">
-          ${equipo.map(u=>`<div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:12px;display:flex;align-items:center;gap:10px;">
-            <div style="width:36px;height:36px;border-radius:50%;background:${col(u.FullName)};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;">${ini(u.FullName||u.Email)}</div>
-            <div><div style="font-weight:700;color:#f0ebe3;font-size:13px;">${u.FullName||u.Email}</div>
-            <div style="font-size:11px;color:#888;">${u.RoleName||''} · ${u.AreaName||''}</div></div>
-            <span style="margin-left:auto;font-size:11px;color:${u.IsActive?'#2ECC71':'#888'};">${u.IsActive?'Activo':'Inactivo'}</span>
-          </div>`).join('')}
-        </div>
-      </div>`
-    : '<div style="padding:20px;color:#888;">Sin equipo asignado para este líder</div>';
-};
 </script>
-
-<!-- MODAL EDITAR OBJETIVO -->
-<div class="modal-overlay" id="editObjectiveModal">
-  <div class="modal" style="max-width:560px;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-      <div class="modal-title" id="editObjModalTitle" style="margin:0;">Editar Objetivo</div>
-      <span id="editObjTipoBadge" style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:rgba(255,84,0,0.15);color:#FF5400;"></span>
-    </div>
-    <input type="hidden" id="editObjId">
-    <input type="hidden" id="editObjTipoHidden">
-    <div class="grid-2 gap-16">
-      <div class="form-group" style="grid-column:1/-1">
-        <label class="form-label">Título del Objetivo</label>
-        <input id="editObjTitulo" class="form-control" type="text" placeholder="Título del objetivo">
-      </div>
-
-      <!-- CAMPOS SOLO PARA CORE -->
-      <div id="editCoreFields" style="grid-column:1/-1;display:none;">
-        <div class="grid-2 gap-16">
-          <div class="form-group">
-            <label class="form-label">Ponderación (%)</label>
-            <input id="editObjPeso" class="form-control" type="number" min="0" max="100" value="20">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Período</label>
-            <select id="editObjPeriodo" class="form-control">
-              <option value="">— Período —</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Fecha Límite</label>
-            <input id="editObjFecha" class="form-control" type="date">
-          </div>
-          <div class="form-group">
-            <label class="form-label" style="color:#FF5400;font-weight:700;">📋 Estado Organizacional</label>
-            <select id="editObjEstadoOrg" class="form-control">
-              <option value="active">✅ Activo</option>
-              <option value="approved">🏛️ Aprobado por Dirección</option>
-              <option value="paused">⏸️ Pausado</option>
-              <option value="cancelled">❌ Cancelado por Dirección</option>
-            </select>
-          </div>
-          <div class="form-group" style="grid-column:1/-1">
-            <label class="form-label">Nota de dirección (opcional)</label>
-            <textarea id="editObjNotaDir" class="form-control" placeholder="Ej: Cancelado por reestructuración Q3..." rows="2"></textarea>
-          </div>
-        </div>
-      </div>
-
-      <!-- CAMPOS SOLO PARA PERSONAL -->
-      <div id="editPersonalFields" style="grid-column:1/-1;display:none;">
-        <div class="grid-2 gap-16">
-          <div class="form-group">
-            <label class="form-label">Avance (%)</label>
-            <input id="editObjAvance" class="form-control" type="number" min="0" max="100" value="0">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Estado de cumplimiento</label>
-            <select id="editObjEstado" class="form-control">
-              <option value="not_started">No Iniciado</option>
-              <option value="in_progress">En Curso</option>
-              <option value="at_risk">En Riesgo</option>
-              <option value="completed">Completado ✓</option>
-              <option value="not_met">No Cumplido</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Ponderación (%)</label>
-            <input id="editObjPesoPersonal" class="form-control" type="number" min="0" max="100" value="20">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Fecha Límite</label>
-            <input id="editObjFechaPersonal" class="form-control" type="date">
-          </div>
-        </div>
-      </div>
-    </div>
-    <div id="editObjError" style="color:#FF4D4D;font-size:12px;margin-top:8px;display:none;"></div>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="closeModal('editObjectiveModal')">Cancelar</button>
-      <button class="btn btn-primary" onclick="guardarEdicionObjetivo()">Guardar Cambios</button>
-    </div>
-  </div>
-</div>
-
 </body>
 </html>

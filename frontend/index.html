@@ -987,7 +987,10 @@ label { color: #888 !important; }
       <h2 style="font-size:20px;font-weight:800;color:#f0ebe3;">Líderes y sus Equipos</h2>
       <p style="font-size:12px;color:#888;margin-top:2px;">Vista de líderes con sus colaboradores asignados</p>
     </div>
-    <input id="lideresSearch" type="text" placeholder="Buscar líder..." onkeyup="filtrarLideres()" style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:8px 12px;color:#f0ebe3;font-size:12px;width:200px;outline:none;">
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button onclick="document.getElementById('modalPromoverLider').style.display='flex'" style="padding:8px 14px;background:#FF5400;border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;">+ Promover Lider</button>
+      <input id="lideresSearch" type="text" placeholder="Buscar líder..." onkeyup="filtrarLideres()" style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:8px 12px;color:#f0ebe3;font-size:12px;width:200px;outline:none;">
+    </div>
   </div>
   <div id="lideresContainer" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:16px;overflow-y:auto;max-height:70vh;">
     <div style="text-align:center;padding:40px;color:#888;">Cargando líderes...</div>
@@ -1716,6 +1719,78 @@ label { color: #888 !important; }
       </div>
     </div>
 
+
+<!-- MODAL NUEVA REUNIÓN -->
+<div style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:500;align-items:center;justify-content:center;" id="newMeetingModal" class="modal-overlay">
+  <div class="modal" style="max-width:520px;">
+    <div class="modal-title">Nueva Reunion 1:1</div>
+    <div style="display:grid;gap:12px;">
+      <div>
+        <label class="form-label">Colaborador</label>
+        <input id="reunionBuscarInput" type="text" class="form-control" placeholder="Buscar colaborador..." style="margin-bottom:4px;" oninput="filtrarColabReunion(this.value)">
+        <select id="reunionColabSel" class="form-control"><option value="">Seleccionar colaborador</option></select>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div>
+          <label class="form-label">Tipo</label>
+          <select id="reunionTipo" class="form-control">
+            <option value="monthly">Mensual</option>
+            <option value="weekly">Semanal</option>
+            <option value="quarterly">Trimestral</option>
+            <option value="biweekly">Quincenal</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label">Fecha</label>
+          <input id="reunionFecha" type="date" class="form-control">
+        </div>
+      </div>
+      <div>
+        <label class="form-label">Titulo</label>
+        <input id="reunionTitulo" type="text" class="form-control" placeholder="Ej: Feedback Q2">
+      </div>
+      <div>
+        <label class="form-label">Notas generales</label>
+        <textarea id="reunionNotas" class="form-control" rows="3" placeholder="Temas tratados en la reunion..."></textarea>
+      </div>
+      <div>
+        <label class="form-label">Proximos pasos</label>
+        <textarea id="reunionPasos" class="form-control" rows="2" placeholder="Compromisos y acciones..."></textarea>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('newMeetingModal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarNuevaReunion()">Guardar Reunion</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR REUNIÓN -->
+<div style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:500;align-items:center;justify-content:center;" id="editMeetingModal" class="modal-overlay">
+  <div class="modal" style="max-width:520px;">
+    <div class="modal-title">Editar Reunion</div>
+    <input type="hidden" id="editMeetingId">
+    <div style="display:grid;gap:12px;">
+      <div>
+        <label class="form-label">Titulo</label>
+        <input id="editMeetingTitulo" type="text" class="form-control">
+      </div>
+      <div>
+        <label class="form-label">Notas generales</label>
+        <textarea id="editMeetingNotas" class="form-control" rows="3"></textarea>
+      </div>
+      <div>
+        <label class="form-label">Proximos pasos</label>
+        <textarea id="editMeetingPasos" class="form-control" rows="2"></textarea>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('editMeetingModal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarEdicionReunion()">Guardar Cambios</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const titles = {
   dashboard:'Dashboard',usuarios:'Usuarios',lideres:'Líderes',areas:'Áreas',objectives:'Objetivos',career:'Plan de Carrera',
@@ -1762,7 +1837,17 @@ async function loadDashboardFromAPI() {
   if (kpiEl('riesgo')) kpiEl('riesgo').textContent = atRisk;
 
   // Equipo — top 10 para el panel
-  teamData = active.slice(0, 15).map((u, i) => ({
+  window.allTeamData = active.map(function(u, i) { return {
+    name: u.FullName||u.Email, init: ini(u.FullName||u.Email),
+    color: colorFor(i), pct: u.AvgProgress||0,
+    status: statusFor(u.AvgProgress||0), userId: u.UserID,
+    leader: u.LeaderName, manager: u.ManagerName
+  }; });
+  window.dashPage=1; window.dashPageSize=20;
+  renderDashboardPage();
+  // legacy
+  teamData = window.allTeamData.slice(0,15).map(function(x){return x;});
+  if (false && ({
     name:   u.FullName || u.Email,
     init:   ini(u.FullName || u.Email),
     color:  colorFor(i),
@@ -4430,6 +4515,227 @@ async function loadHelpArticles() {
 }
 var _ssH = showSection;
 showSection = function(id) { _ssH(id); if (id==='help') loadHelpArticles(); };
+
+
+// ═══ DASHBOARD PAGINACIÓN ════════════════════════════════════
+function renderDashboardPage() {
+  var el = document.getElementById('teamProgressList');
+  var pgEl = document.getElementById('dashPagination');
+  if (!el || !window.allTeamData) return;
+  var ps = window.dashPageSize || 20;
+  var pg = window.dashPage || 1;
+  var all = window.allTeamData;
+  var total = Math.ceil(all.length / ps);
+  var slice = all.slice((pg-1)*ps, pg*ps);
+  el.innerHTML = slice.map(function(p) {
+    var color = p.pct>=70?'var(--success)':p.pct>=40?'var(--warning)':'var(--danger)';
+    return '<div style="margin-bottom:10px;">' +
+      '<div class="progress-label">' +
+        '<div class="person-chip">' +
+          '<div class="avatar-sm" style="background:'+p.color+';width:24px;height:24px;font-size:9px;">'+p.init+'</div>' +
+          '<span class="progress-name">'+p.name+'</span>' +
+        '</div>' +
+        '<span class="progress-pct" style="color:'+color+';">'+p.pct+'%</span>' +
+      '</div>' +
+      '<div class="progress-bar"><div class="progress-fill" style="width:'+p.pct+'%;background:'+color+';"></div></div>' +
+    '</div>';
+  }).join('');
+  if (pgEl) {
+    pgEl.innerHTML = '';
+    if (total > 1) {
+      for (var i=1; i<=total; i++) {
+        (function(pageNum) {
+          var b = document.createElement('button');
+          b.textContent = pageNum;
+          b.style.cssText = 'padding:3px 9px;border-radius:6px;border:1px solid #333;background:'+(pageNum===pg?'#FF5400':'#1a1a1a')+';color:#f0ebe3;cursor:pointer;font-size:11px;margin:2px;';
+          b.onclick = function() { window.dashPage=pageNum; renderDashboardPage(); };
+          pgEl.appendChild(b);
+        })(i);
+      }
+    }
+  }
+}
+
+// ═══ ORGANIGRAMA DINÁMICO ════════════════════════════════════
+var orgData = [];
+
+async function loadOrgChartDynamic() {
+  var container = document.getElementById('orgChartContainer');
+  if (!container) return;
+  container.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Cargando...</div>';
+  if (!allUsuarios.length) await loadUsuarios();
+  orgData = allUsuarios;
+  renderOrgManagers();
+}
+
+function renderOrgManagers() {
+  var container = document.getElementById('orgChartContainer');
+  if (!container) return;
+  var managers = orgData.filter(function(u){ return u.AppRole==='manager'||u.AppRole==='admin'; });
+  if (!managers.length) { container.innerHTML='<div style="text-align:center;padding:30px;color:#888;">Sin managers</div>'; return; }
+  function ini(n){ return (n||'?').split(' ').map(function(p){return p[0];}).join('').slice(0,2).toUpperCase(); }
+  var COLS=['#FF5400','#2ECC71','#3B82F6','#A855F7','#F59E0B'];
+  function col(n){ var h=0; for(var i=0;i<(n||'').length;i++) h=(h*31+n.charCodeAt(i))%COLS.length; return COLS[h]; }
+  container.innerHTML = managers.map(function(m) {
+    var lideres = orgData.filter(function(u){ return u.ManagerID===m.UserID; });
+    return '<div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:10px;padding:14px;margin-bottom:12px;cursor:pointer;" onclick="renderJerarquiaUsuario('+m.UserID+')">' +
+      '<div style="display:flex;align-items:center;gap:10px;">' +
+        '<div style="width:40px;height:40px;border-radius:50%;background:#FF5400;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;">'+ini(m.FullName||m.Email)+'</div>' +
+        '<div><div style="font-weight:800;color:#f0ebe3;">'+(m.FullName||m.Email)+'</div>' +
+        '<div style="font-size:11px;color:#888;">Manager · '+lideres.length+' lideres</div></div>' +
+        '<span style="margin-left:auto;font-size:10px;font-weight:700;color:#FF5400;">MANAGER</span>' +
+      '</div></div>';
+  }).join('');
+}
+
+function renderJerarquiaUsuario(userId) {
+  if (!orgData.length) { loadOrgChartDynamic(); return; }
+  var usuario = orgData.find(function(u){ return u.UserID===userId; });
+  if (!usuario) return;
+  var container = document.getElementById('orgChartContainer');
+  if (!container) return;
+  function ini(n){ return (n||'?').split(' ').map(function(p){return p[0];}).join('').slice(0,2).toUpperCase(); }
+  var COLS=['#FF5400','#2ECC71','#3B82F6','#A855F7','#F59E0B'];
+  function col(n){ var h=0; for(var i=0;i<(n||'').length;i++) h=(h*31+n.charCodeAt(i))%COLS.length; return COLS[h]; }
+  function tarjeta(u, rol, color, destacado) {
+    var bg = destacado ? 'rgba(255,84,0,0.08)' : '#1a1a1a';
+    var border = destacado ? '1px solid rgba(255,84,0,0.3)' : '1px solid #2a2a2a';
+    return '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:'+bg+';border:'+border+';border-radius:8px;margin-bottom:6px;">' +
+      '<div style="width:36px;height:36px;border-radius:50%;background:'+col(u.FullName)+';display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;">'+ini(u.FullName||u.Email)+'</div>' +
+      '<div style="flex:1;"><div style="font-weight:'+(destacado?800:600)+';color:#f0ebe3;font-size:13px;">'+(u.FullName||u.Email)+'</div>' +
+      '<div style="font-size:10px;color:#666;">'+(u.RoleName||'')+'</div></div>' +
+      '<span style="font-size:10px;font-weight:700;color:'+color+';">'+rol+'</span></div>';
+  }
+  var html = '<button onclick="renderOrgManagers()" style="margin-bottom:16px;padding:4px 12px;background:#222;border:1px solid #333;border-radius:6px;color:#aaa;font-size:11px;cursor:pointer;">Volver</button>';
+  var rol = usuario.AppRole;
+  if (rol==='manager'||rol==='admin') {
+    html += tarjeta(usuario,'MANAGER','#FF5400',true);
+    html += '<div style="margin:8px 0 0 24px;border-left:2px solid #333;padding-left:16px;">';
+    var lideres = orgData.filter(function(u){ return u.ManagerID===usuario.UserID; });
+    if (!lideres.length) html += '<div style="color:#888;font-size:12px;padding:8px;">Sin lideres asignados</div>';
+    lideres.forEach(function(l) {
+      html += tarjeta(l,'LIDER','#3B82F6',false);
+      var colab = orgData.filter(function(u){ return u.LeaderID===l.UserID; });
+      if (colab.length) {
+        html += '<div style="margin:4px 0 4px 24px;border-left:2px solid #2a2a2a;padding-left:12px;">';
+        colab.forEach(function(c){ html += tarjeta(c,'COLAB','#888',false); });
+        html += '</div>';
+      }
+    });
+    html += '</div>';
+  } else if (rol==='leader') {
+    var mgr = orgData.find(function(u){ return u.UserID===usuario.ManagerID; });
+    if (mgr) { html += tarjeta(mgr,'MANAGER','#FF5400',false); html += '<div style="margin:8px 0 0 24px;border-left:2px solid #333;padding-left:16px;">'; }
+    html += tarjeta(usuario,'LIDER','#3B82F6',true);
+    html += '<div style="margin:8px 0 0 24px;border-left:2px solid #2a2a2a;padding-left:12px;">';
+    var colab2 = orgData.filter(function(u){ return u.LeaderID===usuario.UserID; });
+    if (!colab2.length) html += '<div style="color:#888;font-size:12px;padding:8px;">Sin colaboradores</div>';
+    colab2.forEach(function(c){ html += tarjeta(c,'COLAB','#888',false); });
+    html += '</div>';
+    if (mgr) html += '</div>';
+  } else {
+    var lider = orgData.find(function(u){ return u.UserID===usuario.LeaderID; });
+    var mgr2 = lider ? orgData.find(function(u){ return u.UserID===lider.ManagerID; }) : null;
+    if (mgr2) { html += tarjeta(mgr2,'MANAGER','#FF5400',false); html += '<div style="margin:8px 0 0 24px;border-left:2px solid #333;padding-left:16px;">'; }
+    if (lider) { html += tarjeta(lider,'LIDER','#3B82F6',false); html += '<div style="margin:8px 0 0 24px;border-left:2px solid #2a2a2a;padding-left:12px;">'; }
+    html += tarjeta(usuario,'COLABORADOR','#888',true);
+    if (lider) html += '</div>';
+    if (mgr2) html += '</div>';
+  }
+  container.innerHTML = html;
+}
+
+function buscarEnOrganigrama(q) {
+  if (!orgData.length) { loadOrgChartDynamic(); return; }
+  var query = q.toLowerCase().trim();
+  var rol = document.getElementById('orgFiltroRol') ? document.getElementById('orgFiltroRol').value : '';
+  if (!query && !rol) { renderOrgManagers(); return; }
+  var matches = orgData.filter(function(u) {
+    return (!rol || u.AppRole===rol) &&
+      (!query || (u.FullName||'').toLowerCase().includes(query) || (u.Email||'').toLowerCase().includes(query));
+  });
+  var container = document.getElementById('orgChartContainer');
+  if (!container) return;
+  if (!matches.length) { container.innerHTML='<div style="text-align:center;padding:30px;color:#888;">Sin resultados</div>'; return; }
+  if (matches.length===1) { renderJerarquiaUsuario(matches[0].UserID); return; }
+  function ini(n){ return (n||'?').split(' ').map(function(p){return p[0];}).join('').slice(0,2).toUpperCase(); }
+  var COLS=['#FF5400','#2ECC71','#3B82F6','#A855F7','#F59E0B'];
+  function col(n){ var h=0; for(var i=0;i<(n||'').length;i++) h=(h*31+n.charCodeAt(i))%COLS.length; return COLS[h]; }
+  container.innerHTML = '<div style="margin-bottom:10px;font-size:12px;color:#888;">'+matches.length+' resultados</div>' +
+    matches.map(function(u) {
+      return '<div onclick="renderJerarquiaUsuario('+u.UserID+')" style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;margin-bottom:6px;cursor:pointer;">' +
+        '<div style="width:36px;height:36px;border-radius:50%;background:'+col(u.FullName)+';display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;">'+ini(u.FullName||u.Email)+'</div>' +
+        '<div><div style="font-weight:700;color:#f0ebe3;">'+(u.FullName||u.Email)+'</div>' +
+        '<div style="font-size:11px;color:#888;">'+(u.AppRole||'')+' · '+(u.AreaName||'')+'</div></div>' +
+      '</div>';
+    }).join('');
+}
+
+// Override showSection para organigrama
+var _ssOrg2 = showSection;
+showSection = function(id) {
+  _ssOrg2(id);
+  if (id==='orgchart' && !orgData.length) loadOrgChartDynamic();
+};
+
+
+// Guardar nueva reunion
+async function guardarNuevaReunion() {
+  var colabSel = document.getElementById('reunionColabSel');
+  var userId = colabSel ? colabSel.value : null;
+  var tipo = document.getElementById('reunionTipo') ? document.getElementById('reunionTipo').value : 'monthly';
+  var fecha = document.getElementById('reunionFecha') ? document.getElementById('reunionFecha').value : null;
+  var titulo = document.getElementById('reunionTitulo') ? document.getElementById('reunionTitulo').value.trim() : '';
+  var notas = document.getElementById('reunionNotas') ? document.getElementById('reunionNotas').value.trim() : '';
+  var pasos = document.getElementById('reunionPasos') ? document.getElementById('reunionPasos').value.trim() : '';
+  if (!userId) { mostrarToast('Selecciona un colaborador', 'error'); return; }
+  if (!fecha) { mostrarToast('Ingresa la fecha', 'error'); return; }
+  try {
+    var res = await fetch(API_BASE+'/meetings', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ employeeId:parseInt(userId), meetingType:tipo, meetingDate:fecha,
+        title:titulo||null, generalNotes:notas||null, nextSteps:pasos||null,
+        status:'completed', sendEmail:false })
+    });
+    var data = await res.json();
+    if (data.ok===false) throw new Error(data.error||'Error');
+    closeModal('newMeetingModal');
+    ['reunionTitulo','reunionNotas','reunionPasos'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
+    mostrarToast('Reunion guardada correctamente', 'success');
+    if (reunionColabActual) cargarBitacoraUsuario(reunionColabActual);
+    else if (userId) seleccionarColabReunion(parseInt(userId), colabSel.options[colabSel.selectedIndex].text, '', '');
+  } catch(e) { mostrarToast('Error: '+e.message, 'error'); }
+}
+
+// Guardar edicion reunion
+async function guardarEdicionReunion() {
+  var id = document.getElementById('editMeetingId') ? document.getElementById('editMeetingId').value : null;
+  if (!id) return;
+  var titulo = document.getElementById('editMeetingTitulo') ? document.getElementById('editMeetingTitulo').value.trim() : '';
+  var notas = document.getElementById('editMeetingNotas') ? document.getElementById('editMeetingNotas').value.trim() : '';
+  var pasos = document.getElementById('editMeetingPasos') ? document.getElementById('editMeetingPasos').value.trim() : '';
+  try {
+    var res = await fetch(API_BASE+'/meetings/'+id, {
+      method:'PUT', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ title:titulo||null, generalNotes:notas||null, nextSteps:pasos||null })
+    });
+    var data = await res.json();
+    if (data.ok===false) throw new Error(data.error||'Error');
+    closeModal('editMeetingModal');
+    mostrarToast('Reunion actualizada', 'success');
+    if (reunionColabActual) cargarBitacoraUsuario(reunionColabActual);
+  } catch(e) { mostrarToast('Error: '+e.message, 'error'); }
+}
+
+// Abrir editar reunion
+function abrirEditarReunion(meetingId, titulo, notas, pasos) {
+  document.getElementById('editMeetingId').value = meetingId;
+  document.getElementById('editMeetingTitulo').value = titulo||'';
+  document.getElementById('editMeetingNotas').value = notas||'';
+  document.getElementById('editMeetingPasos').value = pasos||'';
+  var modal = document.getElementById('editMeetingModal');
+  if (modal) modal.style.display='flex';
+}
 
 </script>
 

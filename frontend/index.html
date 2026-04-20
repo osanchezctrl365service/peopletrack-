@@ -1343,79 +1343,43 @@ label { color: #888 !important; }
 
     <!-- ======== 1:1 ======== -->
     <div class="section" id="sec-oneononex">
-      <div class="section-header">
+      <div class="section-header" style="margin-bottom:16px;">
         <div>
           <div class="section-heading">Reuniones 1:1</div>
           <div class="section-subheading">Bitácora acumulable de reuniones semanales, mensuales y por quarter</div>
         </div>
-        <button class="btn btn-primary btn-sm" onclick="showModal('newMeetingModal')">+ Nueva Reunión</button>
+        <button class="btn btn-primary btn-sm" onclick="abrirModalNuevaReunion()">+ Nueva Reunión</button>
       </div>
 
-      <div class="grid-2 gap-16">
-        <div>
-          <div class="card mb-12">
-            <div class="card-title">Colaboradores</div>
-            <div id="personList">
-              <div class="checklist-item" style="cursor:pointer;padding:10px 6px;border-radius:8px;background:var(--primary-pale)" onclick="">
-                <div class="avatar-sm" style="background:#1B3A5C">JM</div>
-                <div class="flex-1"><div style="font-size:13px;font-weight:600">Jorge Mercado</div><div style="font-size:11px;color:var(--gray-500)">Developer · Operations</div></div>
-                <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();alert('Abriendo cliente de email...')">📧</button>
-              </div>
-              <div class="checklist-item" style="cursor:pointer;padding:10px 6px" onclick="">
-                <div class="avatar-sm" style="background:#00A3A3">MR</div>
-                <div class="flex-1"><div style="font-size:13px;font-weight:600">Miguel Rocha</div><div style="font-size:11px;color:var(--gray-500)">SME · Operations</div></div>
-                <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();alert('Abriendo cliente de email...')">📧</button>
-              </div>
-              <div class="checklist-item" style="cursor:pointer;padding:10px 6px" onclick="">
-                <div class="avatar-sm" style="background:#7B1FA2">LM</div>
-                <div class="flex-1"><div style="font-size:13px;font-weight:600">Leila Martínez</div><div style="font-size:11px;color:var(--gray-500)">P&C Support · People</div></div>
-                <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();alert('Abriendo cliente de email...')">📧</button>
-              </div>
-            </div>
+      <div style="display:grid;grid-template-columns:300px 1fr;gap:16px;height:calc(100vh - 200px);">
+        
+        <!-- PANEL IZQUIERDO: lista de colaboradores -->
+        <div class="card" style="padding:0;overflow:hidden;display:flex;flex-direction:column;">
+          <div style="padding:12px 16px;border-bottom:1px solid #2a2a2a;">
+            <div style="font-size:11px;font-weight:700;color:#FF5400;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Colaboradores</div>
+            <input id="reunionBuscadorColab" type="text" class="form-control" placeholder="🔍 Buscar..." style="font-size:12px;" oninput="filtrarListaColaboradores(this.value)">
+          </div>
+          <div id="reunionListaColab" style="overflow-y:auto;flex:1;padding:8px;">
+            <div style="text-align:center;padding:20px;color:#888;font-size:12px;">Cargando colaboradores...</div>
           </div>
         </div>
 
-        <div>
-          <div class="card">
-            <div class="card-title">Bitácora — Jorge Mercado</div>
-            <div class="flex gap-8 mb-12">
-              <select class="form-control" style="width:160px"><option>Todos los tipos</option><option>Semanal</option><option>Mensual</option><option>Trimestral</option></select>
-            </div>
-            <div class="timeline">
-              <div class="timeline-item">
-                <div class="timeline-dot"></div>
-                <div class="timeline-date">01 Ago 2025 · Mensual</div>
-                <div class="timeline-card">
-                  <div class="timeline-card-title">Feedback + Formulario SA</div>
-                  <div class="timeline-card-body">Reunión de primer feedback. Se presentó formulario de Staff Augmentation para autoevaluación. Detectados desvíos en certificación PL-500, se acordó plan de recuperación para Q3.</div>
-                  <div class="flex gap-8 mt-12">
-                    <span class="badge badge-info">Obj: Formación</span>
-                    <span class="badge badge-gray">Carrera: Developer → Sr</span>
-                    <button class="btn btn-secondary btn-sm" style="margin-left:auto" onclick="alert('Enviando minuta por email...')">📧 Minuta</button>
-                  </div>
-                </div>
-              </div>
-              <div class="timeline-item">
-                <div class="timeline-dot" style="background:var(--primary)"></div>
-                <div class="timeline-date">23 Jul 2025 · Mensual</div>
-                <div class="timeline-card">
-                  <div class="timeline-card-title">Ajuste de Objetivos FY25</div>
-                  <div class="timeline-card-body">Se modificaron objetivos bajo una mirada general aplicada a integrantes de Staff Augmentation. Se establecieron nuevas ponderaciones para H2.</div>
-                  <div class="flex gap-8 mt-12">
-                    <span class="badge badge-primary">Obj: Core</span>
-                    <button class="btn btn-secondary btn-sm" style="margin-left:auto" onclick="alert('Enviando minuta por email...')">📧 Minuta</button>
-                  </div>
-                </div>
-              </div>
-              <div class="timeline-item">
-                <div class="timeline-dot" style="background:var(--success)"></div>
-                <div class="timeline-date">15 May 2025 · Kick-off</div>
-                <div class="timeline-card">
-                  <div class="timeline-card-title">Comunicación de Objetivos FY25</div>
-                  <div class="timeline-card-body">Reunión inicial de comunicación de objetivos del año fiscal. Se compartieron resultados del proceso de calibración de rol del CoE.</div>
-                  <button class="btn btn-secondary btn-sm mt-12" onclick="alert('Enviando minuta por email...')">📧 Minuta</button>
-                </div>
-              </div>
+        <!-- PANEL DERECHO: bitácora del colaborador seleccionado -->
+        <div class="card" style="padding:0;overflow:hidden;display:flex;flex-direction:column;">
+          <div style="padding:12px 16px;border-bottom:1px solid #2a2a2a;display:flex;justify-content:space-between;align-items:center;">
+            <div id="reunionBitacoraTitle" style="font-size:13px;font-weight:700;color:#FF5400;">Seleccioná un colaborador</div>
+            <select id="reunionFiltroTipo" class="form-control" style="width:140px;font-size:11px;" onchange="filtrarBitacoraTipo(this.value)" disabled>
+              <option value="">Todos los tipos</option>
+              <option value="monthly">Mensual</option>
+              <option value="weekly">Semanal</option>
+              <option value="quarterly">Trimestral</option>
+              <option value="biweekly">Quincenal</option>
+            </select>
+          </div>
+          <div id="reunionBitacoraContent" style="overflow-y:auto;flex:1;padding:16px;">
+            <div style="text-align:center;padding:40px;color:#888;">
+              <div style="font-size:32px;margin-bottom:12px;">👥</div>
+              <div>Seleccioná un colaborador para ver su bitácora de reuniones</div>
             </div>
           </div>
         </div>
@@ -1789,8 +1753,8 @@ label { color: #888 !important; }
     <div class="grid-2 gap-16">
       <div class="form-group" style="grid-column:1/-1">
         <label class="form-label">Colaborador</label>
-        <input id="objColabBuscar" type="text" class="form-control" placeholder="🔍 Buscar colaborador..." style="margin-bottom:4px;" oninput="filtrarColabObj(this.value)">
-        <select id="objColabSel" class="form-control"><option value="">— Seleccionar colaborador —</option></select>
+        <input id="reunionBuscarInput" type="text" class="form-control" placeholder="🔍 Buscar colaborador..." style="margin-bottom:4px;" oninput="filtrarColabReunion(this.value)">
+        <select id="reunionColabSel" class="form-control" onchange="onSeleccionColabReunion()"><option value="">— Seleccionar colaborador —</option></select>
       </div>
       <div class="form-group"><label class="form-label">Tipo</label><select class="form-control"><option>Mensual</option><option>Semanal</option><option>Trimestral</option></select></div>
       <div class="form-group"><label class="form-label">Fecha</label><input class="form-control" type="date"></div>
@@ -4040,6 +4004,169 @@ guardarNuevoObjetivo = async function() {
   }
   await _origGuardarObjPers();
 };
+
+// ═══ REUNIONES 1:1 DINÁMICAS ═════════════════════════════════
+let allColabReuniones = [];   // colaboradores cargados
+let reunionColabActual = null; // collaborator seleccionado
+let allBitacoraData = [];     // reuniones del colaborador actual
+
+async function initReuniones() {
+  // Cargar todos los usuarios activos
+  if (!allUsuarios.length) await loadUsuarios();
+  allColabReuniones = allUsuarios.filter(u => u.IsActive)
+    .sort((a,b) => (a.FullName||'').localeCompare(b.FullName||''));
+  renderListaColaboradores(allColabReuniones);
+}
+
+function renderListaColaboradores(lista) {
+  const container = document.getElementById('reunionListaColab');
+  if (!container) return;
+  if (!lista.length) {
+    container.innerHTML = '<div style="padding:16px;text-align:center;color:#888;font-size:12px;">Sin resultados</div>';
+    return;
+  }
+  function ini(n){ return (n||'?').split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase(); }
+  const COLS=['#FF5400','#2ECC71','#3B82F6','#A855F7','#F59E0B','#EF4444','#10B981'];
+  function col(n){ let h=0; for(let c of(n||''))h=(h*31+c.charCodeAt(0))%COLS.length; return COLS[h]; }
+  
+  container.innerHTML = lista.map(u => `
+    <div onclick="seleccionarColabReunion(${u.UserID},'${(u.FullName||u.Email).replace(/'/g,"\'")}','${u.RoleName||''}','${u.AreaName||''}')"
+      id="colab-item-${u.UserID}"
+      style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;margin-bottom:2px;transition:background 0.1s;"
+      onmouseover="this.style.background='#1e1e1e'" onmouseout="this.style.background=(reunionColabActual===${u.UserID}?'rgba(255,84,0,0.1)':'')">
+      <div style="width:32px;height:32px;border-radius:50%;background:${col(u.FullName)};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;">${ini(u.FullName||u.Email)}</div>
+      <div style="min-width:0;flex:1;">
+        <div style="font-size:12px;font-weight:600;color:#f0ebe3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${u.FullName||u.Email}</div>
+        <div style="font-size:10px;color:#666;">${[u.RoleName,u.AreaName].filter(Boolean).join(' · ')}</div>
+      </div>
+      <span style="font-size:10px;color:#555;">📧</span>
+    </div>`).join('');
+}
+
+function filtrarListaColaboradores(q) {
+  const query = q.toLowerCase();
+  const filtered = allColabReuniones.filter(u =>
+    !query ||
+    (u.FullName||'').toLowerCase().includes(query) ||
+    (u.Email||'').toLowerCase().includes(query) ||
+    (u.RoleName||'').toLowerCase().includes(query)
+  );
+  renderListaColaboradores(filtered);
+}
+
+async function seleccionarColabReunion(userId, nombre, rol, area) {
+  reunionColabActual = userId;
+  // Highlight seleccionado
+  document.querySelectorAll('[id^="colab-item-"]').forEach(el => el.style.background = '');
+  const item = document.getElementById('colab-item-' + userId);
+  if (item) item.style.background = 'rgba(255,84,0,0.1)';
+  // Actualizar título
+  const title = document.getElementById('reunionBitacoraTitle');
+  if (title) title.textContent = 'BITÁCORA — ' + nombre.toUpperCase();
+  // Habilitar filtro
+  const filtro = document.getElementById('reunionFiltroTipo');
+  if (filtro) filtro.disabled = false;
+  // Cargar bitácora
+  await cargarBitacoraUsuario(userId);
+}
+
+async function cargarBitacoraUsuario(userId) {
+  const container = document.getElementById('reunionBitacoraContent');
+  if (!container) return;
+  container.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Cargando reuniones...</div>';
+  try {
+    const data = await apiGet('meetings/' + userId);
+    allBitacoraData = Array.isArray(data) ? data : [];
+    renderBitacora(allBitacoraData);
+  } catch(e) {
+    container.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Sin reuniones registradas aún</div>';
+  }
+}
+
+function renderBitacora(meetings) {
+  const container = document.getElementById('reunionBitacoraContent');
+  if (!container) return;
+  if (!meetings.length) {
+    container.innerHTML = '<div style="text-align:center;padding:40px;color:#888;"><div style="font-size:24px;margin-bottom:8px;">📝</div>Sin reuniones registradas para este colaborador</div>';
+    return;
+  }
+  const tipoLabel = {monthly:'Mensual',weekly:'Semanal',quarterly:'Trimestral',biweekly:'Quincenal'};
+  container.innerHTML = meetings.map(m => {
+    const fecha = m.MeetingDate ? new Date(m.MeetingDate).toLocaleDateString('es-AR',{day:'2-digit',month:'short',year:'numeric'}).toUpperCase() : '—';
+    const tipo = tipoLabel[m.MeetingType] || m.MeetingType || 'Reunión';
+    return `<div style="border-bottom:1px solid #1e1e1e;padding:14px 0;margin-bottom:4px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <div style="width:10px;height:10px;border-radius:50%;background:#FF5400;flex-shrink:0;"></div>
+        <div style="font-size:10px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">${fecha} · ${tipo}</div>
+      </div>
+      <div style="font-weight:700;color:#f0ebe3;font-size:14px;margin-bottom:6px;">${m.Title||'Reunión 1:1'}</div>
+      ${m.GeneralNotes?`<div style="font-size:12px;color:#aaa;line-height:1.6;margin-bottom:8px;">${m.GeneralNotes}</div>`:''}
+      ${m.NextSteps?`<div style="font-size:11px;color:#FF5400;font-weight:600;margin-top:6px;">▶ ${m.NextSteps}</div>`:''}
+      ${m.notes&&m.notes.length?`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">${m.notes.map(n=>`<span style="background:#222;border:1px solid #333;border-radius:6px;padding:2px 8px;font-size:10px;color:#aaa;">${n.noteText||n.NoteText||''}</span>`).join('')}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function filtrarBitacoraTipo(tipo) {
+  if (!tipo) { renderBitacora(allBitacoraData); return; }
+  renderBitacora(allBitacoraData.filter(m => m.MeetingType === tipo));
+}
+
+// ═══ MODAL NUEVA REUNIÓN: abrir con collab pre-seleccionado ═══
+function abrirModalNuevaReunion(userId) {
+  showModal('newMeetingModal');
+  // Poblar buscador
+  setTimeout(() => {
+    if (!allUsuarios.length) {
+      loadUsuarios().then(() => {
+        filtrarColabReunion('');
+        if (userId) {
+          const sel = document.getElementById('reunionColabSel');
+          if (sel) sel.value = userId;
+        }
+      });
+    } else {
+      filtrarColabReunion('');
+      if (userId) {
+        const sel = document.getElementById('reunionColabSel');
+        if (sel) sel.value = userId;
+      }
+    }
+  }, 50);
+}
+
+// Override showSection para cargar reuniones
+const _ssReu = showSection;
+showSection = function(id) {
+  _ssReu(id);
+  if (id === 'oneononex') {
+    if (!allColabReuniones.length) initReuniones();
+    else if (!document.getElementById('reunionListaColab')?.querySelector('[id^="colab-item-"]')) {
+      renderListaColaboradores(allColabReuniones);
+    }
+  }
+};
+
+// Override guardarReunion para recargar bitácora después
+const _origGR2 = guardarReunion;
+guardarReunion = async function() {
+  const colabSel = document.getElementById('reunionColabSel');
+  const userId = colabSel?.value;
+  await _origGR2();
+  // Recargar bitácora si hay un colaborador seleccionado
+  if (reunionColabActual) {
+    await cargarBitacoraUsuario(reunionColabActual);
+  } else if (userId) {
+    seleccionarColabReunion(parseInt(userId), '', '', '');
+  }
+};
+
+// Al seleccionar colaborador en modal reunión, pre-seleccionar en la lista
+function onSeleccionColabReunion() {
+  const sel = document.getElementById('reunionColabSel');
+  if (!sel || !sel.value) return;
+  // Si hay un colaborador en la lista principal con ese ID, destacarlo
+}
 </script>
 
 <!-- MODAL EDITAR OBJETIVO -->

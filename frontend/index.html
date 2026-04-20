@@ -1085,79 +1085,38 @@ label { color: #888 !important; }
 
       <div id="obj-core">
         <div class="flex gap-8 mb-12">
-          <div class="search-input-wrap flex-1"><span class="search-icon">🔍</span><input class="form-control" type="text" placeholder="Buscar objetivo..."></div>
-          <select class="form-control" style="width:160px"><option>Todas las áreas</option><option>Operations</option><option>People & Culture</option><option>Admin & Finance</option></select>
+          <div class="search-input-wrap flex-1">
+            <span class="search-icon">🔍</span>
+            <input id="objCoreSearch" class="form-control" type="text" placeholder="Buscar objetivo..." oninput="filtrarTablaObjetivos('core',this.value)">
+          </div>
+          <select id="objCoreArea" class="form-control" style="width:160px" onchange="filtrarTablaObjetivos('core','')">
+            <option value="">Todas las áreas</option>
+          </select>
         </div>
-        <table class="data-table">
-          <thead><tr><th>Objetivo</th><th>Tipo</th><th>Ponderación</th><th>Período</th><th>Área</th><th>Acciones</th></tr></thead>
-          <tbody>
-            <tr><td><strong>Control de Horas — Límite rojo ≤3</strong></td><td><span class="badge badge-primary">Core</span></td><td>30%</td><td>FY26</td><td>Operations</td><td><button class="btn btn-secondary btn-sm" onclick="showModal('editObjectiveModal')">Editar</button></td></tr>
-            <tr><td><strong>Certificación MS oficial anual</strong></td><td><span class="badge badge-primary">Core</span></td><td>25%</td><td>FY26</td><td>Todas</td><td><button class="btn btn-secondary btn-sm" onclick="showModal('editObjectiveModal')">Editar</button></td></tr>
-            <tr><td><strong>NPS cliente ≥ 4.5</strong></td><td><span class="badge badge-primary">Core</span></td><td>20%</td><td>FY26</td><td>Operations</td><td><button class="btn btn-secondary btn-sm">Editar</button></td></tr>
-            <tr><td><strong>Innovación — 1 demo AI por año</strong></td><td><span class="badge badge-primary">Core</span></td><td>25%</td><td>FY26</td><td>Technology</td><td><button class="btn btn-secondary btn-sm">Editar</button></td></tr>
-          </tbody>
-        </table>
+        <div id="objCoreTbody">
+          <div style="text-align:center;padding:30px;color:#888;">Cargando objetivos...</div>
+        </div>
       </div>
 
-      <div id="obj-personal" style="display:none" data-tab="obj">
+      <div id="obj-personal" style="display:none">
         <div class="flex gap-8 mb-12">
-          <select class="form-control" style="width:200px"><option>— Seleccionar colaborador —</option><option>Jorge Mercado</option><option>Miguel Rocha</option><option>Leila Martínez</option></select>
-          <select class="form-control" style="width:160px"><option>FY26</option><option>H1-FY26</option><option>H2-FY26</option></select>
+          <select id="objPersonalColab" class="form-control" style="width:240px" onchange="cargarObjetivosPersonales()">
+            <option value="">— Seleccionar colaborador —</option>
+          </select>
+          <select id="objPersonalPeriodo" class="form-control" style="width:140px" onchange="cargarObjetivosPersonales()">
+            <option value="">— Período —</option>
+          </select>
         </div>
-        <table class="data-table">
-          <thead><tr><th>Colaborador</th><th>Objetivo</th><th>Competencia</th><th>Ponderación</th><th>Avance</th><th>Estado</th><th>Acción</th></tr></thead>
-          <tbody>
-            <tr>
-              <td><div class="person-chip"><div class="avatar-sm" style="background:#1B3A5C">JM</div><span>J. Mercado</span></div></td>
-              <td>Formación — Cursos Python / PL-200 / PL-500</td>
-              <td>Aprendizaje</td>
-              <td>40%</td>
-              <td>
-                <div class="progress-label"><span class="progress-pct" style="color:var(--warning)">45%</span></div>
-                <div class="progress-bar"><div class="progress-fill" style="width:45%;background:var(--warning)"></div></div>
-              </td>
-              <td><span class="badge badge-warning">En Curso</span></td>
-              <td><button class="btn btn-secondary btn-sm" onclick="showModal('checkinModal')">Check-in</button></td>
-            </tr>
-            <tr>
-              <td><div class="person-chip"><div class="avatar-sm" style="background:#1B3A5C">JM</div><span>J. Mercado</span></div></td>
-              <td>Aplicación — Power Automate + Python Integrado</td>
-              <td>Innovación</td>
-              <td>30%</td>
-              <td>
-                <div class="progress-label"><span class="progress-pct" style="color:var(--danger)">20%</span></div>
-                <div class="progress-bar"><div class="progress-fill" style="width:20%;background:var(--danger)"></div></div>
-              </td>
-              <td><span class="badge badge-danger">En Riesgo</span></td>
-              <td><button class="btn btn-secondary btn-sm" onclick="showModal('checkinModal')">Check-in</button></td>
-            </tr>
-            <tr>
-              <td><div class="person-chip"><div class="avatar-sm" style="background:#00A3A3">MR</div><span>M. Rocha</span></div></td>
-              <td>AI Foundry — Demos de innovación tecnológica</td>
-              <td>Innovación</td>
-              <td>25%</td>
-              <td>
-                <div class="progress-label"><span class="progress-pct" style="color:var(--success)">75%</span></div>
-                <div class="progress-bar"><div class="progress-fill" style="width:75%;background:var(--success)"></div></div>
-              </td>
-              <td><span class="badge badge-success">Viene Bien</span></td>
-              <td><button class="btn btn-secondary btn-sm" onclick="showModal('checkinModal')">Check-in</button></td>
-            </tr>
-          </tbody>
-        </table>
+        <div id="objPersonalTbody">
+          <div style="text-align:center;padding:30px;color:#888;">Seleccioná un colaborador</div>
+        </div>
       </div>
 
-      <div id="obj-tasks" style="display:none" data-tab="obj">
-        <p class="text-muted mb-12">Seguimiento detallado de tareas / hitos por objetivo</p>
-        <table class="data-table">
-          <thead><tr><th>#</th><th>Tarea / Hito</th><th>Objetivo</th><th>Colaborador</th><th>Vencimiento</th><th>Avance</th><th>Estado</th></tr></thead>
-          <tbody>
-            <tr><td>1</td><td>Curso Python completo</td><td>Formación J.Mercado</td><td>J. Mercado</td><td>31 May 2026</td><td><div class="progress-bar" style="width:100px"><div class="progress-fill" style="width:50%;background:var(--warning)"></div></div></td><td><span class="badge badge-info">En Curso</span></td></tr>
-            <tr><td>2</td><td>Curso PL-200 completo</td><td>Formación J.Mercado</td><td>J. Mercado</td><td>28 Feb 2026</td><td><div class="progress-bar" style="width:100px"><div class="progress-fill" style="width:100%;background:var(--success)"></div></div></td><td><span class="badge badge-success">Cumplido</span></td></tr>
-            <tr><td>3</td><td>Certificación PL-500</td><td>Formación J.Mercado</td><td>J. Mercado</td><td>30 Jun 2026</td><td><div class="progress-bar" style="width:100px"><div class="progress-fill" style="width:30%;background:var(--danger)"></div></div></td><td><span class="badge badge-danger">En Riesgo</span></td></tr>
-            <tr><td>4</td><td>DP-100 Azure Data Scientist</td><td>Plan Carrera M.Rocha</td><td>M. Rocha</td><td>30 Sep 2026</td><td><div class="progress-bar" style="width:100px"><div class="progress-fill" style="width:60%;background:var(--accent)"></div></div></td><td><span class="badge badge-info">En Curso</span></td></tr>
-          </tbody>
-        </table>
+      <div id="obj-tasks" style="display:none">
+        <p style="color:#888;margin-bottom:12px;font-size:13px;">Seguimiento detallado de tareas / hitos por objetivo</p>
+        <div id="objTasksTbody">
+          <div style="text-align:center;padding:30px;color:#888;">Cargando tareas...</div>
+        </div>
       </div>
     </div>
 
@@ -1939,13 +1898,16 @@ function showSection(id){
 }
 
 function switchTab(prefix, id, el){
-  const parent = el.closest('.tabs');
-  parent.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  const tabsDiv = el.closest('.tabs');
+  tabsDiv.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
   const panelId = prefix + '-' + id;
-  // Scope: buscar en el contenedor padre del div de tabs
-  const container = parent.parentElement;
+  // Buscar panels: hijos directos del padre que tengan id con el prefijo
+  // Excluir el propio div de tabs (que tiene id obj-tabs)
+  const container = tabsDiv.parentElement;
   container.querySelectorAll('[id^="' + prefix + '-"]').forEach(p=>{
+    if (p === tabsDiv) return; // no ocultar el div de tabs
+    if (p.id === prefix + '-tabs') return; // excluir *-tabs
     p.style.display = p.id === panelId ? '' : 'none';
   });
 }
@@ -2991,14 +2953,28 @@ const _ss2 = showSection;
 showSection = function(id) {
   _ss2(id);
   if (id === 'objectives') {
-    // Reset: obj-core visible, los demás ocultos
-    const objPanels = ['obj-core','obj-personal','obj-tasks'];
-    objPanels.forEach((pid,i) => {
+    // Reset tabs
+    ['obj-core','obj-personal','obj-tasks'].forEach((pid,i) => {
       const el = document.getElementById(pid);
       if (el) el.style.display = i === 0 ? '' : 'none';
     });
     document.querySelectorAll('#sec-objectives .tab').forEach((t,i) => t.classList.toggle('active', i===0));
-    if (!allUsuarios.length) loadUsuarios().then(poblarSelectoresObjetivos); else poblarSelectoresObjetivos();
+    // Cargar datos reales
+    if (!allUsuarios.length) {
+      loadUsuarios().then(() => {
+        poblarSelectoresObjetivos();
+        cargarObjetivosCoreEmpresa();
+        poblarSelectoresTabObjetivos();
+        if (!allPeriods.length) loadPeriods().then(poblarModalObjetivo);
+        else poblarModalObjetivo();
+      });
+    } else {
+      cargarObjetivosCoreEmpresa();
+      poblarSelectoresTabObjetivos();
+      poblarSelectoresObjetivos();
+      if (!allPeriods.length) loadPeriods().then(poblarModalObjetivo);
+      else poblarModalObjetivo();
+    }
   }
   if (id === 'reports') {
     if (!allUsuarios.length) loadUsuarios().then(initReportes); else initReportes();
@@ -3328,6 +3304,141 @@ showModal = function(id) {
   if (id === 'newMeetingModal') {
     if (!allUsuarios.length) loadUsuarios().then(poblarColaboradoresReunion);
     else poblarColaboradoresReunion();
+  }
+};
+
+
+// ═══ DATOS DE OBJETIVOS ══════════════════════════════════════
+let allObjetivosCore = [];
+let allObjetivosPersonales = [];
+
+async function cargarObjetivosCoreEmpresa() {
+  const container = document.getElementById('objCoreTbody');
+  if (!container) return;
+  container.innerHTML = '<div style="text-align:center;padding:20px;color:#888;">Cargando...</div>';
+  try {
+    const data = await apiGet('objectives?type=company');
+    allObjetivosCore = Array.isArray(data) ? data : [];
+    renderObjetivosCore(allObjetivosCore);
+    // Poblar áreas
+    const areasSel = document.getElementById('objCoreArea');
+    if (areasSel && allAreas.length) {
+      const currentOpts = Array.from(areasSel.options).map(o=>o.text);
+      allAreas.forEach(a => {
+        if (!currentOpts.includes(a.AreaName)) areasSel.add(new Option(a.AreaName, a.AreaID));
+      });
+    }
+  } catch(e) {
+    container.innerHTML = '<div style="text-align:center;padding:20px;color:#888;">Sin objetivos core cargados</div>';
+  }
+}
+
+function renderObjetivosCore(objs) {
+  const container = document.getElementById('objCoreTbody');
+  if (!container) return;
+  if (!objs.length) {
+    container.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">No hay objetivos core. Usá + Nuevo Objetivo para crear uno.</div>';
+    return;
+  }
+  container.innerHTML = '<table class="data-table"><thead><tr><th>Objetivo</th><th>Tipo</th><th>Ponderación</th><th>Período</th><th>Área</th><th>Acciones</th></tr></thead><tbody>' +
+    objs.map(o => `<tr>
+      <td><strong>${o.Title||o.title||'—'}</strong></td>
+      <td><span class="badge badge-primary">Core</span></td>
+      <td>${o.Weight||o.weight||0}%</td>
+      <td>${o.PeriodName||o.periodName||'—'}</td>
+      <td>${o.AreaName||o.areaName||'—'}</td>
+      <td><button class="btn btn-secondary btn-sm" onclick="editarObjetivo(${o.ObjectiveID||o.objectiveId})">Editar</button></td>
+    </tr>`).join('') + '</tbody></table>';
+}
+
+function filtrarTablaObjetivos(tipo, query) {
+  const objs = allObjetivosCore;
+  const q = query.toLowerCase();
+  const areaId = document.getElementById('objCoreArea')?.value;
+  const filtered = objs.filter(o => {
+    const matchQ = !q || (o.Title||'').toLowerCase().includes(q);
+    const matchA = !areaId || String(o.AreaID) === String(areaId);
+    return matchQ && matchA;
+  });
+  renderObjetivosCore(filtered);
+}
+
+async function cargarObjetivosPersonales() {
+  const colabSel = document.getElementById('objPersonalColab');
+  const perSel = document.getElementById('objPersonalPeriodo');
+  const container = document.getElementById('objPersonalTbody');
+  if (!container) return;
+  const userId = colabSel?.value;
+  const periodId = perSel?.value;
+  if (!userId) {
+    container.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Seleccioná un colaborador</div>';
+    return;
+  }
+  container.innerHTML = '<div style="text-align:center;padding:20px;color:#888;">Cargando...</div>';
+  try {
+    const url = 'objectives?type=personal&userId=' + userId + (periodId ? '&periodId=' + periodId : '');
+    const data = await apiGet(url);
+    const objs = Array.isArray(data) ? data : [];
+    if (!objs.length) {
+      container.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Sin objetivos personales para este colaborador</div>';
+      return;
+    }
+    container.innerHTML = '<table class="data-table"><thead><tr><th>Objetivo</th><th>Competencia</th><th>Ponderación</th><th>Avance</th><th>Estado</th><th>Acción</th></tr></thead><tbody>' +
+      objs.map(o => {
+        const avance = o.Progress||0;
+        const color = avance>=70?'#2ECC71':avance>=40?'#F59E0B':'#FF4D4D';
+        return `<tr>
+          <td><strong>${o.Title||'—'}</strong></td>
+          <td>${o.CompetencyName||'—'}</td>
+          <td>${o.Weight||0}%</td>
+          <td><span style="color:${color};font-weight:700;">${avance}%</span></td>
+          <td><span style="font-size:11px;font-weight:700;color:${color};">${o.Status||'—'}</span></td>
+          <td><button class="btn btn-secondary btn-sm" onclick="editarObjetivo(${o.ObjectiveID})">Editar</button></td>
+        </tr>`;
+      }).join('') + '</tbody></table>';
+  } catch(e) {
+    container.innerHTML = '<div style="text-align:center;padding:20px;color:#F44;">Error: ' + e.message + '</div>';
+  }
+}
+
+function poblarSelectoresTabObjetivos() {
+  // Poblar colab y período en tab de personales
+  const colabSel = document.getElementById('objPersonalColab');
+  if (colabSel && colabSel.options.length <= 1) {
+    allUsuarios.filter(u=>u.IsActive).sort((a,b)=>(a.FullName||'').localeCompare(b.FullName||'')).forEach(u=>{
+      colabSel.add(new Option((u.FullName||u.Email)+' — '+(u.Email||''), u.UserID));
+    });
+  }
+  const perSel = document.getElementById('objPersonalPeriodo');
+  if (perSel && perSel.options.length <= 1 && allPeriods.length) {
+    allPeriods.forEach(p => perSel.add(new Option(p.PeriodName, p.PeriodID)));
+    const active = allPeriods.find(p=>p.IsActive);
+    if (active) perSel.value = active.PeriodID;
+  }
+}
+
+function editarObjetivo(id) {
+  mostrarToast('Edición de objetivo: próximamente disponible', 'info');
+}
+
+// Fix para poblarModalObjetivo: cargar períodos si faltan
+const _origPoblarModal = poblarModalObjetivo;
+poblarModalObjetivo = function() {
+  _origPoblarModal();
+  // Si no hay períodos, cargarlos
+  const perSel = document.getElementById('objPeriodoSel');
+  if (perSel && perSel.options.length <= 1) {
+    if (allPeriods.length) {
+      allPeriods.forEach(p => perSel.add(new Option(p.PeriodName, p.PeriodID)));
+      const active = allPeriods.find(p=>p.IsActive);
+      if (active) perSel.value = active.PeriodID;
+    } else {
+      loadPeriods().then(() => {
+        allPeriods.forEach(p => perSel.add(new Option(p.PeriodName, p.PeriodID)));
+        const active = allPeriods.find(p=>p.IsActive);
+        if (active) perSel.value = active.PeriodID;
+      });
+    }
   }
 };
 

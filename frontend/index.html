@@ -3426,7 +3426,7 @@ function renderObjetivosCore(objs) {
     container.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">No hay objetivos core. Usá + Nuevo Objetivo para crear uno.</div>';
     return;
   }
-  container.innerHTML = '<table class="data-table"><thead><tr><th>Objetivo Core</th><th>Ponderación</th><th>Período</th><th>Área</th><th>Vigencia</th><th>Acciones</th></tr></thead><tbody>' +
+  container.innerHTML = '<table class="data-table"><thead><tr><th>Objetivo Core</th><th>Pond.</th><th>Período</th><th>Área</th><th>Vigencia</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>' +
     objs.map(o => `<tr>
       <td><strong>${o.Title||o.title||'—'}</strong>${o.Description?'<br><span style="font-size:11px;color:#666;">'+o.Description+'</span>':''}</td>
       <td>${o.Weight||o.weight||0}%</td>
@@ -3513,16 +3513,59 @@ async function editarObjetivo(id) {
   const modal = document.getElementById('editObjectiveModal');
   if (!modal) { mostrarToast('Modal no disponible', 'error'); return; }
   document.getElementById('editObjId').value = id;
-  // Buscar en cache global (incluye core y personales)
-  const obj = allObjetivosCache[id] || 
+  const obj = allObjetivosCache[id] ||
               (allObjetivosCore||[]).find(o => String(o.ObjectiveID) === String(id)) ||
               (allObjetivosPersonales||[]).find(o => String(o.ObjectiveID) === String(id));
+
+  const tipo = obj?.ObjectiveType || obj?.objectiveType || 'personal';
+  document.getElementById('editObjTipoHidden').value = tipo;
+
+  // Mostrar/ocultar campos según tipo
+  const coreFields = document.getElementById('editCoreFields');
+  const persFields = document.getElementById('editPersonalFields');
+  const badge = document.getElementById('editObjTipoBadge');
+  const title = document.getElementById('editObjModalTitle');
+
+  if (tipo === 'company') {
+    if(coreFields) coreFields.style.display = 'block';
+    if(persFields) persFields.style.display = 'none';
+    if(badge) badge.textContent = 'CORE EMPRESA';
+    if(title) title.textContent = 'Editar Objetivo Core';
+    // Poblar período
+    const perSel = document.getElementById('editObjPeriodo');
+    if (perSel && perSel.options.length <= 1 && allPeriods.length) {
+      allPeriods.forEach(p => perSel.add(new Option(p.PeriodName, p.PeriodID)));
+    }
+  } else {
+    if(coreFields) coreFields.style.display = 'none';
+    if(persFields) persFields.style.display = 'block';
+    if(badge) { badge.textContent = 'PERSONAL'; badge.style.background='rgba(59,130,246,0.15)'; badge.style.color='#3B82F6'; }
+    if(title) title.textContent = 'Editar Objetivo Personal';
+  }
+
   if (obj) {
     document.getElementById('editObjTitulo').value = obj.Title || '';
-    document.getElementById('editObjAvance').value = obj.Progress || 0;
-    document.getElementById('editObjEstado').value = obj.Status || 'not_started';
-    document.getElementById('editObjPeso').value = obj.Weight || 0;
-    document.getElementById('editObjFecha').value = obj.DueDate ? obj.DueDate.split('T')[0] : '';
+    if (tipo === 'company') {
+      const pesoEl = document.getElementById('editObjPeso');
+      if(pesoEl) pesoEl.value = obj.Weight || 0;
+      const fechaEl = document.getElementById('editObjFecha');
+      if(fechaEl) fechaEl.value = obj.DueDate ? obj.DueDate.split('T')[0] : '';
+      const perSel = document.getElementById('editObjPeriodo');
+      if(perSel && obj.PeriodID) perSel.value = obj.PeriodID;
+      const estadoOrg = document.getElementById('editObjEstadoOrg');
+      if(estadoOrg) estadoOrg.value = obj.OrgStatus || obj.orgStatus || 'active';
+      const notaDir = document.getElementById('editObjNotaDir');
+      if(notaDir) notaDir.value = obj.Description || obj.DirectionNote || '';
+    } else {
+      const avEl = document.getElementById('editObjAvance');
+      if(avEl) avEl.value = obj.Progress || 0;
+      const stEl = document.getElementById('editObjEstado');
+      if(stEl) stEl.value = obj.Status || 'not_started';
+      const pesoEl = document.getElementById('editObjPesoPersonal');
+      if(pesoEl) pesoEl.value = obj.Weight || 0;
+      const fechaEl = document.getElementById('editObjFechaPersonal');
+      if(fechaEl) fechaEl.value = obj.DueDate ? obj.DueDate.split('T')[0] : '';
+    }
   }
   showModal('editObjectiveModal');
 }
@@ -3541,18 +3584,30 @@ async function guardarEdicionObjetivo() {
   try {
     // Obtener datos originales del cache para campos requeridos por el SP
     const orig = allObjetivosCache[id] || {};
-    const body = {
+    const tipo = document.getElementById('editObjTipoHidden')?.value || orig.ObjectiveType || 'personal';
+    let body = {
       title: titulo,
-      progress: avance,
-      status: estado,
-      weight: peso,
-      dueDate: fecha,
-      // Campos requeridos por sp_UpsertObjective
-      objectiveType: orig.ObjectiveType || orig.objectiveType || 'personal',
+      objectiveType: tipo,
       periodId: orig.PeriodID || orig.periodId || null,
       userId: orig.UserID || orig.userId || null,
       areaId: orig.AreaID || orig.areaId || null,
     };
+    if (tipo === 'company') {
+      body.weight = parseFloat(document.getElementById('editObjPeso')?.value || '0');
+      body.dueDate = document.getElementById('editObjFecha')?.value || null;
+      body.status = document.getElementById('editObjEstadoOrg')?.value || 'active';
+      const newPeriod = document.getElementById('editObjPeriodo')?.value;
+      if (newPeriod) body.periodId = parseInt(newPeriod);
+      body.progress = 0;
+      // Nota de dirección → campo description
+      const notaDir = document.getElementById('editObjNotaDir')?.value?.trim();
+      body.description = notaDir || null;
+    } else {
+      body.weight = parseFloat(document.getElementById('editObjPesoPersonal')?.value || '0');
+      body.dueDate = document.getElementById('editObjFechaPersonal')?.value || null;
+      body.status = document.getElementById('editObjEstado')?.value || 'not_started';
+      body.progress = parseInt(document.getElementById('editObjAvance')?.value || '0');
+    }
     const res = await fetch(API_BASE + '/objectives/' + id, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -3891,36 +3946,81 @@ poblarModalObjetivo = function() {
 
 <!-- MODAL EDITAR OBJETIVO -->
 <div class="modal-overlay" id="editObjectiveModal">
-  <div class="modal">
-    <div class="modal-title">Editar Objetivo</div>
+  <div class="modal" style="max-width:560px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <div class="modal-title" id="editObjModalTitle" style="margin:0;">Editar Objetivo</div>
+      <span id="editObjTipoBadge" style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:rgba(255,84,0,0.15);color:#FF5400;"></span>
+    </div>
     <input type="hidden" id="editObjId">
+    <input type="hidden" id="editObjTipoHidden">
     <div class="grid-2 gap-16">
       <div class="form-group" style="grid-column:1/-1">
         <label class="form-label">Título del Objetivo</label>
         <input id="editObjTitulo" class="form-control" type="text" placeholder="Título del objetivo">
       </div>
-      <div class="form-group">
-        <label class="form-label">Avance (%)</label>
-        <input id="editObjAvance" class="form-control" type="number" min="0" max="100" value="0">
+
+      <!-- CAMPOS SOLO PARA CORE -->
+      <div id="editCoreFields" style="grid-column:1/-1;display:none;">
+        <div class="grid-2 gap-16">
+          <div class="form-group">
+            <label class="form-label">Ponderación (%)</label>
+            <input id="editObjPeso" class="form-control" type="number" min="0" max="100" value="20">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Período</label>
+            <select id="editObjPeriodo" class="form-control">
+              <option value="">— Período —</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Fecha Límite</label>
+            <input id="editObjFecha" class="form-control" type="date">
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="color:#FF5400;font-weight:700;">📋 Estado Organizacional</label>
+            <select id="editObjEstadoOrg" class="form-control">
+              <option value="active">✅ Activo</option>
+              <option value="approved">🏛️ Aprobado por Dirección</option>
+              <option value="paused">⏸️ Pausado</option>
+              <option value="cancelled">❌ Cancelado por Dirección</option>
+            </select>
+          </div>
+          <div class="form-group" style="grid-column:1/-1">
+            <label class="form-label">Nota de dirección (opcional)</label>
+            <textarea id="editObjNotaDir" class="form-control" placeholder="Ej: Cancelado por reestructuración Q3..." rows="2"></textarea>
+          </div>
+        </div>
       </div>
-      <div class="form-group">
-        <label class="form-label">Estado</label>
-        <select id="editObjEstado" class="form-control">
-          <option value="not_started">No Iniciado</option>
-          <option value="in_progress">En Curso</option>
-          <option value="completed">Completado</option>
-          <option value="at_risk">En Riesgo</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Ponderación (%)</label>
-        <input id="editObjPeso" class="form-control" type="number" min="0" max="100" value="20">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Fecha Límite</label>
-        <input id="editObjFecha" class="form-control" type="date">
+
+      <!-- CAMPOS SOLO PARA PERSONAL -->
+      <div id="editPersonalFields" style="grid-column:1/-1;display:none;">
+        <div class="grid-2 gap-16">
+          <div class="form-group">
+            <label class="form-label">Avance (%)</label>
+            <input id="editObjAvance" class="form-control" type="number" min="0" max="100" value="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Estado de cumplimiento</label>
+            <select id="editObjEstado" class="form-control">
+              <option value="not_started">No Iniciado</option>
+              <option value="in_progress">En Curso</option>
+              <option value="at_risk">En Riesgo</option>
+              <option value="completed">Completado ✓</option>
+              <option value="not_met">No Cumplido</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Ponderación (%)</label>
+            <input id="editObjPesoPersonal" class="form-control" type="number" min="0" max="100" value="20">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Fecha Límite</label>
+            <input id="editObjFechaPersonal" class="form-control" type="date">
+          </div>
+        </div>
       </div>
     </div>
+    <div id="editObjError" style="color:#FF4D4D;font-size:12px;margin-top:8px;display:none;"></div>
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeModal('editObjectiveModal')">Cancelar</button>
       <button class="btn btn-primary" onclick="guardarEdicionObjetivo()">Guardar Cambios</button>

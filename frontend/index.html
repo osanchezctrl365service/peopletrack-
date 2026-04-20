@@ -1675,22 +1675,90 @@ label { color: #888 !important; }
 
 <!-- MODALS -->
 <div class="modal-overlay" id="newObjectiveModal">
-  <div class="modal">
-    <div class="modal-title">Nuevo Objetivo</div>
-    <div class="grid-2 gap-16">
-      <div class="form-group" style="grid-column:1/-1"><label class="form-label">Título del Objetivo</label><input class="form-control" placeholder="Ej: Certificación PL-500 completa"></div>
-      <div class="form-group"><label class="form-label">Tipo</label><select class="form-control"><option>Personal</option><option>Core (Empresa)</option></select></div>
-      <div class="form-group" style="grid-column:1/-1">
-        <label class="form-label">Colaborador</label>
-        <input id="objColabBuscar" type="text" class="form-control" placeholder="🔍 Buscar colaborador..." style="margin-bottom:4px;" oninput="filtrarColabObj(this.value)">
-        <select id="objColabSel" class="form-control"><option value="">— Seleccionar colaborador —</option></select>
-      </div>
-      <div class="form-group"><label class="form-label">Competencia</label><select class="form-control"><option>Aprendizaje</option><option>Innovación</option><option>Orientación al Cliente</option></select></div>
-      <div class="form-group"><label class="form-label">Ponderación (%)</label><input class="form-control" type="number" value="20"></div>
-      <div class="form-group"><label class="form-label">Período</label><select id="objPeriodoSel" class="form-control"><option value="">— Período —</option></select></div>
-      <div class="form-group"><label class="form-label">Fecha Límite</label><input class="form-control" type="date"></div>
-      <div class="form-group" style="grid-column:1/-1"><label class="form-label">Descripción</label><textarea class="form-control" placeholder="Detalle del objetivo..."></textarea></div>
+  <div class="modal" style="max-width:600px;">
+    <div class="modal-title" id="newObjModalTitle">Nuevo Objetivo</div>
+    
+    <!-- SELECTOR DE TIPO -->
+    <div style="display:flex;gap:8px;margin-bottom:20px;">
+      <button id="btnTipoCore" onclick="setTipoObjetivo('company')" style="flex:1;padding:10px;border-radius:8px;border:2px solid #FF5400;background:rgba(255,84,0,0.15);color:#FF5400;font-weight:700;font-size:13px;cursor:pointer;">🏢 Core Empresa</button>
+      <button id="btnTipoPersonal" onclick="setTipoObjetivo('personal')" style="flex:1;padding:10px;border-radius:8px;border:2px solid #333;background:#111;color:#888;font-weight:700;font-size:13px;cursor:pointer;">👤 Personal</button>
     </div>
+    <input type="hidden" id="newObjTipo" value="company">
+    
+    <div class="grid-2 gap-16">
+      <div class="form-group" style="grid-column:1/-1">
+        <label class="form-label">Título del Objetivo *</label>
+        <input id="newObjTitulo" class="form-control" placeholder="Ej: Certificación MS oficial anual">
+      </div>
+      
+      <!-- CAMPOS CORE -->
+      <div id="camposCore" class="grid-2 gap-16" style="grid-column:1/-1;display:grid;">
+        <div class="form-group">
+          <label class="form-label">Ponderación (%)</label>
+          <input id="newObjPeso" class="form-control" type="number" value="20" min="0" max="100">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Área aplicable</label>
+          <select id="newObjArea" class="form-control">
+            <option value="">Todas las áreas</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Período</label>
+          <select id="objPeriodoSel" class="form-control"><option value="">— Período —</option></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Fecha Límite</label>
+          <input id="newObjFechaCore" class="form-control" type="date">
+        </div>
+        <div class="form-group" style="grid-column:1/-1">
+          <label class="form-label">Descripción</label>
+          <textarea id="newObjDescCore" class="form-control" placeholder="Descripción del objetivo core..." rows="2"></textarea>
+        </div>
+      </div>
+      
+      <!-- CAMPOS PERSONAL -->
+      <div id="camposPersonal" style="grid-column:1/-1;display:none;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div class="form-group" style="grid-column:1/-1">
+            <label class="form-label">Colaborador *</label>
+            <input id="objColabBuscar" type="text" class="form-control" placeholder="🔍 Buscar colaborador..." style="margin-bottom:4px;" oninput="filtrarColabObj(this.value)">
+            <select id="objColabSel" class="form-control"><option value="">— Seleccionar colaborador —</option></select>
+          </div>
+          <div class="form-group" style="grid-column:1/-1">
+            <label class="form-label">Basado en objetivo Core (opcional)</label>
+            <select id="newObjCoreRef" class="form-control">
+              <option value="">— Sin referencia core —</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Ponderación (%)</label>
+            <input id="newObjPesoPersonal" class="form-control" type="number" value="20" min="0" max="100">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Competencia</label>
+            <select id="newObjCompetencia" class="form-control">
+              <option value="">— Competencia —</option>
+              <option>Aprendizaje</option><option>Innovación</option><option>Orientación al Cliente</option>
+              <option>Comunicación</option><option>Liderazgo</option><option>Adaptabilidad</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Período</label>
+            <select id="objPeriodoSelPersonal" class="form-control"><option value="">— Período —</option></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Fecha Límite</label>
+            <input id="newObjFechaPersonal" class="form-control" type="date">
+          </div>
+          <div class="form-group" style="grid-column:1/-1">
+            <label class="form-label">Descripción</label>
+            <textarea id="newObjDescPersonal" class="form-control" placeholder="Descripción del objetivo personal..." rows="2"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="newObjError" style="color:#FF4D4D;font-size:12px;margin-top:8px;display:none;"></div>
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeModal('newObjectiveModal')">Cancelar</button>
       <button class="btn btn-primary" onclick="guardarNuevoObjetivo()">Guardar Objetivo</button>
@@ -3358,10 +3426,9 @@ function renderObjetivosCore(objs) {
     container.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">No hay objetivos core. Usá + Nuevo Objetivo para crear uno.</div>';
     return;
   }
-  container.innerHTML = '<table class="data-table"><thead><tr><th>Objetivo</th><th>Tipo</th><th>Ponderación</th><th>Período</th><th>Área</th><th>Acciones</th></tr></thead><tbody>' +
+  container.innerHTML = '<table class="data-table"><thead><tr><th>Objetivo Core</th><th>Ponderación</th><th>Período</th><th>Área</th><th>Vigencia</th><th>Acciones</th></tr></thead><tbody>' +
     objs.map(o => `<tr>
-      <td><strong>${o.Title||o.title||'—'}</strong></td>
-      <td><span class="badge badge-primary">Core</span></td>
+      <td><strong>${o.Title||o.title||'—'}</strong>${o.Description?'<br><span style="font-size:11px;color:#666;">'+o.Description+'</span>':''}</td>
       <td>${o.Weight||o.weight||0}%</td>
       <td>${o.PeriodName||o.periodName||'—'}</td>
       <td>${o.AreaName||o.areaName||'—'}</td>
@@ -3408,12 +3475,16 @@ async function cargarObjetivosPersonales() {
       objs.map(o => {
         const avance = o.Progress||0;
         const color = avance>=70?'#2ECC71':avance>=40?'#F59E0B':'#FF4D4D';
+        const stColor = estadoColor(o.Status);
+        const stLabel = estadoLabel(o.Status);
         return `<tr>
           <td><strong>${o.Title||'—'}</strong></td>
           <td>${o.CompetencyName||'—'}</td>
           <td>${o.Weight||0}%</td>
-          <td><span style="color:${color};font-weight:700;">${avance}%</span></td>
-          <td><span style="font-size:11px;font-weight:700;color:${color};">${o.Status||'—'}</span></td>
+          <td><span style="color:${color};font-weight:700;">${avance}%</span>
+            <div style="height:3px;background:#222;border-radius:2px;margin-top:3px;"><div style="height:3px;background:${color};width:${Math.min(avance,100)}%;border-radius:2px;"></div></div>
+          </td>
+          <td><span style="background:${stColor}22;color:${stColor};font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;">${stLabel}</span></td>
           <td><button class="btn btn-secondary btn-sm" onclick="editarObjetivo(${o.ObjectiveID})">Editar</button></td>
         </tr>`;
       }).join('') + '</tbody></table>';
@@ -3662,6 +3733,160 @@ function verAsignacionesCore(objId) {
   if (!obj) { mostrarToast('Objetivo no encontrado', 'error'); return; }
   mostrarToast('Los objetivos Core se aplican automáticamente a todos los colaboradores activos.', 'info');
 }
+
+// ═══ COLORES Y LABELS DE ESTADO ══════════════════════════════
+function estadoColor(status) {
+  const s = (status||'').toLowerCase();
+  if (s.includes('complet')) return '#2ECC71';
+  if (s.includes('progress') || s.includes('curso')) return '#FF5400';
+  if (s.includes('risk') || s.includes('riesgo')) return '#FF4D4D';
+  return '#888'; // not_started = gris
+}
+function estadoLabel(status) {
+  const map = {
+    'not_started': 'No Iniciado',
+    'in_progress': 'En Curso',
+    'at_risk': 'En Riesgo',
+    'completed': 'Completado',
+    'not_met': 'No Cumplido'
+  };
+  return map[(status||'').toLowerCase()] || (status||'—').replace(/_/g,' ');
+}
+
+// ═══ SELECTOR DE TIPO EN MODAL NUEVO OBJETIVO ════════════════
+function setTipoObjetivo(tipo) {
+  document.getElementById('newObjTipo').value = tipo;
+  const btnCore = document.getElementById('btnTipoCore');
+  const btnPers = document.getElementById('btnTipoPersonal');
+  const camposCore = document.getElementById('camposCore');
+  const camposPers = document.getElementById('camposPersonal');
+  const title = document.getElementById('newObjModalTitle');
+  if (tipo === 'company') {
+    btnCore.style.cssText = 'flex:1;padding:10px;border-radius:8px;border:2px solid #FF5400;background:rgba(255,84,0,0.15);color:#FF5400;font-weight:700;font-size:13px;cursor:pointer;';
+    btnPers.style.cssText = 'flex:1;padding:10px;border-radius:8px;border:2px solid #333;background:#111;color:#888;font-weight:700;font-size:13px;cursor:pointer;';
+    camposCore.style.display = 'grid';
+    camposPers.style.display = 'none';
+    if(title) title.textContent = 'Nuevo Objetivo Core Empresa';
+    // Poblar áreas
+    const areaSel = document.getElementById('newObjArea');
+    if (areaSel && areaSel.options.length <= 1 && allAreas.length) {
+      allAreas.forEach(a => areaSel.add(new Option(a.AreaName, a.AreaID)));
+    }
+  } else {
+    btnPers.style.cssText = 'flex:1;padding:10px;border-radius:8px;border:2px solid #FF5400;background:rgba(255,84,0,0.15);color:#FF5400;font-weight:700;font-size:13px;cursor:pointer;';
+    btnCore.style.cssText = 'flex:1;padding:10px;border-radius:8px;border:2px solid #333;background:#111;color:#888;font-weight:700;font-size:13px;cursor:pointer;';
+    camposCore.style.display = 'none';
+    camposPers.style.display = 'block';
+    if(title) title.textContent = 'Nuevo Objetivo Personal';
+    // Poblar período en personal
+    const perSel = document.getElementById('objPeriodoSelPersonal');
+    if (perSel && perSel.options.length <= 1 && allPeriods.length) {
+      allPeriods.forEach(p => perSel.add(new Option(p.PeriodName, p.PeriodID)));
+      const act = allPeriods.find(p=>p.IsActive);
+      if(act) perSel.value = act.PeriodID;
+    }
+    // Poblar referencia a core
+    const coreRef = document.getElementById('newObjCoreRef');
+    if (coreRef && coreRef.options.length <= 1 && allObjetivosCore.length) {
+      allObjetivosCore.forEach(o => coreRef.add(new Option(o.Title||o.title, o.ObjectiveID)));
+    }
+    // Poblar colaboradores
+    if (!allUsuarios.length) loadUsuarios().then(()=>filtrarColabObj(''));
+    else filtrarColabObj('');
+  }
+}
+
+// ═══ ASIGNAR CORE A USUARIO ══════════════════════════════════
+function asignarCoreAUsuario(objId) {
+  const obj = allObjetivosCache[objId];
+  if (!obj) return;
+  // Abrir modal personal con el core preseleccionado
+  setTipoObjetivo('personal');
+  showModal('newObjectiveModal');
+  setTimeout(() => {
+    document.getElementById('newObjTitulo').value = obj.Title || '';
+    const coreRef = document.getElementById('newObjCoreRef');
+    if (coreRef) coreRef.value = objId;
+    const pesoSel = document.getElementById('newObjPesoPersonal');
+    if (pesoSel) pesoSel.value = obj.Weight || 20;
+  }, 100);
+}
+
+// ═══ FIX guardarNuevoObjetivo: usa nuevos campos ══════════════
+const _origGuardarObj = guardarNuevoObjetivo;
+guardarNuevoObjetivo = async function() {
+  const tipo = document.getElementById('newObjTipo')?.value || 'company';
+  const titulo = document.getElementById('newObjTitulo')?.value?.trim();
+  const errEl = document.getElementById('newObjError');
+  if (!titulo) { if(errEl){errEl.textContent='El título es obligatorio';errEl.style.display='block';} return; }
+  if(errEl) errEl.style.display='none';
+  
+  let body = { title: titulo, objectiveType: tipo, status: 'not_started', progress: 0 };
+  
+  if (tipo === 'company') {
+    body.weight = parseFloat(document.getElementById('newObjPeso')?.value||'0');
+    body.periodId = document.getElementById('objPeriodoSel')?.value ? parseInt(document.getElementById('objPeriodoSel').value) : null;
+    body.dueDate = document.getElementById('newObjFechaCore')?.value || null;
+    body.areaId = document.getElementById('newObjArea')?.value ? parseInt(document.getElementById('newObjArea').value) : null;
+    body.description = document.getElementById('newObjDescCore')?.value || null;
+  } else {
+    const userId = document.getElementById('objColabSel')?.value;
+    if (!userId) { if(errEl){errEl.textContent='Seleccioná un colaborador';errEl.style.display='block';} return; }
+    body.userId = parseInt(userId);
+    body.weight = parseFloat(document.getElementById('newObjPesoPersonal')?.value||'0');
+    body.periodId = document.getElementById('objPeriodoSelPersonal')?.value ? parseInt(document.getElementById('objPeriodoSelPersonal').value) : null;
+    body.dueDate = document.getElementById('newObjFechaPersonal')?.value || null;
+    body.description = document.getElementById('newObjDescPersonal')?.value || null;
+  }
+  
+  const btn = document.querySelector('#newObjectiveModal .btn-primary');
+  if(btn){btn.textContent='Guardando...';btn.disabled=true;}
+  try {
+    const res = await fetch(API_BASE + '/objectives', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(body)
+    });
+    let data = {};
+    try { data = await res.json(); } catch(e) {}
+    if (!res.ok || data.ok === false) throw new Error(data.error || 'Error ' + res.status);
+    closeModal('newObjectiveModal');
+    // Limpiar
+    ['newObjTitulo','newObjDescCore','newObjDescPersonal'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    mostrarToast('Objetivo creado ✓', 'success');
+    // Recargar
+    if (tipo === 'company') cargarObjetivosCoreEmpresa();
+    else cargarObjetivosPersonales();
+  } catch(e) {
+    if(errEl){errEl.textContent='Error: '+e.message;errEl.style.display='block';}
+    mostrarToast('Error: '+e.message,'error');
+  } finally {
+    if(btn){btn.textContent='Guardar Objetivo';btn.disabled=false;}
+  }
+};
+
+// ═══ FIX MODAL EDIT: agregar estado "No Cumplido" ════════════
+// Agregar al select de estado
+document.addEventListener('DOMContentLoaded', function() {
+  const estSel = document.getElementById('editObjEstado');
+  if (estSel && !Array.from(estSel.options).find(o=>o.value==='not_met')) {
+    estSel.add(new Option('No Cumplido', 'not_met'));
+  }
+  // Poblar selector de objetivos personales con período por defecto
+  setTipoObjetivo('company'); // iniciar en modo Core
+});
+
+// ═══ OVERRIDE poblarModalObjetivo: llamar setTipoObjetivo ════
+const _origPMO2 = poblarModalObjetivo;
+poblarModalObjetivo = function() {
+  if(allPeriods.length) {
+    const perSel = document.getElementById('objPeriodoSel');
+    if (perSel && perSel.options.length <= 1) {
+      allPeriods.forEach(p=>perSel.add(new Option(p.PeriodName, p.PeriodID)));
+      const act = allPeriods.find(p=>p.IsActive);
+      if(act) perSel.value = act.PeriodID;
+    }
+  }
+};
 </script>
 
 <!-- MODAL EDITAR OBJETIVO -->

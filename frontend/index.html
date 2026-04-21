@@ -1959,6 +1959,7 @@ label { color: #888 !important; }
 
 
 
+
 const titles = {
   dashboard:'Dashboard',usuarios:'Usuarios',lideres:'Líderes',areas:'Áreas',objectives:'Objetivos',career:'Plan de Carrera',
   competencies:'Competencias',oneononex:'Reuniones 1:1',reports:'Reportes',feedback360:'Feedback 360°',
@@ -3838,25 +3839,7 @@ async function guardarEdicionObjetivo() {
 }
 
 // Fix para poblarModalObjetivo: cargar períodos si faltan
-const _origPoblarModal = poblarModalObjetivo;
-poblarModalObjetivo = function() {
-  _origPoblarModal();
-  // Si no hay períodos, cargarlos
-  const perSel = document.getElementById('objPeriodoSel');
-  if (perSel && perSel.options.length <= 1) {
-    if (allPeriods.length) {
-      allPeriods.forEach(p => perSel.add(new Option(p.PeriodName, p.PeriodID)));
-      const active = allPeriods.find(p=>p.IsActive);
-      if (active) perSel.value = active.PeriodID;
-    } else {
-      loadPeriods().then(() => {
-        allPeriods.forEach(p => perSel.add(new Option(p.PeriodName, p.PeriodID)));
-        const active = allPeriods.find(p=>p.IsActive);
-        if (active) perSel.value = active.PeriodID;
-      });
-    }
-  }
-};
+
 
 
 
@@ -3948,24 +3931,7 @@ async function cargarTareasColaborador() {
 }
 
 // ═══ OVERRIDE SWITCHTAB PARA POBLAR AL CAMBIAR TAB ═══════════
-const _origST = switchTab;
-switchTab = function(prefix, id, el) {
-  _origST(prefix, id, el);
-  if (prefix === 'obj' && id === 'tasks') {
-    const tc = document.getElementById('objTasksColab');
-    if (tc && tc.options.length <= 1 && allUsuarios.length) filtrarColabTareas('');
-  }
-  if (prefix === 'obj' && id === 'personal') {
-    const cs = document.getElementById('objPersonalColab');
-    if (cs && cs.options.length <= 1 && allUsuarios.length) filtrarColabPersonal('');
-    const ps = document.getElementById('objPersonalPeriodo');
-    if (ps && ps.options.length <= 1 && allPeriods.length) {
-      allPeriods.forEach(p=>ps.add(new Option(p.PeriodName, p.PeriodID)));
-      const act = allPeriods.find(p=>p.IsActive);
-      if (act) ps.value = act.PeriodID;
-    }
-  }
-};
+
 
 // ═══ FILTRAR COLABORADOR EN TAREAS ═══════════════════════════
 function filtrarColabTareas(q) {
@@ -4088,56 +4054,7 @@ function asignarCoreAUsuario(objId) {
 }
 
 // ═══ FIX guardarNuevoObjetivo: usa nuevos campos ══════════════
-const _origGuardarObj = guardarNuevoObjetivo;
-guardarNuevoObjetivo = async function() {
-  const tipo = document.getElementById('newObjTipo')?.value || 'company';
-  const titulo = document.getElementById('newObjTitulo')?.value?.trim();
-  const errEl = document.getElementById('newObjError');
-  if (!titulo) { if(errEl){errEl.textContent='El título es obligatorio';errEl.style.display='block';} return; }
-  if(errEl) errEl.style.display='none';
-  
-  let body = { title: titulo, objectiveType: tipo, status: 'not_started', progress: 0 };
-  
-  if (tipo === 'company') {
-    body.weight = parseFloat(document.getElementById('newObjPeso')?.value||'0');
-    body.periodId = document.getElementById('objPeriodoSel')?.value ? parseInt(document.getElementById('objPeriodoSel').value) : null;
-    body.dueDate = document.getElementById('newObjFechaCore')?.value || null;
-    body.areaId = document.getElementById('newObjArea')?.value ? parseInt(document.getElementById('newObjArea').value) : null;
-    body.description = document.getElementById('newObjDescCore')?.value || null;
-  } else {
-    const userId = document.getElementById('objColabSel')?.value;
-    if (!userId) { if(errEl){errEl.textContent='Seleccioná un colaborador';errEl.style.display='block';} return; }
-    body.userId = parseInt(userId);
-    body.weight = parseFloat(document.getElementById('newObjPesoPersonal')?.value||'0');
-    body.periodId = document.getElementById('objPeriodoSelPersonal')?.value ? parseInt(document.getElementById('objPeriodoSelPersonal').value) : null;
-    body.dueDate = document.getElementById('newObjFechaPersonal')?.value || null;
-    body.description = document.getElementById('newObjDescPersonal')?.value || null;
-  }
-  
-  const btn = document.querySelector('#newObjectiveModal .btn-primary');
-  if(btn){btn.textContent='Guardando...';btn.disabled=true;}
-  try {
-    const res = await fetch(API_BASE + '/objectives', {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify(body)
-    });
-    let data = {};
-    try { data = await res.json(); } catch(e) {}
-    if (!res.ok || data.ok === false) throw new Error(data.error || 'Error ' + res.status);
-    closeModal('newObjectiveModal');
-    // Limpiar
-    ['newObjTitulo','newObjDescCore','newObjDescPersonal'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-    mostrarToast('Objetivo creado ✓', 'success');
-    // Recargar
-    if (tipo === 'company') cargarObjetivosCoreEmpresa();
-    else cargarObjetivosPersonales();
-  } catch(e) {
-    if(errEl){errEl.textContent='Error: '+e.message;errEl.style.display='block';}
-    mostrarToast('Error: '+e.message,'error');
-  } finally {
-    if(btn){btn.textContent='Guardar Objetivo';btn.disabled=false;}
-  }
-};
+
 
 // ═══ FIX MODAL EDIT: agregar estado "No Cumplido" ════════════
 // Agregar al select de estado
@@ -4151,17 +4068,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ═══ OVERRIDE poblarModalObjetivo: llamar setTipoObjetivo ════
-const _origPMO2 = poblarModalObjetivo;
-poblarModalObjetivo = function() {
-  if(allPeriods.length) {
-    const perSel = document.getElementById('objPeriodoSel');
-    if (perSel && perSel.options.length <= 1) {
-      allPeriods.forEach(p=>perSel.add(new Option(p.PeriodName, p.PeriodID)));
-      const act = allPeriods.find(p=>p.IsActive);
-      if(act) perSel.value = act.PeriodID;
-    }
-  }
-};
+
 
 // ═══ PRECARGAR DESDE OBJETIVO CORE ═══════════════════════════
 function precargarDesdeCore(coreId) {
@@ -4199,26 +4106,7 @@ function precargarDesdeCore(coreId) {
 
 // ═══ FIX: guardarNuevoObjetivo personal - incluir referencia core ════════
 // La referencia core se guarda en el body para traceabilidad
-const _origGuardarObjPers = guardarNuevoObjetivo;
-guardarNuevoObjetivo = async function() {
-  // Agregar coreRefId al body si está seleccionado
-  const tipo = document.getElementById('newObjTipo')?.value || 'company';
-  if (tipo === 'personal') {
-    const coreRefId = document.getElementById('newObjCoreRef')?.value;
-    if (coreRefId) {
-      // Se guardará como areaId o como campo adicional
-      // Por ahora lo incluimos en la descripción para traceabilidad
-      const descEl = document.getElementById('newObjDescPersonal');
-      if (descEl && !descEl.value.includes('[Core ref:')) {
-        const core = allObjetivosCache[coreRefId] || allObjetivosCore.find(o=>String(o.ObjectiveID)===String(coreRefId));
-        if (core) {
-          descEl.value = (descEl.value ? descEl.value + '\n' : '') + '[Core ref: ' + (core.Title||core.title) + ']';
-        }
-      }
-    }
-  }
-  await _origGuardarObjPers();
-};
+
 
 // ═══ REUNIONES 1:1 DINÁMICAS ═════════════════════════════════
 let allColabReuniones = [];   // colaboradores cargados
@@ -4359,18 +4247,7 @@ function abrirModalNuevaReunion(userId) {
   }
 
 // Override guardarReunion para recargar bitácora después
-const _origGR2 = guardarReunion;
-guardarReunion = async function() {
-  const colabSel = document.getElementById('reunionColabSel');
-  const userId = colabSel?.value;
-  await _origGR2();
-  // Recargar bitácora si hay un colaborador seleccionado
-  if (reunionColabActual) {
-    await cargarBitacoraUsuario(reunionColabActual);
-  } else if (userId) {
-    seleccionarColabReunion(parseInt(userId), '', '', '');
-  }
-};
+
 
 // Al seleccionar colaborador en modal reunión, pre-seleccionar en la lista
 function onSeleccionColabReunion() {
@@ -5003,6 +4880,7 @@ function estadoLabel(status) {
   if (id === 'oneononex') {
     if (!allColabReuniones || !allColabReuniones.length) initReuniones();
   }
+
 
 
 

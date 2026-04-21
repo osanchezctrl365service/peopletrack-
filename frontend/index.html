@@ -1413,57 +1413,66 @@ label { color: #888 !important; }
         <div class="tab" onclick="switchTab('fb','dado',this);cargarMiFeedback()">Mi Feedback Dado</div>
       </div>
       <div id="fb-dar" style="margin-top:16px;">
-        <div class="card" style="max-width:600px;">
+        <div class="card" style="max-width:900px;">
           <div style="font-size:14px;font-weight:700;color:#f0ebe3;margin-bottom:16px;">Evaluar a mi Líder o Manager</div>
-          <div class="form-group" style="margin-bottom:14px;">
-            <label class="form-label">A quien evaluás *</label>
-            <select id="fbEvaluado" class="form-control" style="margin-top:6px;"><option value="">&#8212; Seleccionar &#8212;</option></select>
-          </div>
-          <div class="form-group" style="margin-bottom:14px;">
-            <label class="form-label">Categoría *</label>
-            <select id="fbCategoria" class="form-control" style="margin-top:6px;">
-              <option value="liderazgo">Liderazgo y dirección</option>
-              <option value="comunicacion">Comunicación y claridad</option>
-              <option value="apoyo">Apoyo y desarrollo</option>
-              <option value="feedback_recibido">Calidad del feedback recibido</option>
-              <option value="ambiente">Ambiente de trabajo</option>
-              <option value="reconocimiento">Reconocimiento y valoración</option>
-              <option value="general">General</option>
-            </select>
-          </div>
-          <div class="form-group" style="margin-bottom:14px;">
-            <label class="form-label">Puntuación * (1 = Muy malo &nbsp;5 = Excelente)</label>
-            <div style="display:flex;gap:8px;margin-top:8px;align-items:center;">
-              <button onclick="setFbScore(1)" id="fbStar1" class="btn btn-secondary" style="width:44px;height:44px;font-size:20px;padding:0;">&#9734;</button>
-              <button onclick="setFbScore(2)" id="fbStar2" class="btn btn-secondary" style="width:44px;height:44px;font-size:20px;padding:0;">&#9734;</button>
-              <button onclick="setFbScore(3)" id="fbStar3" class="btn btn-secondary" style="width:44px;height:44px;font-size:20px;padding:0;">&#9734;</button>
-              <button onclick="setFbScore(4)" id="fbStar4" class="btn btn-secondary" style="width:44px;height:44px;font-size:20px;padding:0;">&#9734;</button>
-              <button onclick="setFbScore(5)" id="fbStar5" class="btn btn-secondary" style="width:44px;height:44px;font-size:20px;padding:0;">&#9734;</button>
-              <span id="fbScoreLabel" style="font-size:13px;color:#888;margin-left:8px;"></span>
-            </div>
-            <input type="hidden" id="fbScore" value="0">
-          </div>
-          <div class="form-group" style="margin-bottom:14px;">
-            <label class="form-label">Comentario (opcional)</label>
-            <textarea id="fbComment" class="form-control" rows="8"
-              placeholder="Compartí tu experiencia de forma constructiva..."
-              style="margin-top:6px;height:180px;overflow-y:auto;overflow:auto;resize:vertical;display:block;width:100%;box-sizing:border-box;"></textarea>
-          </div>
-          <div class="form-group" style="margin-bottom:14px;">
-            <label class="form-label">Período</label>
-            <select id="fbPeriodo" class="form-control" style="margin-top:6px;width:200px;"><option value="">&#8212; Período actual &#8212;</option></select>
-          </div>
-          <div style="background:#111;border:1px solid #2a2a2a;border-radius:10px;padding:14px;margin-bottom:16px;">
-            <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+
+            <!-- COLUMNA IZQUIERDA -->
+            <div style="display:flex;flex-direction:column;gap:14px;">
               <div>
-                <div style="font-weight:700;color:#f0ebe3;font-size:13px;">Enviar de forma anónima</div>
-                <div style="font-size:11px;color:#888;margin-top:3px;">El evaluado no sabrá que fuiste vos</div>
+                <label class="form-label">A quien evaluás *</label>
+                <select id="fbEvaluado" class="form-control" style="margin-top:6px;"><option value="">&#8212; Seleccionar &#8212;</option></select>
               </div>
-              <input type="checkbox" id="fbAnonimo" checked style="width:20px;height:20px;cursor:pointer;accent-color:#FF5400;flex-shrink:0;">
+              <div>
+                <label class="form-label">Categoría *</label>
+                <select id="fbCategoria" class="form-control" style="margin-top:6px;">
+                  <option value="liderazgo">Liderazgo y dirección</option>
+                  <option value="comunicacion">Comunicación y claridad</option>
+                  <option value="apoyo">Apoyo y desarrollo</option>
+                  <option value="feedback_recibido">Calidad del feedback recibido</option>
+                  <option value="ambiente">Ambiente de trabajo</option>
+                  <option value="reconocimiento">Reconocimiento y valoración</option>
+                  <option value="general">General</option>
+                </select>
+              </div>
+              <div>
+                <label class="form-label">Puntuación * &nbsp;<span style="color:#888;font-size:11px;">1 = Muy malo &nbsp; 5 = Excelente</span></label>
+                <div style="display:flex;gap:8px;margin-top:8px;align-items:center;">
+                  <button onclick="setFbScore(1)" id="fbStar1" class="btn btn-secondary" style="width:44px;height:44px;font-size:22px;padding:0;">&#9734;</button>
+                  <button onclick="setFbScore(2)" id="fbStar2" class="btn btn-secondary" style="width:44px;height:44px;font-size:22px;padding:0;">&#9734;</button>
+                  <button onclick="setFbScore(3)" id="fbStar3" class="btn btn-secondary" style="width:44px;height:44px;font-size:22px;padding:0;">&#9734;</button>
+                  <button onclick="setFbScore(4)" id="fbStar4" class="btn btn-secondary" style="width:44px;height:44px;font-size:22px;padding:0;">&#9734;</button>
+                  <button onclick="setFbScore(5)" id="fbStar5" class="btn btn-secondary" style="width:44px;height:44px;font-size:22px;padding:0;">&#9734;</button>
+                  <span id="fbScoreLabel" style="font-size:13px;color:#FF5400;font-weight:700;margin-left:4px;"></span>
+                </div>
+                <input type="hidden" id="fbScore" value="0">
+              </div>
+              <div>
+                <label class="form-label">Período</label>
+                <select id="fbPeriodo" class="form-control" style="margin-top:6px;"><option value="">&#8212; Período actual &#8212;</option></select>
+              </div>
+              <div style="background:#111;border:1px solid #2a2a2a;border-radius:10px;padding:12px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                  <div>
+                    <div style="font-weight:700;color:#f0ebe3;font-size:13px;">Enviar anónimamente</div>
+                    <div style="font-size:11px;color:#888;margin-top:2px;">El evaluado no sabrá que fuiste vos</div>
+                  </div>
+                  <input type="checkbox" id="fbAnonimo" checked style="width:22px;height:22px;cursor:pointer;accent-color:#FF5400;flex-shrink:0;">
+                </div>
+              </div>
             </div>
+
+            <!-- COLUMNA DERECHA: comentario ocupa toda la altura -->
+            <div style="display:flex;flex-direction:column;">
+              <label class="form-label">Comentario (opcional)</label>
+              <textarea id="fbComment" class="form-control"
+                placeholder="Compartí tu experiencia de forma constructiva. Podés escribir todo lo que necesites acá..."
+                style="margin-top:6px;flex:1;min-height:260px;resize:none;font-size:13px;line-height:1.6;"></textarea>
+            </div>
+
           </div>
-          <div id="fbError" style="color:#FF4D4D;font-size:12px;margin-bottom:10px;display:none;"></div>
-          <button onclick="enviarFeedback360()" class="btn btn-primary" style="width:100%;">Enviar Feedback</button>
+          <div id="fbError" style="color:#FF4D4D;font-size:12px;margin-top:12px;display:none;"></div>
+          <button onclick="enviarFeedback360()" class="btn btn-primary" style="width:100%;margin-top:16px;">Enviar Feedback</button>
         </div>
       </div>
       <div id="fb-resultados" style="display:none;margin-top:16px;">

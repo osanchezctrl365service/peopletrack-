@@ -1415,17 +1415,17 @@ label { color: #888 !important; }
       <div id="fb-dar" style="margin-top:16px;">
         <div class="card">
           <div style="font-size:14px;font-weight:700;color:#f0ebe3;margin-bottom:16px;">Evaluar a mi Líder o Manager</div>
-          <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;">
+          <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:start;">
 
             <!-- COLUMNA IZQUIERDA -->
-            <div style="display:flex;flex-direction:column;gap:14px;">
+            <div style="display:flex;flex-direction:column;gap:10px;">
               <div>
-                <label class="form-label">A quien evaluás *</label>
-                <select id="fbEvaluado" class="form-control" style="margin-top:6px;"><option value="">&#8212; Seleccionar &#8212;</option></select>
+                <label class="form-label" style="font-size:11px;">A quien evaluás *</label>
+                <select id="fbEvaluado" class="form-control" style="margin-top:4px;font-size:12px;padding:6px 8px;"><option value="">&#8212; Seleccionar &#8212;</option></select>
               </div>
               <div>
-                <label class="form-label">Categoría *</label>
-                <select id="fbCategoria" class="form-control" style="margin-top:6px;">
+                <label class="form-label" style="font-size:11px;">Categoría *</label>
+                <select id="fbCategoria" class="form-control" style="margin-top:4px;font-size:12px;padding:6px 8px;">
                   <option value="liderazgo">Liderazgo y dirección</option>
                   <option value="comunicacion">Comunicación y claridad</option>
                   <option value="apoyo">Apoyo y desarrollo</option>
@@ -1436,7 +1436,7 @@ label { color: #888 !important; }
                 </select>
               </div>
               <div>
-                <label class="form-label">Puntuación * &nbsp;<span style="color:#888;font-size:11px;">1 = Muy malo &nbsp; 5 = Excelente</span></label>
+                <label class="form-label" style="font-size:11px;">Puntuación * &nbsp;<span style="color:#888;font-size:10px;">1=Peor 5=Mejor</span></label>
                 <div style="display:flex;gap:8px;margin-top:8px;align-items:center;">
                   <button onclick="setFbScore(1)" id="fbStar1" class="btn btn-secondary" style="width:36px;height:36px;font-size:18px;padding:0;">&#9734;</button>
                   <button onclick="setFbScore(2)" id="fbStar2" class="btn btn-secondary" style="width:36px;height:36px;font-size:18px;padding:0;">&#9734;</button>
@@ -1448,8 +1448,8 @@ label { color: #888 !important; }
                 <input type="hidden" id="fbScore" value="0">
               </div>
               <div>
-                <label class="form-label">Período</label>
-                <select id="fbPeriodo" class="form-control" style="margin-top:6px;"><option value="">&#8212; Período actual &#8212;</option></select>
+                <label class="form-label" style="font-size:11px;">Período</label>
+                <select id="fbPeriodo" class="form-control" style="margin-top:4px;font-size:12px;padding:6px 8px;"><option value="">&#8212; Período actual &#8212;</option></select>
               </div>
               <div style="background:#111;border:1px solid #2a2a2a;border-radius:10px;padding:12px;">
                 <div style="display:flex;align-items:center;justify-content:space-between;">
@@ -1464,10 +1464,10 @@ label { color: #888 !important; }
 
             <!-- COLUMNA DERECHA: comentario ocupa toda la altura -->
             <div style="display:flex;flex-direction:column;">
-              <label class="form-label">Comentario (opcional)</label>
+              <label class="form-label" style="font-size:11px;">Comentario (opcional)</label>
               <textarea id="fbComment" class="form-control"
                 placeholder="Compartí tu experiencia de forma constructiva. Podés escribir todo lo que necesites acá..."
-                style="margin-top:6px;flex:1;min-height:200px;resize:none;font-size:13px;line-height:1.6;"></textarea>
+                style="margin-top:6px;height:220px;resize:none;font-size:13px;line-height:1.6;overflow-y:auto;"></textarea>
             </div>
 
           </div>
@@ -1777,7 +1777,7 @@ label { color: #888 !important; }
           </select>
         </div>
         <div class="form-group">
-          <label class="form-label">Período</label>
+          <label class="form-label" style="font-size:11px;">Período</label>
           <select id="objPeriodoSel" class="form-control"><option value="">— Período —</option></select>
         </div>
         <div class="form-group">
@@ -1820,7 +1820,7 @@ label { color: #888 !important; }
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label">Período</label>
+            <label class="form-label" style="font-size:11px;">Período</label>
             <select id="objPeriodoSelPersonal" class="form-control"><option value="">— Período —</option></select>
           </div>
           <div class="form-group">
@@ -1883,7 +1883,7 @@ label { color: #888 !important; }
     <div class="modal-title">Exportar Datos</div>
     <div class="grid-2 gap-16">
       <div class="form-group"><label class="form-label">Tipo de Reporte</label><select class="form-control"><option>Por Persona</option><option>Por Líder (todo su equipo)</option><option>Por Manager</option><option>General Empresa</option></select></div>
-      <div class="form-group"><label class="form-label">Período</label><select class="form-control"><option>FY26</option><option>H1-FY26</option><option>FY25</option></select></div>
+      <div class="form-group"><label class="form-label" style="font-size:11px;">Período</label><select class="form-control"><option>FY26</option><option>H1-FY26</option><option>FY25</option></select></div>
       <div class="form-group"><label class="form-label">Persona (si aplica)</label><select class="form-control"><option>Todos</option><option>Jorge Mercado</option><option>Miguel Rocha</option></select></div>
       <div class="form-group"><label class="form-label">Formato</label><select class="form-control"><option>Excel (.xlsx)</option><option>PDF</option><option>CSV</option></select></div>
     </div>
@@ -4607,7 +4607,7 @@ async function cargarMiFeedback() {
             <input id="editObjPeso" class="form-control" type="number" min="0" max="100" value="20">
           </div>
           <div class="form-group">
-            <label class="form-label">Período</label>
+            <label class="form-label" style="font-size:11px;">Período</label>
             <select id="editObjPeriodo" class="form-control">
               <option value="">— Período —</option>
             </select>

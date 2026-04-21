@@ -84,25 +84,23 @@ app.http('updateUser', {
       if (body.FullName  !== undefined) { fields.push('FullName = @name');   params.name   = body.FullName; }
       if (body.Email     !== undefined) { fields.push('Email = @email');     params.email  = body.Email; }
       if (body.AppRole   !== undefined) { fields.push('AppRole = @role');    params.role   = body.AppRole; }
-      if (body.IsActive !== undefined) { fields.push('IsActive = @active'); params.active = body.IsActive ? 1 : 0; }
-      if (body.AreaID   !== undefined) { fields.push('AreaID = @areaId'); params.areaId = body.AreaID ? parseInt(body.AreaID) : null; }
+      if (body.IsActive  !== undefined) { fields.push('IsActive = @active'); params.active = body.IsActive ? 1 : 0; }
+      if (body.ManagerID !== undefined) { fields.push('ManagerID = @managerId'); params.managerId = body.ManagerID ? parseInt(body.ManagerID) : null; }
+      if (body.AreaID    !== undefined) { fields.push('AreaID = @areaId');     params.areaId   = body.AreaID    ? parseInt(body.AreaID)    : null; }
+      if (body.RoleName  !== undefined) { fields.push('RoleName = @roleName'); params.roleName = body.RoleName; }
       if (fields.length > 0) {
         await query(
           `UPDATE Users SET ${fields.join(', ')}, UpdatedAt = GETDATE() WHERE UserID = @id`,
           params
         );
       }
-      // LeaderID y ManagerID se guardan en UserRelationships
-      if (body.LeaderID !== undefined || body.ManagerID !== undefined) {
-        // Desactivar relaciones actuales
+      if (body.LeaderID !== undefined) {
         await query(`UPDATE UserRelationships SET IsActive=0 WHERE EmployeeID=@uid`, { uid });
-        const newLeader  = body.LeaderID  ? parseInt(body.LeaderID)  : null;
-        const newManager = body.ManagerID ? parseInt(body.ManagerID) : null;
-        if (newLeader || newManager) {
+        if (body.LeaderID) {
           await query(
-            `INSERT INTO UserRelationships (EmployeeID, LeaderID, ManagerID, IsPrimary, IsActive)
-             VALUES (@uid, @lid, @mid, 1, 1)`,
-            { uid, lid: newLeader, mid: newManager }
+            `IF NOT EXISTS (SELECT 1 FROM UserRelationships WHERE EmployeeID=@uid AND LeaderID=@lid AND IsActive=1)
+             INSERT INTO UserRelationships (EmployeeID, LeaderID, IsPrimary, IsActive) VALUES (@uid, @lid, 1, 1)`,
+            { uid, lid: parseInt(body.LeaderID) }
           );
         }
       }

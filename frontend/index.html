@@ -147,7 +147,15 @@ body { font-family: var(--font); font-size: 14px; color: var(--gray-800); backgr
   flex-shrink: 0;
 }
 .topbar-title { font-size: 16px; font-weight: 700; color: #f0ebe3; flex: 1; }
-.topbar-period { background:rgba(255,84,0,0.15); color:#FF5400; font-size:11px; font-weight:700; padding:4px 10px; border-radius:6px; }
+.topbar-period {
+  background: var(--primary-pale);
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.3px;
+}
 .topbar-btn {
   background: none;
   border: 1px solid var(--gray-300);
@@ -234,7 +242,7 @@ body { font-family: var(--font); font-size: 14px; color: var(--gray-800); backgr
 .badge-warning { background: var(--warning-light); color: var(--warning); }
 .badge-danger  { background: var(--danger-light); color: var(--danger); }
 .badge-info    { background: var(--accent-light); color: var(--accent-dark); }
-.badge-primary { background:rgba(255,84,0,0.15); color:#FF5400; font-size:10px; font-weight:700; padding:2px 8px; border-radius:20px; }
+.badge-primary { background: var(--primary-pale); color: var(--primary); }
 .badge-gray    { background: var(--gray-100); color: var(--gray-600); }
 
 /* TABLE */
@@ -244,7 +252,7 @@ body { font-family: var(--font); font-size: 14px; color: var(--gray-800); backgr
   padding: 10px 12px;
   font-size: 10px;
   font-weight: 700;
-  color: #888;
+  color: var(--gray-600);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   border-bottom: 2px solid var(--gray-200);
@@ -254,7 +262,7 @@ body { font-family: var(--font); font-size: 14px; color: var(--gray-800); backgr
   padding: 11px 12px;
   border-bottom: 1px solid var(--gray-100);
   font-size: 13px;
-  color: #ccc;
+  color: var(--gray-800);
   vertical-align: middle;
 }
 .data-table tr:hover td { background: var(--gray-50); }
@@ -314,7 +322,7 @@ textarea.form-control { min-height: 80px; resize: vertical; }
   overflow-y: auto;
   box-shadow: var(--shadow-lg);
 }
-.modal-title { font-size: 18px; font-weight: 800; color: #f0ebe3; margin-bottom: 20px; }
+.modal-title { font-size: 18px; font-weight: 800; color: var(--primary); margin-bottom: 20px; }
 .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
 .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 18px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid transparent; transition: all 0.15s; font-family: var(--font); }
 .btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
@@ -336,7 +344,7 @@ textarea.form-control { min-height: 80px; resize: vertical; }
   margin-bottom: -2px;
   transition: all 0.15s;
 }
-.tab:hover { color: var(--orange); }
+.tab:hover { color: var(--primary); }
 .tab.active { color: var(--accent-dark); border-bottom-color: var(--accent); }
 
 /* ALERT BLOCK */
@@ -372,7 +380,7 @@ textarea.form-control { min-height: 80px; resize: vertical; }
 }
 .timeline-date { font-size: 10px; font-weight: 700; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
 .timeline-card { background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: var(--radius-md); padding: 12px; }
-.timeline-card-title { font-size: 13px; font-weight: 700; color: #f0ebe3; margin-bottom: 6px; }
+.timeline-card-title { font-size: 13px; font-weight: 700; color: var(--primary); margin-bottom: 6px; }
 .timeline-card-body { font-size: 12px; color: var(--gray-700); line-height: 1.6; }
 
 /* DONUT CHART */
@@ -395,7 +403,7 @@ textarea.form-control { min-height: 80px; resize: vertical; }
   cursor: pointer;
 }
 .org-node.leader { border-color: var(--accent); }
-.org-node .org-name { font-size: 12px; font-weight: 700; color: #f0ebe3; }
+.org-node .org-name { font-size: 12px; font-weight: 700; color: var(--primary); }
 .org-node .org-role { font-size: 10px; color: var(--gray-500); margin-top: 2px; }
 .org-node .org-progress { font-size: 11px; font-weight: 700; margin-top: 6px; }
 .org-connector { width: 2px; height: 16px; background: var(--gray-300); margin: 0 auto; }
@@ -428,11 +436,21 @@ textarea.form-control { min-height: 80px; resize: vertical; }
 
 /* SECTION HEADER */
 .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-.section-heading { font-size: 20px; font-weight: 800; color: #f0ebe3; margin-bottom: 4px; }
-.section-subheading { font-size: 13px; color: #888; margin-top: 2px; }
+.section-heading { font-size: 20px; font-weight: 800; color: var(--primary); }
+.section-subheading { font-size: 13px; color: var(--gray-500); margin-top: 2px; }
 
 /* HELP TIP */
-.help-tip { background:rgba(255,84,0,0.08); border:1px solid rgba(255,84,0,0.25); border-radius:8px; padding:12px 16px; font-size:12px; color:#bbb; margin-bottom:16px; display:flex; gap:8px; align-items:flex-start; }
+.help-tip {
+  background: linear-gradient(135deg, var(--primary-pale), var(--accent-light));
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  font-size: 12px;
+  color: var(--primary);
+  margin-bottom: 16px;
+  display: flex;
+  gap: 10px;
+}
 .help-tip-icon { font-size: 16px; flex-shrink: 0; }
 
 /* COMPETENCY RADAR PLACEHOLDER */
@@ -530,24 +548,6 @@ textarea.form-control { min-height: 80px; resize: vertical; }
 .sso-note { font-size: 10px; color: rgba(255,255,255,.25); margin-top: 28px; line-height: 1.6; }
 .sso-wave { width: 100%; height: 3px; background: linear-gradient(90deg, #FF5400, rgba(255,84,0,.2)); border-radius: 0 0 20px 20px; margin-top: 28px; }
 .sso-status { font-size: 11px; color: #FF5400; margin-top: 12px; min-height: 16px; }
-
-/* Dark mode inputs override */
-input:not([type=range]), select, textarea {
-  background: #111 !important;
-  border-color: #333 !important;
-  color: #f0ebe3 !important;
-}
-input::placeholder, textarea::placeholder { color: #555 !important; }
-
-
-/* === DARK MODE GLOBAL OVERRIDES === */
-input:not([type=range]):not([type=checkbox]), select, textarea {
-  background: #111 !important;
-  border-color: #333 !important;
-  color: #f0ebe3 !important;
-}
-input::placeholder, textarea::placeholder { color: #555 !important; }
-label { color: #888 !important; }
 </style>
 
 </head>
@@ -803,10 +803,6 @@ label { color: #888 !important; }
   </div>
 
   <div class="sidebar-section-label">Reportes</div>
-  <div class="nav-item" onclick="showSection('feedback360')">
-    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-    Feedback 360°
-  </div>
   <div class="nav-item" onclick="showSection('reports')">
     <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
     Reportes
@@ -831,10 +827,6 @@ label { color: #888 !important; }
   </div>
 
   <div class="sidebar-section-label">Sistema</div>
-  <div class="nav-item" onclick="showSection('periods')">
-    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-    Períodos
-  </div>
   <div class="nav-item" onclick="showSection('settings')">
     <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
     Configuración
@@ -855,13 +847,15 @@ label { color: #888 !important; }
 <div class="main-wrap">
   <header class="topbar">
     <span class="topbar-title" id="topbarTitle">Dashboard</span>
-    <span class="topbar-period" id="topbarPeriod">FY26 — Q2</span>
+    <span class="topbar-period">FY26 — Q2</span>
+    <button class="topbar-btn" onclick="showModal('exportModal')">⬇ Exportar Excel</button>
+    <button class="topbar-btn primary" onclick="nuevoContextual()">+ Nuevo</button>
   </header>
 
   <div class="content">
 
     <!-- ======== DASHBOARD ======== -->
-    <div class="section active" id="sec-dashboard">
+    <section class="section active" id="sec-dashboard">
       <div class="section-header">
         <div>
           <div class="section-heading">Mi Equipo</div>
@@ -942,10 +936,10 @@ label { color: #888 !important; }
           </tbody>
         </table>
       </div>
-    </div>
+    </section>
 
     <!-- ======== OBJETIVOS ======== -->
-    <div class="section" id="sec-usuarios">
+    <section class="section" <div class="section" id="sec-usuarios">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
     <div>
       <h2 style="font-size:20px;font-weight:800;color:#f0ebe3;">Usuarios</h2>
@@ -987,15 +981,11 @@ label { color: #888 !important; }
       <h2 style="font-size:20px;font-weight:800;color:#f0ebe3;">Líderes y sus Equipos</h2>
       <p style="font-size:12px;color:#888;margin-top:2px;">Vista de líderes con sus colaboradores asignados</p>
     </div>
-    <div style="display:flex;gap:8px;align-items:center;">
-      <button onclick="document.getElementById('modalPromoverLider').style.display='flex'" style="padding:8px 14px;background:#FF5400;border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;">+ Promover Lider</button>
-      <input id="lideresSearch" type="text" placeholder="Buscar líder..." onkeyup="filtrarLideres()" style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:8px 12px;color:#f0ebe3;font-size:12px;width:200px;outline:none;">
-    </div>
+    <input id="lideresSearch" type="text" placeholder="Buscar líder..." onkeyup="filtrarLideres()" style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:8px 12px;color:#f0ebe3;font-size:12px;width:200px;outline:none;">
   </div>
-  <div id="lideresContainer" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:16px;overflow-y:auto;max-height:70vh;">
+  <div id="lideresContainer" style="display:grid;gap:16px;">
     <div style="text-align:center;padding:40px;color:#888;">Cargando líderes...</div>
   </div>
-  <div id="lideresPagination" style="display:flex;justify-content:center;gap:8px;margin-top:16px;flex-wrap:wrap;"></div>
 </div>
 
     <div class="section" id="sec-areas">
@@ -1022,52 +1012,7 @@ label { color: #888 !important; }
   </div>
 </div>
 
-    
-<div class="section" id="sec-periods">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-    <div><h2 style="font-size:20px;font-weight:800;color:#f0ebe3;">Períodos Fiscales</h2>
-    <p style="font-size:12px;color:#888;margin-top:2px;">Gestión de años y trimestres para objetivos</p></div>
-    <button onclick="abrirModalPeriodo()" style="padding:8px 16px;background:#FF5400;border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;">+ Nuevo Período</button>
-  </div>
-  <div class="card" style="padding:0;overflow:hidden;">
-    <div id="periodsLoading" style="text-align:center;padding:40px;color:#888;">Cargando períodos...</div>
-    <table class="data-table" id="periodsTable" style="display:none;">
-      <thead><tr><th>Período</th><th>Inicio</th><th>Fin</th><th>Estado</th><th>Acciones</th></tr></thead>
-      <tbody id="periodsTbody"></tbody>
-    </table>
-  </div>
-</div>
-
-<div id="modalPeriodo" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:500;align-items:center;justify-content:center;">
-  <div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:16px;padding:32px;width:420px;max-width:95vw;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
-      <h3 id="modalPeriodoTitle" style="font-size:16px;font-weight:800;color:#f0ebe3;">Nuevo Período</h3>
-      <button onclick="cerrarModalPeriodo()" style="background:none;border:none;color:#888;font-size:20px;cursor:pointer;">x</button>
-    </div>
-    <input type="hidden" id="editPeriodoId">
-    <div style="display:grid;gap:14px;">
-      <div><label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Nombre *</label>
-      <input id="periodoName" type="text" placeholder="Ej: FY27 — Q1" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;"></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-        <div><label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Inicio</label>
-        <input id="periodoStart" type="date" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;"></div>
-        <div><label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Fin</label>
-        <input id="periodoEnd" type="date" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;"></div>
-      </div>
-      <div><label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Estado</label>
-      <select id="periodoActivo" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
-        <option value="1">Activo</option><option value="0">Inactivo</option>
-      </select></div>
-    </div>
-    <div id="modalPeriodoError" style="color:#FF4D4D;font-size:12px;margin-top:12px;display:none;"></div>
-    <div style="display:flex;gap:10px;margin-top:24px;justify-content:flex-end;">
-      <button onclick="cerrarModalPeriodo()" style="padding:10px 20px;background:#222;border:1px solid #333;border-radius:8px;color:#aaa;font-size:13px;cursor:pointer;">Cancelar</button>
-      <button onclick="guardarPeriodo()" id="btnGuardarPeriodo" style="padding:10px 24px;background:#FF5400;border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;">Guardar</button>
-    </div>
-  </div>
-</div>
-
-<div class="section" id="sec-objectives">
+    <div class="section" id="sec-objectives">
       <div class="section-header">
         <div>
           <div class="section-heading">Objetivos</div>
@@ -1091,65 +1036,91 @@ label { color: #888 !important; }
       </div>
 
       <div id="obj-core">
-        <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center;">
-          <div class="search-input-wrap" style="flex:1;min-width:180px;">
-            <span class="search-icon">🔍</span>
-            <input id="objCoreSearch" class="form-control" type="text" placeholder="Buscar objetivo core..." oninput="filtrarTablaObjetivos('core',this.value)">
-          </div>
-          <select id="objCoreArea" class="form-control" style="width:160px" onchange="filtrarTablaObjetivos('core','')">
-            <option value="">Todas las áreas</option>
-          </select>
-          <button class="btn btn-primary btn-sm" onclick="abrirNuevoObjetivoCore()">+ Nuevo Core</button>
+        <div class="flex gap-8 mb-12">
+          <div class="search-input-wrap flex-1"><span class="search-icon">🔍</span><input class="form-control" type="text" placeholder="Buscar objetivo..."></div>
+          <select class="form-control" style="width:160px"><option>Todas las áreas</option><option>Operations</option><option>People & Culture</option><option>Admin & Finance</option></select>
         </div>
-        <div id="objCoreTbody">
-          <div style="text-align:center;padding:30px;color:#888;">Cargando objetivos...</div>
-        </div>
+        <table class="data-table">
+          <thead><tr><th>Objetivo</th><th>Tipo</th><th>Ponderación</th><th>Período</th><th>Área</th><th>Acciones</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Control de Horas — Límite rojo ≤3</strong></td><td><span class="badge badge-primary">Core</span></td><td>30%</td><td>FY26</td><td>Operations</td><td><button class="btn btn-secondary btn-sm" onclick="showModal('editObjectiveModal')">Editar</button></td></tr>
+            <tr><td><strong>Certificación MS oficial anual</strong></td><td><span class="badge badge-primary">Core</span></td><td>25%</td><td>FY26</td><td>Todas</td><td><button class="btn btn-secondary btn-sm" onclick="showModal('editObjectiveModal')">Editar</button></td></tr>
+            <tr><td><strong>NPS cliente ≥ 4.5</strong></td><td><span class="badge badge-primary">Core</span></td><td>20%</td><td>FY26</td><td>Operations</td><td><button class="btn btn-secondary btn-sm">Editar</button></td></tr>
+            <tr><td><strong>Innovación — 1 demo AI por año</strong></td><td><span class="badge badge-primary">Core</span></td><td>25%</td><td>FY26</td><td>Technology</td><td><button class="btn btn-secondary btn-sm">Editar</button></td></tr>
+          </tbody>
+        </table>
       </div>
 
       <div id="obj-personal" style="display:none">
-        <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:flex-end;">
-          <div style="flex:1;min-width:200px;">
-            <input id="objPersonalBuscar" type="text" class="form-control" placeholder="🔍 Buscar colaborador..." style="margin-bottom:4px;" oninput="filtrarColabPersonal(this.value)">
-            <select id="objPersonalColab" class="form-control" onchange="cargarObjetivosPersonales()">
-              <option value="">— Seleccionar colaborador —</option>
-            </select>
-          </div>
-          <select id="objPersonalPeriodo" class="form-control" style="width:140px;" onchange="cargarObjetivosPersonales()">
-            <option value="">— Período —</option>
-          </select>
-          <button class="btn btn-primary btn-sm" onclick="abrirNuevoObjetivoPersonal()">+ Nuevo Personal</button>
+        <div class="flex gap-8 mb-12">
+          <select class="form-control" style="width:200px"><option>— Seleccionar colaborador —</option><option>Jorge Mercado</option><option>Miguel Rocha</option><option>Leila Martínez</option></select>
+          <select class="form-control" style="width:160px"><option>FY26</option><option>H1-FY26</option><option>H2-FY26</option></select>
         </div>
-        <div id="objPersonalTbody">
-          <div style="text-align:center;padding:30px;color:#888;">Seleccioná un colaborador</div>
-        </div>
+        <table class="data-table">
+          <thead><tr><th>Colaborador</th><th>Objetivo</th><th>Competencia</th><th>Ponderación</th><th>Avance</th><th>Estado</th><th>Acción</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><div class="person-chip"><div class="avatar-sm" style="background:#1B3A5C">JM</div><span>J. Mercado</span></div></td>
+              <td>Formación — Cursos Python / PL-200 / PL-500</td>
+              <td>Aprendizaje</td>
+              <td>40%</td>
+              <td>
+                <div class="progress-label"><span class="progress-pct" style="color:var(--warning)">45%</span></div>
+                <div class="progress-bar"><div class="progress-fill" style="width:45%;background:var(--warning)"></div></div>
+              </td>
+              <td><span class="badge badge-warning">En Curso</span></td>
+              <td><button class="btn btn-secondary btn-sm" onclick="showModal('checkinModal')">Check-in</button></td>
+            </tr>
+            <tr>
+              <td><div class="person-chip"><div class="avatar-sm" style="background:#1B3A5C">JM</div><span>J. Mercado</span></div></td>
+              <td>Aplicación — Power Automate + Python Integrado</td>
+              <td>Innovación</td>
+              <td>30%</td>
+              <td>
+                <div class="progress-label"><span class="progress-pct" style="color:var(--danger)">20%</span></div>
+                <div class="progress-bar"><div class="progress-fill" style="width:20%;background:var(--danger)"></div></div>
+              </td>
+              <td><span class="badge badge-danger">En Riesgo</span></td>
+              <td><button class="btn btn-secondary btn-sm" onclick="showModal('checkinModal')">Check-in</button></td>
+            </tr>
+            <tr>
+              <td><div class="person-chip"><div class="avatar-sm" style="background:#00A3A3">MR</div><span>M. Rocha</span></div></td>
+              <td>AI Foundry — Demos de innovación tecnológica</td>
+              <td>Innovación</td>
+              <td>25%</td>
+              <td>
+                <div class="progress-label"><span class="progress-pct" style="color:var(--success)">75%</span></div>
+                <div class="progress-bar"><div class="progress-fill" style="width:75%;background:var(--success)"></div></div>
+              </td>
+              <td><span class="badge badge-success">Viene Bien</span></td>
+              <td><button class="btn btn-secondary btn-sm" onclick="showModal('checkinModal')">Check-in</button></td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
       <div id="obj-tasks" style="display:none">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
-          <p style="color:#888;font-size:13px;">Check-ins y seguimiento de avance por objetivo</p>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;">
-            <div>
-              <input id="objTasksBuscar" type="text" class="form-control" placeholder="🔍 Buscar colaborador..." style="margin-bottom:4px;width:220px;" oninput="filtrarColabTareas(this.value)">
-              <select id="objTasksColab" class="form-control" style="width:220px;" onchange="cargarTareasColaborador()">
-                <option value="">— Seleccionar colaborador —</option>
-              </select>
-            </div>
-          </div>
-        </div>
-        <div id="objTasksTbody">
-          <div style="text-align:center;padding:30px;color:#888;">Seleccioná un colaborador para ver sus check-ins</div>
-        </div>
+        <p class="text-muted mb-12">Seguimiento detallado de tareas / hitos por objetivo</p>
+        <table class="data-table">
+          <thead><tr><th>#</th><th>Tarea / Hito</th><th>Objetivo</th><th>Colaborador</th><th>Vencimiento</th><th>Avance</th><th>Estado</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>Curso Python completo</td><td>Formación J.Mercado</td><td>J. Mercado</td><td>31 May 2026</td><td><div class="progress-bar" style="width:100px"><div class="progress-fill" style="width:50%;background:var(--warning)"></div></div></td><td><span class="badge badge-info">En Curso</span></td></tr>
+            <tr><td>2</td><td>Curso PL-200 completo</td><td>Formación J.Mercado</td><td>J. Mercado</td><td>28 Feb 2026</td><td><div class="progress-bar" style="width:100px"><div class="progress-fill" style="width:100%;background:var(--success)"></div></div></td><td><span class="badge badge-success">Cumplido</span></td></tr>
+            <tr><td>3</td><td>Certificación PL-500</td><td>Formación J.Mercado</td><td>J. Mercado</td><td>30 Jun 2026</td><td><div class="progress-bar" style="width:100px"><div class="progress-fill" style="width:30%;background:var(--danger)"></div></div></td><td><span class="badge badge-danger">En Riesgo</span></td></tr>
+            <tr><td>4</td><td>DP-100 Azure Data Scientist</td><td>Plan Carrera M.Rocha</td><td>M. Rocha</td><td>30 Sep 2026</td><td><div class="progress-bar" style="width:100px"><div class="progress-fill" style="width:60%;background:var(--accent)"></div></div></td><td><span class="badge badge-info">En Curso</span></td></tr>
+          </tbody>
+        </table>
       </div>
-    </div>
+    </section>
 
     <!-- ======== PLAN DE CARRERA ======== -->
-    <div class="section" id="sec-career">
+    <section class="section" id="sec-career">
       <div class="section-header">
         <div>
           <div class="section-heading">Plan de Carrera</div>
           <div class="section-subheading">Desarrollo profesional e hitos de crecimiento por colaborador</div>
         </div>
-        <button class="btn btn-primary btn-sm" onclick="abrirModalNuevoPlan()">+ Nuevo Plan</button>
+        <button class="btn btn-primary btn-sm">+ Nuevo Plan</button>
       </div>
 
       <div class="grid-2 gap-16">
@@ -1234,16 +1205,16 @@ label { color: #888 !important; }
           </div>
         </div>
       </div>
-    </div>
+    </section>
 
     <!-- ======== COMPETENCIAS ======== -->
-    <div class="section" id="sec-competencies">
+    <section class="section" id="sec-competencies">
       <div class="section-header">
         <div>
           <div class="section-heading">Competencias</div>
           <div class="section-subheading">Evaluación por competencias con ponderaciones globales, por equipo y personales</div>
         </div>
-        <button class="btn btn-primary btn-sm" onclick="abrirModalEvaluar()">+ Evaluar</button>
+        <button class="btn btn-primary btn-sm">+ Evaluar</button>
       </div>
 
       <div class="tabs">
@@ -1343,176 +1314,135 @@ label { color: #888 !important; }
         <div class="card">
           <div class="card-title">Competencias Personales / Acuerdo con el Empleado</div>
           <p class="text-muted mb-12">Competencias adicionales acordadas entre el colaborador y el líder, fuera del marco global.</p>
-          <button class="btn btn-primary btn-sm" onclick="agregarCompetenciaPersonal()">+ Agregar Competencia Personal</button>
+          <button class="btn btn-primary btn-sm">+ Agregar Competencia Personal</button>
         </div>
       </div>
-    </div>
+    </section>
 
     <!-- ======== 1:1 ======== -->
-    <div class="section" id="sec-oneononex">
-      <div class="section-header" style="margin-bottom:16px;">
+    <section class="section" id="sec-oneononex">
+      <div class="section-header">
         <div>
           <div class="section-heading">Reuniones 1:1</div>
           <div class="section-subheading">Bitácora acumulable de reuniones semanales, mensuales y por quarter</div>
         </div>
-        <button class="btn btn-primary btn-sm" onclick="abrirModalNuevaReunion()">+ Nueva Reunión</button>
+        <button class="btn btn-primary btn-sm" onclick="showModal('newMeetingModal')">+ Nueva Reunión</button>
       </div>
 
-      <div style="display:grid;grid-template-columns:300px 1fr;gap:16px;height:calc(100vh - 200px);">
-        
-        <!-- PANEL IZQUIERDO: lista de colaboradores -->
-        <div class="card" style="padding:0;overflow:hidden;display:flex;flex-direction:column;">
-          <div style="padding:12px 16px;border-bottom:1px solid #2a2a2a;">
-            <div style="font-size:11px;font-weight:700;color:#FF5400;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Colaboradores</div>
-            <input id="reunionBuscadorColab" type="text" class="form-control" placeholder="🔍 Buscar..." style="font-size:12px;" oninput="filtrarListaColaboradores(this.value)">
-          </div>
-          <div id="reunionListaColab" style="overflow-y:auto;flex:1;padding:8px;">
-            <div style="text-align:center;padding:20px;color:#888;font-size:12px;">Cargando colaboradores...</div>
+      <div class="grid-2 gap-16">
+        <div>
+          <div class="card mb-12">
+            <div class="card-title">Colaboradores</div>
+            <div id="personList">
+              <div class="checklist-item" style="cursor:pointer;padding:10px 6px;border-radius:8px;background:var(--primary-pale)" onclick="">
+                <div class="avatar-sm" style="background:#1B3A5C">JM</div>
+                <div class="flex-1"><div style="font-size:13px;font-weight:600">Jorge Mercado</div><div style="font-size:11px;color:var(--gray-500)">Developer · Operations</div></div>
+                <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();alert('Abriendo cliente de email...')">📧</button>
+              </div>
+              <div class="checklist-item" style="cursor:pointer;padding:10px 6px" onclick="">
+                <div class="avatar-sm" style="background:#00A3A3">MR</div>
+                <div class="flex-1"><div style="font-size:13px;font-weight:600">Miguel Rocha</div><div style="font-size:11px;color:var(--gray-500)">SME · Operations</div></div>
+                <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();alert('Abriendo cliente de email...')">📧</button>
+              </div>
+              <div class="checklist-item" style="cursor:pointer;padding:10px 6px" onclick="">
+                <div class="avatar-sm" style="background:#7B1FA2">LM</div>
+                <div class="flex-1"><div style="font-size:13px;font-weight:600">Leila Martínez</div><div style="font-size:11px;color:var(--gray-500)">P&C Support · People</div></div>
+                <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();alert('Abriendo cliente de email...')">📧</button>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- PANEL DERECHO: bitácora del colaborador seleccionado -->
-        <div class="card" style="padding:0;overflow:hidden;display:flex;flex-direction:column;">
-          <div style="padding:12px 16px;border-bottom:1px solid #2a2a2a;display:flex;justify-content:space-between;align-items:center;">
-            <div id="reunionBitacoraTitle" style="font-size:13px;font-weight:700;color:#FF5400;">Seleccioná un colaborador</div>
-            <select id="reunionFiltroTipo" class="form-control" style="width:140px;font-size:11px;" onchange="filtrarBitacoraTipo(this.value)" disabled>
-              <option value="">Todos los tipos</option>
-              <option value="monthly">Mensual</option>
-              <option value="weekly">Semanal</option>
-              <option value="quarterly">Trimestral</option>
-              <option value="biweekly">Quincenal</option>
-            </select>
-          </div>
-          <div id="reunionBitacoraContent" style="overflow-y:auto;flex:1;padding:16px;">
-            <div style="text-align:center;padding:40px;color:#888;">
-              <div style="font-size:32px;margin-bottom:12px;">👥</div>
-              <div>Seleccioná un colaborador para ver su bitácora de reuniones</div>
+        <div>
+          <div class="card">
+            <div class="card-title">Bitácora — Jorge Mercado</div>
+            <div class="flex gap-8 mb-12">
+              <select class="form-control" style="width:160px"><option>Todos los tipos</option><option>Semanal</option><option>Mensual</option><option>Trimestral</option></select>
+            </div>
+            <div class="timeline">
+              <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-date">01 Ago 2025 · Mensual</div>
+                <div class="timeline-card">
+                  <div class="timeline-card-title">Feedback + Formulario SA</div>
+                  <div class="timeline-card-body">Reunión de primer feedback. Se presentó formulario de Staff Augmentation para autoevaluación. Detectados desvíos en certificación PL-500, se acordó plan de recuperación para Q3.</div>
+                  <div class="flex gap-8 mt-12">
+                    <span class="badge badge-info">Obj: Formación</span>
+                    <span class="badge badge-gray">Carrera: Developer → Sr</span>
+                    <button class="btn btn-secondary btn-sm" style="margin-left:auto" onclick="alert('Enviando minuta por email...')">📧 Minuta</button>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-dot" style="background:var(--primary)"></div>
+                <div class="timeline-date">23 Jul 2025 · Mensual</div>
+                <div class="timeline-card">
+                  <div class="timeline-card-title">Ajuste de Objetivos FY25</div>
+                  <div class="timeline-card-body">Se modificaron objetivos bajo una mirada general aplicada a integrantes de Staff Augmentation. Se establecieron nuevas ponderaciones para H2.</div>
+                  <div class="flex gap-8 mt-12">
+                    <span class="badge badge-primary">Obj: Core</span>
+                    <button class="btn btn-secondary btn-sm" style="margin-left:auto" onclick="alert('Enviando minuta por email...')">📧 Minuta</button>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-dot" style="background:var(--success)"></div>
+                <div class="timeline-date">15 May 2025 · Kick-off</div>
+                <div class="timeline-card">
+                  <div class="timeline-card-title">Comunicación de Objetivos FY25</div>
+                  <div class="timeline-card-body">Reunión inicial de comunicación de objetivos del año fiscal. Se compartieron resultados del proceso de calibración de rol del CoE.</div>
+                  <button class="btn btn-secondary btn-sm mt-12" onclick="alert('Enviando minuta por email...')">📧 Minuta</button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </section>
 
     <!-- ======== REPORTES ======== -->
-    <div class="section" id="sec-feedback360">
-      <div class="section-header" style="margin-bottom:16px;">
+    <section class="section" id="sec-reports">
+      <div class="section-header">
         <div>
-          <div class="section-heading">Feedback 360°</div>
-          <div class="section-subheading">Evaluación anónima o identificada de líderes y managers</div>
+          <div class="section-heading">Reportes</div>
+          <div class="section-subheading">Reportes individuales y de equipo exportables a Excel con formato de marca</div>
         </div>
-        <button class="btn btn-primary btn-sm" onclick="showSection('feedback360')">+ Dar Feedback</button>
+        <button class="btn btn-primary btn-sm" onclick="showModal('exportModal')">⬇ Exportar</button>
       </div>
-      <div style="background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.2);border-radius:8px;padding:14px 16px;margin-bottom:20px;font-size:13px;color:#aaa;line-height:1.7;">
-        <strong style="color:#3B82F6;">Confidencialidad:</strong> Los resultados individuales solo los puede ver el equipo de <strong style="color:#f0ebe3;">People / Admin</strong>. Los evaluados solo ven promedios globales.
+      <div class="tabs">
+        <div class="tab active">Por Persona</div>
+        <div class="tab">Por Líder</div>
+        <div class="tab">Por Manager</div>
+        <div class="tab">General Empresa</div>
       </div>
-      <div class="tabs" id="fb-tabs">
-        <div class="tab active" onclick="switchTab('fb','dar',this)">Dar Feedback</div>
-        <div class="tab" onclick="switchTab('fb','resultados',this);loadFeedbackResultados()">Resultados (Admin)</div>
-        <div class="tab" onclick="switchTab('fb','dado',this);loadMiFeedback()">Mi Feedback Dado</div>
+      <div class="flex gap-8 mb-16">
+        <select class="form-control" style="width:220px"><option>Jorge Mercado</option><option>Miguel Rocha</option></select>
+        <select class="form-control" style="width:140px"><option>FY26</option><option>FY25</option></select>
+        <button class="btn btn-primary">Ver Reporte</button>
       </div>
-      <div id="fb-dar" style="margin-top:16px;">
-        <div class="card" style="max-width:580px;">
-          <div style="font-size:14px;font-weight:700;color:#f0ebe3;margin-bottom:16px;">Evaluar a mi Lider o Manager</div>
-          <div style="display:grid;gap:14px;">
-            <div>
-              <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">A quien evaluás</label>
-              <select id="fbEvaluado" class="form-control" style="margin-top:6px;"></select>
-            </div>
-            <div>
-              <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Categoría</label>
-              <select id="fbCategoria" class="form-control" style="margin-top:6px;">
-                <option value="liderazgo">Liderazgo y dirección</option>
-                <option value="comunicacion">Comunicación y claridad</option>
-                <option value="apoyo">Apoyo y desarrollo</option>
-                <option value="feedback_recibido">Calidad del feedback recibido</option>
-                <option value="ambiente">Ambiente de trabajo</option>
-                <option value="reconocimiento">Reconocimiento y valoración</option>
-                <option value="general">General</option>
-              </select>
-            </div>
-            <div>
-              <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Puntuación (1-5)</label>
-              <div style="display:flex;gap:8px;margin-top:8px;">
-                <button onclick="setFbScore(1)" id="fbStar1" style="width:40px;height:40px;border-radius:8px;border:1px solid #333;background:#111;color:#888;font-size:18px;cursor:pointer;">☆</button>
-                <button onclick="setFbScore(2)" id="fbStar2" style="width:40px;height:40px;border-radius:8px;border:1px solid #333;background:#111;color:#888;font-size:18px;cursor:pointer;">☆</button>
-                <button onclick="setFbScore(3)" id="fbStar3" style="width:40px;height:40px;border-radius:8px;border:1px solid #333;background:#111;color:#888;font-size:18px;cursor:pointer;">☆</button>
-                <button onclick="setFbScore(4)" id="fbStar4" style="width:40px;height:40px;border-radius:8px;border:1px solid #333;background:#111;color:#888;font-size:18px;cursor:pointer;">☆</button>
-                <button onclick="setFbScore(5)" id="fbStar5" style="width:40px;height:40px;border-radius:8px;border:1px solid #333;background:#111;color:#888;font-size:18px;cursor:pointer;">☆</button>
-              </div>
-              <input type="hidden" id="fbScore" value="0">
-              <div id="fbScoreLabel" style="font-size:11px;color:#888;margin-top:6px;"></div>
-            </div>
-            <div>
-              <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Comentario (opcional)</label>
-              <textarea id="fbComment" class="form-control" rows="3" placeholder="Compartí tu experiencia de forma constructiva..." style="margin-top:6px;resize:vertical;"></textarea>
-            </div>
-            <div>
-              <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Período</label>
-              <select id="fbPeriodo" class="form-control" style="margin-top:6px;"><option value="">Período actual</option></select>
-            </div>
-            <div style="background:#111;border:1px solid #2a2a2a;border-radius:10px;padding:14px;">
-              <div style="display:flex;align-items:center;justify-content:space-between;">
-                <div>
-                  <div style="font-weight:700;color:#f0ebe3;font-size:13px;">Enviar de forma anónima</div>
-                  <div style="font-size:11px;color:#888;margin-top:2px;">El evaluado no sabrá que fuiste vos</div>
-                </div>
-                <input type="checkbox" id="fbAnonimo" checked style="width:20px;height:20px;cursor:pointer;accent-color:#FF5400;">
-              </div>
-            </div>
+      <div class="card">
+        <div class="flex items-center justify-between mb-16">
+          <div>
+            <div style="font-size:16px;font-weight:800;color:var(--primary)">Jorge Mercado — Reporte FY26</div>
+            <div class="text-muted">Developer · Operations · Evaluador: Gastón Salguero</div>
           </div>
-          <div id="fbError" style="color:#FF4D4D;font-size:12px;margin-top:10px;display:none;"></div>
-          <button onclick="enviarFeedback360()" class="btn btn-primary" style="width:100%;margin-top:16px;">Enviar Feedback</button>
+          <div class="flex gap-8">
+            <button class="btn btn-secondary btn-sm">⬇ PDF</button>
+            <button class="btn btn-primary btn-sm">⬇ Excel</button>
+          </div>
         </div>
+        <div class="grid-3 gap-16 mb-16">
+          <div class="kpi-card"><div class="kpi-label">Avance Objetivos</div><div class="kpi-value" style="color:var(--warning)">40%</div></div>
+          <div class="kpi-card"><div class="kpi-label">Competencias</div><div class="kpi-value" style="color:var(--success)">75pts</div></div>
+          <div class="kpi-card"><div class="kpi-label">Plan Carrera</div><div class="kpi-value" style="color:var(--accent)">6.7%</div></div>
+        </div>
+        <div class="progress-label mb-12"><span class="progress-name">Resultado Final Ponderado</span><span class="progress-pct" style="color:var(--warning)">40%</span></div>
+        <div class="progress-bar" style="height:14px"><div class="progress-fill" style="width:40%;background:var(--warning)"></div></div>
       </div>
-      <div id="fb-resultados" style="display:none;margin-top:16px;">
-        <div id="fbResultadosContainer"><div style="text-align:center;padding:30px;color:#888;">Cargando...</div></div>
-      </div>
-      <div id="fb-dado" style="display:none;margin-top:16px;">
-        <div id="fbDadoContainer"><div style="text-align:center;padding:30px;color:#888;">Cargando...</div></div>
-      </div>
-    </div>
+    </section>
 
-<div class="section" id="sec-reports">
-      <div class="section-header" style="margin-bottom:16px;">
-        <div><div class="section-heading">Reportes</div>
-        <div class="section-subheading">Reportes individuales y de equipo por colaborador, líder o manager</div></div>
-      </div>
-      <div class="tabs" id="rep-tabs">
-        <div class="tab active" onclick="switchTab('rep','persona',this);initReporteTab('persona')">Por Persona</div>
-        <div class="tab" onclick="switchTab('rep','lider',this);initReporteTab('lider')">Por Líder</div>
-        <div class="tab" onclick="switchTab('rep','manager',this);initReporteTab('manager')">Por Manager</div>
-        <div class="tab" onclick="switchTab('rep','empresa',this);initReporteTab('empresa')">General Empresa</div>
-      </div>
-      <div id="rep-persona" style="margin-top:16px;">
-        <div class="flex gap-8 mb-16">
-          <select id="repPersonaSel" class="form-control" style="width:260px" onchange="verReportePersona()"><option value="">— Seleccionar colaborador —</option></select>
-          <select id="repPeriodoSel" class="form-control" style="width:140px" onchange="verReportePersona()"><option value="">— Período —</option></select>
-        </div>
-        <div id="repPersonaEmpty" style="text-align:center;padding:40px;color:#888;">Seleccioná un colaborador para ver el reporte</div>
-        <div id="repPersonaResult" class="card" style="display:none;">
-          <div style="font-size:15px;font-weight:800;color:#f0ebe3;margin-bottom:4px;" id="repPersonaNombre"></div>
-          <div class="text-muted mb-16" id="repPersonaInfo"></div>
-          <div class="grid-3 gap-16 mb-16">
-            <div class="kpi-card"><div class="kpi-label">Avance Objetivos</div><div id="repAvance" class="kpi-value" style="color:#F59E0B;">—</div></div>
-            <div class="kpi-card"><div class="kpi-label">Competencias</div><div id="repCompetencias" class="kpi-value" style="color:#2ECC71;">—</div></div>
-            <div class="kpi-card"><div class="kpi-label">Plan Carrera</div><div id="repCarrera" class="kpi-value" style="color:#FF5400;">—</div></div>
-          </div>
-        </div>
-      </div>
-      <div id="rep-lider" style="display:none;margin-top:16px;">
-        <div class="flex gap-8 mb-16">
-          <select id="repLiderSel" class="form-control" style="width:260px" onchange="verReporteLider()"><option value="">— Seleccionar líder —</option></select>
-        </div>
-        <div id="repLiderResult"></div>
-      </div>
-      <div id="rep-manager" style="display:none;margin-top:16px;">
-        <div id="repManagerResult" class="grid-2 gap-16"></div>
-      </div>
-      <div id="rep-empresa" style="display:none;margin-top:16px;">
-        <div class="card"><div style="font-size:14px;font-weight:700;color:#f0ebe3;margin-bottom:12px;">KPIs de empresa</div>
-        <div id="repEmpresaKPIs" class="grid-3 gap-16"></div></div>
-      </div>
-    <div class="section" id="sec-orgchart" style="overflow-y:auto;">
+    <!-- ======== ORGANIGRAMA ======== -->
+    <section class="section" id="sec-orgchart">
       <div class="section-header">
         <div>
           <div class="section-heading">Organigrama</div>
@@ -1568,50 +1498,37 @@ label { color: #888 !important; }
           </div>
         </div>
       </div>
-    </div>
+    </section>
 
     <!-- ======== ALERTAS ======== -->
-    <div class="section" id="sec-alerts">
-      <div class="section-header" style="margin-bottom:16px;">
+    <section class="section" id="sec-alerts">
+      <div class="section-header">
         <div>
           <div class="section-heading">Alertas</div>
-          <div class="section-subheading">Colaboradores con objetivos por debajo del umbral de rendimiento</div>
+          <div class="section-subheading">Colaboradores por debajo del umbral configurado (70%)</div>
         </div>
-        <button class="btn btn-secondary btn-sm" onclick="generarAlertas()">⟳ Actualizar alertas</button>
       </div>
-
-      <!-- Descripción de la sección -->
-      <div style="background:rgba(255,84,0,0.06);border:1px solid rgba(255,84,0,0.2);border-radius:8px;padding:12px 16px;margin-bottom:20px;font-size:13px;color:#aaa;line-height:1.6;">
-        <strong style="color:#FF5400;">¿Qué son las alertas?</strong> Se generan automáticamente cuando el avance de un colaborador cae por debajo del <strong style="color:#f0ebe3;">umbral configurado (70%)</strong>. 
-        Permiten identificar a tiempo quién necesita seguimiento o soporte antes de que venza el período.
-        Las alertas se resuelven automáticamente cuando el colaborador supera el umbral.
+      <div class="alert-block danger">
+        <span class="alert-icon">⚠</span>
+        <div class="alert-text"><strong>Jorge Mercado</strong> — Objetivo "Aplicación Power Automate" al <strong>20%</strong>. Umbral: 70%. Vencimiento: 30 Jun 2026.</div>
       </div>
-
-      <!-- KPIs -->
-      <div id="alertasKPIs" class="grid-3 gap-16" style="margin-bottom:20px;"></div>
-
-      <!-- Filtros -->
-      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
-        <select id="alertaFiltroTipo" class="form-control" style="width:160px;" onchange="filtrarAlertas()">
-          <option value="">Todos los tipos</option>
-          <option value="danger">⚠️ En riesgo</option>
-          <option value="warning">⚡ Advertencia</option>
-        </select>
-        <input id="alertaBuscador" type="text" class="form-control" placeholder="🔍 Buscar colaborador..." style="flex:1;min-width:180px;" oninput="filtrarAlertas()">
+      <div class="alert-block danger">
+        <span class="alert-icon">⚠</span>
+        <div class="alert-text"><strong>Jorge Mercado</strong> — Objetivo "Certificación PL-500" al <strong>30%</strong>. Umbral: 70%. Sin check-in hace 45 días.</div>
       </div>
-
-      <!-- Lista de alertas -->
-      <div id="alertasContainer">
-        <div style="text-align:center;padding:40px;color:#888;">Cargando alertas...</div>
+      <div class="alert-block warning">
+        <span class="alert-icon">⚡</span>
+        <div class="alert-text"><strong>Miguel Rocha</strong> — Objetivo "PL-600 Power Platform Architect" al <strong>10%</strong>. Umbral: 70%. Vence en Q3 2026.</div>
       </div>
-    </div>
+      <div class="alert-block success">
+        <span class="alert-icon">✓</span>
+        <div class="alert-text"><strong>Leila Martínez</strong> — Todos los objetivos en verde (≥70%). Excelente desempeño en el período.</div>
+      </div>
+    </section>
 
     <!-- ======== CONFIGURACIÓN ======== -->
-    <div class="section" id="sec-settings">
+    <section class="section" id="sec-settings">
       <div class="section-heading mb-16">Configuración</div>
-      <div style="background:rgba(255,84,0,0.06);border:1px solid rgba(255,84,0,0.2);border-radius:8px;padding:12px 16px;margin-bottom:20px;font-size:13px;color:#aaa;line-height:1.6;">
-        <strong style="color:#FF5400;">Configuración del sistema</strong> — Administración de conexiones, integraciones y parámetros globales de PeopleTrack. Solo visible para administradores.
-      </div>
       <div class="tabs">
         <div class="tab active" onclick="switchTab('cfg','sql',this)">Base de Datos</div>
         <div class="tab" onclick="switchTab('cfg','azure',this)">Azure AD / SSO</div>
@@ -1697,273 +1614,100 @@ label { color: #888 !important; }
           <button class="btn btn-primary btn-sm">Guardar</button>
         </div>
       </div>
-    </div>
+    </section>
 
     <!-- ======== AYUDA ======== -->
-    <div class="section" id="sec-help">
-      <div style="max-width:860px;margin:0 auto;padding-bottom:60px;">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;">
-          <div>
-            <h2 style="font-size:22px;font-weight:800;color:#f0ebe3;margin-bottom:4px;">Centro de Ayuda</h2>
-            <p style="color:#888;font-size:13px;">Guia completa de PeopleTrack.</p>
-          </div>
-          <button class="btn btn-secondary btn-sm" onclick="loadHelpArticles()">Actualizar</button>
-        </div>
-        <div class="card" style="margin-bottom:20px;padding:14px 18px;">
-          <div style="font-size:11px;font-weight:700;color:#FF5400;text-transform:uppercase;margin-bottom:10px;">Ir a modulo</div>
-          <div id="helpIndexButtons" style="display:flex;flex-wrap:wrap;gap:6px;"><div style="color:#888;font-size:12px;">Cargando...</div></div>
-        </div>
-        <div id="helpArticlesContainer">
-          <div style="text-align:center;padding:40px;color:#888;">Cargando ayuda...</div>
-        </div>
-      </div>
-    </div>
+    <section class="section" id="sec-help">
+      <div class="section-heading mb-16">Centro de Ayuda</div>
+      <div class="help-tip"><span class="help-tip-icon">👋</span>Esta sección explica a detalle cada módulo de PeopleTrack. Está pensada para que cualquier usuario pueda entender la plataforma sin necesidad de capacitación previa.</div>
 
+      <div class="grid-2 gap-16">
+        <div class="card"><div class="card-title">📊 Dashboard</div><p class="text-muted" style="font-size:12px;line-height:1.7">El dashboard muestra un resumen del equipo asignado. Verá tarjetas con el avance promedio, objetivos en riesgo y reuniones pendientes. Haga clic en el nombre de cada colaborador para ver su detalle.</p></div>
+        <div class="card"><div class="card-title">🎯 Objetivos</div><p class="text-muted" style="font-size:12px;line-height:1.7">Los objetivos tienen dos tipos: Core (definidos por la empresa para todos) y Personales (acordados con cada colaborador). Cada objetivo tiene una ponderación que suma 100% por persona. Puede registrar check-ins de avance periódicos.</p></div>
+        <div class="card"><div class="card-title">📈 Plan de Carrera</div><p class="text-muted" style="font-size:12px;line-height:1.7">Define hitos de desarrollo para cada colaborador desde su rol actual hasta el rol objetivo. Cada hito tiene un porcentaje de avance y fecha de revisión. El progreso total se calcula automáticamente.</p></div>
+        <div class="card"><div class="card-title">⭐ Competencias</div><p class="text-muted" style="font-size:12px;line-height:1.7">Se evalúan competencias genéricas (para todos), de liderazgo (para líderes) y personales. La escala es de 0 a 10 y se mapea a 4 niveles: No desarrollado, Sigue trabajando, Viene Bien, Viene Súper.</p></div>
+        <div class="card"><div class="card-title">🤝 Reuniones 1:1</div><p class="text-muted" style="font-size:12px;line-height:1.7">Registre reuniones semanales, mensuales o trimestrales con cada colaborador. Las notas se acumulan cronológicamente (bitácora). Puede enviar la minuta directamente por email haciendo clic en el botón 📧 junto a cada persona.</p></div>
+        <div class="card"><div class="card-title">⚙ Configuración</div><p class="text-muted" style="font-size:12px;line-height:1.7">Configure la conexión SQL, Azure AD para SSO, la API de Claude AI para asistencia inteligente, y el umbral de alertas. En Importación puede descargar el template CSV para cargar usuarios y sus relaciones de liderazgo.</p></div>
+      </div>
+    </section>
 
-<!-- MODAL NUEVA REUNIÓN -->
-<div class="modal-overlay" id="newMeetingModal">
-  <div class="modal" style="max-width:520px;">
-    <div class="modal-title">Nueva Reunion 1:1</div>
-    <div style="display:grid;gap:12px;">
-      <div>
-        <label class="form-label">Colaborador</label>
-        <input id="reunionBuscarInput" type="text" class="form-control" placeholder="Buscar colaborador..." style="margin-bottom:4px;" oninput="filtrarColabReunion(this.value)">
-        <select id="reunionColabSel" class="form-control"><option value="">Seleccionar colaborador</option></select>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-        <div>
-          <label class="form-label">Tipo</label>
-          <select id="reunionTipo" class="form-control">
-            <option value="monthly">Mensual</option>
-            <option value="weekly">Semanal</option>
-            <option value="quarterly">Trimestral</option>
-            <option value="biweekly">Quincenal</option>
-          </select>
-        </div>
-        <div>
-          <label class="form-label">Fecha</label>
-          <input id="reunionFecha" type="date" class="form-control">
-        </div>
-      </div>
-      <div>
-        <label class="form-label">Titulo</label>
-        <input id="reunionTitulo" type="text" class="form-control" placeholder="Ej: Feedback Q2">
-      </div>
-      <div>
-        <label class="form-label">Notas generales</label>
-        <textarea id="reunionNotas" class="form-control" rows="3" placeholder="Temas tratados en la reunion..."></textarea>
-      </div>
-      <div>
-        <label class="form-label">Proximos pasos</label>
-        <textarea id="reunionPasos" class="form-control" rows="2" placeholder="Compromisos y acciones..."></textarea>
-      </div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="closeModal('newMeetingModal')">Cancelar</button>
-      <button class="btn btn-primary" onclick="guardarNuevaReunion()">Guardar Reunion</button>
-    </div>
-  </div>
-</div>
+  </div><!-- /content -->
+</div><!-- /main-wrap -->
 
-<!-- MODAL EDITAR REUNIÓN -->
-<div class="modal-overlay" id="editMeetingModal">
-  <div class="modal" style="max-width:520px;">
-    <div class="modal-title">Editar Reunion</div>
-    <input type="hidden" id="editMeetingId">
-    <div style="display:grid;gap:12px;">
-      <div>
-        <label class="form-label">Titulo</label>
-        <input id="editMeetingTitulo" type="text" class="form-control">
-      </div>
-      <div>
-        <label class="form-label">Notas generales</label>
-        <textarea id="editMeetingNotas" class="form-control" rows="3"></textarea>
-      </div>
-      <div>
-        <label class="form-label">Proximos pasos</label>
-        <textarea id="editMeetingPasos" class="form-control" rows="2"></textarea>
-      </div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="closeModal('editMeetingModal')">Cancelar</button>
-      <button class="btn btn-primary" onclick="guardarEdicionReunion()">Guardar Cambios</button>
-    </div>
-  </div>
-</div>
-
-
-<!-- ═══ MODAL: NUEVO/EDITAR OBJETIVO ═══════════════════════════ -->
+<!-- MODALS -->
 <div class="modal-overlay" id="newObjectiveModal">
-  <div class="modal" style="max-width:600px;">
-    <div class="modal-title" id="newObjModalTitle">Nuevo Objetivo</div>
-    <div style="display:flex;gap:8px;margin-bottom:20px;">
-      <button id="btnTipoCore" onclick="setTipoObjetivo('company')" class="btn btn-primary" style="flex:1;">🏢 Core Empresa</button>
-      <button id="btnTipoPersonal" onclick="setTipoObjetivo('personal')" class="btn btn-secondary" style="flex:1;">👤 Personal</button>
-    </div>
-    <input type="hidden" id="newObjTipo" value="company">
+  <div class="modal">
+    <div class="modal-title">Nuevo Objetivo</div>
     <div class="grid-2 gap-16">
-      <div class="form-group" style="grid-column:1/-1">
-        <label class="form-label">Título del Objetivo *</label>
-        <input id="newObjTitulo" class="form-control" placeholder="Ej: Certificación MS oficial anual">
-      </div>
-      <div id="camposCore" style="grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-        <div class="form-group">
-          <label class="form-label">Ponderación (%)</label>
-          <input id="newObjPeso" class="form-control" type="number" value="20" min="0" max="100">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Área aplicable</label>
-          <select id="newObjArea" class="form-control"><option value="">Todas las áreas</option></select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Período</label>
-          <select id="objPeriodoSel" class="form-control"><option value="">— Período —</option></select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Fecha Límite</label>
-          <input id="newObjFechaCore" class="form-control" type="date">
-        </div>
-        <div class="form-group" style="grid-column:1/-1">
-          <label class="form-label">Descripción</label>
-          <textarea id="newObjDescCore" class="form-control" rows="2" placeholder="Descripción del objetivo core..."></textarea>
-        </div>
-      </div>
-      <div id="camposPersonal" style="grid-column:1/-1;display:none;">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-          <div class="form-group" style="grid-column:1/-1">
-            <label class="form-label">Colaborador *</label>
-            <input id="objColabBuscar" type="text" class="form-control" placeholder="🔍 Buscar..." style="margin-bottom:4px;" oninput="filtrarColabObj(this.value)">
-            <select id="objColabSel" class="form-control"><option value="">— Seleccionar —</option></select>
-          </div>
-          <div class="form-group" style="grid-column:1/-1">
-            <label class="form-label">Basado en Core (opcional)</label>
-            <select id="newObjCoreRef" class="form-control" onchange="precargarDesdeCore(this.value)">
-              <option value="">— Sin referencia core —</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Ponderación (%)</label>
-            <input id="newObjPesoPersonal" class="form-control" type="number" value="20" min="0" max="100">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Período</label>
-            <select id="objPeriodoSelPersonal" class="form-control"><option value="">— Período —</option></select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Fecha Límite</label>
-            <input id="newObjFechaPersonal" class="form-control" type="date">
-          </div>
-          <div class="form-group" style="grid-column:1/-1">
-            <label class="form-label">Descripción</label>
-            <textarea id="newObjDescPersonal" class="form-control" rows="2" placeholder="Descripción..."></textarea>
-          </div>
-        </div>
-      </div>
+      <div class="form-group" style="grid-column:1/-1"><label class="form-label">Título del Objetivo</label><input class="form-control" placeholder="Ej: Certificación PL-500 completa"></div>
+      <div class="form-group"><label class="form-label">Tipo</label><select class="form-control"><option>Personal</option><option>Core (Empresa)</option></select></div>
+      <div class="form-group"><label class="form-label">Colaborador</label><select class="form-control"><option>Jorge Mercado</option><option>Miguel Rocha</option></select></div>
+      <div class="form-group"><label class="form-label">Competencia</label><select class="form-control"><option>Aprendizaje</option><option>Innovación</option><option>Orientación al Cliente</option></select></div>
+      <div class="form-group"><label class="form-label">Ponderación (%)</label><input class="form-control" type="number" value="20"></div>
+      <div class="form-group"><label class="form-label">Período</label><select class="form-control"><option>FY26</option><option>H1-FY26</option><option>Q2-FY26</option></select></div>
+      <div class="form-group"><label class="form-label">Fecha Límite</label><input class="form-control" type="date"></div>
+      <div class="form-group" style="grid-column:1/-1"><label class="form-label">Descripción</label><textarea class="form-control" placeholder="Detalle del objetivo..."></textarea></div>
     </div>
-    <div id="newObjError" style="color:#FF4D4D;font-size:12px;margin-top:8px;display:none;"></div>
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeModal('newObjectiveModal')">Cancelar</button>
-      <button class="btn btn-primary" onclick="guardarNuevoObjetivo()">Guardar Objetivo</button>
+      <button class="btn btn-primary" onclick="closeModal('newObjectiveModal')">Guardar Objetivo</button>
     </div>
   </div>
 </div>
 
-<!-- ═══ MODAL: EDITAR OBJETIVO ══════════════════════════════════ -->
-<div class="modal-overlay" id="editObjectiveModal">
-  <div class="modal" style="max-width:520px;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-      <div class="modal-title" id="editObjModalTitle" style="margin:0;">Editar Objetivo</div>
-      <span id="editObjTipoBadge" style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:rgba(255,84,0,0.15);color:#FF5400;"></span>
-    </div>
-    <input type="hidden" id="editObjId">
-    <input type="hidden" id="editObjTipoHidden">
-    <div class="form-group">
-      <label class="form-label">Título del Objetivo</label>
-      <input id="editObjTitulo" class="form-control" type="text" placeholder="Título del objetivo">
-    </div>
-    <div id="editCoreFields" style="display:none;">
-      <div class="grid-2 gap-16">
-        <div class="form-group">
-          <label class="form-label">Ponderación (%)</label>
-          <input id="editObjPeso" class="form-control" type="number" min="0" max="100" value="20">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Período</label>
-          <select id="editObjPeriodo" class="form-control"><option value="">— Período —</option></select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Fecha Límite</label>
-          <input id="editObjFecha" class="form-control" type="date">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Estado Organizacional</label>
-          <select id="editObjEstadoOrg" class="form-control">
-            <option value="active">Activo</option>
-            <option value="approved">Aprobado por Dirección</option>
-            <option value="paused">Pausado</option>
-            <option value="cancelled">Cancelado por Dirección</option>
-          </select>
-        </div>
-        <div class="form-group" style="grid-column:1/-1">
-          <label class="form-label">Nota de dirección</label>
-          <textarea id="editObjNotaDir" class="form-control" rows="2" placeholder="Motivo del cambio..."></textarea>
-        </div>
-      </div>
-    </div>
-    <div id="editPersonalFields" style="display:none;">
-      <div class="grid-2 gap-16">
-        <div class="form-group">
-          <label class="form-label">Avance (%)</label>
-          <input id="editObjAvance" class="form-control" type="number" min="0" max="100" value="0">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Estado</label>
-          <select id="editObjEstado" class="form-control">
-            <option value="not_started">No Iniciado</option>
-            <option value="in_progress">En Curso</option>
-            <option value="at_risk">En Riesgo</option>
-            <option value="completed">Completado</option>
-            <option value="not_met">No Cumplido</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Ponderación (%)</label>
-          <input id="editObjPesoPersonal" class="form-control" type="number" min="0" max="100" value="20">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Fecha Límite</label>
-          <input id="editObjFechaPersonal" class="form-control" type="date">
-        </div>
-      </div>
-    </div>
-    <div id="editObjError" style="color:#FF4D4D;font-size:12px;margin-top:8px;display:none;"></div>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="closeModal('editObjectiveModal')">Cancelar</button>
-      <button class="btn btn-primary" onclick="guardarEdicionObjetivo()">Guardar Cambios</button>
-    </div>
-  </div>
-</div>
-
-<!-- ═══ MODAL: IMPORTAR ══════════════════════════════════════════ -->
-<div class="modal-overlay" id="importModal">
+<div class="modal-overlay" id="checkinModal">
   <div class="modal">
-    <div class="modal-title">Importar Objetivos</div>
-    <p style="color:#888;font-size:13px;margin-bottom:16px;">Funcionalidad de importación próximamente disponible.</p>
+    <div class="modal-title">Registrar Check-in</div>
+    <div class="form-group"><label class="form-label">Objetivo</label><input class="form-control" value="Formación — Cursos Python / PL-200 / PL-500" readonly></div>
+    <div class="form-group"><label class="form-label">Avance actual (%)</label><input class="form-control" type="number" value="45" min="0" max="100"></div>
+    <div class="form-group"><label class="form-label">Estado</label><select class="form-control"><option>En Curso</option><option>Cumplido</option><option>No Cumplido</option><option>No Iniciado</option><option>En Riesgo</option></select></div>
+    <div class="form-group"><label class="form-label">Notas / Comentarios</label><textarea class="form-control" placeholder="¿Qué avanzó? ¿Hay obstáculos?"></textarea></div>
     <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="closeModal('importModal')">Cerrar</button>
+      <button class="btn btn-secondary" onclick="closeModal('checkinModal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="closeModal('checkinModal')">Registrar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="newMeetingModal">
+  <div class="modal">
+    <div class="modal-title">Nueva Reunión 1:1</div>
+    <div class="grid-2 gap-16">
+      <div class="form-group"><label class="form-label">Colaborador</label><select class="form-control"><option>Jorge Mercado</option><option>Miguel Rocha</option></select></div>
+      <div class="form-group"><label class="form-label">Tipo</label><select class="form-control"><option>Mensual</option><option>Semanal</option><option>Trimestral</option></select></div>
+      <div class="form-group"><label class="form-label">Fecha</label><input class="form-control" type="date"></div>
+      <div class="form-group"><label class="form-label">Título</label><input class="form-control" placeholder="Ej: Feedback Q1"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Notas Generales</label><textarea class="form-control" placeholder="Temas tratados en la reunión..."></textarea></div>
+    <div class="form-group"><label class="form-label">Próximos pasos</label><textarea class="form-control" placeholder="Acuerdos y acciones a seguir..."></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('newMeetingModal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="closeModal('newMeetingModal')">Guardar + Enviar Minuta</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="exportModal">
+  <div class="modal">
+    <div class="modal-title">Exportar Datos</div>
+    <div class="grid-2 gap-16">
+      <div class="form-group"><label class="form-label">Tipo de Reporte</label><select class="form-control"><option>Por Persona</option><option>Por Líder (todo su equipo)</option><option>Por Manager</option><option>General Empresa</option></select></div>
+      <div class="form-group"><label class="form-label">Período</label><select class="form-control"><option>FY26</option><option>H1-FY26</option><option>FY25</option></select></div>
+      <div class="form-group"><label class="form-label">Persona (si aplica)</label><select class="form-control"><option>Todos</option><option>Jorge Mercado</option><option>Miguel Rocha</option></select></div>
+      <div class="form-group"><label class="form-label">Formato</label><select class="form-control"><option>Excel (.xlsx)</option><option>PDF</option><option>CSV</option></select></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('exportModal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="closeModal('exportModal')">⬇ Exportar</button>
     </div>
   </div>
 </div>
 
 <script>
-
-
-
-
 const titles = {
   dashboard:'Dashboard',usuarios:'Usuarios',lideres:'Líderes',areas:'Áreas',objectives:'Objetivos',career:'Plan de Carrera',
-  competencies:'Competencias',oneononex:'Reuniones 1:1',reports:'Reportes',feedback360:'Feedback 360°',
-  orgchart:'Organigrama',alerts:'Alertas',periods:'Períodos',settings:'Configuración',help:'Ayuda'
+  competencies:'Competencias',oneononex:'Reuniones 1:1',reports:'Reportes',
+  orgchart:'Organigrama',alerts:'Alertas',settings:'Configuración',help:'Ayuda'
 };
 
 // ── Datos reales desde Azure SQL ────────────────────────────
@@ -1971,10 +1715,6 @@ const API_BASE = 'https://peopletrack-api-gjbbhhcefjbgc6bd.eastus2-01.azurewebsi
 const AVATAR_COLORS = ['#FF5400', '#2ECC71', '#3B82F6', '#A855F7', '#F59E0B', '#EF4444', '#10B981', '#F97316', '#6366F1', '#EC4899'];
 
 let teamData = []; // se llena desde la API
-
-let allObjetivosCore = [];
-let allObjetivosPersonales = [];
-let allObjetivosCache = {}; // cache por ObjectiveID → objeto completo
 
 function ini(name) {
   return (name || '??').split(/[ @]/).filter(Boolean).map(n=>n[0]).join('').slice(0,2).toUpperCase();
@@ -2009,17 +1749,7 @@ async function loadDashboardFromAPI() {
   if (kpiEl('riesgo')) kpiEl('riesgo').textContent = atRisk;
 
   // Equipo — top 10 para el panel
-  window.allTeamData = active.map(function(u, i) { return {
-    name: u.FullName||u.Email, init: ini(u.FullName||u.Email),
-    color: colorFor(i), pct: u.AvgProgress||0,
-    status: statusFor(u.AvgProgress||0), userId: u.UserID,
-    leader: u.LeaderName, manager: u.ManagerName
-  }; });
-  window.dashPage=1; window.dashPageSize=20;
-  renderDashboardPage();
-  // legacy
-  teamData = window.allTeamData.slice(0,15).map(function(x){return x;});
-  if (false && ({
+  teamData = active.slice(0, 15).map((u, i) => ({
     name:   u.FullName || u.Email,
     init:   ini(u.FullName || u.Email),
     color:  colorFor(i),
@@ -2121,78 +1851,40 @@ function drawDonut(){
   ].map(d=>`<div class="donut-legend-item"><div class="donut-dot" style="background:${d.c}"></div>${d.l} <strong style="margin-left:auto">${d.n}</strong></div>`).join('');
 }
 
-
 function showSection(id){
-  document.querySelectorAll('.section').forEach(function(s){ s.classList.remove('active'); });
-  document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
-  var sec = document.getElementById('sec-'+id);
+  if(id==='usuarios' && !allUsuarios.length) loadUsuarios();
+  if(id==='lideres' && !Object.keys(allLideres).length) loadLideres();
+  if(id==='areas' && !allAreas.length) loadAreas();
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const sec = document.getElementById('sec-'+id);
   if(sec) sec.classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(function(n){
+  document.querySelectorAll('.nav-item').forEach(n=>{
     if(n.getAttribute('onclick') && n.getAttribute('onclick').includes("'"+id+"'")) n.classList.add('active');
   });
-  var titleEl = document.getElementById('topbarTitle');
-  if(titleEl) titleEl.textContent = titles[id]||id;
-
-  // Cargar datos por sección
-  if(id==='usuarios' && !allUsuarios.length) loadUsuarios();
-  if(id==='lideres'){ if(!Object.keys(allLideres||{}).length) loadLideres(); }
-  if(id==='areas' && !allAreas.length) loadAreas();
-  if(id==='periods'){ if(!allPeriods.length) loadPeriods(); }
-
-  if(id==='objectives'){
-    var panels=['obj-core','obj-personal','obj-tasks'];
-    panels.forEach(function(pid,i){ var el=document.getElementById(pid); if(el) el.style.display=i===0?'':'none'; });
-    document.querySelectorAll('#sec-objectives .tab').forEach(function(t,i){ t.classList.toggle('active',i===0); });
-    if(!allUsuarios.length){ loadUsuarios().then(function(){
-      cargarObjetivosCoreEmpresa(); poblarSelectoresTabObjetivos();
-      if(!allPeriods.length) loadPeriods().then(poblarModalObjetivo); else poblarModalObjetivo();
-    }); } else {
-      cargarObjetivosCoreEmpresa(); poblarSelectoresTabObjetivos();
-      if(!allPeriods.length) loadPeriods().then(poblarModalObjetivo); else poblarModalObjetivo();
-    }
-  }
-
-  if(id==='career'){
-    if(!allUsuarios.length) loadUsuarios().then(loadCareerPlans); else loadCareerPlans();
-  }
-
-  if(id==='competencies'){
-    if(!allUsuarios.length) loadUsuarios().then(poblarSelectoresCompetencias); else poblarSelectoresCompetencias();
-  }
-
-  if(id==='reports'){
-    if(!allUsuarios.length) loadUsuarios().then(initReportes); else initReportes();
-  }
-
-  if(id==='oneononex'){
-    if(!allColabReuniones||!allColabReuniones.length) initReuniones();
-  }
-
-  if(id==='feedback360'){
-    if(!allUsuarios.length) loadUsuarios().then(initFeedback360); else initFeedback360();
-    if(!allPeriods.length) loadPeriods();
-  }
-
-  if(id==='help') loadHelpArticles();
-  if(id==='orgchart'){ if(!orgData||!orgData.length) loadOrgChartDynamic(); }
-  if(id==='alerts') loadAlertas();
-  if(id==='orgchart') loadOrgChart();
+  document.getElementById('topbarTitle').textContent = titles[id]||id;
 }
 
-
 function switchTab(prefix, id, el){
-  const tabsDiv = el.closest('.tabs');
-  tabsDiv.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  const parent = el.closest('.tabs');
+  parent.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
-  const panelId = prefix + '-' + id;
-  // Buscar panels: hijos directos del padre que tengan id con el prefijo
-  // Excluir el propio div de tabs (que tiene id obj-tabs)
-  const container = tabsDiv.parentElement;
-  container.querySelectorAll('[id^="' + prefix + '-"]').forEach(p=>{
-    if (p === tabsDiv) return; // no ocultar el div de tabs
-    if (p.id === prefix + '-tabs') return; // excluir *-tabs
-    p.style.display = p.id === panelId ? '' : 'none';
+  const container = parent.nextElementSibling;
+  if(!container) return;
+  // Hide all sibling tab panels
+  const panelId = prefix+'-'+id;
+  // Find all potential panels
+  const allPanels = [container];
+  let sib = container.nextElementSibling;
+  while(sib && !sib.classList.contains('section') && !sib.classList.contains('card') && sib.id && sib.id.startsWith(prefix+'-')){
+    allPanels.push(sib); sib=sib.nextElementSibling;
+  }
+  // Show only matching
+  document.querySelectorAll('[id^="'+prefix+'-"]').forEach(p=>{
+    p.style.display = p.id===panelId?'':'none';
   });
+  const target = document.getElementById(panelId);
+  if(target) target.style.display='block';
 }
 
 function showModal(id){ document.getElementById(id).classList.add('open'); }
@@ -2513,9 +2205,8 @@ function abrirModalEditar(userId) {
   allUsuarios.filter(x => x.IsActive && x.UserID !== userId)
     .sort((a,b) => (a.FullName||"").localeCompare(b.FullName||""))
     .forEach(x => {
-      const label = (x.FullName||x.Email) + ' — ' + (x.Email||'');
-      const o1 = new Option(label, x.UserID);
-      const o2 = new Option(label, x.UserID);
+      const o1 = new Option(x.FullName||x.Email, x.UserID);
+      const o2 = new Option(x.FullName||x.Email, x.UserID);
       if (x.UserID === u.LeaderID)  o1.selected = true;
       if (x.UserID === u.ManagerID) o2.selected = true;
       liderSel.add(o1);
@@ -2775,2201 +2466,6 @@ async function guardarArea() {
   }
 }
 
-
-// ═══ PAGINACIÓN LÍDERES ══════════════════════════════════════
-let lideresPagina = 1;
-const LIDERES_POR_PAG = 10;
-const _origRL = renderLideres;
-renderLideres = function(grupos) {
-  const c = document.getElementById("lideresContainer");
-  const pg = document.getElementById("lideresPagination");
-  if (!c || !grupos.length) { if(c) c.innerHTML="<div style='padding:40px;text-align:center;color:#888;'>Sin líderes</div>"; return; }
-  function ini(n){ return (n||"?").split(" ").map(p=>p[0]).join("").slice(0,2).toUpperCase(); }
-  const COLS=["#FF5400","#2ECC71","#3B82F6","#A855F7","#F59E0B","#EF4444","#10B981","#F97316"];
-  function col(n){ let h=0; for(let ch of(n||""))h=(h*31+ch.charCodeAt(0))%COLS.length; return COLS[h]; }
-  const sorted=[...grupos].sort((a,b)=>a.nombre.localeCompare(b.nombre));
-  const tp=Math.ceil(sorted.length/LIDERES_POR_PAG);
-  const slice=sorted.slice((lideresPagina-1)*LIDERES_POR_PAG,lideresPagina*LIDERES_POR_PAG);
-  c.innerHTML=slice.map(g=>`<div class="card" style="padding:16px 20px;"><div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;border-bottom:1px solid #2a2a2a;padding-bottom:12px;"><div style="width:40px;height:40px;border-radius:50%;background:${col(g.nombre)};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;">${ini(g.nombre)}</div><div><div style="font-weight:700;color:#f0ebe3;font-size:14px;">${g.nombre}</div><div style="font-size:11px;color:#888;">${g.equipo.length} colaborador${g.equipo.length!==1?"es":""}</div></div><div style="margin-left:auto;display:flex;gap:8px;"><span style="background:rgba(255,84,0,0.12);color:#FF5400;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">Lider</span><button onclick="abrirModalEditar(${g.id})" style="padding:3px 10px;background:#222;border:1px solid #333;border-radius:6px;color:#aaa;font-size:11px;cursor:pointer;">Editar</button></div></div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;">${g.equipo.map(u=>`<div onclick="abrirModalEditar(${u.UserID})" style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:#111;border-radius:8px;cursor:pointer;" onmouseover="this.style.background='#1e1e1e'" onmouseout="this.style.background='#111'"><div style="width:26px;height:26px;border-radius:50%;background:${col(u.FullName)};display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;flex-shrink:0;">${ini(u.FullName||u.Email)}</div><div style="min-width:0;"><div style="font-size:11px;font-weight:600;color:#ccc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${u.FullName||u.Email}</div><div style="font-size:10px;color:#555;">${u.IsActive?"Activo":"Inactivo"}</div></div></div>`).join("")}</div></div>`).join("");
-  if(pg){ pg.innerHTML=""; if(tp>1) for(let i=1;i<=tp;i++){const b=document.createElement("button");b.textContent=i;b.style.cssText="padding:4px 10px;border-radius:6px;border:1px solid #333;background:"+(i===lideresPagina?"#FF5400":"#1a1a1a")+";color:#f0ebe3;cursor:pointer;font-size:12px;margin:2px;";b.onclick=(pg=>()=>{lideresPagina=pg;renderLideres(Object.values(allLideres));})(i);pg.appendChild(b);} }
-};
-
-// ═══ PERÍODOS ════════════════════════════════════════════════
-let allPeriods=[];
-async function loadPeriods(){
-  let d=await apiGet("periods/all");
-  if(!d||!Array.isArray(d)||!d.length) d=await apiGet("periods");
-  allPeriods=Array.isArray(d)?d:[];
-  renderPeriods();
-}
-function renderPeriods(){
-  const tb=document.getElementById("periodsTbody"),tbl=document.getElementById("periodsTable"),ld=document.getElementById("periodsLoading");
-  if(!tb)return;
-  if(!allPeriods.length){ld.style.display="block";ld.textContent="Sin períodos. Usá + Nuevo para crear uno.";tbl.style.display="none";return;}
-  ld.style.display="none";tbl.style.display="";
-  tb.innerHTML=allPeriods.map(p=>`<tr style="border-bottom:1px solid #222;" onmouseover="this.style.background='#1e1e1e'" onmouseout="this.style.background=''"><td style="padding:10px 12px;font-weight:700;color:#f0ebe3;">${p.PeriodName||"—"}</td><td style="padding:10px 12px;color:#888;font-size:12px;">${p.StartDate?new Date(p.StartDate).toLocaleDateString("es-AR"):"—"}</td><td style="padding:10px 12px;color:#888;font-size:12px;">${p.EndDate?new Date(p.EndDate).toLocaleDateString("es-AR"):"—"}</td><td style="padding:10px 12px;"><span style="padding:2px 10px;border-radius:20px;font-size:10px;font-weight:700;${p.IsActive?"background:rgba(46,204,113,0.15);color:#2ECC71":"background:rgba(255,77,77,0.15);color:#FF4D4D"}">${p.IsActive?"Activo":"Inactivo"}</span></td><td style="padding:10px 12px;"><button onclick="abrirModalPeriodo(${p.PeriodID})" style="padding:4px 12px;background:#222;border:1px solid #333;border-radius:6px;color:#f0ebe3;font-size:11px;cursor:pointer;">Editar</button></td></tr>`).join("");
-}
-function abrirModalPeriodo(id){
-  document.getElementById("editPeriodoId").value=id||"";
-  document.getElementById("modalPeriodoTitle").textContent=id?"Editar Período":"Nuevo Período";
-  document.getElementById("modalPeriodoError").style.display="none";
-  if(id){const p=allPeriods.find(x=>x.PeriodID===id);if(p){document.getElementById("periodoName").value=p.PeriodName||"";document.getElementById("periodoStart").value=p.StartDate?p.StartDate.split("T")[0]:"";document.getElementById("periodoEnd").value=p.EndDate?p.EndDate.split("T")[0]:"";document.getElementById("periodoActivo").value=p.IsActive?"1":"0";}}
-  else{["periodoName","periodoStart","periodoEnd"].forEach(i=>document.getElementById(i).value="");document.getElementById("periodoActivo").value="1";}
-  document.getElementById("modalPeriodo").style.display="flex";
-}
-function cerrarModalPeriodo(){document.getElementById("modalPeriodo").style.display="none";}
-async function guardarPeriodo(){
-  const id=document.getElementById("editPeriodoId").value;
-  const name=document.getElementById("periodoName").value.trim();
-  const start=document.getElementById("periodoStart").value||null;
-  const end=document.getElementById("periodoEnd").value||null;
-  const active=document.getElementById("periodoActivo").value==="1";
-  const errEl=document.getElementById("modalPeriodoError");
-  const btn=document.getElementById("btnGuardarPeriodo");
-  if(!name){errEl.textContent="Nombre obligatorio";errEl.style.display="block";return;}
-  btn.textContent="Guardando...";btn.disabled=true;errEl.style.display="none";
-  try{
-    const url=id?API_BASE+"/manage/periods/"+id:API_BASE+"/manage/periods";
-    const res=await fetch(url,{method:id?"PUT":"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({periodName:name,startDate:start,endDate:end,isActive:active})});
-    const data=await res.json();
-    if(data.ok===false)throw new Error(data.error||"Error");
-    cerrarModalPeriodo();allPeriods=[];await loadPeriods();
-    mostrarToast(id?"Período actualizado":"Período creado","success");
-  }catch(e){errEl.textContent=e.message;errEl.style.display="block";}
-  finally{btn.textContent="Guardar";btn.disabled=false;}
-}
-
-// ═══ SHOWSECTION PERIODOS ════════════════════════════════════
-
-
-
-// ═══ NUEVOCONTEXTUAL MEJORADO ════════════════════════════════
-nuevoContextual=function(){
-  const a=document.querySelector(".section.active");if(!a)return;const id=a.id;
-  if(id==="sec-lideres"){abrirModalPromover();return;}
-  if(id==="sec-usuarios"){abrirModalUsuario();return;}
-  if(id==="sec-areas"){abrirModalArea();return;}
-  if(id==="sec-periods"){abrirModalPeriodo();return;}
-  if(id==="sec-oneononex"){mostrarToast("Seleccioná un colaborador de la lista para registrar la reunión","info");return;}
-  if(id==="sec-competencies"){mostrarToast("Seleccioná un colaborador para evaluar sus competencias","info");return;}
-  if(id==="sec-career"){mostrarToast("Seleccioná un colaborador para gestionar su plan de carrera","info");return;}
-  if(typeof showModal==="function")showModal("newObjectiveModal");
-};
-
-// ═══ TOAST INFO ══════════════════════════════════════════════
-const _origToast=mostrarToast;
-mostrarToast=function(msg,tipo){
-  let t=document.getElementById("globalToast");
-  if(!t){t=document.createElement("div");t.id="globalToast";t.style.cssText="position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:9999;transition:opacity 0.3s;max-width:360px;";document.body.appendChild(t);}
-  t.style.background=tipo==="success"?"#2ECC71":tipo==="info"?"#3B82F6":"#FF4D4D";
-  t.style.color="#fff";t.textContent=msg;t.style.opacity="1";
-  setTimeout(()=>{t.style.opacity="0";},4000);
-};
-
-
-// ═══ GUARDAR REUNIÓN 1:1 ════════════════════════════════════
-async function guardarReunion() {
-  const modal = document.getElementById('newMeetingModal');
-  const colaboradorEl = modal.querySelector('select');
-  const tipoEl = modal.querySelectorAll('select')[1];
-  const fechaEl = modal.querySelector('input[type="date"]');
-  const tituloEl = modal.querySelectorAll('input')[1];
-  const notasEl = modal.querySelectorAll('textarea')[0];
-  const pasosEl = modal.querySelectorAll('textarea')[1];
-  
-  // Obtener valores
-  const colaboradorId = colaboradorEl ? colaboradorEl.value : null;
-  const tipo = tipoEl ? tipoEl.value : 'monthly';
-  const fecha = fechaEl ? fechaEl.value : new Date().toISOString().split('T')[0];
-  const titulo = tituloEl ? tituloEl.value : '';
-  const notas = notasEl ? notasEl.value : '';
-  const pasos = pasosEl ? pasosEl.value : '';
-
-  if (!colaboradorId) {
-    mostrarToast('Seleccioná un colaborador', 'error');
-    return;
-  }
-  if (!fecha) {
-    mostrarToast('Ingresá la fecha de la reunión', 'error');
-    return;
-  }
-
-  try {
-    const res = await fetch(API_BASE + '/meetings', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        employeeId: parseInt(colaboradorId),
-        meetingType: tipo,
-        meetingDate: fecha,
-        title: titulo || null,
-        generalNotes: notas || null,
-        nextSteps: pasos || null,
-        status: 'completed',
-        sendEmail: false
-      })
-    });
-    const data = await res.json();
-    if (data.ok === false) throw new Error(data.error || 'Error al guardar');
-    closeModal('newMeetingModal');
-    mostrarToast('Reunión guardada correctamente', 'success');
-    // Limpiar campos
-    if (notasEl) notasEl.value = '';
-    if (pasosEl) pasosEl.value = '';
-    if (tituloEl) tituloEl.value = '';
-  } catch(e) {
-    mostrarToast(e.message || 'Error al guardar la reunión', 'error');
-  }
-}
-
-
-// ═══ ORGANIGRAMA REAL ════════════════════════════════════════
-async function loadOrgChart() {
-  const section = document.getElementById('sec-orgchart');
-  if (!section) return;
-  // Buscar el contenedor del organigrama
-  const container = section.querySelector('.org-chart-wrap') || section.querySelector('[class*="org"]');
-  if (!container) return;
-  container.innerHTML = '<div style="text-align:center;padding:40px;color:#888;">Cargando organigrama...</div>';
-  
-  // Cargar usuarios para construir el organigrama
-  const users = await apiGet('users/all');
-  if (!users || !users.length) {
-    container.innerHTML = '<div style="text-align:center;padding:40px;color:#888;">Sin datos de organigrama</div>';
-    return;
-  }
-  
-  // Construir jerarquía simple: manager → líderes → colaboradores
-  const managers = users.filter(u => u.AppRole === 'manager' || u.AppRole === 'admin');
-  const leaders = users.filter(u => u.AppRole === 'leader');
-  
-  function ini(n){ return (n||'?').split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase(); }
-  const COLS = ['#FF5400','#2ECC71','#3B82F6','#A855F7','#F59E0B'];
-  function col(n){ let h=0; for(let c of(n||''))h=(h*31+c.charCodeAt(0))%COLS.length; return COLS[h]; }
-  
-  let html = '<div style="display:flex;flex-direction:column;align-items:center;gap:24px;padding:20px;">';
-  
-  // Mostrar manager/admin al tope
-  managers.forEach(m => {
-    html += `<div style="background:#1a1a1a;border:2px solid #FF5400;border-radius:12px;padding:14px 24px;text-align:center;min-width:180px;">
-      <div style="font-weight:800;color:#f0ebe3;">${m.FullName||m.Email}</div>
-      <div style="font-size:11px;color:#888;margin-top:2px;">${m.AppRole}</div>
-    </div>`;
-  });
-  
-  // Mostrar líderes
-  if (leaders.length) {
-    html += '<div style="display:flex;flex-wrap:wrap;gap:16px;justify-content:center;">';
-    leaders.forEach(l => {
-      const equipo = users.filter(u => u.LeaderID === l.UserID);
-      html += `<div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:12px;padding:14px 20px;min-width:160px;text-align:center;">
-        <div style="width:36px;height:36px;border-radius:50%;background:${col(l.FullName)};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;margin:0 auto 8px;">${ini(l.FullName||l.Email)}</div>
-        <div style="font-weight:700;color:#f0ebe3;font-size:13px;">${l.FullName||l.Email}</div>
-        <div style="font-size:10px;color:#FF5400;margin-top:2px;">Líder</div>
-        ${equipo.length ? `<div style="font-size:10px;color:#666;margin-top:4px;">${equipo.length} colaborador${equipo.length!==1?'es':''}</div>` : ''}
-      </div>`;
-    });
-    html += '</div>';
-  }
-  
-  html += '</div>';
-  container.innerHTML = html;
-}
-
-
-// ═══ POBLAR SELECT COLABORADORES EN MODAL REUNIÓN ═══════════
-function poblarColaboradoresReunion() {
-  const modal = document.getElementById('newMeetingModal');
-  if (!modal) return;
-  const selects = modal.querySelectorAll('select');
-  if (!selects.length) return;
-  const sel = selects[0]; // primer select = colaborador
-  const current = sel.value;
-  sel.innerHTML = '<option value="">— Seleccionar colaborador —</option>';
-  const activos = allUsuarios.filter(u => u.IsActive)
-    .sort((a,b) => (a.FullName||'').localeCompare(b.FullName||''));
-  activos.forEach(u => {
-    const opt = new Option((u.FullName||u.Email) + ' — ' + (u.Email||''), u.UserID);
-    sel.add(opt);
-  });
-  if (current) sel.value = current;
-}
-
-// showModal unificado
-const _origShowModal = showModal;
-showModal = function(id) {
-  _origShowModal(id);
-  if (id === 'newMeetingModal') {
-    if (!allUsuarios.length) loadUsuarios().then(function(){ filtrarColabReunion(''); });
-    else filtrarColabReunion('');
-  }
-  if (id === 'newObjectiveModal') {
-    if (!allUsuarios.length) loadUsuarios().then(poblarModalObjetivo);
-    else poblarModalObjetivo();
-    if (!allPeriods.length) loadPeriods().then(poblarModalObjetivo);
-  }
-};
-
-
-// ═══ MODAL NUEVO PLAN DE CARRERA ════════════════════════════
-function abrirModalNuevoPlan() {
-  // Modal simple inline para nuevo plan
-  const existente = document.getElementById('modalNuevoPlan');
-  if (existente) { existente.style.display='flex'; return; }
-  
-  const modal = document.createElement('div');
-  modal.id = 'modalNuevoPlan';
-  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:500;display:flex;align-items:center;justify-content:center;';
-  modal.innerHTML = `
-    <div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:16px;padding:28px;width:440px;max-width:95vw;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-        <h3 style="font-size:16px;font-weight:800;color:#f0ebe3;">Nuevo Plan de Carrera</h3>
-        <button onclick="document.getElementById('modalNuevoPlan').style.display='none'" style="background:none;border:none;color:#888;font-size:20px;cursor:pointer;">×</button>
-      </div>
-      <div style="display:grid;gap:14px;">
-        <div>
-          <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Colaborador *</label>
-          <select id="npColaborador" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px;color:#f0ebe3;font-size:13px;outline:none;">
-            <option value="">— Seleccionar —</option>
-            ${allUsuarios.filter(u=>u.IsActive).sort((a,b)=>(a.FullName||'').localeCompare(b.FullName||'')).map(u=>`<option value="${u.UserID}">${u.FullName||u.Email}</option>`).join('')}
-          </select>
-        </div>
-        <div>
-          <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Rol actual</label>
-          <input id="npRolActual" type="text" placeholder="Ej: Developer" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px;color:#f0ebe3;font-size:13px;outline:none;">
-        </div>
-        <div>
-          <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Rol objetivo</label>
-          <input id="npRolObjetivo" type="text" placeholder="Ej: Senior Developer" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px;color:#f0ebe3;font-size:13px;outline:none;">
-        </div>
-      </div>
-      <div id="npError" style="color:#FF4D4D;font-size:12px;margin-top:10px;display:none;"></div>
-      <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end;">
-        <button onclick="document.getElementById('modalNuevoPlan').style.display='none'" style="padding:10px 20px;background:#222;border:1px solid #333;border-radius:8px;color:#aaa;font-size:13px;cursor:pointer;">Cancelar</button>
-        <button onclick="guardarNuevoPlan()" style="padding:10px 24px;background:#FF5400;border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;">Crear Plan</button>
-      </div>
-    </div>`;
-  document.body.appendChild(modal);
-}
-
-async function guardarNuevoPlan() {
-  const userId = document.getElementById('npColaborador')?.value;
-  const rolActual = document.getElementById('npRolActual')?.value?.trim();
-  const rolObjetivo = document.getElementById('npRolObjetivo')?.value?.trim();
-  const errEl = document.getElementById('npError');
-  if (!userId) { errEl.textContent='Seleccioná un colaborador'; errEl.style.display='block'; return; }
-  mostrarToast('Plan de carrera: funcionalidad en desarrollo. Próximamente disponible.', 'info');
-  document.getElementById('modalNuevoPlan').style.display='none';
-}
-
-// ═══ MODAL EVALUAR COMPETENCIA ═══════════════════════════════
-function abrirModalEvaluar() {
-  // Scroll al formulario de evaluación que ya existe en la sección
-  const evalSection = document.querySelector('#comp-global') || document.querySelector('[id^="comp-"]');
-  if (evalSection) {
-    evalSection.scrollIntoView({ behavior: 'smooth' });
-    mostrarToast('Seleccioná el colaborador y el período en el formulario de evaluación', 'info');
-  }
-}
-
-// ═══ FIX REUNIÓN: usar LeaderID del usuario actual como fallback ══
-async function guardarReunionFixed() {
-  const modal = document.getElementById('newMeetingModal');
-  if (!modal) return;
-  const selects = modal.querySelectorAll('select');
-  const colaboradorId = selects[0]?.value;
-  const tipo = selects[1]?.value || 'monthly';
-  const fecha = modal.querySelector('input[type="date"]')?.value;
-  const inputs = modal.querySelectorAll('input[type="text"], input:not([type])');
-  const titulo = inputs[0]?.value || '';
-  const textareas = modal.querySelectorAll('textarea');
-  const notas = textareas[0]?.value || '';
-  const pasos = textareas[1]?.value || '';
-
-  if (!colaboradorId) { mostrarToast('Seleccioná un colaborador', 'error'); return; }
-  if (!fecha) { mostrarToast('Ingresá la fecha', 'error'); return; }
-
-  try {
-    // Usar el usuario logueado como líder (no requiere auth token separado)
-    const currentUser = allUsuarios.find(u => u.Email === document.querySelector('.sidebar-user-email')?.textContent?.trim());
-    const leaderId = currentUser?.UserID || 1;
-    
-    const body = {
-      employeeId: parseInt(colaboradorId),
-      leaderId: leaderId,
-      meetingType: tipo,
-      meetingDate: fecha,
-      title: titulo || null,
-      generalNotes: notas || null,
-      nextSteps: pasos || null,
-      status: 'completed',
-      sendEmail: false
-    };
-    
-    const res = await fetch(API_BASE + '/meetings', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
-    
-    if (!res.ok) {
-      const errData = await res.json().catch(()=>({error:'Error de servidor'}));
-      throw new Error(errData.error || 'Error ' + res.status);
-    }
-    
-    const data = await res.json();
-    if (data.ok === false) throw new Error(data.error || 'Error');
-    closeModal('newMeetingModal');
-    // Limpiar
-    textareas.forEach(t => t.value = '');
-    inputs.forEach(i => i.value = '');
-    mostrarToast('Reunión guardada correctamente ✓', 'success');
-  } catch(e) {
-    mostrarToast('Error: ' + e.message, 'error');
-  }
-}
-
-// Reemplazar guardarReunion con la versión corregida
-guardarReunion = guardarReunionFixed;
-
-// ═══ FIX ORGCHART: usar usuarios reales con jerarquía visual ══
-loadOrgChart = async function() {
-  const section = document.getElementById('sec-orgchart');
-  if (!section) return;
-  
-  // Buscar o crear contenedor
-  let container = section.querySelector('.org-chart-wrap');
-  if (!container) {
-    // Buscar el div con el organigrama existente
-    container = section.querySelector('.card') || section.querySelector('div:last-child');
-  }
-  if (!container) return;
-  
-  container.innerHTML = '<div style="text-align:center;padding:40px;color:#888;">Cargando...</div>';
-  
-  const users = allUsuarios.length ? allUsuarios : await apiGet('users/all');
-  if (!users || !users.length) {
-    container.innerHTML = '<div style="text-align:center;padding:40px;color:#888;">Sin datos</div>';
-    return;
-  }
-
-  function ini(n){ return (n||'?').split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase(); }
-  const COLS=['#FF5400','#2ECC71','#3B82F6','#A855F7','#F59E0B','#EF4444'];
-  function col(n){ let h=0; for(let c of(n||''))h=(h*31+c.charCodeAt(0))%COLS.length; return COLS[h]; }
-
-  // Agrupar: managers arriba, luego líderes con sus equipos
-  const managers = users.filter(u => ['manager','admin'].includes(u.AppRole));
-  const leaders = users.filter(u => u.AppRole === 'leader');
-  const employees = users.filter(u => u.AppRole === 'employee');
-
-  let html = '<div style="display:flex;flex-direction:column;align-items:center;gap:20px;padding:16px;overflow-y:auto;">';
-  
-  // Managers
-  if (managers.length) {
-    html += '<div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center;">';
-    managers.forEach(m => {
-      html += `<div style="background:#1e1e1e;border:2px solid #FF5400;border-radius:12px;padding:12px 20px;text-align:center;min-width:160px;">
-        <div style="width:36px;height:36px;border-radius:50%;background:${col(m.FullName)};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;margin:0 auto 8px;">${ini(m.FullName)}</div>
-        <div style="font-weight:800;color:#f0ebe3;font-size:13px;">${m.FullName||m.Email}</div>
-        <div style="font-size:10px;color:#FF5400;margin-top:2px;font-weight:700;">Manager</div>
-      </div>`;
-    });
-    html += '</div>';
-  }
-
-  // Línea conectora
-  if (managers.length && leaders.length) {
-    html += '<div style="width:2px;height:24px;background:#333;"></div>';
-  }
-
-  // Líderes con equipos
-  if (leaders.length) {
-    html += '<div style="display:flex;gap:20px;flex-wrap:wrap;justify-content:center;align-items:flex-start;">';
-    leaders.forEach(l => {
-      const equipo = employees.filter(e => e.LeaderID === l.UserID);
-      html += `<div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
-        <div style="background:#1e1e1e;border:1px solid #333;border-radius:12px;padding:10px 16px;text-align:center;min-width:140px;">
-          <div style="width:32px;height:32px;border-radius:50%;background:${col(l.FullName)};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;margin:0 auto 6px;">${ini(l.FullName)}</div>
-          <div style="font-weight:700;color:#f0ebe3;font-size:12px;">${l.FullName||l.Email}</div>
-          <div style="font-size:10px;color:#FF5400;font-weight:700;">Líder</div>
-        </div>
-        ${equipo.length ? `<div style="display:flex;flex-direction:column;gap:4px;align-items:center;">
-          ${equipo.map(e=>`<div style="background:#111;border:1px solid #222;border-radius:8px;padding:5px 10px;text-align:center;min-width:120px;">
-            <div style="font-size:10px;font-weight:600;color:#ccc;">${e.FullName||e.Email}</div>
-            <div style="font-size:9px;color:#666;">${e.IsActive?'Activo':'Inactivo'}</div>
-          </div>`).join('')}
-        </div>` : ''}
-      </div>`;
-    });
-    html += '</div>';
-  }
-  
-  html += '</div>';
-  container.innerHTML = html;
-};
-
-// ═══ FIX REPORTES: tabs y ver reporte ═════════════════════════
-// Los tabs de reportes ya tienen switchTab, solo falta poblar selectores
-async function initReportes() {
-  const section = document.getElementById('sec-reports');
-  if (!section) return;
-  
-  // Poblar select de personas si existe
-  section.querySelectorAll('select').forEach((sel, i) => {
-    if (i === 0 && sel.options.length <= 2) {
-      const current = sel.value;
-      // Solo si es un selector de personas
-      if (!sel.querySelector('option[value=""]')) {
-        sel.innerHTML = '<option value="">— Seleccionar —</option>';
-      }
-      allUsuarios.filter(u=>u.IsActive).sort((a,b)=>(a.FullName||'').localeCompare(b.FullName||'')).forEach(u=>{
-        if (!sel.querySelector(`option[value="${u.UserID}"]`)) {
-          sel.add(new Option(u.FullName||u.Email, u.UserID));
-        }
-      });
-      if (current) sel.value = current;
-    }
-  });
-}
-
-// Cargar reportes cuando se activa la sección
-  if (id === 'objectives') {
-    // Reset tabs
-    ['obj-core','obj-personal','obj-tasks'].forEach((pid,i) => {
-      const el = document.getElementById(pid);
-      if (el) el.style.display = i === 0 ? '' : 'none';
-    });
-    document.querySelectorAll('#sec-objectives .tab').forEach((t,i) => t.classList.toggle('active', i===0));
-    // Cargar datos reales
-    if (!allUsuarios.length) {
-      loadUsuarios().then(() => {
-        poblarSelectoresObjetivos();
-        cargarObjetivosCoreEmpresa();
-        poblarSelectoresTabObjetivos();
-        if (!allPeriods.length) loadPeriods().then(poblarModalObjetivo);
-        else poblarModalObjetivo();
-      });
-    } else {
-      cargarObjetivosCoreEmpresa();
-      poblarSelectoresTabObjetivos();
-      poblarSelectoresObjetivos();
-      if (!allPeriods.length) loadPeriods().then(poblarModalObjetivo);
-      else poblarModalObjetivo();
-    }
-  }
-  if (id === 'reports') {
-    if (!allUsuarios.length) loadUsuarios().then(initReportes); else initReportes();
-  }
-  if (id === 'competencies') {
-    if (!allUsuarios.length) loadUsuarios().then(poblarSelectoresCompetencias); else poblarSelectoresCompetencias();
-  }
-  if (id === 'oneononex') {
-    if (!allUsuarios.length) loadUsuarios().then(poblarColaboradoresReunion); else poblarColaboradoresReunion();
-  }
-
-function poblarSelectoresObjetivos() {
-  const modal = document.getElementById('newObjectiveModal');
-  if (!modal) return;
-  modal.querySelectorAll('select').forEach(sel => {
-    const first = sel.querySelector('option');
-    if (!first) return;
-    const txt = first.textContent;
-    if (txt.includes('Mercado') || txt.includes('Rocha') || txt.includes('Seleccionar col')) {
-      const cur = sel.value;
-      sel.innerHTML = '<option value="">— Colaborador —</option>';
-      allUsuarios.filter(u=>u.IsActive).sort((a,b)=>(a.FullName||'').localeCompare(b.FullName||'')).forEach(u=>sel.add(new Option(u.FullName||u.Email, u.UserID)));
-      if (cur) sel.value = cur;
-    }
-  });
-}
-
-function poblarSelectoresCompetencias() {
-  document.querySelectorAll('#sec-competencies select').forEach(sel => {
-    const first = sel.querySelector('option');
-    if (!first) return;
-    const txt = first.textContent;
-    if (txt.includes('Mercado') || txt.includes('Rocha')) {
-      const cur = sel.value;
-      sel.innerHTML = '<option value="">— Colaborador —</option>';
-      allUsuarios.filter(u=>u.IsActive).sort((a,b)=>(a.FullName||'').localeCompare(b.FullName||'')).forEach(u=>sel.add(new Option(u.FullName||u.Email, u.UserID)));
-      if (cur) sel.value = cur;
-    }
-  });
-}
-
-
-// ═══ REPORTES ════════════════════════════════════════════════
-function initReportes() {
-  const pSel = document.getElementById('repPersonaSel');
-  const lSel = document.getElementById('repLiderSel');
-  const perSel = document.getElementById('repPeriodoSel');
-  if (pSel && pSel.options.length <= 1) {
-    allUsuarios.filter(u=>u.IsActive).sort((a,b)=>(a.FullName||'').localeCompare(b.FullName||'')).forEach(u=>pSel.add(new Option(u.FullName||u.Email, u.UserID)));
-  }
-  if (lSel && lSel.options.length <= 1) {
-    allUsuarios.filter(u=>u.IsActive&&['leader','manager','admin'].includes(u.AppRole)).sort((a,b)=>(a.FullName||'').localeCompare(b.FullName||'')).forEach(u=>lSel.add(new Option(u.FullName||u.Email, u.UserID)));
-  }
-  if (perSel && perSel.options.length <= 1 && allPeriods.length) {
-    allPeriods.forEach(p=>perSel.add(new Option(p.PeriodName, p.PeriodID)));
-  }
-}
-
-function initReporteTab(tipo) {
-  if (tipo === 'manager') {
-    const c = document.getElementById('repManagerResult');
-    if (c && !c.innerHTML.trim()) {
-      const managers = allUsuarios.filter(u=>['manager','admin'].includes(u.AppRole));
-      c.innerHTML = managers.length ? managers.map(m=>{
-        const eq = allUsuarios.filter(u=>u.ManagerID==m.UserID||u.LeaderID==m.UserID);
-        return '<div class="card"><div style="font-weight:800;color:#FF5400;margin-bottom:8px;">'+m.FullName+'</div><div style="font-size:12px;color:#888;">'+eq.length+' personas</div></div>';
-      }).join('') : '<div style="padding:20px;color:#888;">Sin managers</div>';
-    }
-  }
-  if (tipo === 'empresa') {
-    const k = document.getElementById('repEmpresaKPIs');
-    if (k && !k.innerHTML.trim()) {
-      const act = allUsuarios.filter(u=>u.IsActive).length;
-      k.innerHTML = '<div class="kpi-card"><div class="kpi-label">Total usuarios</div><div class="kpi-value" style="color:#f0ebe3;">'+allUsuarios.length+'</div></div>'+
-        '<div class="kpi-card"><div class="kpi-label">Activos</div><div class="kpi-value" style="color:#2ECC71;">'+act+'</div></div>'+
-        '<div class="kpi-card"><div class="kpi-label">Períodos activos</div><div class="kpi-value" style="color:#FF5400;">'+(allPeriods.filter(p=>p.IsActive).length)+'</div></div>';
-    }
-  }
-}
-
-async function verReportePersona() {
-  const userId = document.getElementById('repPersonaSel')?.value;
-  const periodId = document.getElementById('repPeriodoSel')?.value;
-  const res = document.getElementById('repPersonaResult');
-  const emp = document.getElementById('repPersonaEmpty');
-  if (!userId) { if(res)res.style.display='none'; if(emp)emp.style.display='block'; return; }
-  const user = allUsuarios.find(u=>String(u.UserID)===String(userId));
-  if (!user || !res) return;
-  res.style.display='block'; if(emp)emp.style.display='none';
-  const period = allPeriods.find(p=>String(p.PeriodID)===String(periodId));
-  document.getElementById('repPersonaNombre').textContent = (user.FullName||user.Email) + (period?' — '+period.PeriodName:'');
-  document.getElementById('repPersonaInfo').textContent = [user.RoleName,user.AreaName].filter(Boolean).join(' · ');
-  if (periodId) {
-    try {
-      const data = await apiGet('users/'+userId+'/report?periodId='+periodId);
-      if (data) {
-        const av = data.objectives?.length ? Math.round(data.objectives.reduce((s,o)=>s+(o.Progress||0),0)/data.objectives.length) : '—';
-        const cp = data.competencies?.length ? Math.round(data.competencies.reduce((s,c)=>s+(c.Score||0),0)/data.competencies.length) : '—';
-        document.getElementById('repAvance').textContent = av+(typeof av==='number'?'%':'');
-        document.getElementById('repCompetencias').textContent = cp+(typeof cp==='number'?'pts':'');
-      }
-    } catch(e) { console.warn('Reporte error:', e); }
-  }
-}
-
-async function verReporteLider() {
-  const userId = document.getElementById('repLiderSel')?.value;
-  const c = document.getElementById('repLiderResult');
-  if (!userId || !c) return;
-  const lider = allUsuarios.find(u=>String(u.UserID)===String(userId));
-  const equipo = allUsuarios.filter(u=>String(u.LeaderID)===String(userId)&&u.IsActive);
-  c.innerHTML = equipo.length
-    ? '<div class="card" style="margin-top:12px;"><div style="font-weight:800;color:#f0ebe3;margin-bottom:12px;">Equipo de '+(lider?.FullName||'')+'</div><table class="data-table"><thead><tr><th>Colaborador</th><th>Área</th><th>Estado</th></tr></thead><tbody>'+
-      equipo.map(u=>'<tr><td>'+(u.FullName||u.Email)+'</td><td>'+(u.AreaName||'—')+'</td><td><span style="color:'+(u.IsActive?'#2ECC71':'#888')+'">'+(u.IsActive?'Activo':'Inactivo')+'</span></td></tr>').join('')+'</tbody></table></div>'
-    : '<div style="padding:20px;color:#888;">Sin equipo asignado</div>';
-}
-
-
-// ═══ GUARDAR NUEVO OBJETIVO ══════════════════════════════════
-async function guardarNuevoObjetivo() {
-  const modal = document.getElementById('newObjectiveModal');
-  if (!modal) return;
-
-  // Buscar título - primer input de texto del modal
-  let titulo = '';
-  const allInputs = modal.querySelectorAll('input');
-  for (const inp of allInputs) {
-    const v = inp.value?.trim();
-    if (v && inp.type !== 'hidden' && inp.type !== 'number') { titulo = v; break; }
-  }
-  if (!titulo) {
-    mostrarToast('El título del objetivo es obligatorio', 'error');
-    return;
-  }
-
-  // Tipo de objetivo
-  const tipoSel = modal.querySelectorAll('select')[0];
-  const tipo = tipoSel?.value?.toLowerCase().includes('core') ? 'company' : 'personal';
-
-  // Colaborador del selector con buscador
-  const colabSel = document.getElementById('objColabSel') || modal.querySelectorAll('select')[1];
-  const userId = colabSel?.value ? parseInt(colabSel.value) : null;
-
-  // Período del selector con IDs reales
-  const perSel = document.getElementById('objPeriodoSel') || modal.querySelectorAll('select')[2];
-  let periodId = perSel?.value ? parseInt(perSel.value) : null;
-  if (!periodId && allPeriods.length) {
-    const active = allPeriods.find(p=>p.IsActive) || allPeriods[0];
-    if (active) periodId = active.PeriodID;
-  }
-
-  // Ponderación
-  const numInput = modal.querySelector('input[type="number"]');
-  if (numInput?.value) peso = parseFloat(numInput.value) || 0;
-
-  const btn = modal.querySelector('.btn-primary');
-  if (btn) { btn.textContent = 'Guardando...'; btn.disabled = true; }
-
-  try {
-    const res = await fetch(API_BASE + '/objectives', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        title: titulo,
-        objectiveType: tipo,
-        userId: userId,
-        periodId: periodId,
-        weight: peso,
-        status: 'not_started',
-        progress: 0
-      })
-    });
-
-    let data;
-    try { data = await res.json(); } catch(e) { data = {}; }
-
-    if (!res.ok || data.ok === false) {
-      throw new Error(data.error || 'Error ' + res.status);
-    }
-
-    closeModal('newObjectiveModal');
-    modal.querySelectorAll('input, textarea').forEach(el => { if (el.type !== 'submit' && el.type !== 'number') el.value = ''; });
-    mostrarToast('Objetivo "' + titulo + '" creado ✓', 'success');
-
-  } catch(e) {
-    mostrarToast('No se pudo guardar: ' + e.message, 'error');
-  } finally {
-    if (btn) { btn.textContent = 'Guardar Objetivo'; btn.disabled = false; }
-  }
-}
-
-// ═══ GUARDAR CHECKIN ═════════════════════════════════════════
-async function guardarCheckin() {
-  closeModal('checkinModal');
-  mostrarToast('Check-in registrado', 'success');
-}
-
-// ═══ FILTRAR COLABORADORES EN MODAL REUNIÓN ═══════════════════
-function filtrarColabReunion(query) {
-  const sel = document.getElementById('reunionColabSel');
-  if (!sel) return;
-  const q = query.toLowerCase();
-  sel.innerHTML = '<option value="">— Seleccionar —</option>';
-  allUsuarios.filter(u => u.IsActive && (
-    !q || (u.FullName||'').toLowerCase().includes(q) || (u.Email||'').toLowerCase().includes(q)
-  )).sort((a,b)=>(a.FullName||'').localeCompare(b.FullName||'')).forEach(u => {
-    sel.add(new Option((u.FullName||u.Email) + ' — ' + (u.Email||''), u.UserID));
-  });
-}
-
-// ═══ OVERRIDE poblarColaboradoresReunion para usar nuevo select ═══════
-const _origPoblar = poblarColaboradoresReunion;
-poblarColaboradoresReunion = function() {
-  filtrarColabReunion('');
-};
-
-// ═══ FIX GUARDAR REUNIÓN: usar el nuevo select ════════════════
-const _origGuardarReunion = guardarReunionFixed || guardarReunion;
-guardarReunion = async function() {
-  const modal = document.getElementById('newMeetingModal');
-  if (!modal) return;
-  const colabSel = document.getElementById('reunionColabSel') || modal.querySelector('select');
-  const tipoSel = modal.querySelectorAll('select')[1];
-  const fechaEl = modal.querySelector('input[type="date"]');
-  const inputs = modal.querySelectorAll('input[type="text"], input:not([type])');
-  const textareas = modal.querySelectorAll('textarea');
-  
-  const colaboradorId = colabSel?.value;
-  const tipo = tipoSel?.value || 'monthly';
-  const fecha = fechaEl?.value;
-  const titulo = Array.from(inputs).find(i=>i.placeholder&&i.placeholder.includes('Feedback'))?.value || '';
-  const notas = textareas[0]?.value || '';
-  const pasos = textareas[1]?.value || '';
-  
-  if (!colaboradorId) { mostrarToast('Seleccioná un colaborador', 'error'); return; }
-  if (!fecha) { mostrarToast('Ingresá la fecha', 'error'); return; }
-  
-  try {
-    const res = await fetch(API_BASE + '/meetings', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        employeeId: parseInt(colaboradorId),
-        meetingType: tipo,
-        meetingDate: fecha,
-        title: titulo || null,
-        generalNotes: notas || null,
-        nextSteps: pasos || null,
-        status: 'completed',
-        sendEmail: false
-      })
-    });
-    if (!res.ok) throw new Error('Error ' + res.status);
-    const data = await res.json();
-    if (data.ok === false) throw new Error(data.error || 'Error');
-    closeModal('newMeetingModal');
-    textareas.forEach(t=>t.value='');
-    mostrarToast('Reunión guardada ✓', 'success');
-    // Recargar bitácora del colaborador
-    if (typeof cargarBitacora === 'function') cargarBitacora(parseInt(colaboradorId));
-  } catch(e) {
-    mostrarToast('Error: ' + e.message, 'error');
-  }
-};
-guardarReunionFixed = guardarReunion;
-
-// ═══ CARGAR BITÁCORA DE REUNIONES ════════════════════════════
-async function cargarBitacora(userId) {
-  const bitEl = document.querySelector('#sec-oneononex .bitacora, #sec-oneononex [class*="timeline"], #sec-oneononex .card:last-child > div');
-  if (!bitEl) return;
-  try {
-    const meetings = await apiGet('meetings/' + userId);
-    if (!meetings || !meetings.length) {
-      bitEl.innerHTML = '<div style="text-align:center;padding:20px;color:#888;">Sin reuniones registradas</div>';
-      return;
-    }
-    bitEl.innerHTML = meetings.map(m => {
-      const fecha = m.MeetingDate ? new Date(m.MeetingDate).toLocaleDateString('es-AR') : '—';
-      return '<div style="border-bottom:1px solid #2a2a2a;padding:12px 0;"><div style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;margin-bottom:6px;">'+fecha+' · '+(m.MeetingType||'Mensual').toUpperCase()+'</div>'+
-        '<div style="font-weight:700;color:#f0ebe3;margin-bottom:4px;">'+(m.Title||'Reunión 1:1')+'</div>'+
-        (m.GeneralNotes?'<div style="font-size:12px;color:#aaa;">'+m.GeneralNotes+'</div>':'')+'</div>';
-    }).join('');
-  } catch(e) { console.warn('Bitácora:', e); }
-}
-
-// ═══ AGREGAR COMPETENCIA PERSONAL ════════════════════════════
-function agregarCompetenciaPersonal() {
-  const nombre = prompt('Nombre de la competencia personal:');
-  if (!nombre?.trim()) return;
-  mostrarToast('Competencia personal agregada: ' + nombre.trim(), 'success');
-}
-
-
-// ═══ POBLAR MODAL NUEVO OBJETIVO ════════════════════════════
-function filtrarColabObj(q) {
-  const sel = document.getElementById('objColabSel');
-  if (!sel) return;
-  const query = q.toLowerCase();
-  sel.innerHTML = '<option value="">— Seleccionar colaborador —</option>';
-  allUsuarios.filter(u => u.IsActive && (!query || 
-    (u.FullName||'').toLowerCase().includes(query) || 
-    (u.Email||'').toLowerCase().includes(query)
-  )).sort((a,b)=>(a.FullName||'').localeCompare(b.FullName||''))
-  .forEach(u => sel.add(new Option((u.FullName||u.Email) + ' — ' + (u.Email||''), u.UserID)));
-}
-
-function poblarModalObjetivo() {
-  filtrarColabObj('');
-  const perSel = document.getElementById('objPeriodoSel');
-  if (perSel && perSel.options.length <= 1 && allPeriods.length) {
-    allPeriods.forEach(p => perSel.add(new Option(p.PeriodName, p.PeriodID)));
-    // Seleccionar período activo por defecto
-    const active = allPeriods.find(p=>p.IsActive);
-    if (active) perSel.value = active.PeriodID;
-  }
-}
-
-// showModal ya unificado arriba
-
-
-// ═══ DATOS DE OBJETIVOS ══════════════════════════════════════
-
-async function cargarObjetivosCoreEmpresa() {
-  const container = document.getElementById('objCoreTbody');
-  if (!container) return;
-  container.innerHTML = '<div style="text-align:center;padding:20px;color:#888;">Cargando...</div>';
-  try {
-    const data = await apiGet('objectives?type=company');
-    allObjetivosCore = Array.isArray(data) ? data : [];
-    renderObjetivosCore(allObjetivosCore);
-    // Poblar áreas
-    const areasSel = document.getElementById('objCoreArea');
-    if (areasSel && allAreas.length) {
-      const currentOpts = Array.from(areasSel.options).map(o=>o.text);
-      allAreas.forEach(a => {
-        if (!currentOpts.includes(a.AreaName)) areasSel.add(new Option(a.AreaName, a.AreaID));
-      });
-    }
-  } catch(e) {
-    container.innerHTML = '<div style="text-align:center;padding:20px;color:#888;">Sin objetivos core cargados</div>';
-  }
-}
-
-function renderObjetivosCore(objs) {
-  const container = document.getElementById('objCoreTbody');
-  if (!container) return;
-  // Guardar en cache global
-  objs.forEach(o => { if(o.ObjectiveID) allObjetivosCache[o.ObjectiveID] = o; });
-  if (!objs.length) {
-    container.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">No hay objetivos core. Usá + Nuevo Objetivo para crear uno.</div>';
-    return;
-  }
-  container.innerHTML = '<table class="data-table"><thead><tr><th>Objetivo Core</th><th>Pond.</th><th>Período</th><th>Área</th><th>Vigencia</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>' +
-    objs.map(o => {
-    const orgStatus = o.Status||o.status||'active';
-    const orgMap = {
-      'active':    {label:'✅ Activo',    color:'#2ECC71'},
-      'approved':  {label:'🏛️ Aprobado', color:'#3B82F6'},
-      'paused':    {label:'⏸️ Pausado',   color:'#F59E0B'},
-      'cancelled': {label:'❌ Cancelado', color:'#FF4D4D'},
-      'not_started':{label:'✅ Activo',   color:'#2ECC71'},
-      'in_progress':{label:'✅ Activo',   color:'#2ECC71'},
-      'completed':  {label:'✅ Activo',   color:'#2ECC71'},
-    };
-    const st = orgMap[orgStatus] || {label:'✅ Activo', color:'#2ECC71'};
-    return `<tr>
-      <td><strong>${o.Title||o.title||'—'}</strong>${o.Description?'<br><span style="font-size:11px;color:#888;font-style:italic;">'+o.Description+'</span>':''}</td>
-      <td>${o.Weight||o.weight||0}%</td>
-      <td>${o.PeriodName||o.periodName||'—'}</td>
-      <td>${o.AreaName||o.areaName||'Todas'}</td>
-      <td>${o.DueDate?new Date(o.DueDate).toLocaleDateString('es-AR'):'—'}</td>
-      <td><span style="font-size:11px;font-weight:700;color:${st.color};">${st.label}</span></td>
-      <td style="display:flex;gap:4px;">
-        <button class="btn btn-secondary btn-sm" onclick="editarObjetivo(${o.ObjectiveID||o.objectiveId})">Editar</button>
-        <button class="btn btn-sm" style="background:rgba(255,84,0,0.1);border:1px solid rgba(255,84,0,0.3);color:#FF5400;padding:3px 8px;border-radius:6px;font-size:10px;cursor:pointer;" onclick="asignarCoreAUsuario(${o.ObjectiveID||o.objectiveId})">Asignar →</button>
-      </td>
-    </tr>`;
-  }).join('') + '</tbody></table>';
-}
-
-function filtrarTablaObjetivos(tipo, query) {
-  const objs = allObjetivosCore;
-  const q = query.toLowerCase();
-  const areaId = document.getElementById('objCoreArea')?.value;
-  const filtered = objs.filter(o => {
-    const matchQ = !q || (o.Title||'').toLowerCase().includes(q);
-    const matchA = !areaId || String(o.AreaID) === String(areaId);
-    return matchQ && matchA;
-  });
-  renderObjetivosCore(filtered);
-}
-
-async function cargarObjetivosPersonales() {
-  const colabSel = document.getElementById('objPersonalColab');
-  const perSel = document.getElementById('objPersonalPeriodo');
-  const container = document.getElementById('objPersonalTbody');
-  if (!container) return;
-  const userId = colabSel?.value;
-  const periodId = perSel?.value;
-  if (!userId) {
-    container.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Seleccioná un colaborador</div>';
-    return;
-  }
-  container.innerHTML = '<div style="text-align:center;padding:20px;color:#888;">Cargando...</div>';
-  try {
-    const url = 'objectives?type=personal&userId=' + userId + (periodId ? '&periodId=' + periodId : '');
-    const data = await apiGet(url);
-    const objs = Array.isArray(data) ? data : [];
-    // Guardar en cache y en allObjetivosPersonales
-    allObjetivosPersonales = objs;
-    objs.forEach(o => { if(o.ObjectiveID) allObjetivosCache[o.ObjectiveID] = o; });
-    if (!objs.length) {
-      container.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Sin objetivos personales para este colaborador</div>';
-      return;
-    }
-    container.innerHTML = '<table class="data-table"><thead><tr><th>Objetivo</th><th>Competencia</th><th>Ponderación</th><th>Avance</th><th>Estado</th><th>Acción</th></tr></thead><tbody>' +
-      objs.map(o => {
-        const avance = o.Progress||0;
-        const color = avance>=70?'#2ECC71':avance>=40?'#F59E0B':'#FF4D4D';
-        const stColor = estadoColor(o.Status);
-        const stLabel = estadoLabel(o.Status);
-        return `<tr>
-          <td><strong>${o.Title||'—'}</strong></td>
-          <td>${o.CompetencyName||'—'}</td>
-          <td>${o.Weight||0}%</td>
-          <td><span style="color:${color};font-weight:700;">${avance}%</span>
-            <div style="height:3px;background:#222;border-radius:2px;margin-top:3px;"><div style="height:3px;background:${color};width:${Math.min(avance,100)}%;border-radius:2px;"></div></div>
-          </td>
-          <td><span style="background:${stColor}22;color:${stColor};font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;">${stLabel}</span></td>
-          <td><button class="btn btn-secondary btn-sm" onclick="editarObjetivo(${o.ObjectiveID})">Editar</button></td>
-        </tr>`;
-      }).join('') + '</tbody></table>';
-  } catch(e) {
-    container.innerHTML = '<div style="text-align:center;padding:20px;color:#F44;">Error: ' + e.message + '</div>';
-  }
-}
-
-function poblarSelectoresTabObjetivos() {
-  // Poblar colab y período en tab de personales
-  const colabSel = document.getElementById('objPersonalColab');
-  if (colabSel && colabSel.options.length <= 1) {
-    allUsuarios.filter(u=>u.IsActive).sort((a,b)=>(a.FullName||'').localeCompare(b.FullName||'')).forEach(u=>{
-      colabSel.add(new Option((u.FullName||u.Email)+' — '+(u.Email||''), u.UserID));
-    });
-  }
-  const perSel = document.getElementById('objPersonalPeriodo');
-  if (perSel && perSel.options.length <= 1 && allPeriods.length) {
-    allPeriods.forEach(p => perSel.add(new Option(p.PeriodName, p.PeriodID)));
-    const active = allPeriods.find(p=>p.IsActive);
-    if (active) perSel.value = active.PeriodID;
-  }
-}
-
-async function editarObjetivo(id) {
-  const modal = document.getElementById('editObjectiveModal');
-  if (!modal) { mostrarToast('Modal no disponible', 'error'); return; }
-  document.getElementById('editObjId').value = id;
-  const obj = allObjetivosCache[id] ||
-              (allObjetivosCore||[]).find(o => String(o.ObjectiveID) === String(id)) ||
-              (allObjetivosPersonales||[]).find(o => String(o.ObjectiveID) === String(id));
-
-  const tipo = obj?.ObjectiveType || obj?.objectiveType || 'personal';
-  document.getElementById('editObjTipoHidden').value = tipo;
-
-  // Mostrar/ocultar campos según tipo
-  const coreFields = document.getElementById('editCoreFields');
-  const persFields = document.getElementById('editPersonalFields');
-  const badge = document.getElementById('editObjTipoBadge');
-  const title = document.getElementById('editObjModalTitle');
-
-  if (tipo === 'company') {
-    if(coreFields) coreFields.style.display = 'block';
-    if(persFields) persFields.style.display = 'none';
-    if(badge) badge.textContent = 'CORE EMPRESA';
-    if(title) title.textContent = 'Editar Objetivo Core';
-    // Poblar período
-    const perSel = document.getElementById('editObjPeriodo');
-    if (perSel && perSel.options.length <= 1 && allPeriods.length) {
-      allPeriods.forEach(p => perSel.add(new Option(p.PeriodName, p.PeriodID)));
-    }
-  } else {
-    if(coreFields) coreFields.style.display = 'none';
-    if(persFields) persFields.style.display = 'block';
-    if(badge) { badge.textContent = 'PERSONAL'; badge.style.background='rgba(59,130,246,0.15)'; badge.style.color='#3B82F6'; }
-    if(title) title.textContent = 'Editar Objetivo Personal';
-  }
-
-  if (obj) {
-    document.getElementById('editObjTitulo').value = obj.Title || '';
-    if (tipo === 'company') {
-      const pesoEl = document.getElementById('editObjPeso');
-      if(pesoEl) pesoEl.value = obj.Weight || 0;
-      const fechaEl = document.getElementById('editObjFecha');
-      if(fechaEl) fechaEl.value = obj.DueDate ? obj.DueDate.split('T')[0] : '';
-      const perSel = document.getElementById('editObjPeriodo');
-      if(perSel && obj.PeriodID) perSel.value = obj.PeriodID;
-      const estadoOrg = document.getElementById('editObjEstadoOrg');
-      if(estadoOrg) estadoOrg.value = obj.OrgStatus || obj.orgStatus || 'active';
-      const notaDir = document.getElementById('editObjNotaDir');
-      if(notaDir) notaDir.value = obj.Description || obj.DirectionNote || '';
-    } else {
-      const avEl = document.getElementById('editObjAvance');
-      if(avEl) avEl.value = obj.Progress || 0;
-      const stEl = document.getElementById('editObjEstado');
-      if(stEl) stEl.value = obj.Status || 'not_started';
-      const pesoEl = document.getElementById('editObjPesoPersonal');
-      if(pesoEl) pesoEl.value = obj.Weight || 0;
-      const fechaEl = document.getElementById('editObjFechaPersonal');
-      if(fechaEl) fechaEl.value = obj.DueDate ? obj.DueDate.split('T')[0] : '';
-    }
-  }
-  showModal('editObjectiveModal');
-}
-
-async function guardarEdicionObjetivo() {
-  const id = document.getElementById('editObjId')?.value;
-  if (!id) return;
-  const titulo = document.getElementById('editObjTitulo')?.value?.trim();
-  const avance = parseInt(document.getElementById('editObjAvance')?.value || '0');
-  const estado = document.getElementById('editObjEstado')?.value;
-  const peso = parseFloat(document.getElementById('editObjPeso')?.value || '0');
-  const fecha = document.getElementById('editObjFecha')?.value || null;
-  if (!titulo) { mostrarToast('El título es obligatorio', 'error'); return; }
-  const btn = document.querySelector('#editObjectiveModal .btn-primary');
-  if (btn) { btn.textContent = 'Guardando...'; btn.disabled = true; }
-  try {
-    // Obtener datos originales del cache para campos requeridos por el SP
-    const orig = allObjetivosCache[id] || {};
-    const tipo = document.getElementById('editObjTipoHidden')?.value || orig.ObjectiveType || 'personal';
-    let body = {
-      title: titulo,
-      objectiveType: tipo,
-      periodId: orig.PeriodID || orig.periodId || null,
-      userId: orig.UserID || orig.userId || null,
-      areaId: orig.AreaID || orig.areaId || null,
-    };
-    if (tipo === 'company') {
-      body.weight = parseFloat(document.getElementById('editObjPeso')?.value || '0');
-      body.dueDate = document.getElementById('editObjFecha')?.value || null;
-      body.status = document.getElementById('editObjEstadoOrg')?.value || 'active';
-      const newPeriod = document.getElementById('editObjPeriodo')?.value;
-      if (newPeriod) body.periodId = parseInt(newPeriod);
-      body.progress = 0;
-      // Nota de dirección → campo description
-      const notaDir = document.getElementById('editObjNotaDir')?.value?.trim();
-      body.description = notaDir || null;
-    } else {
-      body.weight = parseFloat(document.getElementById('editObjPesoPersonal')?.value || '0');
-      body.dueDate = document.getElementById('editObjFechaPersonal')?.value || null;
-      body.status = document.getElementById('editObjEstado')?.value || 'not_started';
-      body.progress = parseInt(document.getElementById('editObjAvance')?.value || '0');
-    }
-    const res = await fetch(API_BASE + '/objectives/' + id, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
-    let data = {};
-    try { data = await res.json(); } catch(e) {}
-    if (!res.ok || data.ok === false) throw new Error(data.error || 'Error ' + res.status);
-    // Actualizar cache local
-    if (allObjetivosCache[id]) {
-      allObjetivosCache[id] = {...allObjetivosCache[id], Title: titulo, Progress: avance, Status: estado, Weight: peso};
-    }
-    closeModal('editObjectiveModal');
-    mostrarToast('Objetivo actualizado ✓', 'success');
-    // Recargar la vista activa
-    const activeTab = document.querySelector('#sec-objectives .tab.active');
-    if (activeTab) {
-      const tabText = activeTab.textContent;
-      if (tabText.includes('Core')) cargarObjetivosCoreEmpresa();
-      else if (tabText.includes('Personal')) cargarObjetivosPersonales();
-      else if (tabText.includes('Seguimiento')) cargarTareasColaborador();
-    }
-  } catch(e) {
-    mostrarToast('Error al guardar: ' + e.message, 'error');
-  } finally {
-    if (btn) { btn.textContent = 'Guardar Cambios'; btn.disabled = false; }
-  }
-}
-
-// Fix para poblarModalObjetivo: cargar períodos si faltan
-
-
-
-
-// ═══ FILTRAR COLABORADORES EN OBJETIVOS PERSONALES ═══════════
-function filtrarColabPersonal(q) {
-  const sel = document.getElementById('objPersonalColab');
-  if (!sel) return;
-  const query = (q||'').toLowerCase();
-  sel.innerHTML = '<option value="">— Seleccionar colaborador —</option>';
-  allUsuarios.filter(u => u.IsActive && (!query ||
-    (u.FullName||'').toLowerCase().includes(query) ||
-    (u.Email||'').toLowerCase().includes(query)
-  )).sort((a,b)=>(a.FullName||'').localeCompare(b.FullName||''))
-  .forEach(u => sel.add(new Option((u.FullName||u.Email)+' — '+(u.Email||''), u.UserID)));
-}
-
-// ═══ ABRIR NUEVO OBJETIVO CORE ═══════════════════════════════
-function abrirNuevoObjetivoCore() {
-  const modal = document.getElementById('newObjectiveModal');
-  if (!modal) return;
-  const tipoSel = modal.querySelectorAll('select')[0];
-  if (tipoSel) {
-    Array.from(tipoSel.options).forEach(opt => {
-      if (opt.text.toLowerCase().includes('core') || opt.text.toLowerCase().includes('empresa')) {
-        tipoSel.value = opt.value;
-      }
-    });
-  }
-  showModal('newObjectiveModal');
-}
-
-// ═══ ABRIR NUEVO OBJETIVO PERSONAL ═══════════════════════════
-function abrirNuevoObjetivoPersonal() {
-  const colabSel = document.getElementById('objPersonalColab');
-  const userId = colabSel?.value;
-  const modal = document.getElementById('newObjectiveModal');
-  if (!modal) return;
-  const tipoSel = modal.querySelectorAll('select')[0];
-  if (tipoSel) {
-    Array.from(tipoSel.options).forEach(opt => {
-      if (opt.text.toLowerCase().includes('personal')) tipoSel.value = opt.value;
-    });
-  }
-  showModal('newObjectiveModal');
-  if (userId) setTimeout(() => {
-    const s = document.getElementById('objColabSel');
-    if (s) s.value = userId;
-  }, 100);
-}
-
-// ═══ CARGAR TAREAS / CHECKINS POR COLABORADOR ════════════════
-async function cargarTareasColaborador() {
-  const sel = document.getElementById('objTasksColab');
-  const container = document.getElementById('objTasksTbody');
-  const userId = sel?.value;
-  if (!container) return;
-  if (!userId) {
-    container.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Seleccioná un colaborador</div>';
-    return;
-  }
-  container.innerHTML = '<div style="text-align:center;padding:20px;color:#888;">Cargando...</div>';
-  try {
-    const objs = await apiGet('objectives?userId=' + userId);
-    const lista = Array.isArray(objs) ? objs : [];
-    // Guardar en cache
-    lista.forEach(o => { if(o.ObjectiveID) allObjetivosCache[o.ObjectiveID] = o; });
-    if (!lista.length) {
-      container.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Sin objetivos para este colaborador</div>';
-      return;
-    }
-    container.innerHTML = '<table class="data-table"><thead><tr><th>#</th><th>Objetivo</th><th>Tipo</th><th>Ponderación</th><th>Avance</th><th>Estado</th><th>Acción</th></tr></thead><tbody>' +
-      lista.map((o,i) => {
-        const av = o.Progress||0;
-        const color = av>=70?'#2ECC71':av>=40?'#F59E0B':'#FF4D4D';
-        const tipo = o.ObjectiveType==='company'?'Core':'Personal';
-        const estado = (o.Status||'').replace(/_/g,' ');
-        return '<tr><td style="color:#888;">'+(i+1)+'</td>'+
-          '<td><strong>'+(o.Title||'—')+'</strong><br><span style="font-size:10px;color:#666;">'+(o.PeriodName||'')+'</span></td>'+
-          '<td><span class="badge badge-primary" style="font-size:10px;">'+tipo+'</span></td>'+
-          '<td>'+(o.Weight||0)+'%</td>'+
-          '<td><span style="color:'+color+';font-weight:700;">'+av+'%</span>'+
-          '<div style="height:3px;background:#222;border-radius:2px;margin-top:3px;"><div style="height:3px;background:'+color+';width:'+av+'%;border-radius:2px;"></div></div></td>'+
-          '<td><span style="font-size:10px;font-weight:700;color:'+color+';">'+estado+'</span></td>'+
-          '<td><button class="btn btn-secondary btn-sm" onclick="editarObjetivo('+o.ObjectiveID+')">Editar</button></td></tr>';
-      }).join('') + '</tbody></table>';
-  } catch(e) {
-    container.innerHTML = '<div style="padding:20px;color:#F44;">Error: '+e.message+'</div>';
-  }
-}
-
-// ═══ OVERRIDE SWITCHTAB PARA POBLAR AL CAMBIAR TAB ═══════════
-
-
-// ═══ FILTRAR COLABORADOR EN TAREAS ═══════════════════════════
-function filtrarColabTareas(q) {
-  const sel = document.getElementById('objTasksColab');
-  if (!sel) return;
-  const query = (q||'').toLowerCase();
-  sel.innerHTML = '<option value="">— Seleccionar colaborador —</option>';
-  allUsuarios.filter(u => u.IsActive && (!query ||
-    (u.FullName||'').toLowerCase().includes(query) ||
-    (u.Email||'').toLowerCase().includes(query)
-  )).sort((a,b)=>(a.FullName||'').localeCompare(b.FullName||''))
-  .forEach(u => sel.add(new Option((u.FullName||u.Email)+' — '+(u.Email||''), u.UserID)));
-}
-
-// ═══ ASIGNAR OBJETIVO CORE A USUARIOS ════════════════════════
-// Cuando un objetivo tiene type=company se aplica a todos
-// Agregar función para ver/gestionar asignaciones
-function verAsignacionesCore(objId) {
-  const obj = allObjetivosCache[objId];
-  if (!obj) { mostrarToast('Objetivo no encontrado', 'error'); return; }
-  mostrarToast('Los objetivos Core se aplican automáticamente a todos los colaboradores activos.', 'info');
-}
-
-// ═══ COLORES Y LABELS DE ESTADO ══════════════════════════════
-function estadoColor(status) {
-  const s = (status||'').toLowerCase();
-  if (s.includes('complet')) return '#2ECC71';
-  if (s.includes('progress') || s.includes('curso')) return '#FF5400';
-  if (s.includes('risk') || s.includes('riesgo')) return '#FF4D4D';
-  return '#888'; // not_started = gris
-}
-function estadoLabel(status) {
-  const map = {
-    'not_started': 'No Iniciado',
-    'in_progress': 'En Curso',
-    'at_risk': 'En Riesgo',
-    'completed': 'Completado',
-    'not_met': 'No Cumplido'
-  };
-  return map[(status||'').toLowerCase()] || (status||'—').replace(/_/g,' ');
-}
-
-// ═══ SELECTOR DE TIPO EN MODAL NUEVO OBJETIVO ════════════════
-function setTipoObjetivo(tipo) {
-  document.getElementById('newObjTipo').value = tipo;
-  const btnCore = document.getElementById('btnTipoCore');
-  const btnPers = document.getElementById('btnTipoPersonal');
-  const camposCore = document.getElementById('camposCore');
-  const camposPers = document.getElementById('camposPersonal');
-  const title = document.getElementById('newObjModalTitle');
-  if (tipo === 'company') {
-    btnCore.style.cssText = 'flex:1;padding:10px;border-radius:8px;border:2px solid #FF5400;background:rgba(255,84,0,0.15);color:#FF5400;font-weight:700;font-size:13px;cursor:pointer;';
-    btnPers.style.cssText = 'flex:1;padding:10px;border-radius:8px;border:2px solid #333;background:#111;color:#888;font-weight:700;font-size:13px;cursor:pointer;';
-    camposCore.style.display = 'grid';
-    camposPers.style.display = 'none';
-    if(title) title.textContent = 'Nuevo Objetivo Core Empresa';
-    // Poblar áreas
-    const areaSel = document.getElementById('newObjArea');
-    if (areaSel && areaSel.options.length <= 1 && allAreas.length) {
-      allAreas.forEach(a => areaSel.add(new Option(a.AreaName, a.AreaID)));
-    }
-  } else {
-    btnPers.style.cssText = 'flex:1;padding:10px;border-radius:8px;border:2px solid #FF5400;background:rgba(255,84,0,0.15);color:#FF5400;font-weight:700;font-size:13px;cursor:pointer;';
-    btnCore.style.cssText = 'flex:1;padding:10px;border-radius:8px;border:2px solid #333;background:#111;color:#888;font-weight:700;font-size:13px;cursor:pointer;';
-    camposCore.style.display = 'none';
-    camposPers.style.display = 'block';
-    if(title) title.textContent = 'Nuevo Objetivo Personal';
-    // Poblar período en personal
-    const perSel = document.getElementById('objPeriodoSelPersonal');
-    if (perSel && perSel.options.length <= 1 && allPeriods.length) {
-      allPeriods.forEach(p => perSel.add(new Option(p.PeriodName, p.PeriodID)));
-      const act = allPeriods.find(p=>p.IsActive);
-      if(act) perSel.value = act.PeriodID;
-    }
-    // Poblar referencia a core - cargar desde API si no hay datos
-    const coreRef = document.getElementById('newObjCoreRef');
-    if (coreRef) {
-      const poblarCoreRef = (cores) => {
-        coreRef.innerHTML = '<option value="">— Crear objetivo personal nuevo desde cero —</option>';
-        cores.filter(o => {
-          // Solo mostrar cores activos (no cancelados)
-          const s = o.Status||o.status||'active';
-          return !['cancelled'].includes(s);
-        }).forEach(o => {
-          coreRef.add(new Option('📌 ' + (o.Title||o.title), o.ObjectiveID));
-        });
-      };
-      if (allObjetivosCore.length) {
-        poblarCoreRef(allObjetivosCore);
-      } else {
-        // Cargar desde API
-        apiGet('objectives?type=company').then(data => {
-          const cores = Array.isArray(data) ? data : [];
-          allObjetivosCore = cores;
-          cores.forEach(o => { if(o.ObjectiveID) allObjetivosCache[o.ObjectiveID] = o; });
-          poblarCoreRef(cores);
-        }).catch(() => {});
-      }
-    }
-    // Poblar colaboradores
-    if (!allUsuarios.length) loadUsuarios().then(()=>filtrarColabObj(''));
-    else filtrarColabObj('');
-  }
-}
-
-// ═══ ASIGNAR CORE A USUARIO ══════════════════════════════════
-function asignarCoreAUsuario(objId) {
-  const obj = allObjetivosCache[objId];
-  if (!obj) return;
-  // Abrir modal personal con el core preseleccionado
-  setTipoObjetivo('personal');
-  showModal('newObjectiveModal');
-  setTimeout(() => {
-    document.getElementById('newObjTitulo').value = obj.Title || '';
-    const coreRef = document.getElementById('newObjCoreRef');
-    if (coreRef) coreRef.value = objId;
-    const pesoSel = document.getElementById('newObjPesoPersonal');
-    if (pesoSel) pesoSel.value = obj.Weight || 20;
-  }, 100);
-}
-
-// ═══ FIX guardarNuevoObjetivo: usa nuevos campos ══════════════
-
-
-// ═══ FIX MODAL EDIT: agregar estado "No Cumplido" ════════════
-// Agregar al select de estado
-document.addEventListener('DOMContentLoaded', function() {
-  const estSel = document.getElementById('editObjEstado');
-  if (estSel && !Array.from(estSel.options).find(o=>o.value==='not_met')) {
-    estSel.add(new Option('No Cumplido', 'not_met'));
-  }
-  // Poblar selector de objetivos personales con período por defecto
-  setTipoObjetivo('company'); // iniciar en modo Core
-});
-
-// ═══ OVERRIDE poblarModalObjetivo: llamar setTipoObjetivo ════
-
-
-// ═══ PRECARGAR DESDE OBJETIVO CORE ═══════════════════════════
-function precargarDesdeCore(coreId) {
-  if (!coreId) {
-    // Limpiar si deseleccionan
-    const titulo = document.getElementById('newObjTitulo');
-    const peso = document.getElementById('newObjPesoPersonal');
-    if(titulo && !titulo.dataset.manual) titulo.value = '';
-    return;
-  }
-  const core = allObjetivosCache[coreId] ||
-               allObjetivosCore.find(o => String(o.ObjectiveID) === String(coreId));
-  if (!core) return;
-  
-  // Precargar título (editable por el usuario)
-  const titulo = document.getElementById('newObjTitulo');
-  if (titulo) { titulo.value = core.Title || core.title || ''; titulo.dataset.manual = ''; }
-  
-  // Precargar ponderación
-  const peso = document.getElementById('newObjPesoPersonal');
-  if (peso) peso.value = core.Weight || core.weight || 20;
-  
-  // Precargar período
-  const perSel = document.getElementById('objPeriodoSelPersonal');
-  if (perSel && (core.PeriodID || core.periodId)) {
-    perSel.value = core.PeriodID || core.periodId;
-  }
-  
-  // Precargar fecha límite
-  const fecha = document.getElementById('newObjFechaPersonal');
-  if (fecha && core.DueDate) fecha.value = core.DueDate.split('T')[0];
-  
-  mostrarToast('Datos del Core precargados — podés editar antes de guardar', 'info');
-}
-
-// ═══ FIX: guardarNuevoObjetivo personal - incluir referencia core ════════
-// La referencia core se guarda en el body para traceabilidad
-
-
-// ═══ REUNIONES 1:1 DINÁMICAS ═════════════════════════════════
-let allColabReuniones = [];   // colaboradores cargados
-let reunionColabActual = null; // collaborator seleccionado
-let allBitacoraData = [];     // reuniones del colaborador actual
-
-async function initReuniones() {
-  // Cargar todos los usuarios activos
-  if (!allUsuarios.length) await loadUsuarios();
-  allColabReuniones = allUsuarios.filter(u => u.IsActive)
-    .sort((a,b) => (a.FullName||'').localeCompare(b.FullName||''));
-  renderListaColaboradores(allColabReuniones);
-}
-
-function renderListaColaboradores(lista) {
-  const container = document.getElementById('reunionListaColab');
-  if (!container) return;
-  if (!lista.length) {
-    container.innerHTML = '<div style="padding:16px;text-align:center;color:#888;font-size:12px;">Sin resultados</div>';
-    return;
-  }
-  function ini(n){ return (n||'?').split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase(); }
-  const COLS=['#FF5400','#2ECC71','#3B82F6','#A855F7','#F59E0B','#EF4444','#10B981'];
-  function col(n){ let h=0; for(let c of(n||''))h=(h*31+c.charCodeAt(0))%COLS.length; return COLS[h]; }
-  
-  container.innerHTML = lista.map(u => `
-    <div onclick="seleccionarColabReunion(${u.UserID},'${(u.FullName||u.Email).replace(/'/g,"\'")}','${u.RoleName||''}','${u.AreaName||''}')"
-      id="colab-item-${u.UserID}"
-      style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;margin-bottom:2px;transition:background 0.1s;"
-      onmouseover="this.style.background='#1e1e1e'" onmouseout="this.style.background=(reunionColabActual===${u.UserID}?'rgba(255,84,0,0.1)':'')">
-      <div style="width:32px;height:32px;border-radius:50%;background:${col(u.FullName)};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;">${ini(u.FullName||u.Email)}</div>
-      <div style="min-width:0;flex:1;">
-        <div style="font-size:12px;font-weight:600;color:#f0ebe3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${u.FullName||u.Email}</div>
-        <div style="font-size:10px;color:#666;">${[u.RoleName,u.AreaName].filter(Boolean).join(' · ')}</div>
-      </div>
-      <span style="font-size:10px;color:#555;">📧</span>
-    </div>`).join('');
-}
-
-function filtrarListaColaboradores(q) {
-  const query = q.toLowerCase();
-  const filtered = allColabReuniones.filter(u =>
-    !query ||
-    (u.FullName||'').toLowerCase().includes(query) ||
-    (u.Email||'').toLowerCase().includes(query) ||
-    (u.RoleName||'').toLowerCase().includes(query)
-  );
-  renderListaColaboradores(filtered);
-}
-
-async function seleccionarColabReunion(userId, nombre, rol, area) {
-  reunionColabActual = userId;
-  // Highlight seleccionado
-  document.querySelectorAll('[id^="colab-item-"]').forEach(el => el.style.background = '');
-  const item = document.getElementById('colab-item-' + userId);
-  if (item) item.style.background = 'rgba(255,84,0,0.1)';
-  // Actualizar título
-  const title = document.getElementById('reunionBitacoraTitle');
-  if (title) title.textContent = 'BITÁCORA — ' + nombre.toUpperCase();
-  // Habilitar filtro
-  const filtro = document.getElementById('reunionFiltroTipo');
-  if (filtro) filtro.disabled = false;
-  // Cargar bitácora
-  await cargarBitacoraUsuario(userId);
-}
-
-async function cargarBitacoraUsuario(userId) {
-  const container = document.getElementById('reunionBitacoraContent');
-  if (!container) return;
-  container.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Cargando reuniones...</div>';
-  try {
-    const data = await apiGet('meetings/' + userId);
-    allBitacoraData = Array.isArray(data) ? data : [];
-    renderBitacora(allBitacoraData);
-  } catch(e) {
-    container.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Sin reuniones registradas aún</div>';
-  }
-}
-
-function renderBitacora(meetings) {
-  const container = document.getElementById('reunionBitacoraContent');
-  if (!container) return;
-  if (!meetings.length) {
-    container.innerHTML = '<div style="text-align:center;padding:40px;color:#888;"><div style="font-size:24px;margin-bottom:8px;">📝</div>Sin reuniones registradas para este colaborador</div>';
-    return;
-  }
-  const tipoLabel = {monthly:'Mensual',weekly:'Semanal',quarterly:'Trimestral',biweekly:'Quincenal'};
-  container.innerHTML = meetings.map(m => {
-    const fecha = m.MeetingDate ? new Date(m.MeetingDate).toLocaleDateString('es-AR',{day:'2-digit',month:'short',year:'numeric'}).toUpperCase() : '—';
-    const tipo = tipoLabel[m.MeetingType] || m.MeetingType || 'Reunión';
-    return `<div style="border-bottom:1px solid #1e1e1e;padding:14px 0;margin-bottom:4px;">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-        <div style="width:10px;height:10px;border-radius:50%;background:#FF5400;flex-shrink:0;"></div>
-        <div style="font-size:10px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">${fecha} · ${tipo}</div>
-      </div>
-      <div style="font-weight:700;color:#f0ebe3;font-size:14px;margin-bottom:6px;">${m.Title||'Reunión 1:1'}</div>
-      ${m.GeneralNotes?`<div style="font-size:12px;color:#aaa;line-height:1.6;margin-bottom:8px;">${m.GeneralNotes}</div>`:''}
-      ${m.NextSteps?`<div style="font-size:11px;color:#FF5400;font-weight:600;margin-top:6px;">▶ ${m.NextSteps}</div>`:''}
-      ${m.notes&&m.notes.length?`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">${m.notes.map(n=>`<span style="background:#222;border:1px solid #333;border-radius:6px;padding:2px 8px;font-size:10px;color:#aaa;">${n.noteText||n.NoteText||''}</span>`).join('')}</div>`:''}
-    </div>`;
-  }).join('');
-}
-
-function filtrarBitacoraTipo(tipo) {
-  if (!tipo) { renderBitacora(allBitacoraData); return; }
-  renderBitacora(allBitacoraData.filter(m => m.MeetingType === tipo));
-}
-
-// ═══ MODAL NUEVA REUNIÓN: abrir con collab pre-seleccionado ═══
-function abrirModalNuevaReunion(userId) {
-  showModal('newMeetingModal');
-  // Poblar buscador
-  setTimeout(() => {
-    if (!allUsuarios.length) {
-      loadUsuarios().then(() => {
-        filtrarColabReunion('');
-        if (userId) {
-          const sel = document.getElementById('reunionColabSel');
-          if (sel) sel.value = userId;
-        }
-      });
-    } else {
-      filtrarColabReunion('');
-      if (userId) {
-        const sel = document.getElementById('reunionColabSel');
-        if (sel) sel.value = userId;
-      }
-    }
-  }, 50);
-}
-
-// Override showSection para cargar reuniones
-  if (id === 'oneononex') {
-    if (!allColabReuniones.length) initReuniones();
-    else if (!document.getElementById('reunionListaColab')?.querySelector('[id^="colab-item-"]')) {
-      renderListaColaboradores(allColabReuniones);
-    }
-  }
-
-// Override guardarReunion para recargar bitácora después
-
-
-// Al seleccionar colaborador en modal reunión, pre-seleccionar en la lista
-function onSeleccionColabReunion() {
-  const sel = document.getElementById('reunionColabSel');
-  if (!sel || !sel.value) return;
-  // Si hay un colaborador en la lista principal con ese ID, destacarlo
-}
-
-// ═══ ALERTAS DINÁMICAS ═══════════════════════════════════════
-let allAlertas = [];
-
-async function loadAlertas() {
-  const container = document.getElementById('alertasContainer');
-  if (!container) return;
-  container.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Cargando alertas...</div>';
-  try {
-    // Calcular alertas desde los usuarios: buscar quienes tienen objetivos en riesgo
-    if (!allUsuarios.length) await loadUsuarios();
-    
-    // Intentar cargar desde la API de alertas
-    let alertas = [];
-    try {
-      const data = await apiGet('alerts');
-      if (Array.isArray(data) && data.length) {
-        alertas = data;
-      }
-    } catch(e) {}
-    
-    // Si no hay alertas en la API, calcular desde usuarios con bajo avance
-    if (!alertas.length) {
-      // Generar alertas basadas en datos de equipo del dashboard si los hay
-      const usuarios = allUsuarios.filter(u => u.IsActive);
-      // Mostrar aviso de que se necesita generar alertas
-      allAlertas = [];
-      renderAlertas([]);
-      return;
-    }
-    
-    allAlertas = alertas;
-    renderAlertas(alertas);
-  } catch(e) {
-    if (container) container.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Sin alertas activas en este momento</div>';
-  }
-}
-
-function renderAlertas(alertas) {
-  const container = document.getElementById('alertasContainer');
-  const kpisEl = document.getElementById('alertasKPIs');
-  if (!container) return;
-  
-  // KPIs
-  const enRiesgo = alertas.filter(a => (a.AlertType||'').includes('risk') || a.Severity === 'danger').length;
-  const advertencia = alertas.filter(a => (a.AlertType||'').includes('warning') || a.Severity === 'warning').length;
-  if (kpisEl) {
-    kpisEl.innerHTML = `
-      <div class="kpi-card"><div class="kpi-label">Total alertas activas</div><div class="kpi-value" style="color:#f0ebe3;">${alertas.length}</div></div>
-      <div class="kpi-card"><div class="kpi-label">En riesgo crítico</div><div class="kpi-value" style="color:#FF4D4D;">${enRiesgo}</div></div>
-      <div class="kpi-card"><div class="kpi-label">Advertencias</div><div class="kpi-value" style="color:#F59E0B;">${advertencia}</div></div>`;
-  }
-  
-  if (!alertas.length) {
-    container.innerHTML = `<div style="text-align:center;padding:40px;">
-      <div style="font-size:32px;margin-bottom:12px;">✅</div>
-      <div style="color:#2ECC71;font-weight:700;font-size:16px;">¡Sin alertas activas!</div>
-      <div style="color:#888;font-size:13px;margin-top:8px;">Todo el equipo está por encima del umbral del 70%</div>
-      <button class="btn btn-secondary btn-sm" style="margin-top:16px;" onclick="generarAlertas()">Verificar ahora</button>
-    </div>`;
-    return;
-  }
-  
-  container.innerHTML = alertas.map(a => {
-    const isRisk = (a.AlertType||'').includes('risk') || a.Severity === 'danger';
-    const color = isRisk ? '#FF4D4D' : '#F59E0B';
-    const icon = isRisk ? '⚠️' : '⚡';
-    const bgColor = isRisk ? 'rgba(255,77,77,0.06)' : 'rgba(245,158,11,0.06)';
-    const borderColor = isRisk ? 'rgba(255,77,77,0.2)' : 'rgba(245,158,11,0.2)';
-    const nombre = a.FullName || a.UserName || a.userName || '—';
-    const objetivo = a.ObjectiveTitle || a.Title || a.message || '—';
-    const avance = a.Progress !== undefined ? a.Progress : (a.progress || '—');
-    const fecha = a.CreatedAt ? new Date(a.CreatedAt).toLocaleDateString('es-AR') : '';
-    
-    return `<div style="background:${bgColor};border:1px solid ${borderColor};border-radius:10px;padding:14px 16px;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start;">
-      <span style="font-size:20px;flex-shrink:0;">${icon}</span>
-      <div style="flex:1;">
-        <div style="font-weight:700;color:#f0ebe3;margin-bottom:4px;">${nombre}</div>
-        <div style="font-size:13px;color:#aaa;margin-bottom:6px;">${objetivo}${avance!=='—'?' — Avance: <strong style="color:'+color+';">'+avance+'%</strong>':''}</div>
-        ${fecha?`<div style="font-size:10px;color:#666;">Detectada: ${fecha}</div>`:''}
-      </div>
-      <button onclick="resolverAlerta(${a.AlertID||a.alertId})" style="padding:4px 12px;background:#222;border:1px solid #333;border-radius:6px;color:#aaa;font-size:11px;cursor:pointer;flex-shrink:0;">Resolver</button>
-    </div>`;
-  }).join('');
-}
-
-function filtrarAlertas() {
-  const tipo = document.getElementById('alertaFiltroTipo')?.value;
-  const q = (document.getElementById('alertaBuscador')?.value||'').toLowerCase();
-  let filtered = allAlertas;
-  if (tipo === 'danger') filtered = filtered.filter(a => (a.AlertType||'').includes('risk') || a.Severity === 'danger');
-  if (tipo === 'warning') filtered = filtered.filter(a => (a.AlertType||'').includes('warning') || a.Severity === 'warning');
-  if (q) filtered = filtered.filter(a => (a.FullName||a.UserName||'').toLowerCase().includes(q) || (a.ObjectiveTitle||a.Title||'').toLowerCase().includes(q));
-  renderAlertas(filtered);
-}
-
-async function resolverAlerta(id) {
-  if (!id) return;
-  try {
-    await fetch(API_BASE + '/alerts/' + id + '/resolve', { method: 'PUT', headers: {'Content-Type':'application/json'} });
-    mostrarToast('Alerta resuelta ✓', 'success');
-    allAlertas = allAlertas.filter(a => (a.AlertID||a.alertId) !== id);
-    renderAlertas(allAlertas);
-  } catch(e) { mostrarToast('Error al resolver', 'error'); }
-}
-
-async function generarAlertas() {
-  mostrarToast('Verificando alertas del equipo...', 'info');
-  try {
-    await fetch(API_BASE + '/alerts/generate', {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ threshold: 70 })
-    });
-    await loadAlertas();
-    mostrarToast('Alertas actualizadas', 'success');
-  } catch(e) {
-    // Si falla, solo recargar
-    await loadAlertas();
-  }
-}
-
-// Cargar alertas al entrar a la sección
-  if (id === 'alerts') loadAlertas();
-
-// Actualizar badge de alertas en el sidebar
-async function actualizarBadgeAlertas() {
-  try {
-    const data = await apiGet('alerts');
-    const count = Array.isArray(data) ? data.length : 0;
-    document.querySelectorAll('.nav-badge, [class*="badge"]').forEach(b => {
-      if (b.closest('[onclick*="alerts"]')) b.textContent = count;
-    });
-  } catch(e) {}
-}
-
-// ═══ FEEDBACK 360 ════════════════════════════════════════════
-const FB_LABELS = ['','Muy malo','Malo','Regular','Bueno','Excelente'];
-let fbScoreVal = 0;
-let fbResultadosFull = [];
-
-function setFbScore(n) {
-  fbScoreVal = n;
-  document.getElementById('fbScore').value = n;
-  var lbl = document.getElementById('fbScoreLabel');
-  if (lbl) lbl.textContent = FB_LABELS[n] || '';
-  for (var i=1; i<=5; i++) {
-    var btn = document.getElementById('fbStar'+i);
-    if (!btn) continue;
-    btn.textContent = i<=n ? '★' : '☆';
-    btn.style.color = i<=n ? '#FF5400' : '#888';
-    btn.style.background = i<=n ? 'rgba(255,84,0,0.1)' : '#111';
-  }
-}
-
-async function initFeedback360() {
-  var sel = document.getElementById('fbEvaluado');
-  if (!sel) return;
-  if (sel.options.length <= 1) {
-    sel.innerHTML = '<option value="">— Seleccionar —</option>';
-    if (!allUsuarios.length) await loadUsuarios();
-    allUsuarios.filter(function(u){ return u.IsActive && ['leader','manager','admin'].includes(u.AppRole); })
-      .sort(function(a,b){ return (a.FullName||'').localeCompare(b.FullName||''); })
-      .forEach(function(u){ sel.add(new Option((u.FullName||u.Email)+' ('+u.AppRole+')', u.UserID)); });
-  }
-  var perSel = document.getElementById('fbPeriodo');
-  if (perSel && perSel.options.length <= 1 && allPeriods.length) {
-    allPeriods.forEach(function(p){ perSel.add(new Option(p.PeriodName, p.PeriodID)); });
-    var act = allPeriods.find(function(p){ return p.IsActive; });
-    if (act) perSel.value = act.PeriodID;
-  }
-}
-
-async function enviarFeedback360() {
-  var evaluadoId = document.getElementById('fbEvaluado').value;
-  var categoria = document.getElementById('fbCategoria').value;
-  var score = parseInt(document.getElementById('fbScore').value||'0');
-  var comment = document.getElementById('fbComment').value.trim();
-  var isAnon = document.getElementById('fbAnonimo').checked;
-  var periodId = document.getElementById('fbPeriodo').value||null;
-  var errEl = document.getElementById('fbError');
-  if (!evaluadoId) { errEl.textContent='Seleccioná a quién evaluás'; errEl.style.display='block'; return; }
-  if (!score) { errEl.textContent='Seleccioná una puntuación'; errEl.style.display='block'; return; }
-  errEl.style.display='none';
-  var myEmail = window._userEmail || '';
-  var me = allUsuarios.find(function(u){ return u.Email===myEmail; });
-  var evaluatorId = me ? me.UserID : 1;
-  try {
-    var res = await fetch(API_BASE+'/feedback360', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ evaluatorId:evaluatorId, evaluatedId:parseInt(evaluadoId),
-        periodId:periodId?parseInt(periodId):null, category:categoria,
-        score:score, comment:comment||null, isAnonymous:isAnon })
-    });
-    var data = await res.json();
-    if (data.ok===false) throw new Error(data.error||'Error');
-    document.getElementById('fbComment').value='';
-    document.getElementById('fbEvaluado').value='';
-    setFbScore(0);
-    mostrarToast(isAnon?'Feedback enviado anónimamente ✓':'Feedback enviado con tu nombre ✓','success');
-  } catch(e) { errEl.textContent='Error: '+e.message; errEl.style.display='block'; }
-}
-
-async function loadFeedbackResultados() {
-  var c = document.getElementById('fbResultadosContainer');
-  if (!c) return;
-  c.innerHTML = '<div style="text-align:center;padding:20px;color:#888;">Cargando...</div>';
-  try {
-    var data = await apiGet('feedback360/summary');
-    if (!Array.isArray(data)) { c.innerHTML='<div style="padding:20px;color:#888;">Solo visible para administradores</div>'; return; }
-    fbResultadosFull = data;
-    var html = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">';
-    data.forEach(function(u) {
-      var avg = u.AvgScore ? Math.round(u.AvgScore*10)/10 : '—';
-      var color = avg>=4?'#2ECC71':avg>=3?'#F59E0B':'#FF4D4D';
-      html += '<div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:10px;padding:14px;">';
-      html += '<div style="font-weight:700;color:#f0ebe3;margin-bottom:4px;">'+(u.FullName||'—')+'</div>';
-      html += '<div style="font-size:12px;color:#888;margin-bottom:8px;">'+(u.AppRole||'')+'</div>';
-      html += '<div style="font-size:22px;font-weight:800;color:'+color+';">'+avg+'<span style="font-size:12px;color:#888;"> / 5</span></div>';
-      html += '<div style="font-size:11px;color:#666;margin-top:4px;">'+(u.TotalFeedbacks||0)+' respuestas · '+(u.AnonCount||0)+' anónimas</div>';
-      html += '<button onclick="verDetalleFeedback('+u.UserID+')" style="margin-top:8px;padding:3px 10px;background:#222;border:1px solid #333;border-radius:6px;color:#aaa;font-size:11px;cursor:pointer;">Ver detalle</button>';
-      html += '</div>';
-    });
-    html += '</div>';
-    c.innerHTML = data.length ? html : '<div style="text-align:center;padding:30px;color:#888;">Sin feedback aún</div>';
-  } catch(e) { c.innerHTML='<div style="padding:20px;color:#888;">Solo visible para administradores</div>'; }
-}
-
-async function verDetalleFeedback(userId) {
-  var c = document.getElementById('fbResultadosContainer');
-  if (!c) return;
-  c.innerHTML = '<button onclick="loadFeedbackResultados()" style="margin-bottom:12px;padding:4px 12px;background:#222;border:1px solid #333;border-radius:6px;color:#aaa;font-size:11px;cursor:pointer;">← Volver</button><div id="fbDetalleInner" style="padding:20px;text-align:center;color:#888;">Cargando...</div>';
-  try {
-    var data = await apiGet('feedback360/received/'+userId);
-    var inner = document.getElementById('fbDetalleInner');
-    if (!inner) return;
-    if (!data||!data.feedback||!data.feedback.length) { inner.innerHTML='Sin feedback'; return; }
-    var html = '';
-    data.feedback.forEach(function(f) {
-      var fecha = f.CreatedAt ? new Date(f.CreatedAt).toLocaleDateString('es-AR') : '—';
-      var stars = '★'.repeat(f.Score||0)+'☆'.repeat(5-(f.Score||0));
-      html += '<div style="background:#111;border:1px solid #2a2a2a;border-radius:8px;padding:12px;margin-bottom:8px;text-align:left;">';
-      html += '<div style="display:flex;justify-content:space-between;margin-bottom:6px;">';
-      html += '<span style="font-size:11px;font-weight:700;color:#888;">'+(f.EvaluatorName||'Anónimo')+(f.IsAnonymous?' 🔒':'')+'</span>';
-      html += '<span style="font-size:11px;color:#888;">'+fecha+'</span></div>';
-      html += '<div style="color:#FF5400;">'+stars+'</div>';
-      if (f.Comment) html += '<div style="font-size:12px;color:#ccc;margin-top:6px;">'+f.Comment+'</div>';
-      html += '</div>';
-    });
-    inner.innerHTML = html;
-  } catch(e) { var inner=document.getElementById('fbDetalleInner'); if(inner) inner.innerHTML='Error al cargar'; }
-}
-
-async function loadMiFeedback() {
-  var c = document.getElementById('fbDadoContainer');
-  if (!c) return;
-  var me = allUsuarios.find(function(u){ return u.Email===window._userEmail; });
-  if (!me) { c.innerHTML='<div style="padding:20px;color:#888;">Iniciá sesión para ver</div>'; return; }
-  try {
-    var data = await apiGet('feedback360/given/'+me.UserID);
-    var lista = Array.isArray(data)?data:[];
-    if (!lista.length) { c.innerHTML='<div style="text-align:center;padding:30px;color:#888;">Todavía no diste feedback.</div>'; return; }
-    var html = '';
-    lista.forEach(function(f) {
-      var fecha = f.CreatedAt?new Date(f.CreatedAt).toLocaleDateString('es-AR'):'—';
-      var stars = '★'.repeat(f.Score||0)+'☆'.repeat(5-(f.Score||0));
-      html += '<div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:12px;margin-bottom:8px;">';
-      html += '<div style="display:flex;justify-content:space-between;margin-bottom:4px;">';
-      html += '<span style="font-weight:700;color:#f0ebe3;">'+(f.EvaluatedName||'—')+'</span>';
-      html += '<span style="font-size:11px;color:#888;">'+fecha+'</span></div>';
-      html += '<div style="color:#FF5400;font-size:13px;">'+stars+'</div>';
-      if (f.Comment) html += '<div style="font-size:12px;color:#aaa;margin-top:4px;">'+f.Comment+'</div>';
-      html += '</div>';
-    });
-    c.innerHTML = html;
-  } catch(e) { c.innerHTML='<div style="padding:20px;color:#888;">Error al cargar</div>'; }
-}
-
-// Cargar al entrar a feedback360
-  if (id==='feedback360') {
-    if (!allUsuarios.length) loadUsuarios().then(initFeedback360);
-    else initFeedback360();
-    if (!allPeriods.length) loadPeriods();
-  }
-
-
-// Ayuda desde BD
-async function loadHelpArticles() {
-  var c = document.getElementById('helpArticlesContainer');
-  var idx = document.getElementById('helpIndexButtons');
-  if (!c) return;
-  c.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Cargando...</div>';
-  try {
-    var data = await apiGet('help/articles');
-    var arts = Array.isArray(data) ? data : [];
-    if (!arts.length) { c.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Sin articulos</div>'; return; }
-    if (idx) {
-      idx.innerHTML = '';
-      arts.forEach(function(a) {
-        var b = document.createElement('button');
-        b.textContent = a.Title;
-        b.style.cssText = 'padding:3px 10px;background:#222;border:1px solid #333;border-radius:6px;color:#f0ebe3;font-size:11px;cursor:pointer;margin:2px;';
-        var aid = 'help-'+a.ArticleID;
-        b.onclick = function(){ var el=document.getElementById(aid); if(el) el.scrollIntoView({behavior:'smooth'}); };
-        idx.appendChild(b);
-      });
-    }
-    var html = '';
-    arts.forEach(function(a) {
-      var fecha = a.UpdatedAt ? new Date(a.UpdatedAt).toLocaleDateString('es-AR') : '';
-      html += '<div id="help-'+a.ArticleID+'" class="card" style="margin-bottom:14px;padding:20px;">';
-      html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #2a2a2a;">';
-      html += '<strong style="font-size:14px;color:#f0ebe3;">'+a.Title+'</strong>';
-      if (fecha) html += '<span style="margin-left:auto;font-size:10px;color:#555;">'+fecha+'</span>';
-      html += '</div>';
-      html += '<div style="font-size:13px;color:#aaa;line-height:1.8;">'+(a.Content||'')+'</div>';
-      html += '</div>';
-    });
-    c.innerHTML = html;
-  } catch(e) {
-    c.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Error al cargar</div>';
-  }
-}
-
-
-// ═══ DASHBOARD PAGINACIÓN ════════════════════════════════════
-function renderDashboardPage() {
-  var el = document.getElementById('teamProgressList');
-  var pgEl = document.getElementById('dashPagination');
-  if (!el || !window.allTeamData) return;
-  var ps = window.dashPageSize || 20;
-  var pg = window.dashPage || 1;
-  var all = window.allTeamData;
-  var total = Math.ceil(all.length / ps);
-  var slice = all.slice((pg-1)*ps, pg*ps);
-  el.innerHTML = slice.map(function(p) {
-    var color = p.pct>=70?'var(--success)':p.pct>=40?'var(--warning)':'var(--danger)';
-    return '<div style="margin-bottom:10px;">' +
-      '<div class="progress-label">' +
-        '<div class="person-chip">' +
-          '<div class="avatar-sm" style="background:'+p.color+';width:24px;height:24px;font-size:9px;">'+p.init+'</div>' +
-          '<span class="progress-name">'+p.name+'</span>' +
-        '</div>' +
-        '<span class="progress-pct" style="color:'+color+';">'+p.pct+'%</span>' +
-      '</div>' +
-      '<div class="progress-bar"><div class="progress-fill" style="width:'+p.pct+'%;background:'+color+';"></div></div>' +
-    '</div>';
-  }).join('');
-  if (pgEl) {
-    pgEl.innerHTML = '';
-    if (total > 1) {
-      for (var i=1; i<=total; i++) {
-        (function(pageNum) {
-          var b = document.createElement('button');
-          b.textContent = pageNum;
-          b.style.cssText = 'padding:3px 9px;border-radius:6px;border:1px solid #333;background:'+(pageNum===pg?'#FF5400':'#1a1a1a')+';color:#f0ebe3;cursor:pointer;font-size:11px;margin:2px;';
-          b.onclick = function() { window.dashPage=pageNum; renderDashboardPage(); };
-          pgEl.appendChild(b);
-        })(i);
-      }
-    }
-  }
-}
-
-// ═══ ORGANIGRAMA DINÁMICO ════════════════════════════════════
-var orgData = [];
-
-async function loadOrgChartDynamic() {
-  var container = document.getElementById('orgChartContainer');
-  if (!container) return;
-  container.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Cargando...</div>';
-  if (!allUsuarios.length) await loadUsuarios();
-  orgData = allUsuarios;
-  renderOrgManagers();
-}
-
-function renderOrgManagers() {
-  var container = document.getElementById('orgChartContainer');
-  if (!container) return;
-  var managers = orgData.filter(function(u){ return u.AppRole==='manager'||u.AppRole==='admin'; });
-  if (!managers.length) { container.innerHTML='<div style="text-align:center;padding:30px;color:#888;">Sin managers</div>'; return; }
-  function ini(n){ return (n||'?').split(' ').map(function(p){return p[0];}).join('').slice(0,2).toUpperCase(); }
-  var COLS=['#FF5400','#2ECC71','#3B82F6','#A855F7','#F59E0B'];
-  function col(n){ var h=0; for(var i=0;i<(n||'').length;i++) h=(h*31+n.charCodeAt(i))%COLS.length; return COLS[h]; }
-  container.innerHTML = managers.map(function(m) {
-    var lideres = orgData.filter(function(u){ return u.ManagerID===m.UserID; });
-    return '<div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:10px;padding:14px;margin-bottom:12px;cursor:pointer;" onclick="renderJerarquiaUsuario('+m.UserID+')">' +
-      '<div style="display:flex;align-items:center;gap:10px;">' +
-        '<div style="width:40px;height:40px;border-radius:50%;background:#FF5400;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;">'+ini(m.FullName||m.Email)+'</div>' +
-        '<div><div style="font-weight:800;color:#f0ebe3;">'+(m.FullName||m.Email)+'</div>' +
-        '<div style="font-size:11px;color:#888;">Manager · '+lideres.length+' lideres</div></div>' +
-        '<span style="margin-left:auto;font-size:10px;font-weight:700;color:#FF5400;">MANAGER</span>' +
-      '</div></div>';
-  }).join('');
-}
-
-function renderJerarquiaUsuario(userId) {
-  if (!orgData.length) { loadOrgChartDynamic(); return; }
-  var usuario = orgData.find(function(u){ return u.UserID===userId; });
-  if (!usuario) return;
-  var container = document.getElementById('orgChartContainer');
-  if (!container) return;
-  function ini(n){ return (n||'?').split(' ').map(function(p){return p[0];}).join('').slice(0,2).toUpperCase(); }
-  var COLS=['#FF5400','#2ECC71','#3B82F6','#A855F7','#F59E0B'];
-  function col(n){ var h=0; for(var i=0;i<(n||'').length;i++) h=(h*31+n.charCodeAt(i))%COLS.length; return COLS[h]; }
-  function tarjeta(u, rol, color, destacado) {
-    var bg = destacado ? 'rgba(255,84,0,0.08)' : '#1a1a1a';
-    var border = destacado ? '1px solid rgba(255,84,0,0.3)' : '1px solid #2a2a2a';
-    return '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:'+bg+';border:'+border+';border-radius:8px;margin-bottom:6px;">' +
-      '<div style="width:36px;height:36px;border-radius:50%;background:'+col(u.FullName)+';display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;">'+ini(u.FullName||u.Email)+'</div>' +
-      '<div style="flex:1;"><div style="font-weight:'+(destacado?800:600)+';color:#f0ebe3;font-size:13px;">'+(u.FullName||u.Email)+'</div>' +
-      '<div style="font-size:10px;color:#666;">'+(u.RoleName||'')+'</div></div>' +
-      '<span style="font-size:10px;font-weight:700;color:'+color+';">'+rol+'</span></div>';
-  }
-  var html = '<button onclick="renderOrgManagers()" style="margin-bottom:16px;padding:4px 12px;background:#222;border:1px solid #333;border-radius:6px;color:#aaa;font-size:11px;cursor:pointer;">Volver</button>';
-  var rol = usuario.AppRole;
-  if (rol==='manager'||rol==='admin') {
-    html += tarjeta(usuario,'MANAGER','#FF5400',true);
-    html += '<div style="margin:8px 0 0 24px;border-left:2px solid #333;padding-left:16px;">';
-    var lideres = orgData.filter(function(u){ return u.ManagerID===usuario.UserID; });
-    if (!lideres.length) html += '<div style="color:#888;font-size:12px;padding:8px;">Sin lideres asignados</div>';
-    lideres.forEach(function(l) {
-      html += tarjeta(l,'LIDER','#3B82F6',false);
-      var colab = orgData.filter(function(u){ return u.LeaderID===l.UserID; });
-      if (colab.length) {
-        html += '<div style="margin:4px 0 4px 24px;border-left:2px solid #2a2a2a;padding-left:12px;">';
-        colab.forEach(function(c){ html += tarjeta(c,'COLAB','#888',false); });
-        html += '</div>';
-      }
-    });
-    html += '</div>';
-  } else if (rol==='leader') {
-    var mgr = orgData.find(function(u){ return u.UserID===usuario.ManagerID; });
-    if (mgr) { html += tarjeta(mgr,'MANAGER','#FF5400',false); html += '<div style="margin:8px 0 0 24px;border-left:2px solid #333;padding-left:16px;">'; }
-    html += tarjeta(usuario,'LIDER','#3B82F6',true);
-    html += '<div style="margin:8px 0 0 24px;border-left:2px solid #2a2a2a;padding-left:12px;">';
-    var colab2 = orgData.filter(function(u){ return u.LeaderID===usuario.UserID; });
-    if (!colab2.length) html += '<div style="color:#888;font-size:12px;padding:8px;">Sin colaboradores</div>';
-    colab2.forEach(function(c){ html += tarjeta(c,'COLAB','#888',false); });
-    html += '</div>';
-    if (mgr) html += '</div>';
-  } else {
-    var lider = orgData.find(function(u){ return u.UserID===usuario.LeaderID; });
-    var mgr2 = lider ? orgData.find(function(u){ return u.UserID===lider.ManagerID; }) : null;
-    if (mgr2) { html += tarjeta(mgr2,'MANAGER','#FF5400',false); html += '<div style="margin:8px 0 0 24px;border-left:2px solid #333;padding-left:16px;">'; }
-    if (lider) { html += tarjeta(lider,'LIDER','#3B82F6',false); html += '<div style="margin:8px 0 0 24px;border-left:2px solid #2a2a2a;padding-left:12px;">'; }
-    html += tarjeta(usuario,'COLABORADOR','#888',true);
-    if (lider) html += '</div>';
-    if (mgr2) html += '</div>';
-  }
-  container.innerHTML = html;
-}
-
-function buscarEnOrganigrama(q) {
-  if (!orgData.length) { loadOrgChartDynamic(); return; }
-  var query = q.toLowerCase().trim();
-  var rol = document.getElementById('orgFiltroRol') ? document.getElementById('orgFiltroRol').value : '';
-  if (!query && !rol) { renderOrgManagers(); return; }
-  var matches = orgData.filter(function(u) {
-    return (!rol || u.AppRole===rol) &&
-      (!query || (u.FullName||'').toLowerCase().includes(query) || (u.Email||'').toLowerCase().includes(query));
-  });
-  var container = document.getElementById('orgChartContainer');
-  if (!container) return;
-  if (!matches.length) { container.innerHTML='<div style="text-align:center;padding:30px;color:#888;">Sin resultados</div>'; return; }
-  if (matches.length===1) { renderJerarquiaUsuario(matches[0].UserID); return; }
-  function ini(n){ return (n||'?').split(' ').map(function(p){return p[0];}).join('').slice(0,2).toUpperCase(); }
-  var COLS=['#FF5400','#2ECC71','#3B82F6','#A855F7','#F59E0B'];
-  function col(n){ var h=0; for(var i=0;i<(n||'').length;i++) h=(h*31+n.charCodeAt(i))%COLS.length; return COLS[h]; }
-  container.innerHTML = '<div style="margin-bottom:10px;font-size:12px;color:#888;">'+matches.length+' resultados</div>' +
-    matches.map(function(u) {
-      return '<div onclick="renderJerarquiaUsuario('+u.UserID+')" style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;margin-bottom:6px;cursor:pointer;">' +
-        '<div style="width:36px;height:36px;border-radius:50%;background:'+col(u.FullName)+';display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;">'+ini(u.FullName||u.Email)+'</div>' +
-        '<div><div style="font-weight:700;color:#f0ebe3;">'+(u.FullName||u.Email)+'</div>' +
-        '<div style="font-size:11px;color:#888;">'+(u.AppRole||'')+' · '+(u.AreaName||'')+'</div></div>' +
-      '</div>';
-    }).join('');
-}
-
-// Override showSection para organigrama
-  if (id==='orgchart' && !orgData.length) loadOrgChartDynamic();
-
-
-// Guardar nueva reunion
-async function guardarNuevaReunion() {
-  var colabSel = document.getElementById('reunionColabSel');
-  var userId = colabSel ? colabSel.value : null;
-  var tipo = document.getElementById('reunionTipo') ? document.getElementById('reunionTipo').value : 'monthly';
-  var fecha = document.getElementById('reunionFecha') ? document.getElementById('reunionFecha').value : null;
-  var titulo = document.getElementById('reunionTitulo') ? document.getElementById('reunionTitulo').value.trim() : '';
-  var notas = document.getElementById('reunionNotas') ? document.getElementById('reunionNotas').value.trim() : '';
-  var pasos = document.getElementById('reunionPasos') ? document.getElementById('reunionPasos').value.trim() : '';
-  if (!userId) { mostrarToast('Selecciona un colaborador', 'error'); return; }
-  if (!fecha) { mostrarToast('Ingresa la fecha', 'error'); return; }
-  try {
-    var res = await fetch(API_BASE+'/meetings', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ employeeId:parseInt(userId), meetingType:tipo, meetingDate:fecha,
-        title:titulo||null, generalNotes:notas||null, nextSteps:pasos||null,
-        status:'completed', sendEmail:false })
-    });
-    var data = await res.json();
-    if (data.ok===false) throw new Error(data.error||'Error');
-    closeModal('newMeetingModal');
-    ['reunionTitulo','reunionNotas','reunionPasos'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
-    mostrarToast('Reunion guardada correctamente', 'success');
-    if (reunionColabActual) cargarBitacoraUsuario(reunionColabActual);
-    else if (userId) seleccionarColabReunion(parseInt(userId), colabSel.options[colabSel.selectedIndex].text, '', '');
-  } catch(e) { mostrarToast('Error: '+e.message, 'error'); }
-}
-
-// Guardar edicion reunion
-async function guardarEdicionReunion() {
-  var id = document.getElementById('editMeetingId') ? document.getElementById('editMeetingId').value : null;
-  if (!id) return;
-  var titulo = document.getElementById('editMeetingTitulo') ? document.getElementById('editMeetingTitulo').value.trim() : '';
-  var notas = document.getElementById('editMeetingNotas') ? document.getElementById('editMeetingNotas').value.trim() : '';
-  var pasos = document.getElementById('editMeetingPasos') ? document.getElementById('editMeetingPasos').value.trim() : '';
-  try {
-    var res = await fetch(API_BASE+'/meetings/'+id, {
-      method:'PUT', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ title:titulo||null, generalNotes:notas||null, nextSteps:pasos||null })
-    });
-    var data = await res.json();
-    if (data.ok===false) throw new Error(data.error||'Error');
-    closeModal('editMeetingModal');
-    mostrarToast('Reunion actualizada', 'success');
-    if (reunionColabActual) cargarBitacoraUsuario(reunionColabActual);
-  } catch(e) { mostrarToast('Error: '+e.message, 'error'); }
-}
-
-// Abrir editar reunion
-function abrirEditarReunion(meetingId, titulo, notas, pasos) {
-  document.getElementById('editMeetingId').value = meetingId;
-  document.getElementById('editMeetingTitulo').value = titulo||'';
-  document.getElementById('editMeetingNotas').value = notas||'';
-  document.getElementById('editMeetingPasos').value = pasos||'';
-  var modal = document.getElementById('editMeetingModal');
-  if (modal) modal.style.display='flex';
-}
-
-
-// ═══ LIDERES: DESPROMOVER Y EDITAR ═══════════════════════════
-async function despromoverLider(userId, nombre) {
-  if (!confirm('Despromover a ' + nombre + ' de Lider? Pasara a rol de empleado.')) return;
-  try {
-    var res = await fetch(API_BASE + '/users/' + userId, {
-      method: 'PUT', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ appRole: 'employee' })
-    });
-    var data = await res.json();
-    if (data.ok === false) throw new Error(data.error || 'Error');
-    mostrarToast(nombre + ' fue despromovido correctamente', 'success');
-    loadLideres();
-  } catch(e) { mostrarToast('Error: ' + e.message, 'error'); }
-}
-
-function abrirEditarLider(userId, nombre, email) {
-  abrirModalEditar(userId);
-}
-
-// ═══ OBJETIVOS: PRECARGAR DESDE CORE ═════════════════════════
-function precargarDesdeCore(coreId) {
-  if (!coreId) return;
-  var core = allObjetivosCache ? allObjetivosCache[coreId] : null;
-  if (!core && typeof allObjetivosCore !== 'undefined') {
-    core = allObjetivosCore.find(function(o){ return String(o.ObjectiveID)===String(coreId); });
-  }
-  if (!core) return;
-  var titulo = document.getElementById('newObjTitulo');
-  if (titulo) titulo.value = core.Title || core.title || '';
-  var peso = document.getElementById('newObjPesoPersonal');
-  if (peso) peso.value = core.Weight || core.weight || 20;
-  mostrarToast('Datos del Core precargados', 'info');
-}
-
-// ═══ OBJETIVOS: ESTADO COLOR ══════════════════════════════════
-function estadoColor(status) {
-  var s = (status||'').toLowerCase();
-  if (s.includes('complet')) return '#2ECC71';
-  if (s.includes('progress') || s.includes('curso')) return '#FF5400';
-  if (s.includes('risk') || s.includes('riesgo')) return '#FF4D4D';
-  return '#888';
-}
-function estadoLabel(status) {
-  var map = {
-    'not_started':'No Iniciado','in_progress':'En Curso',
-    'at_risk':'En Riesgo','completed':'Completado','not_met':'No Cumplido',
-    'active':'Activo','approved':'Aprobado','paused':'Pausado','cancelled':'Cancelado'
-  };
-  return map[(status||'').toLowerCase()] || (status||'—').replace(/_/g,' ');
-}
-
-// ═══ FIX showSection para cargar datos dinámicamente ══════════
-  if (id === 'objectives') {
-    var panels = ['obj-core','obj-personal','obj-tasks'];
-    panels.forEach(function(pid, i) {
-      var el = document.getElementById(pid);
-      if (el) el.style.display = i===0 ? '' : 'none';
-    });
-    document.querySelectorAll('#sec-objectives .tab').forEach(function(t,i){ t.classList.toggle('active',i===0); });
-    if (!allUsuarios.length) {
-      loadUsuarios().then(function() {
-        cargarObjetivosCoreEmpresa();
-        poblarSelectoresTabObjetivos();
-        if (!allPeriods.length) loadPeriods().then(poblarModalObjetivo);
-        else poblarModalObjetivo();
-      });
-    } else {
-      cargarObjetivosCoreEmpresa();
-      poblarSelectoresTabObjetivos();
-      if (!allPeriods.length) loadPeriods().then(poblarModalObjetivo);
-      else poblarModalObjetivo();
-    }
-  }
-  if (id === 'feedback360') {
-    if (!allUsuarios.length) loadUsuarios().then(initFeedback360);
-    else initFeedback360();
-    if (!allPeriods.length) loadPeriods();
-  }
-  if (id === 'help') loadHelpArticles();
-  if (id === 'orgchart' && !orgData.length) loadOrgChartDynamic();
-  if (id === 'alerts') loadAlertas();
-  if (id === 'oneononex') {
-    if (!allColabReuniones || !allColabReuniones.length) initReuniones();
-  }
-
-
-
-
-
 </script>
-
-<!-- MODAL EDITAR OBJETIVO -->
-<div class="modal-overlay" id="editObjectiveModal">
-  <div class="modal" style="max-width:560px;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-      <div class="modal-title" id="editObjModalTitle" style="margin:0;">Editar Objetivo</div>
-      <span id="editObjTipoBadge" style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:rgba(255,84,0,0.15);color:#FF5400;"></span>
-    </div>
-    <input type="hidden" id="editObjId">
-    <input type="hidden" id="editObjTipoHidden">
-    <div class="grid-2 gap-16">
-      <div class="form-group" style="grid-column:1/-1">
-        <label class="form-label">Título del Objetivo</label>
-        <input id="editObjTitulo" class="form-control" type="text" placeholder="Título del objetivo">
-      </div>
-
-      <!-- CAMPOS SOLO PARA CORE -->
-      <div id="editCoreFields" style="grid-column:1/-1;display:none;">
-        <div class="grid-2 gap-16">
-          <div class="form-group">
-            <label class="form-label">Ponderación (%)</label>
-            <input id="editObjPeso" class="form-control" type="number" min="0" max="100" value="20">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Período</label>
-            <select id="editObjPeriodo" class="form-control">
-              <option value="">— Período —</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Fecha Límite</label>
-            <input id="editObjFecha" class="form-control" type="date">
-          </div>
-          <div class="form-group">
-            <label class="form-label" style="color:#FF5400;font-weight:700;">📋 Estado Organizacional</label>
-            <select id="editObjEstadoOrg" class="form-control">
-              <option value="active">✅ Activo</option>
-              <option value="approved">🏛️ Aprobado por Dirección</option>
-              <option value="paused">⏸️ Pausado</option>
-              <option value="cancelled">❌ Cancelado por Dirección</option>
-            </select>
-          </div>
-          <div class="form-group" style="grid-column:1/-1">
-            <label class="form-label">Nota de dirección (opcional)</label>
-            <textarea id="editObjNotaDir" class="form-control" placeholder="Ej: Cancelado por reestructuración Q3..." rows="2"></textarea>
-          </div>
-        </div>
-      </div>
-
-      <!-- CAMPOS SOLO PARA PERSONAL -->
-      <div id="editPersonalFields" style="grid-column:1/-1;display:none;">
-        <div class="grid-2 gap-16">
-          <div class="form-group">
-            <label class="form-label">Avance (%)</label>
-            <input id="editObjAvance" class="form-control" type="number" min="0" max="100" value="0">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Estado de cumplimiento</label>
-            <select id="editObjEstado" class="form-control">
-              <option value="not_started">No Iniciado</option>
-              <option value="in_progress">En Curso</option>
-              <option value="at_risk">En Riesgo</option>
-              <option value="completed">Completado ✓</option>
-              <option value="not_met">No Cumplido</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Ponderación (%)</label>
-            <input id="editObjPesoPersonal" class="form-control" type="number" min="0" max="100" value="20">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Fecha Límite</label>
-            <input id="editObjFechaPersonal" class="form-control" type="date">
-          </div>
-        </div>
-      </div>
-    </div>
-    <div id="editObjError" style="color:#FF4D4D;font-size:12px;margin-top:8px;display:none;"></div>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="closeModal('editObjectiveModal')">Cancelar</button>
-      <button class="btn btn-primary" onclick="guardarEdicionObjetivo()">Guardar Cambios</button>
-    </div>
-  </div>
-</div>
-
 </body>
 </html>

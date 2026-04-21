@@ -1956,6 +1956,8 @@ label { color: #888 !important; }
 </div>
 
 <script>
+
+
 const titles = {
   dashboard:'Dashboard',usuarios:'Usuarios',lideres:'Líderes',areas:'Áreas',objectives:'Objetivos',career:'Plan de Carrera',
   competencies:'Competencias',oneononex:'Reuniones 1:1',reports:'Reportes',feedback360:'Feedback 360°',
@@ -2113,19 +2115,64 @@ function drawDonut(){
   ].map(d=>`<div class="donut-legend-item"><div class="donut-dot" style="background:${d.c}"></div>${d.l} <strong style="margin-left:auto">${d.n}</strong></div>`).join('');
 }
 
+
 function showSection(id){
-  if(id==='usuarios' && !allUsuarios.length) loadUsuarios();
-  if(id==='lideres' && !Object.keys(allLideres).length) loadLideres();
-  if(id==='areas' && !allAreas.length) loadAreas();
-  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  const sec = document.getElementById('sec-'+id);
+  document.querySelectorAll('.section').forEach(function(s){ s.classList.remove('active'); });
+  document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
+  var sec = document.getElementById('sec-'+id);
   if(sec) sec.classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(n=>{
+  document.querySelectorAll('.nav-item').forEach(function(n){
     if(n.getAttribute('onclick') && n.getAttribute('onclick').includes("'"+id+"'")) n.classList.add('active');
   });
-  document.getElementById('topbarTitle').textContent = titles[id]||id;
+  var titleEl = document.getElementById('topbarTitle');
+  if(titleEl) titleEl.textContent = titles[id]||id;
+
+  // Cargar datos por sección
+  if(id==='usuarios' && !allUsuarios.length) loadUsuarios();
+  if(id==='lideres'){ if(!Object.keys(allLideres||{}).length) loadLideres(); }
+  if(id==='areas' && !allAreas.length) loadAreas();
+  if(id==='periods'){ if(!allPeriods.length) loadPeriods(); }
+
+  if(id==='objectives'){
+    var panels=['obj-core','obj-personal','obj-tasks'];
+    panels.forEach(function(pid,i){ var el=document.getElementById(pid); if(el) el.style.display=i===0?'':'none'; });
+    document.querySelectorAll('#sec-objectives .tab').forEach(function(t,i){ t.classList.toggle('active',i===0); });
+    if(!allUsuarios.length){ loadUsuarios().then(function(){
+      cargarObjetivosCoreEmpresa(); poblarSelectoresTabObjetivos();
+      if(!allPeriods.length) loadPeriods().then(poblarModalObjetivo); else poblarModalObjetivo();
+    }); } else {
+      cargarObjetivosCoreEmpresa(); poblarSelectoresTabObjetivos();
+      if(!allPeriods.length) loadPeriods().then(poblarModalObjetivo); else poblarModalObjetivo();
+    }
+  }
+
+  if(id==='career'){
+    if(!allUsuarios.length) loadUsuarios().then(loadCareerPlans); else loadCareerPlans();
+  }
+
+  if(id==='competencies'){
+    if(!allUsuarios.length) loadUsuarios().then(poblarSelectoresCompetencias); else poblarSelectoresCompetencias();
+  }
+
+  if(id==='reports'){
+    if(!allUsuarios.length) loadUsuarios().then(initReportes); else initReportes();
+  }
+
+  if(id==='oneononex'){
+    if(!allColabReuniones||!allColabReuniones.length) initReuniones();
+  }
+
+  if(id==='feedback360'){
+    if(!allUsuarios.length) loadUsuarios().then(initFeedback360); else initFeedback360();
+    if(!allPeriods.length) loadPeriods();
+  }
+
+  if(id==='help') loadHelpArticles();
+  if(id==='orgchart'){ if(!orgData||!orgData.length) loadOrgChartDynamic(); }
+  if(id==='alerts') loadAlertas();
+  if(id==='orgchart') loadOrgChart();
 }
+
 
 function switchTab(prefix, id, el){
   const tabsDiv = el.closest('.tabs');
@@ -2340,8 +2387,6 @@ function renderLideres(grupos) {
           <div style="font-size:11px;color:#888;margin-top:1px;">${g.equipo.length} colaborador${g.equipo.length!==1?'es':''}</div>
         </div>
         <span style="margin-left:auto;background:rgba(255,84,0,0.12);color:#FF5400;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">Líder</span>
-        <button onclick="abrirEditarLider(${g.liderId},'${g.nombre.replace(/'/g,"\'")}','${g.email||''}')" style="padding:4px 10px;background:#222;border:1px solid #333;border-radius:6px;color:#aaa;font-size:11px;cursor:pointer;">Editar</button>
-        <button onclick="despromoverLider(${g.liderId},'${g.nombre.replace(/'/g,"\'")}')" style="padding:4px 10px;background:rgba(255,77,77,0.1);border:1px solid rgba(255,77,77,0.3);border-radius:6px;color:#FF4D4D;font-size:11px;cursor:pointer;">Despromover</button>
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;">
         ${g.equipo.map(u=>`
@@ -2790,8 +2835,8 @@ async function guardarPeriodo(){
 }
 
 // ═══ SHOWSECTION PERIODOS ════════════════════════════════════
-const _origSS=showSection;
-showSection=function(id){_origSS(id);if(id==="periods"&&!allPeriods.length)loadPeriods();if(id==="orgchart")loadOrgChart();};
+
+
 
 // ═══ NUEVOCONTEXTUAL MEJORADO ════════════════════════════════
 nuevoContextual=function(){
@@ -3181,9 +3226,6 @@ async function initReportes() {
 }
 
 // Cargar reportes cuando se activa la sección
-const _ss2 = showSection;
-showSection = function(id) {
-  _ss2(id);
   if (id === 'objectives') {
     // Reset tabs
     ['obj-core','obj-personal','obj-tasks'].forEach((pid,i) => {
@@ -3217,7 +3259,6 @@ showSection = function(id) {
   if (id === 'oneononex') {
     if (!allUsuarios.length) loadUsuarios().then(poblarColaboradoresReunion); else poblarColaboradoresReunion();
   }
-};
 
 function poblarSelectoresObjetivos() {
   const modal = document.getElementById('newObjectiveModal');
@@ -4318,16 +4359,12 @@ function abrirModalNuevaReunion(userId) {
 }
 
 // Override showSection para cargar reuniones
-const _ssReu = showSection;
-showSection = function(id) {
-  _ssReu(id);
   if (id === 'oneononex') {
     if (!allColabReuniones.length) initReuniones();
     else if (!document.getElementById('reunionListaColab')?.querySelector('[id^="colab-item-"]')) {
       renderListaColaboradores(allColabReuniones);
     }
   }
-};
 
 // Override guardarReunion para recargar bitácora después
 const _origGR2 = guardarReunion;
@@ -4471,11 +4508,7 @@ async function generarAlertas() {
 }
 
 // Cargar alertas al entrar a la sección
-const _ssAlerts = showSection;
-showSection = function(id) {
-  _ssAlerts(id);
   if (id === 'alerts') loadAlertas();
-};
 
 // Actualizar badge de alertas en el sidebar
 async function actualizarBadgeAlertas() {
@@ -4631,15 +4664,11 @@ async function loadMiFeedback() {
 }
 
 // Cargar al entrar a feedback360
-var _origSSfb = showSection;
-showSection = function(id) {
-  _origSSfb(id);
   if (id==='feedback360') {
     if (!allUsuarios.length) loadUsuarios().then(initFeedback360);
     else initFeedback360();
     if (!allPeriods.length) loadPeriods();
   }
-};
 
 
 // Ayuda desde BD
@@ -4679,8 +4708,6 @@ async function loadHelpArticles() {
     c.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Error al cargar</div>';
   }
 }
-var _ssH = showSection;
-showSection = function(id) { _ssH(id); if (id==='help') loadHelpArticles(); };
 
 
 // ═══ DASHBOARD PAGINACIÓN ════════════════════════════════════
@@ -4838,11 +4865,7 @@ function buscarEnOrganigrama(q) {
 }
 
 // Override showSection para organigrama
-var _ssOrg2 = showSection;
-showSection = function(id) {
-  _ssOrg2(id);
   if (id==='orgchart' && !orgData.length) loadOrgChartDynamic();
-};
 
 
 // Guardar nueva reunion
@@ -4956,9 +4979,6 @@ function estadoLabel(status) {
 }
 
 // ═══ FIX showSection para cargar datos dinámicamente ══════════
-var _ssMain = showSection;
-showSection = function(id) {
-  _ssMain(id);
   if (id === 'objectives') {
     var panels = ['obj-core','obj-personal','obj-tasks'];
     panels.forEach(function(pid, i) {
@@ -4991,7 +5011,8 @@ showSection = function(id) {
   if (id === 'oneononex') {
     if (!allColabReuniones || !allColabReuniones.length) initReuniones();
   }
-};
+
+
 
 </script>
 

@@ -548,6 +548,12 @@ input:not([type=range]):not([type=checkbox]), select, textarea {
 }
 input::placeholder, textarea::placeholder { color: #555 !important; }
 label { color: #888 !important; }
+
+#fbComment {
+  height: 180px !important;
+  overflow-y: auto !important;
+  resize: vertical !important;
+}
 </style>
 
 </head>
@@ -1439,9 +1445,9 @@ label { color: #888 !important; }
           </div>
           <div class="form-group" style="margin-bottom:14px;">
             <label class="form-label">Comentario (opcional)</label>
-            <textarea id="fbComment" class="form-control" rows="5"
+            <textarea id="fbComment" class="form-control" rows="8"
               placeholder="Compartí tu experiencia de forma constructiva..."
-              style="margin-top:6px;resize:vertical;height:140px;overflow-y:scroll;"></textarea>
+              style="margin-top:6px;height:180px;overflow-y:auto;overflow:auto;resize:vertical;display:block;width:100%;box-sizing:border-box;"></textarea>
           </div>
           <div class="form-group" style="margin-bottom:14px;">
             <label class="form-label">Período</label>
@@ -2039,6 +2045,11 @@ function showSection(id){
     if(n.getAttribute('onclick') && n.getAttribute('onclick').includes("'"+id+"'")) n.classList.add('active');
   });
   document.getElementById('topbarTitle').textContent = titles[id]||id;
+  if(id==='feedback360'){
+    if(!allUsuarios.length) loadUsuarios().then(initFeedback360);
+    else initFeedback360();
+    if(!allPeriods.length) loadPeriods();
+  }
 }
 
 function switchTab(prefix, id, el){

@@ -1958,6 +1958,7 @@ label { color: #888 !important; }
 <script>
 
 
+
 const titles = {
   dashboard:'Dashboard',usuarios:'Usuarios',lideres:'Líderes',areas:'Áreas',objectives:'Objetivos',career:'Plan de Carrera',
   competencies:'Competencias',oneononex:'Reuniones 1:1',reports:'Reportes',feedback360:'Feedback 360°',
@@ -1969,6 +1970,10 @@ const API_BASE = 'https://peopletrack-api-gjbbhhcefjbgc6bd.eastus2-01.azurewebsi
 const AVATAR_COLORS = ['#FF5400', '#2ECC71', '#3B82F6', '#A855F7', '#F59E0B', '#EF4444', '#10B981', '#F97316', '#6366F1', '#EC4899'];
 
 let teamData = []; // se llena desde la API
+
+let allObjetivosCore = [];
+let allObjetivosPersonales = [];
+let allObjetivosCache = {}; // cache por ObjectiveID → objeto completo
 
 function ini(name) {
   return (name || '??').split(/[ @]/).filter(Boolean).map(n=>n[0]).join('').slice(0,2).toUpperCase();
@@ -2990,16 +2995,18 @@ function poblarColaboradoresReunion() {
   if (current) sel.value = current;
 }
 
-// Parchar showModal para poblar colaboradores cuando se abre modal reunión
+// showModal unificado
 const _origShowModal = showModal;
 showModal = function(id) {
   _origShowModal(id);
   if (id === 'newMeetingModal') {
-    if (!allUsuarios.length) {
-      loadUsuarios().then(poblarColaboradoresReunion);
-    } else {
-      poblarColaboradoresReunion();
-    }
+    if (!allUsuarios.length) loadUsuarios().then(function(){ filtrarColabReunion(''); });
+    else filtrarColabReunion('');
+  }
+  if (id === 'newObjectiveModal') {
+    if (!allUsuarios.length) loadUsuarios().then(poblarModalObjetivo);
+    else poblarModalObjetivo();
+    if (!allPeriods.length) loadPeriods().then(poblarModalObjetivo);
   }
 };
 
@@ -3566,25 +3573,10 @@ function poblarModalObjetivo() {
   }
 }
 
-// Parchar showModal para poblar cuando se abre newObjectiveModal
-const _origShowModalObj = showModal;
-showModal = function(id) {
-  _origShowModal ? _origShowModal(id) : _origShowModalObj(id);
-  if (id === 'newObjectiveModal') {
-    if (!allUsuarios.length) loadUsuarios().then(poblarModalObjetivo);
-    else poblarModalObjetivo();
-  }
-  if (id === 'newMeetingModal') {
-    if (!allUsuarios.length) loadUsuarios().then(poblarColaboradoresReunion);
-    else poblarColaboradoresReunion();
-  }
-};
+// showModal ya unificado arriba
 
 
 // ═══ DATOS DE OBJETIVOS ══════════════════════════════════════
-let allObjetivosCore = [];
-let allObjetivosPersonales = [];
-let allObjetivosCache = {}; // cache por ObjectiveID → objeto completo
 
 async function cargarObjetivosCoreEmpresa() {
   const container = document.getElementById('objCoreTbody');
@@ -5011,6 +5003,7 @@ function estadoLabel(status) {
   if (id === 'oneononex') {
     if (!allColabReuniones || !allColabReuniones.length) initReuniones();
   }
+
 
 
 

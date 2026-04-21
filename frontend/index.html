@@ -675,6 +675,7 @@ label { color: #888 !important; }
     <div style="display:flex;gap:10px;margin-top:24px;justify-content:flex-end;">
       <button onclick="cerrarModalEditar()" style="padding:10px 20px;background:#222;border:1px solid #333;border-radius:8px;color:#aaa;font-size:13px;cursor:pointer;">Cancelar</button>
       <button onclick="guardarEdicionUsuario()" id="btnGuardarEdicion" style="padding:10px 24px;background:#FF5400;border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;">Guardar cambios</button>
+    <button onclick="confirmarEliminarUsuario()" style="padding:10px 20px;background:transparent;border:1px solid rgba(255,77,77,0.4);border-radius:8px;color:#FF4D4D;font-size:13px;font-weight:600;cursor:pointer;margin-left:8px;">Eliminar usuario</button>
     </div>
   </div>
 </div>
@@ -799,6 +800,10 @@ label { color: #888 !important; }
     <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
     Plan de Carrera
   </div>
+  <div class="nav-item" onclick="showSection('pip')">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    PIP
+  </div>
   <div class="nav-item" onclick="showSection('competencies')">
     <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
     Competencias
@@ -823,6 +828,14 @@ label { color: #888 !important; }
   </div>
 
   <div class="sidebar-section-label">Gestión RR.HH.</div>
+  <div class="nav-item" onclick="showSection('recruiting')">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    Recruiting
+  </div>
+  <div class="nav-item" onclick="showSection('onboarding')">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    Onboarding
+  </div>
   <div class="nav-item" onclick="showSection('usuarios')">
     <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
     Usuarios
@@ -1993,7 +2006,7 @@ label { color: #888 !important; }
 
 <script>
 const titles = {
-  dashboard:'Dashboard',usuarios:'Usuarios',lideres:'Líderes',areas:'Áreas',objectives:'Objetivos',career:'Plan de Carrera',pip:'PIP — Plan de Improvement',
+  dashboard:'Dashboard',recruiting:'Recruiting',onboarding:'Onboarding',usuarios:'Usuarios',lideres:'Líderes',areas:'Áreas',objectives:'Objetivos',career:'Plan de Carrera',pip:'PIP — Improvement',pip:'PIP — Plan de Improvement',
   competencies:'Competencias',oneononex:'Reuniones 1:1',feedback360:'Feedback 360°',reports:'Reportes',
   orgchart:'Organigrama',alerts:'Alertas',periods:'Períodos',settings:'Configuración',help:'Ayuda'
 };
@@ -4701,6 +4714,305 @@ async function cargarMiFeedback() {
   } catch(e) { c.innerHTML = '<div style="padding:20px;color:#888;text-align:center;">Error: ' + e.message + '</div>'; }
 }
 
+
+// ════════════════════════════════════════════════════════════════
+// PIP - PLAN DE IMPROVEMENT
+// ════════════════════════════════════════════════════════════════
+var allPIPs = [];
+
+function filtrarPipColab(q) {
+  var sel = document.getElementById('pipColabSel');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">&#8212; Seleccionar &#8212;</option>';
+  allUsuarios.filter(function(u) {
+    return u.IsActive && (!q || (u.FullName||'').toLowerCase().includes(q.toLowerCase()));
+  }).sort(function(a,b){ return (a.FullName||'').localeCompare(b.FullName||''); })
+  .forEach(function(u){ sel.add(new Option((u.FullName||u.Email)+' \u2014 '+(u.Email||''), u.UserID)); });
+}
+
+function abrirModalNuevoPIP() {
+  if (!allUsuarios.length) { loadUsuarios().then(function(){ filtrarPipColab(''); }); }
+  else { filtrarPipColab(''); }
+  showModal('modalNuevoPIP');
+}
+
+async function guardarNuevoPIP() {
+  var empId = document.getElementById('pipColabSel').value;
+  var reason = document.getElementById('pipReason').value.trim();
+  var start = document.getElementById('pipStartDate').value;
+  var errEl = document.getElementById('pipError');
+  if (!empId) { errEl.textContent = 'Seleccion\xe1 un colaborador'; errEl.style.display='block'; return; }
+  if (!reason) { errEl.textContent = 'El motivo es obligatorio'; errEl.style.display='block'; return; }
+  if (!start) { errEl.textContent = 'La fecha de inicio es obligatoria'; errEl.style.display='block'; return; }
+  errEl.style.display = 'none';
+  var me = allUsuarios.find(function(u){ return u.Email === window._userEmail; });
+  try {
+    var res = await fetch(API_BASE + '/pips', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ employeeId: parseInt(empId), createdById: me?me.UserID:1,
+        reason: reason, startDate: start,
+        target15: document.getElementById('pipTarget15').value||null,
+        target30: document.getElementById('pipTarget30').value||null,
+        target60: document.getElementById('pipTarget60').value||null,
+        milestones: document.getElementById('pipMilestones').value||null })
+    });
+    var data = await res.json();
+    if (data.ok === false) throw new Error(data.error||'Error');
+    closeModal('modalNuevoPIP');
+    ['pipReason','pipMilestones','pipTarget15','pipTarget30','pipTarget60','pipStartDate']
+      .forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
+    mostrarToast('PIP creado correctamente', 'success');
+    cargarPIPs();
+  } catch(e) { errEl.textContent = 'Error: '+e.message; errEl.style.display='block'; }
+}
+
+async function cargarPIPs() {
+  var c = document.getElementById('pipContainer');
+  if (!c) return;
+  c.innerHTML = '<div style="text-align:center;padding:20px;color:#888;">Cargando...</div>';
+  try {
+    var data = await apiGet('pips');
+    allPIPs = Array.isArray(data) ? data : [];
+    renderPIPs(allPIPs);
+  } catch(e) { c.innerHTML = '<div style="padding:20px;color:#888;text-align:center;">Error al cargar</div>'; }
+}
+
+function filtrarPIPs(q) {
+  var status = (document.getElementById('pipFiltroStatus')||{}).value||'';
+  var filtered = allPIPs.filter(function(p){
+    var mQ = !(q||'').trim() || (p.EmployeeName||'').toLowerCase().includes(q.toLowerCase());
+    var mS = !status || p.Status===status;
+    return mQ && mS;
+  });
+  renderPIPs(filtered);
+}
+
+function renderPIPs(pips) {
+  var c = document.getElementById('pipContainer');
+  if (!c) return;
+  if (!pips.length) { c.innerHTML='<div style="text-align:center;padding:30px;color:#888;">Sin PIPs registrados</div>'; return; }
+  var html = '';
+  pips.forEach(function(p) {
+    var sc = p.Status==='closed'?(p.Achieved?'#2ECC71':'#FF4D4D'):'#F59E0B';
+    var sl = p.Status==='closed'?(p.Achieved?'Logrado':'No logrado'):'Activo';
+    var inicio = p.StartDate ? new Date(p.StartDate).toLocaleDateString('es-AR') : '&#8212;';
+    html += '<div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:10px;padding:16px;margin-bottom:12px;">';
+    html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">';
+    html += '<div><div style="font-weight:700;color:#f0ebe3;font-size:14px;">'+(p.EmployeeName||'&#8212;')+'</div>';
+    html += '<div style="font-size:11px;color:#888;margin-top:2px;">Creado por '+(p.CreatedByName||'&#8212;')+' &middot; '+inicio+'</div></div>';
+    html += '<span style="font-size:11px;font-weight:700;color:'+sc+';background:'+sc+'22;padding:3px 10px;border-radius:20px;">'+sl+'</span></div>';
+    html += '<div style="font-size:13px;color:#aaa;margin-bottom:10px;line-height:1.5;">'+(p.Reason||'').replace(/</g,'&lt;').substring(0,200)+'</div>';
+    if (p.Target15Days||p.Target30Days||p.Target60Days) {
+      html += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">';
+      if (p.Target15Days) html += '<span style="font-size:11px;background:#222;border:1px solid #333;padding:2px 8px;border-radius:6px;color:#aaa;">15d: '+new Date(p.Target15Days).toLocaleDateString('es-AR')+'</span>';
+      if (p.Target30Days) html += '<span style="font-size:11px;background:#222;border:1px solid #333;padding:2px 8px;border-radius:6px;color:#aaa;">30d: '+new Date(p.Target30Days).toLocaleDateString('es-AR')+'</span>';
+      if (p.Target60Days) html += '<span style="font-size:11px;background:#222;border:1px solid #333;padding:2px 8px;border-radius:6px;color:#aaa;">60d: '+new Date(p.Target60Days).toLocaleDateString('es-AR')+'</span>';
+      html += '</div>';
+    }
+    if (p.ReviewNotes) html += '<div style="font-size:12px;color:#888;background:#111;border-radius:6px;padding:8px;margin-bottom:10px;">&#128221; '+(p.ReviewNotes||'').replace(/</g,'&lt;')+'</div>';
+    if (p.Status==='active') html += '<button data-pipid="'+p.PIPID+'" data-nombre="'+(p.EmployeeName||'').replace(/"/g,'&quot;')+'" onclick="abrirRevisarPIP(this.dataset.pipid,this.dataset.nombre)" style="padding:5px 14px;background:#222;border:1px solid #333;border-radius:6px;color:#aaa;font-size:11px;cursor:pointer;">Revisar / Cerrar PIP</button>';
+    html += '</div>';
+  });
+  c.innerHTML = html;
+}
+
+function abrirRevisarPIP(id, nombre) {
+  document.getElementById('revisarPIPId').value = id;
+  var t = document.getElementById('revisarPIPTitle');
+  if (t) t.textContent = 'Revisar PIP \u2014 '+nombre;
+  document.getElementById('pipReviewNotes').value = '';
+  document.getElementById('pipAchieved').value = '';
+  setPIPResult(null);
+  showModal('modalRevisarPIP');
+}
+
+function setPIPResult(val) {
+  document.getElementById('pipAchieved').value = val===null?'':String(val);
+  ['pipResNull','pipResTrue','pipResFalse'].forEach(function(id){
+    var b=document.getElementById(id); if(b) b.style.background='';
+  });
+  var active = val===null?'pipResNull':(val===true?'pipResTrue':'pipResFalse');
+  var btn = document.getElementById(active);
+  if (btn) btn.style.background = val===null?'rgba(255,84,0,0.15)':(val===true?'rgba(46,204,113,0.15)':'rgba(255,77,77,0.15)');
+}
+
+async function guardarRevisionPIP() {
+  var id = document.getElementById('revisarPIPId').value;
+  var notes = document.getElementById('pipReviewNotes').value.trim();
+  var achievedStr = document.getElementById('pipAchieved').value;
+  var achieved = achievedStr===''?null:achievedStr==='true';
+  var status = achievedStr===''?'active':'closed';
+  try {
+    var res = await fetch(API_BASE+'/pips/'+id, {
+      method:'PUT', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ reviewNotes:notes||null, achieved:achieved, status:status })
+    });
+    var data = await res.json();
+    if (data.ok===false) throw new Error(data.error||'Error');
+    closeModal('modalRevisarPIP');
+    mostrarToast('PIP actualizado', 'success');
+    cargarPIPs();
+  } catch(e) { mostrarToast('Error: '+e.message,'error'); }
+}
+
+// ════════════════════════════════════════════════════════════════
+// CAMBIOS
+// ════════════════════════════════════════════════════════════════
+var allCambios = [];
+
+function filtrarCambiosColab(q) {
+  ['cambiosColabSel','cambiosNuevoLider','cambiosNuevoManager'].forEach(function(selId, idx) {
+    var sel = document.getElementById(selId);
+    if (!sel) return;
+    sel.innerHTML = '<option value="">'+(idx===0?'&#8212; Seleccionar &#8212;':'&#8212; Sin cambio &#8212;')+'</option>';
+    allUsuarios.filter(function(u){
+      if (!u.IsActive) return false;
+      if (idx===0 && (q||'').trim()) return (u.FullName||'').toLowerCase().includes(q.toLowerCase());
+      return true;
+    }).sort(function(a,b){ return (a.FullName||'').localeCompare(b.FullName||''); })
+    .forEach(function(u){ sel.add(new Option((u.FullName||u.Email)+' \u2014 '+(u.Email||''), u.UserID)); });
+  });
+}
+
+function abrirModalNuevoCambio() {
+  if (!allUsuarios.length) { loadUsuarios().then(function(){ filtrarCambiosColab(''); }); }
+  else { filtrarCambiosColab(''); }
+  showModal('modalNuevoCambio');
+}
+
+async function guardarNuevoCambio() {
+  var empId = document.getElementById('cambiosColabSel').value;
+  var tipo = document.getElementById('cambiosTipo').value;
+  var fecha = document.getElementById('cambiosFecha').value;
+  var errEl = document.getElementById('cambiosError');
+  if (!empId) { errEl.textContent='Seleccion\xe1 un colaborador'; errEl.style.display='block'; return; }
+  if (!fecha) { errEl.textContent='La fecha es obligatoria'; errEl.style.display='block'; return; }
+  errEl.style.display='none';
+  var me = allUsuarios.find(function(u){ return u.Email===window._userEmail; });
+  try {
+    var res = await fetch(API_BASE+'/rolechanges', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ employeeId:parseInt(empId), requestedById:me?me.UserID:1,
+        changeType:tipo, newRole:(document.getElementById('cambiosNuevoRol')||{}).value||null,
+        newLeaderId:(document.getElementById('cambiosNuevoLider')||{}).value||null,
+        newManagerId:(document.getElementById('cambiosNuevoManager')||{}).value||null,
+        changeDate:fecha, observations:(document.getElementById('cambiosObs')||{}).value||null })
+    });
+    var data = await res.json();
+    if (data.ok===false) throw new Error(data.error||'Error');
+    closeModal('modalNuevoCambio');
+    mostrarToast('Cambio registrado', 'success');
+    cargarCambios();
+  } catch(e) { errEl.textContent='Error: '+e.message; errEl.style.display='block'; }
+}
+
+async function cargarCambios() {
+  var c = document.getElementById('cambiosContainer');
+  if (!c) return;
+  c.innerHTML = '<div style="text-align:center;padding:20px;color:#888;">Cargando...</div>';
+  try {
+    var data = await apiGet('rolechanges');
+    allCambios = Array.isArray(data)?data:[];
+    renderCambios(allCambios);
+  } catch(e) { c.innerHTML='<div style="padding:20px;color:#888;text-align:center;">Error al cargar</div>'; }
+}
+
+function renderCambios(cambios) {
+  var c = document.getElementById('cambiosContainer');
+  if (!c) return;
+  if (!cambios.length) { c.innerHTML='<div style="text-align:center;padding:30px;color:#888;">Sin cambios registrados</div>'; return; }
+  var tipoLabel = {proyecto:'Cambio de proyecto',rol:'Cambio de rol',lider:'Cambio de l\xedder',manager:'Cambio de manager'};
+  var sColors = {pending:'#F59E0B',completed:'#2ECC71',rejected:'#FF4D4D'};
+  var sLabels = {pending:'Pendiente',completed:'Realizado',rejected:'Rechazado'};
+  var html = '<table class="data-table"><thead><tr><th>Colaborador</th><th>Tipo</th><th>Detalle</th><th>Fecha</th><th>Estado</th><th>Acci\xf3n</th></tr></thead><tbody>';
+  cambios.forEach(function(ch) {
+    var sc = sColors[ch.Status]||'#888';
+    var sl = sLabels[ch.Status]||ch.Status;
+    var fecha = ch.ChangeDate?new Date(ch.ChangeDate).toLocaleDateString('es-AR'):'&#8212;';
+    var det = [ch.NewRole?'Rol: '+ch.NewRole:'',ch.NewLeaderName?'L\xedder: '+ch.NewLeaderName:'',ch.NewManagerName?'Manager: '+ch.NewManagerName:''].filter(Boolean).join(' &middot; ')||'&#8212;';
+    html += '<tr><td><strong>'+(ch.EmployeeName||'&#8212;').replace(/</g,'&lt;')+'</strong><br><span style="font-size:10px;color:#666;">'+(ch.EmployeeEmail||'')+'</span></td>';
+    html += '<td>'+(tipoLabel[ch.ChangeType]||ch.ChangeType||'&#8212;')+'</td>';
+    html += '<td style="font-size:12px;">'+det+(ch.Observations?'<br><span style="color:#888;">'+(ch.Observations||'').replace(/</g,'&lt;')+'</span>':'')+'</td>';
+    html += '<td>'+fecha+'</td>';
+    html += '<td><span style="color:'+sc+';font-weight:700;font-size:11px;">'+sl+'</span></td>';
+    html += '<td>';
+    if (ch.Status==='pending') {
+      html += '<button data-cid="'+ch.ChangeID+'" data-s="completed" onclick="actualizarCambio(this.dataset.cid,this.dataset.s)" style="padding:3px 7px;background:rgba(46,204,113,0.1);border:1px solid rgba(46,204,113,0.3);border-radius:5px;color:#2ECC71;font-size:10px;cursor:pointer;margin-right:3px;">Realizado</button>';
+      html += '<button data-cid="'+ch.ChangeID+'" data-s="rejected" onclick="actualizarCambio(this.dataset.cid,this.dataset.s)" style="padding:3px 7px;background:rgba(255,77,77,0.1);border:1px solid rgba(255,77,77,0.3);border-radius:5px;color:#FF4D4D;font-size:10px;cursor:pointer;">Rechazado</button>';
+    }
+    html += '</td></tr>';
+  });
+  html += '</tbody></table>';
+  c.innerHTML = html;
+}
+
+async function actualizarCambio(id, status) {
+  try {
+    var res = await fetch(API_BASE+'/rolechanges/'+id, {
+      method:'PUT', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ status: status })
+    });
+    var data = await res.json();
+    if (data.ok===false) throw new Error(data.error||'Error');
+    mostrarToast(status==='completed'?'Cambio marcado como realizado':'Cambio rechazado','success');
+    cargarCambios();
+  } catch(e) { mostrarToast('Error: '+e.message,'error'); }
+}
+
+// ════════════════════════════════════════════════════════════════
+// ELIMINAR USUARIO
+// ════════════════════════════════════════════════════════════════
+function confirmarEliminarUsuario() {
+  var id = document.getElementById('editUserId').value;
+  var nombre = document.getElementById('editNombre').value || 'este usuario';
+  if (!id) return;
+  var overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:600;display:flex;align-items:center;justify-content:center;';
+  overlay.id = 'overlayEliminarUser';
+  overlay.innerHTML = '<div style="background:#1a1a1a;border:1px solid rgba(255,77,77,0.4);border-radius:16px;padding:32px;width:400px;max-width:90vw;text-align:center;">' +
+    '<div style="font-size:32px;margin-bottom:12px;">&#9888;&#65039;</div>' +
+    '<div style="font-size:16px;font-weight:800;color:#f0ebe3;margin-bottom:8px;">Eliminar usuario</div>' +
+    '<div style="font-size:13px;color:#aaa;margin-bottom:6px;">\xbfSeg\xfaro que quer\xe9s eliminar a <strong style="color:#f0ebe3;">'+nombre.replace(/</g,'&lt;')+'</strong>?</div>' +
+    '<div style="font-size:12px;color:#888;margin-bottom:24px;">Quedar\xe1 inactivo. Sus datos hist\xf3ricos se conservan.</div>' +
+    '<div style="display:flex;gap:10px;justify-content:center;">' +
+    '<button onclick="document.getElementById(\'overlayEliminarUser\').remove()" style="padding:10px 24px;background:#222;border:1px solid #333;border-radius:8px;color:#aaa;font-size:13px;cursor:pointer;">Cancelar</button>' +
+    '<button data-uid="'+id+'" onclick="ejecutarEliminarUsuario(this.dataset.uid,this)" style="padding:10px 24px;background:#FF4D4D;border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;">S\xed, eliminar</button>' +
+    '</div></div>';
+  document.body.appendChild(overlay);
+}
+
+async function ejecutarEliminarUsuario(id, btn) {
+  var overlay = document.getElementById('overlayEliminarUser');
+  btn.textContent = 'Eliminando...'; btn.disabled = true;
+  try {
+    var res = await fetch(API_BASE+'/manage/users/'+id, {
+      method:'PUT', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ IsActive: false })
+    });
+    var data = await res.json();
+    if (data.ok===false) throw new Error(data.error||'Error');
+    if (overlay) overlay.remove();
+    cerrarModalEditar();
+    allUsuarios = [];
+    await loadUsuarios();
+    mostrarToast('Usuario eliminado correctamente','success');
+  } catch(e) {
+    btn.textContent = 'S\xed, eliminar'; btn.disabled = false;
+    mostrarToast('Error: '+e.message,'error');
+  }
+}
+
+// ════════════════════════════════════════════════════════════════
+// showSection: cargar PIP, Cambios, Recruiting, Onboarding
+// ════════════════════════════════════════════════════════════════
+var _ssExtra = showSection;
+showSection = function(id) {
+  _ssExtra(id);
+  if (id==='pip') {
+    if (!allUsuarios.length) loadUsuarios().then(cargarPIPs); else cargarPIPs();
+  }
+};
+
 </script>
 
 <!-- MODAL EDITAR OBJETIVO -->
@@ -4788,4 +5100,168 @@ async function cargarMiFeedback() {
 </div>
 
 </body>
-</html>
+</html>      <!-- PANEL CAMBIOS -->
+      <div id="rep-cambios" style="display:none;margin-top:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <div style="font-size:13px;color:#aaa;">Registro de cambios de rol, proyecto o líder.</div>
+          <button class="btn btn-primary btn-sm" onclick="abrirModalNuevoCambio()">+ Registrar Cambio</button>
+        </div>
+        <div id="cambiosContainer"><div style="text-align:center;padding:30px;color:#888;">Cargando...</div></div>
+      </div>
+    </div>
+
+    <!-- MODAL NUEVO CAMBIO -->
+    <div class="modal-overlay" id="modalNuevoCambio">
+      <div class="modal" style="max-width:580px;">
+        <div class="modal-title">Registrar Cambio</div>
+        <div style="display:grid;gap:14px;">
+          <div>
+            <label class="form-label">Colaborador *</label>
+            <input id="cambiosBuscarColab" type="text" class="form-control" placeholder="Buscar..." style="margin-bottom:4px;" oninput="filtrarCambiosColab(this.value)">
+            <select id="cambiosColabSel" class="form-control"><option value="">&#8212; Seleccionar &#8212;</option></select>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div><label class="form-label">Tipo *</label>
+              <select id="cambiosTipo" class="form-control">
+                <option value="proyecto">Cambio de proyecto</option>
+                <option value="rol">Cambio de rol</option>
+                <option value="lider">Cambio de líder</option>
+                <option value="manager">Cambio de manager</option>
+              </select></div>
+            <div><label class="form-label">Fecha *</label>
+              <input id="cambiosFecha" type="date" class="form-control"></div>
+          </div>
+          <div><label class="form-label">Nuevo rol (texto)</label>
+            <input id="cambiosNuevoRol" type="text" class="form-control" placeholder="Ej: Tech Lead..."></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div><label class="form-label">Nuevo líder</label>
+              <select id="cambiosNuevoLider" class="form-control"><option value="">&#8212; Sin cambio &#8212;</option></select></div>
+            <div><label class="form-label">Nuevo manager</label>
+              <select id="cambiosNuevoManager" class="form-control"><option value="">&#8212; Sin cambio &#8212;</option></select></div>
+          </div>
+          <div><label class="form-label">Observaciones</label>
+            <textarea id="cambiosObs" class="form-control" rows="3" style="height:80px;resize:none;overflow-y:auto;"></textarea></div>
+        </div>
+        <div id="cambiosError" style="color:#FF4D4D;font-size:12px;margin-top:10px;display:none;"></div>
+        <div class="modal-actions">
+          <button class="btn btn-secondary" onclick="closeModal('modalNuevoCambio')">Cancelar</button>
+          <button class="btn btn-primary" onclick="guardarNuevoCambio()">Registrar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RECRUITING -->
+    <div class="section" id="sec-recruiting">
+      <div class="section-header" style="margin-bottom:20px;">
+        <div><div class="section-heading">Recruiting</div>
+          <div class="section-subheading">Pipeline de candidatos</div></div>
+        <button class="btn btn-primary btn-sm" onclick="mostrarToast('Próximamente: carga de candidatos desde la BD','info')">+ Nuevo Candidato</button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(6,minmax(140px,1fr));gap:10px;overflow-x:auto;">
+        <div style="background:#111;border:1px solid #1e1e1e;border-radius:10px;padding:12px;">
+          <div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:10px;display:flex;justify-content:space-between;"><span>Screening</span><span style="background:#333;color:#aaa;padding:1px 7px;border-radius:10px;font-size:10px;">1</span></div>
+          <div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:10px;">
+            <div style="font-weight:700;color:#f0ebe3;font-size:12px;margin-bottom:3px;">Martina Lopez</div>
+            <div style="font-size:10px;color:#888;margin-bottom:4px;">.NET &middot; Azure</div>
+            <div style="font-size:10px;color:#aaa;">USD 3.500</div>
+            <div style="margin-top:6px;"><span style="font-size:9px;background:rgba(59,130,246,0.15);color:#3B82F6;padding:2px 6px;border-radius:4px;">LinkedIn</span></div>
+          </div>
+        </div>
+        <div style="background:#111;border:1px solid #1e1e1e;border-radius:10px;padding:12px;">
+          <div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:10px;display:flex;justify-content:space-between;"><span>T&eacute;cnica</span><span style="background:#333;color:#aaa;padding:1px 7px;border-radius:10px;font-size:10px;">1</span></div>
+          <div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:10px;">
+            <div style="font-weight:700;color:#f0ebe3;font-size:12px;margin-bottom:3px;">Diego Fernandez</div>
+            <div style="font-size:10px;color:#888;margin-bottom:4px;">Java &middot; AWS</div>
+            <div style="font-size:10px;color:#aaa;">USD 4.000</div>
+            <div style="margin-top:6px;"><span style="font-size:9px;background:rgba(239,68,68,0.15);color:#EF4444;padding:2px 6px;border-radius:4px;">Viaje jun</span></div>
+          </div>
+        </div>
+        <div style="background:#111;border:1px solid #1e1e1e;border-radius:10px;padding:12px;">
+          <div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:10px;display:flex;justify-content:space-between;"><span>Cliente</span><span style="background:#333;color:#aaa;padding:1px 7px;border-radius:10px;font-size:10px;">1</span></div>
+          <div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:10px;">
+            <div style="font-weight:700;color:#f0ebe3;font-size:12px;margin-bottom:3px;">Sofia Ramos</div>
+            <div style="font-size:10px;color:#888;margin-bottom:4px;">Python &middot; Data</div>
+            <div style="font-size:10px;color:#aaa;">USD 2.800</div>
+          </div>
+        </div>
+        <div style="background:#111;border:1px solid #1e1e1e;border-radius:10px;padding:12px;">
+          <div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:10px;display:flex;justify-content:space-between;"><span>Oferta</span><span style="background:#333;color:#aaa;padding:1px 7px;border-radius:10px;font-size:10px;">1</span></div>
+          <div style="background:#1a1a1a;border:1px solid rgba(245,158,11,0.3);border-radius:8px;padding:10px;">
+            <div style="font-weight:700;color:#f0ebe3;font-size:12px;margin-bottom:3px;">Lucas Martinez</div>
+            <div style="font-size:10px;color:#888;margin-bottom:4px;">React &middot; Node.js</div>
+            <div style="font-size:10px;color:#F59E0B;font-weight:700;">Oferta enviada</div>
+          </div>
+        </div>
+        <div style="background:#111;border:1px solid rgba(46,204,113,0.2);border-radius:10px;padding:12px;">
+          <div style="font-size:11px;font-weight:700;color:#2ECC71;text-transform:uppercase;margin-bottom:10px;display:flex;justify-content:space-between;"><span>Contratado</span><span style="background:rgba(46,204,113,0.15);color:#2ECC71;padding:1px 7px;border-radius:10px;font-size:10px;">1</span></div>
+          <div style="background:#1a1a1a;border:1px solid rgba(46,204,113,0.3);border-radius:8px;padding:10px;">
+            <div style="font-weight:700;color:#f0ebe3;font-size:12px;margin-bottom:3px;">Carolina Benitez</div>
+            <div style="font-size:10px;color:#888;margin-bottom:4px;">.NET &middot; DevOps</div>
+            <div style="font-size:10px;color:#2ECC71;font-weight:700;">Inicia 01/05</div>
+          </div>
+        </div>
+        <div style="background:#111;border:1px solid rgba(255,77,77,0.15);border-radius:10px;padding:12px;">
+          <div style="font-size:11px;font-weight:700;color:#FF4D4D;text-transform:uppercase;margin-bottom:10px;display:flex;justify-content:space-between;"><span>Rechazado</span><span style="background:rgba(255,77,77,0.15);color:#FF4D4D;padding:1px 7px;border-radius:10px;font-size:10px;">1</span></div>
+          <div style="background:#1a1a1a;border:1px solid rgba(255,77,77,0.2);border-radius:8px;padding:10px;">
+            <div style="font-weight:700;color:#888;font-size:12px;margin-bottom:3px;">Rodrigo Salinas</div>
+            <div style="font-size:10px;color:#666;margin-bottom:4px;">Java &middot; Microservices</div>
+            <div style="font-size:10px;color:#FF4D4D;">No pas&oacute; t&eacute;cnica</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ONBOARDING -->
+    <div class="section" id="sec-onboarding">
+      <div class="section-header" style="margin-bottom:20px;">
+        <div><div class="section-heading">Onboarding</div>
+          <div class="section-subheading">Incorporaci&oacute;n de nuevos empleados</div></div>
+        <button class="btn btn-primary btn-sm" onclick="mostrarToast('Próximamente: nuevo onboarding','info')">+ Nuevo Onboarding</button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">
+        <div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:10px;padding:16px;text-align:center;"><div style="font-size:28px;font-weight:800;color:#FF5400;">2</div><div style="font-size:11px;color:#888;margin-top:4px;">En proceso</div></div>
+        <div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:10px;padding:16px;text-align:center;"><div style="font-size:28px;font-weight:800;color:#2ECC71;">1</div><div style="font-size:11px;color:#888;margin-top:4px;">Completados</div></div>
+        <div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:10px;padding:16px;text-align:center;"><div style="font-size:28px;font-weight:800;color:#3B82F6;">3</div><div style="font-size:11px;color:#888;margin-top:4px;">Hitos pendientes</div></div>
+        <div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:10px;padding:16px;text-align:center;"><div style="font-size:28px;font-weight:800;color:#A855F7;">2</div><div style="font-size:11px;color:#888;margin-top:4px;">Cursos pendientes</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;">
+        <div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:12px;padding:20px;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;">
+            <div><div style="font-weight:800;color:#f0ebe3;font-size:14px;">Carolina Benitez</div>
+              <div style="font-size:11px;color:#888;margin-top:2px;">.NET Developer &middot; Inicio: 01/05/2026</div></div>
+            <span style="font-size:10px;font-weight:700;background:rgba(255,84,0,0.15);color:#FF5400;padding:3px 10px;border-radius:20px;">En proceso</span>
+          </div>
+          <div style="margin-bottom:12px;">
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:#888;margin-bottom:4px;"><span>Progreso</span><span style="color:#FF5400;font-weight:700;">40%</span></div>
+            <div style="background:#222;border-radius:4px;height:6px;"><div style="background:#FF5400;height:6px;border-radius:4px;width:40%;"></div></div>
+          </div>
+          <div style="display:grid;gap:7px;font-size:12px;">
+            <div style="display:flex;align-items:center;gap:8px;"><span style="color:#2ECC71;">&#10003;</span><span style="color:#aaa;text-decoration:line-through;">Documentaci&oacute;n legal firmada</span></div>
+            <div style="display:flex;align-items:center;gap:8px;"><span style="color:#2ECC71;">&#10003;</span><span style="color:#aaa;text-decoration:line-through;">Accesos al sistema otorgados</span></div>
+            <div style="display:flex;align-items:center;gap:8px;"><span style="color:#888;">&#9675;</span><span style="color:#f0ebe3;">Curso de Seguridad Inform&aacute;tica</span><span style="font-size:9px;color:#FF4D4D;background:rgba(255,77,77,0.1);padding:1px 6px;border-radius:10px;margin-left:4px;">Obligatorio</span></div>
+            <div style="display:flex;align-items:center;gap:8px;"><span style="color:#888;">&#9675;</span><span style="color:#f0ebe3;">Curso Microsoft Copilot</span><span style="font-size:9px;color:#FF4D4D;background:rgba(255,77,77,0.1);padding:1px 6px;border-radius:10px;margin-left:4px;">Obligatorio</span></div>
+            <div style="display:flex;align-items:center;gap:8px;"><span style="color:#888;">&#9675;</span><span style="color:#f0ebe3;">Entendimiento del rol</span></div>
+          </div>
+        </div>
+        <div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:12px;padding:20px;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;">
+            <div><div style="font-weight:800;color:#f0ebe3;font-size:14px;">Fernando Aguirre</div>
+              <div style="font-size:11px;color:#888;margin-top:2px;">Data Analyst &middot; Inicio: 07/04/2026</div></div>
+            <span style="font-size:10px;font-weight:700;background:rgba(255,84,0,0.15);color:#FF5400;padding:3px 10px;border-radius:20px;">En proceso</span>
+          </div>
+          <div style="margin-bottom:12px;">
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:#888;margin-bottom:4px;"><span>Progreso</span><span style="color:#2ECC71;font-weight:700;">80%</span></div>
+            <div style="background:#222;border-radius:4px;height:6px;"><div style="background:#2ECC71;height:6px;border-radius:4px;width:80%;"></div></div>
+          </div>
+          <div style="display:grid;gap:7px;font-size:12px;">
+            <div style="display:flex;align-items:center;gap:8px;"><span style="color:#2ECC71;">&#10003;</span><span style="color:#aaa;text-decoration:line-through;">Documentaci&oacute;n legal</span></div>
+            <div style="display:flex;align-items:center;gap:8px;"><span style="color:#2ECC71;">&#10003;</span><span style="color:#aaa;text-decoration:line-through;">Accesos otorgados</span></div>
+            <div style="display:flex;align-items:center;gap:8px;"><span style="color:#2ECC71;">&#10003;</span><span style="color:#aaa;text-decoration:line-through;">Curso Seguridad &#10004; Certificado</span></div>
+            <div style="display:flex;align-items:center;gap:8px;"><span style="color:#2ECC71;">&#10003;</span><span style="color:#aaa;text-decoration:line-through;">Curso Copilot &#10004; Certificado</span></div>
+            <div style="display:flex;align-items:center;gap:8px;"><span style="color:#888;">&#9675;</span><span style="color:#f0ebe3;">Preocupacional pendiente</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+

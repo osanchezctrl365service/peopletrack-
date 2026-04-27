@@ -1790,6 +1790,12 @@ label { color: #888 !important; }
           <div style="text-align:center;padding:40px;color:#888;">Cargando artículos...</div>
         </div>
       </div>
+    </div><!-- /sec-help -->
+
+<!-- MODAL NUEVO OBJETIVO -->
+<div class="modal-overlay" id="newObjectiveModal">
+  <div class="modal" style="max-width:640px;">
+    <div class="modal-title" id="newObjModalTitle">Nuevo Objetivo Core Empresa</div>
 
     <!-- SELECTOR DE TIPO -->
     <div style="display:flex;gap:8px;margin-bottom:20px;">
@@ -2130,8 +2136,21 @@ function switchTab(prefix, id, el){
   });
 }
 
-function showModal(id){ document.getElementById(id).classList.add('open'); }
-function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+function showModal(id){
+  var el = document.getElementById(id);
+  if (!el) { console.warn('showModal: no encontrado:', id); return; }
+  if (el.classList.contains('modal-overlay') || el.classList.contains('modal')) {
+    el.classList.add('open');
+  } else {
+    el.style.display = 'flex';
+  }
+}
+function closeModal(id){
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.classList.remove('open');
+  el.style.display = 'none';
+}
 document.querySelectorAll('.modal-overlay').forEach(m=>{
   m.addEventListener('click',function(e){ if(e.target===this) this.classList.remove('open'); });
 });
@@ -3496,7 +3515,14 @@ function poblarModalObjetivo() {
 // Parchar showModal para poblar cuando se abre newObjectiveModal
 const _origShowModalObj = showModal;
 showModal = function(id) {
-  _origShowModal ? _origShowModal(id) : _origShowModalObj(id);
+  var el = document.getElementById(id);
+  if (!el) { console.warn('showModal: elemento no encontrado:', id); return; }
+  // Soporte modal-overlay con clase .open y modales con style.display
+  if (el.classList.contains('modal-overlay') || el.classList.contains('modal')) {
+    el.classList.add('open');
+  } else {
+    el.style.display = 'flex';
+  }
   if (id === 'newObjectiveModal') {
     if (!allUsuarios.length) loadUsuarios().then(poblarModalObjetivo);
     else poblarModalObjetivo();
@@ -6257,6 +6283,8 @@ function verEvidenciaCareer(mid) {
       <div id="recruitingContainer" style="overflow-y:auto;max-height:calc(100vh - 220px);">
         <div style="text-align:center;padding:30px;color:#888;">Cargando candidatos...</div>
       </div>
+    </div><!-- /sec-recruiting -->
+
     <div class="section" id="sec-onboarding">
       <div class="section-header" style="margin-bottom:20px;">
         <div><div class="section-heading">Onboarding</div>

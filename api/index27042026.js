@@ -362,7 +362,7 @@ app.http('updateMilestone', {
       const body = await req.json();
       await query(
         `UPDATE CareerMilestones SET Progress=@progress, Status=@status, Feedback=@feedback,
-         LastReviewDate=CAST(GETDATE() AS DATE) WHERE MilestoneID=@id`,
+         LastReviewDate=CAST(GETDATE() AS DATE), UpdatedAt=GETDATE() WHERE MilestoneID=@id`,
         { id: parseInt(req.params.id), progress: body.progress, status: body.status, feedback: body.feedback||null }
       );
       await query(
@@ -899,7 +899,8 @@ app.http('getHelpArticles', {
       const res = await query(
         `SELECT ArticleID, Section, Title, Content, SortOrder, UpdatedAt
          FROM HelpArticles
-         WHERE (@section IS NULL OR Section = @section)
+         WHERE IsActive = 1
+           AND (@section IS NULL OR Section = @section)
          ORDER BY SortOrder ASC`,
         { section }
       );
@@ -918,7 +919,7 @@ app.http('updateHelpArticle', {
       const body = await req.json();
       const id = parseInt(req.params.id);
       await query(
-        `UPDATE HelpArticles SET Title=@title, Content=@content, UpdatedBy=@by
+        `UPDATE HelpArticles SET Title=@title, Content=@content, UpdatedAt=GETDATE(), UpdatedBy=@by
          WHERE ArticleID=@id`,
         { title: body.title, content: body.content, by: body.updatedBy||'admin', id }
       );
@@ -996,7 +997,7 @@ app.http('updatePIP', {
       const b = await req.json();
       const id = parseInt(req.params.id);
       await query(
-        `UPDATE PIPs SET ReviewNotes=@notes, Achieved=@achieved, Status=@status
+        `UPDATE PIPs SET ReviewNotes=@notes, Achieved=@achieved, Status=@status, UpdatedAt=GETDATE()
          WHERE PIPID=@id`,
         { notes: b.reviewNotes||null, achieved: b.achieved!=null?b.achieved:null, status: b.status||'active', id }
       );
@@ -1081,7 +1082,7 @@ app.http('getOnboardingPlans', {
          FROM OnboardingPlans op
          JOIN Users u ON op.UserID=u.UserID
          LEFT JOIN Users hr ON op.AssignedToID=hr.UserID
-         ORDER BY op.OnboardingID DESC`
+         ORDER BY op.CreatedAt DESC`
       );
       return ok(res.recordset);
     } catch(e) { return err(e.message, 500); }
@@ -1186,366 +1187,9 @@ app.http('updateOnboardingStatus', {
     try {
       const b = await req.json();
       const id = parseInt(req.params.id);
-      await query(`UPDATE OnboardingPlans SET Status=@status WHERE OnboardingID=@id`,
+      await query(`UPDATE OnboardingPlans SET Status=@status, UpdatedAt=GETDATE() WHERE OnboardingID=@id`,
         { status: b.status, id });
       return ok({ updated: true });
-    } catch(e) { return err(e.message, 500); }
-  }
-});
-
-// ============================================================
-// CANDIDATES - RECRUITING
-// ============================================================
-app.http('getCandidates', {
-  methods: ['GET'], authLevel: 'anonymous', route: 'candidates',
-  handler: async (req) => {
-    try {
-      const status = req.query.get('status') || null;
-      const res = await query(
-        `SELECT c.CandidateID, c.FullName, c.Email, c.Phone, c.SourceType,
-                c.TechStack, c.SalaryExpectation, c.Currency, c.AvailableFrom,
-                c.HasPrepaga, c.Notes, c.Status, c.RejectionReason, c.CreatedAt,
-                u.FullName AS AssignedToName,
-                (SELECT COUNT(*) FROM CandidateInterviews ci WHERE ci.CandidateID=c.CandidateID) AS TotalInterviews
-         FROM Candidates c
-         LEFT JOIN Users u ON c.AssignedToID=u.UserID
-         WHERE (@status IS NULL OR c.Status=@status)
-         ORDER BY c.CandidateID DESC`,
-        { status }
-      );
-      return ok(res.recordset);
-    } catch(e) { return err(e.message, 500); }
-  }
-});
-
-app.http('createCandidate', {
-  methods: ['POST'], authLevel: 'anonymous', route: 'candidates',
-  handler: async (req) => {
-    try {
-      const b = await req.json();
-      const res = await query(
-        `INSERT INTO Candidates (FullName, Email, Phone, SourceType, TechStack, SalaryExpectation, Currency, AvailableFrom, Notes, AssignedToID, Status)
-         OUTPUT INSERTED.CandidateID
-         VALUES (@name, @email, @phone, @source, @stack, @salary, @currency, @available, @notes, @assigned, 'screening')`,
-        { name: b.fullName, email: b.email||null, phone: b.phone||null,
-          source: b.sourceType||'Directo', stack: b.techStack||null,
-          salary: b.salaryExpectation||null, currency: b.currency||'USD',
-          available: b.availableFrom||null, notes: b.notes||null,
-          assigned: b.assignedToId||null }
-      );
-      const candId = res.recordset[0].CandidateID;
-      await query(
-        `INSERT INTO CandidateHistory (CandidateID, ChangedByID, OldStatus, NewStatus, Note)
-         VALUES (@cid, @by, NULL, 'screening', 'Candidato creado')`,
-        { cid: candId, by: b.assignedToId||1 }
-      );
-      return ok({ candidateId: candId });
-    } catch(e) { return err(e.message, 500); }
-  }
-});
-
-app.http('advanceCandidate', {
-  methods: ['POST'], authLevel: 'anonymous', route: 'candidates/{id}/advance',
-  handler: async (req) => {
-    try {
-      const id = parseInt(req.params.id);
-      const b = await req.json();
-      const current = await query(`SELECT Status FROM Candidates WHERE CandidateID=@id`, { id });
-      if (!current.recordset.length) return err('Not found', 404);
-      const oldStatus = current.recordset[0].Status;
-      const nextMap = { screening:'technical', technical:'client', client:'offer', offer:'hired' };
-      const newStatus = nextMap[oldStatus] || oldStatus;
-      if (newStatus === oldStatus) return ok({ status: oldStatus, message: 'Already at final stage' });
-      await query(`UPDATE Candidates SET Status=@s WHERE CandidateID=@id`, { s: newStatus, id });
-      await query(
-        `INSERT INTO CandidateHistory (CandidateID, ChangedByID, OldStatus, NewStatus, Note)
-         VALUES (@cid, @by, @old, @new, @note)`,
-        { cid: id, by: b.changedById||1, old: oldStatus, new: newStatus, note: b.note||null }
-      );
-      return ok({ oldStatus, newStatus });
-    } catch(e) { return err(e.message, 500); }
-  }
-});
-
-app.http('rejectCandidate', {
-  methods: ['POST'], authLevel: 'anonymous', route: 'candidates/{id}/reject',
-  handler: async (req) => {
-    try {
-      const id = parseInt(req.params.id);
-      const b = await req.json();
-      const current = await query(`SELECT Status FROM Candidates WHERE CandidateID=@id`, { id });
-      if (!current.recordset.length) return err('Not found', 404);
-      const oldStatus = current.recordset[0].Status;
-      await query(
-        `UPDATE Candidates SET Status='rejected', RejectionReason=@reason WHERE CandidateID=@id`,
-        { reason: b.reason||null, id }
-      );
-      await query(
-        `INSERT INTO CandidateHistory (CandidateID, ChangedByID, OldStatus, NewStatus, Note)
-         VALUES (@cid, @by, @old, 'rejected', @note)`,
-        { cid: id, by: b.changedById||1, old: oldStatus, note: b.reason||null }
-      );
-      return ok({ rejected: true });
-    } catch(e) { return err(e.message, 500); }
-  }
-});
-
-// ─── PUT /meetings/:id (editar nota) ──────────────────
-app.http('updateMeeting', {
-  methods: ['PUT'], authLevel: 'anonymous', route: 'meetings/{id}',
-  handler: async (req) => {
-    try {
-      const id = parseInt(req.params.id);
-      const b  = await req.json();
-      await query(
-        `UPDATE OneOnOneMeetings
-         SET Title        = COALESCE(@title, Title),
-             GeneralNotes = COALESCE(@notes, GeneralNotes),
-             NextSteps    = COALESCE(@steps, NextSteps),
-             UpdatedAt    = GETDATE()
-         WHERE MeetingID = @id`,
-        { title: b.title||null, notes: b.generalNotes||null,
-          steps: b.nextSteps||null, id }
-      );
-      return ok({ updated: true });
-    } catch(e) { return err(e.message, 500); }
-  }
-});
-
-// ─── DELETE /meetings/:id (eliminar nota) ─────────────
-app.http('deleteMeeting', {
-  methods: ['DELETE'], authLevel: 'anonymous', route: 'meetings/{id}',
-  handler: async (req) => {
-    try {
-      const id = parseInt(req.params.id);
-      // Soft delete: marcar como eliminado en vez de DELETE (evita problemas de permisos)
-      await query(
-        `UPDATE OneOnOneMeetings SET IsDeleted=1 WHERE MeetingID=@id`,
-        { id }
-      );
-      return ok({ deleted: true });
-    } catch(e) {
-      // Si IsDeleted no existe, intentar DELETE directo
-      try {
-        await query('DELETE FROM OneOnOneMeetings WHERE MeetingID=@id', { id });
-        return ok({ deleted: true });
-      } catch(e2) { return err(e2.message, 500); }
-    }
-  }
-});
-
-// ─── PUT /candidates/:id/notes ────────────────────────
-app.http('candidateNotes', {
-  methods: ['PUT'], authLevel: 'anonymous', route: 'candidates/{id}/notes',
-  handler: async (req) => {
-    try {
-      const id = parseInt(req.params.id);
-      const b  = await req.json();
-      await query(
-        `UPDATE Candidates SET Notes=@notes WHERE CandidateID=@id`,
-        { notes: b.notes||null, id }
-      );
-      if (b.interviewer || b.result || b.feedback) {
-        try {
-          await query(
-            `INSERT INTO CandidateInterviews (CandidateID, InterviewerName, Result, Feedback, CreatedAt)
-             VALUES (@cid, @interv, @result, @feed, GETDATE())`,
-            { cid: id, interv: b.interviewer||null, result: b.result||null, feed: b.feedback||null }
-          );
-        } catch(e2) {
-          // Si falla la entrevista, igual guardar nota
-          console.log('Interview skip:', e2.message);
-        }
-      }
-      return ok({ updated: true });
-    } catch(e) { return err(e.message, 500); }
-  }
-});
-
-// ─── Archivos de candidatos ────────────────────────────
-app.http('getCandidateFiles', {
-  methods: ['GET'], authLevel: 'anonymous', route: 'candidates/{id}/files',
-  handler: async (req) => {
-    try {
-      const id  = parseInt(req.params.id);
-      const res = await query(
-        `SELECT FileID, FileName, FileType, FileSize, CreatedAt
-         FROM CandidateFiles WHERE CandidateID=@id ORDER BY CreatedAt DESC`,
-        { id }
-      );
-      return ok(res.recordset);
-    } catch(e) { return err(e.message, 500); }
-  }
-});
-
-app.http('uploadCandidateFile', {
-  methods: ['POST'], authLevel: 'anonymous', route: 'candidates/{id}/files',
-  handler: async (req) => {
-    try {
-      const id = parseInt(req.params.id);
-      const b  = await req.json();
-      const res = await query(
-        `INSERT INTO CandidateFiles (CandidateID, FileName, FileType, FileData, FileSize)
-         OUTPUT INSERTED.FileID
-         VALUES (@cid, @name, @type, @data, @size)`,
-        { cid: id, name: b.fileName, type: b.fileType||'application/octet-stream',
-          data: b.fileData, size: b.fileData ? Math.round(b.fileData.length*3/4) : 0 }
-      );
-      return ok({ fileId: res.recordset[0].FileID });
-    } catch(e) { return err(e.message, 500); }
-  }
-});
-
-app.http('getCandidateFileData', {
-  methods: ['GET'], authLevel: 'anonymous', route: 'candidates/{id}/files/{fid}',
-  handler: async (req) => {
-    try {
-      const id  = parseInt(req.params.id);
-      const fid = parseInt(req.params.fid);
-      const res = await query(
-        `SELECT FileID, FileName, FileType, FileData FROM CandidateFiles WHERE CandidateID=@id AND FileID=@fid`,
-        { id, fid }
-      );
-      if (!res.recordset.length) return err('Not found', 404);
-      return ok(res.recordset[0]);
-    } catch(e) { return err(e.message, 500); }
-  }
-});
-
-app.http('deleteCandidateFile', {
-  methods: ['DELETE'], authLevel: 'anonymous', route: 'candidates/{id}/files/{fid}',
-  handler: async (req) => {
-    try {
-      const id  = parseInt(req.params.id);
-      const fid = parseInt(req.params.fid);
-      await query(`DELETE FROM CandidateFiles WHERE CandidateID=@id AND FileID=@fid`, { id, fid });
-      return ok({ deleted: true });
-    } catch(e) { return err(e.message, 500); }
-  }
-});
-
-// ══════════════════════════════════════════════════════
-// PLAN DE CARRERA - ENDPOINTS
-// ══════════════════════════════════════════════════════
-app.http('getAllCareerPlans', {
-  methods: ['GET'], authLevel: 'anonymous', route: 'career/all',
-  handler: async (req) => {
-    try {
-      const res = await query(
-        `SELECT cp.PlanID, cp.PlanType, cp.TargetRole, cp.Description,
-                u.FullName AS EmployeeName, u.Email AS EmployeeEmail,
-                r.RoleName AS CurrentRole,
-                (SELECT COUNT(*) FROM CareerMilestones cm WHERE cm.CareerPlanID=cp.PlanID) AS TotalMilestones,
-                (SELECT COUNT(*) FROM CareerMilestones cm WHERE cm.CareerPlanID=cp.PlanID AND cm.IsCompleted=1) AS CompletedMilestones,
-                CASE WHEN (SELECT COUNT(*) FROM CareerMilestones cm WHERE cm.CareerPlanID=cp.PlanID)=0 THEN 0
-                  ELSE CAST((SELECT COUNT(*) FROM CareerMilestones cm WHERE cm.CareerPlanID=cp.PlanID AND cm.IsCompleted=1)*100.0/
-                       (SELECT COUNT(*) FROM CareerMilestones cm WHERE cm.CareerPlanID=cp.PlanID) AS INT)
-                END AS ProgressPct
-         FROM CareerPlans cp
-         JOIN Users u ON cp.UserID=u.UserID
-         LEFT JOIN Roles r ON u.RoleID=r.RoleID
-         ORDER BY cp.PlanID DESC`
-      );
-      return ok(res.recordset);
-    } catch(e) { return err(e.message, 500); }
-  }
-});
-
-app.http('getCareerPlanDetail', {
-  methods: ['GET'], authLevel: 'anonymous', route: 'career/plan/{id}',
-  handler: async (req) => {
-    try {
-      const id = parseInt(req.params.id);
-      const [plan, milestones] = await Promise.all([
-        query(`SELECT cp.*, u.FullName AS EmployeeName, u.Email AS EmployeeEmail
-               FROM CareerPlans cp JOIN Users u ON cp.UserID=u.UserID
-               WHERE cp.PlanID=@id`, { id }),
-        query(`SELECT * FROM CareerMilestones WHERE CareerPlanID=@id ORDER BY SortOrder, MilestoneID`, { id })
-      ]);
-      if (!plan.recordset.length) return err('Not found', 404);
-      return ok({ plan: plan.recordset[0], milestones: milestones.recordset });
-    } catch(e) { return err(e.message, 500); }
-  }
-});
-
-app.http('createCareerPlan', {
-  methods: ['POST'], authLevel: 'anonymous', route: 'career/{userid}',
-  handler: async (req) => {
-    try {
-      const userId = parseInt(req.params.userid);
-      const b = await req.json();
-      // Verificar si ya tiene plan activo
-      const existing = await query(`SELECT PlanID FROM CareerPlans WHERE UserID=@uid`, { uid: userId });
-      if (existing.recordset.length) {
-        return ok({ planId: existing.recordset[0].PlanID, existing: true });
-      }
-      const res = await query(
-        `INSERT INTO CareerPlans (UserID, PlanType, TargetRole, Description)
-         OUTPUT INSERTED.PlanID
-         VALUES (@uid, @type, @target, @desc)`,
-        { uid: userId, type: b.planType||'specialization', target: b.targetRole||null, desc: b.description||null }
-      );
-      return ok({ planId: res.recordset[0].PlanID });
-    } catch(e) { return err(e.message, 500); }
-  }
-});
-
-app.http('createCareerMilestone', {
-  methods: ['POST'], authLevel: 'anonymous', route: 'career/milestone',
-  handler: async (req) => {
-    try {
-      const b = await req.json();
-      const res = await query(
-        `INSERT INTO CareerMilestones (CareerPlanID, Title, MilestoneCategory, CertificationName, BadgeURL, Description, DueDate, SortOrder)
-         OUTPUT INSERTED.MilestoneID
-         VALUES (@pid, @title, @cat, @cert, @badge, @desc, @due, 
-           (SELECT ISNULL(MAX(SortOrder),0)+1 FROM CareerMilestones WHERE CareerPlanID=@pid))`,
-        { pid: b.planId, title: b.title, cat: b.milestoneCategory||null,
-          cert: b.certificationName||null, badge: b.badgeURL||null,
-          desc: b.description||null, due: b.dueDate||null }
-      );
-      return ok({ milestoneId: res.recordset[0].MilestoneID });
-    } catch(e) { return err(e.message, 500); }
-  }
-});
-
-app.http('updateCareerMilestone', {
-  methods: ['PUT'], authLevel: 'anonymous', route: 'career/milestone/{id}',
-  handler: async (req) => {
-    try {
-      const id = parseInt(req.params.id);
-      const b  = await req.json();
-      await query(
-        `UPDATE CareerMilestones SET
-           IsCompleted     = COALESCE(@completed, IsCompleted),
-           CompletedAt     = CASE WHEN @completed=1 THEN GETDATE() WHEN @completed=0 THEN NULL ELSE CompletedAt END,
-           EmployeeComment = COALESCE(@comment, EmployeeComment),
-           FileData        = COALESCE(@fileData, FileData),
-           FileName        = COALESCE(@fileName, FileName),
-           FileType        = COALESCE(@fileType, FileType)
-         WHERE MilestoneID=@id`,
-        { completed: b.isCompleted!=null?b.isCompleted?1:0:null,
-          comment: b.employeeComment!=null?b.employeeComment:null,
-          fileData: b.fileData||null, fileName: b.fileName||null,
-          fileType: b.fileType||null, id }
-      );
-      return ok({ updated: true });
-    } catch(e) { return err(e.message, 500); }
-  }
-});
-
-app.http('getCertifications', {
-  methods: ['GET'], authLevel: 'anonymous', route: 'certifications',
-  handler: async (req) => {
-    try {
-      const cat = req.query.get('category') || null;
-      const res = await query(
-        `SELECT CertID, Name, Category, Provider FROM CertificationCatalog
-         WHERE IsActive=1 AND (@cat IS NULL OR Category=@cat)
-         ORDER BY Category, Name`,
-        { cat }
-      );
-      return ok(res.recordset);
     } catch(e) { return err(e.message, 500); }
   }
 });

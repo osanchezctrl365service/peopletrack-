@@ -2140,6 +2140,7 @@ function showModal(id){
   var el = document.getElementById(id);
   if (!el) { console.warn('showModal: no encontrado:', id); return; }
   if (el.classList.contains('modal-overlay') || el.classList.contains('modal')) {
+    el.style.removeProperty('display'); // limpiar inline style para que CSS .open tome efecto
     el.classList.add('open');
   } else {
     el.style.display = 'flex';
@@ -2149,7 +2150,9 @@ function closeModal(id){
   var el = document.getElementById(id);
   if (!el) return;
   el.classList.remove('open');
-  el.style.display = 'none';
+  if (!el.classList.contains('modal-overlay') && !el.classList.contains('modal')) {
+    el.style.display = 'none';
+  }
 }
 document.querySelectorAll('.modal-overlay').forEach(m=>{
   m.addEventListener('click',function(e){ if(e.target===this) this.classList.remove('open'); });
@@ -3506,8 +3509,8 @@ const _origShowModalObj = showModal;
 showModal = function(id) {
   var el = document.getElementById(id);
   if (!el) { console.warn('showModal: elemento no encontrado:', id); return; }
-  // Soporte modal-overlay con clase .open y modales con style.display
   if (el.classList.contains('modal-overlay') || el.classList.contains('modal')) {
+    el.style.removeProperty('display'); // limpiar inline style
     el.classList.add('open');
   } else {
     el.style.display = 'flex';

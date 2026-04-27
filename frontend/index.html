@@ -2146,6 +2146,7 @@ function showSection(id){
   if(id==='alerts'&&typeof loadAlertas==='function') loadAlertas();
   if(id==='pip'){if(!allUsuarios.length)loadUsuarios().then(cargarPIPs);else cargarPIPs();}
   if(id==='onboarding'){if(!allUsuarios.length)loadUsuarios().then(cargarOnboardings);else cargarOnboardings();}
+  if(id==='recruiting'){cargarCandidatos();}
 }
 
 function switchTab(prefix, id, el){
@@ -5107,20 +5108,24 @@ async function cargarOnboardings() {
   if (!c) return;
   c.innerHTML = '<div style="text-align:center;padding:20px;color:#888;">Cargando...</div>';
   try {
-    var data = await apiGet('onboarding');
-    allOnboardings = Array.isArray(data) ? data : [];
-    // Actualizar KPIs
-    var enProceso = allOnboardings.filter(function(o){ return o.Status==='in_progress'; }).length;
-    var completos = allOnboardings.filter(function(o){ return o.Status==='completed'; }).length;
-    var hitosPend = allOnboardings.reduce(function(s,o){ return s+(o.TotalMilestones-o.CompletedMilestones); }, 0);
-    var cursosPend = allOnboardings.reduce(function(s,o){ return s+(o.TotalCourses-o.CompletedCourses); }, 0);
+    var res  = await fetch(API_BASE + '/onboarding');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    var json = await res.json();
+    var data = Array.isArray(json) ? json : (json.data || []);
+    allOnboardings = data.filter(function(o){ return o.Status !== 'deleted'; });
+    // KPIs
+    var enProceso  = allOnboardings.filter(function(o){ return o.Status==='in_progress'; }).length;
+    var completos  = allOnboardings.filter(function(o){ return o.Status==='completed'; }).length;
+    var hitosPend  = allOnboardings.reduce(function(s,o){ return s+((o.TotalMilestones||0)-(o.CompletedMilestones||0)); }, 0);
+    var cursosPend = allOnboardings.reduce(function(s,o){ return s+((o.TotalCourses||0)-(o.CompletedCourses||0)); }, 0);
     var k = function(id,v){ var el=document.getElementById(id); if(el) el.textContent=v; };
-    k('obKpiEnProceso', enProceso); k('obKpiCompletos', completos);
-    k('obKpiHitos', hitosPend); k('obKpiCursos', cursosPend);
+    k('obKpiEnProceso',enProceso); k('obKpiCompletos',completos);
+    k('obKpiHitos',hitosPend);     k('obKpiCursos',cursosPend);
     renderOnboardings(allOnboardings);
-  } catch(e) { c.innerHTML='<div style="padding:20px;color:#888;text-align:center;">Error al cargar</div>'; }
+  } catch(e) {
+    c.innerHTML = '<div style="text-align:center;padding:20px;color:#FF4D4D;">Error al cargar onboardings: '+e.message+'</div>';
+  }
 }
-
 function renderOnboardings(obs) {
   var c = document.getElementById('onboardingContainer');
   if (!c) return;
@@ -5380,17 +5385,15 @@ async function cargarCandidatos() {
   if (!c) return;
   c.innerHTML = '<div style="text-align:center;padding:20px;color:#888;">Cargando...</div>';
   try {
-    var data = await apiGet('candidates');
-    allCandidatos = Array.isArray(data) ? data : [];
+    var res  = await fetch(API_BASE + '/candidates');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    var json = await res.json();
+    allCandidatos = Array.isArray(json) ? json : (json.data || []);
     renderKanban(allCandidatos);
   } catch(e) {
-    // Si la API aún no tiene el endpoint, usar datos del HTML hardcodeado
-    var container = document.getElementById('recruitingKanban');
-    if (container) container.style.display = 'grid';
-    c.innerHTML = '';
+    c.innerHTML = '<div style="text-align:center;padding:20px;color:#FF4D4D;">Error al cargar candidatos: '+e.message+'</div>';
   }
 }
-
 function filtrarCandidatos(q) {
   var filtered = !q ? allCandidatos : allCandidatos.filter(function(c){
     return (c.FullName||'').toLowerCase().includes(q.toLowerCase()) ||

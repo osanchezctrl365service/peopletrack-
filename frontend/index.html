@@ -1282,39 +1282,31 @@ label { color: #888 !important; }
     <div class="modal-overlay" id="modalNuevoPIP">
       <div class="modal" style="max-width:860px;">
         <div class="modal-title">Nuevo Plan de Improvement (PIP)</div>
-        <div style="display:grid;gap:14px;">
-          <div>
-            <label class="form-label">Colaborador *</label>
-            <input id="pipBuscarColab" type="text" class="form-control" placeholder="🔍 Buscar..." style="margin-bottom:4px;" oninput="filtrarPipColab(this.value)">
-            <select id="pipColabSel" class="form-control"><option value="">— Seleccionar —</option></select>
-          </div>
-          <div>
-            <label class="form-label">Motivo del PIP *</label>
-            <textarea id="pipReason" class="form-control" rows="3" placeholder="Describí el motivo del plan de mejora..." style="height:90px;resize:none;overflow-y:auto;"></textarea>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+          <div style="display:flex;flex-direction:column;gap:12px;">
             <div>
-              <label class="form-label" style="font-size:11px;">Fecha inicio *</label>
-              <input id="pipStartDate" type="date" class="form-control">
+              <label class="form-label">Colaborador *</label>
+              <input id="pipBuscarColab" type="text" class="form-control" placeholder="Buscar..." style="margin-bottom:4px;" oninput="filtrarPipColab(this.value)">
+              <select id="pipColabSel" class="form-control"><option value="">&#8212; Seleccionar &#8212;</option></select>
             </div>
-            <div>
-              <label class="form-label" style="font-size:11px;">Target 15 días</label>
-              <input id="pipTarget15" type="date" class="form-control">
-            </div>
-            <div>
-              <label class="form-label" style="font-size:11px;">Target 30 días</label>
-              <input id="pipTarget30" type="date" class="form-control">
-            </div>
-            <div>
-              <label class="form-label" style="font-size:11px;">Target 60 días</label>
-              <input id="pipTarget60" type="date" class="form-control">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <div><label class="form-label" style="font-size:11px;">Fecha inicio *</label><input id="pipStartDate" type="date" class="form-control"></div>
+              <div><label class="form-label" style="font-size:11px;">Target 15d</label><input id="pipTarget15" type="date" class="form-control"></div>
+              <div><label class="form-label" style="font-size:11px;">Target 30d</label><input id="pipTarget30" type="date" class="form-control"></div>
+              <div><label class="form-label" style="font-size:11px;">Target 60d</label><input id="pipTarget60" type="date" class="form-control"></div>
             </div>
           </div>
-          <div>
-            <label class="form-label">Hitos del plan</label>
-            <textarea id="pipMilestones" class="form-control" rows="3" placeholder="Ej: Semana 1: reunión de alineación&#10;Semana 2: entrega de informe..." style="height:90px;resize:none;overflow-y:auto;"></textarea>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div style="flex:1;">
+              <label class="form-label">Motivo del PIP *</label>
+              <textarea id="pipReason" class="form-control" placeholder="Describí el motivo del plan de mejora..." style="height:110px;resize:none;overflow-y:auto;margin-top:4px;"></textarea>
+            </div>
+            <div style="flex:1;">
+              <label class="form-label">Hitos del plan</label>
+              <textarea id="pipMilestones" class="form-control" placeholder="Semana 1: reunión de alineación&#10;Semana 2: entrega..." style="height:110px;resize:none;overflow-y:auto;margin-top:4px;"></textarea>
+            </div>
           </div>
-        </div>
+        </div></div>
         <div id="pipError" style="color:#FF4D4D;font-size:12px;margin-top:10px;display:none;"></div>
         <div class="modal-actions">
           <button class="btn btn-secondary" onclick="closeModal('modalNuevoPIP')">Cancelar</button>
@@ -5391,6 +5383,188 @@ async function guardarEditarNota(rid) {
     var ol = document.getElementById('overlayEditNota'); if(ol) ol.remove();
     mostrarToast('Nota actualizada','success');
     if (typeof reunionColabActual!=='undefined'&&reunionColabActual) cargarBitacoraUsuario(reunionColabActual);
+  } catch(e) { if(errEl){errEl.textContent='Error: '+e.message;errEl.style.display='block';} }
+}
+
+var allCandidatos = [];
+
+async function cargarCandidatos() {
+  var c = document.getElementById('recruitingContainer');
+  if (!c) return;
+  c.innerHTML = '<div style="text-align:center;padding:20px;color:#888;">Cargando...</div>';
+  try {
+    var data = await apiGet('candidates');
+    allCandidatos = Array.isArray(data) ? data : [];
+    renderKanban(allCandidatos);
+  } catch(e) {
+    // Si la API aún no tiene el endpoint, usar datos del HTML hardcodeado
+    var container = document.getElementById('recruitingKanban');
+    if (container) container.style.display = 'grid';
+    c.innerHTML = '';
+  }
+}
+
+function filtrarCandidatos(q) {
+  var filtered = !q ? allCandidatos : allCandidatos.filter(function(c){
+    return (c.FullName||'').toLowerCase().includes(q.toLowerCase()) ||
+           (c.TechStack||'').toLowerCase().includes(q.toLowerCase());
+  });
+  renderKanban(filtered);
+}
+
+function renderKanban(candidatos) {
+  var c = document.getElementById('recruitingContainer');
+  if (!c) return;
+  var stages = ['screening','technical','client','offer','hired','rejected'];
+  var stageLabels = {screening:'Screening',technical:'T\xe9cnica',client:'Cliente',offer:'Oferta',hired:'Contratado',rejected:'Rechazado'};
+  var stageColors = {hired:'rgba(46,204,113,0.2)',rejected:'rgba(255,77,77,0.15)'};
+  var stageTxtColors = {hired:'#2ECC71',rejected:'#FF4D4D'};
+  
+  if (!candidatos.length && allCandidatos.length === 0) {
+    // Mostrar el kanban hardcodeado que ya existe en el HTML
+    c.innerHTML = '';
+    var k = document.getElementById('recruitingKanban');
+    if (k) k.style.display = 'grid';
+    return;
+  }
+  
+  var html = '<div style="display:grid;grid-template-columns:repeat(6,minmax(140px,1fr));gap:10px;overflow-x:auto;">';
+  stages.forEach(function(stage) {
+    var grupo = candidatos.filter(function(x){ return x.Status===stage; });
+    var borderColor = stageColors[stage] || '1px solid #1e1e1e';
+    var txtColor = stageTxtColors[stage] || '#888';
+    html += '<div style="background:#111;border:1px solid '+(stageColors[stage]?'transparent':'#1e1e1e')+';'+(stageColors[stage]?'border:1px solid '+stageColors[stage]+';':'')+' border-radius:10px;padding:12px;">';
+    html += '<div style="font-size:11px;font-weight:700;color:'+txtColor+';text-transform:uppercase;margin-bottom:10px;display:flex;justify-content:space-between;">';
+    html += '<span>'+stageLabels[stage]+'</span><span style="background:#333;color:#aaa;padding:1px 7px;border-radius:10px;font-size:10px;">'+grupo.length+'</span></div>';
+    grupo.forEach(function(cand) {
+      var nombre = (cand.FullName||'').replace(/</g,'&lt;');
+      html += '<div style="background:#1a1a1a;border:1px solid '+(stageColors[stage]||'#2a2a2a')+';border-radius:8px;padding:10px;margin-bottom:8px;">';
+      html += '<div style="font-weight:700;color:#f0ebe3;font-size:12px;margin-bottom:3px;">'+nombre+'</div>';
+      html += '<div style="font-size:10px;color:#888;margin-bottom:4px;">'+(cand.TechStack||'').replace(/</g,'&lt;').substring(0,30)+'</div>';
+      if (cand.SalaryExpectation) html += '<div style="font-size:10px;color:#aaa;">'+(cand.Currency||'USD')+' '+(cand.SalaryExpectation||0).toLocaleString()+'</div>';
+      if (cand.SourceType) {
+        var srcColors = {LinkedIn:'#0A66C2',Consultora:'#F59E0B',Referido:'#A855F7',Formulario:'#2ECC71',Directo:'#888'};
+        html += '<div style="margin-top:6px;"><span style="font-size:9px;background:rgba(255,255,255,0.05);color:'+(srcColors[cand.SourceType]||'#888')+';padding:2px 6px;border-radius:4px;">'+cand.SourceType+'</span></div>';
+      }
+      html += '<button data-cid="'+cand.CandidateID+'" onclick="verCandidato(this.dataset.cid)" style="margin-top:8px;width:100%;padding:4px;background:#222;border:1px solid #333;border-radius:5px;color:#aaa;font-size:10px;cursor:pointer;">Ver detalle</button>';
+      html += '</div>';
+    });
+    html += '</div>';
+  });
+  html += '</div>';
+  c.innerHTML = html;
+}
+
+async function verCandidato(id) {
+  var cand = allCandidatos.find(function(c){ return String(c.CandidateID)===String(id); });
+  if (!cand) { mostrarToast('Candidato no encontrado','error'); return; }
+  var nombre = (cand.FullName||'').replace(/</g,'&lt;');
+  var overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:600;display:flex;align-items:center;justify-content:center;';
+  overlay.id = 'overlayCandidato';
+  overlay.innerHTML = '<div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:16px;padding:28px;width:560px;max-width:95vw;max-height:88vh;overflow-y:auto;">' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">' +
+    '<div style="font-size:16px;font-weight:800;color:#f0ebe3;">'+nombre+'</div>' +
+    '<button onclick="document.getElementById(\'overlayCandidato\').remove()" style="background:none;border:none;color:#666;font-size:22px;cursor:pointer;">&#x2715;</button></div>' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">' +
+    '<div><div style="font-size:10px;color:#888;margin-bottom:3px;">Email</div><div style="font-size:13px;color:#f0ebe3;">'+(cand.Email||'&#8212;').replace(/</g,'&lt;')+'</div></div>' +
+    '<div><div style="font-size:10px;color:#888;margin-bottom:3px;">Tel\xe9fono</div><div style="font-size:13px;color:#f0ebe3;">'+(cand.Phone||'&#8212;').replace(/</g,'&lt;')+'</div></div>' +
+    '<div><div style="font-size:10px;color:#888;margin-bottom:3px;">Stack tecnol\xf3gico</div><div style="font-size:13px;color:#f0ebe3;">'+(cand.TechStack||'&#8212;').replace(/</g,'&lt;')+'</div></div>' +
+    '<div><div style="font-size:10px;color:#888;margin-bottom:3px;">Pretensi\xf3n salarial</div><div style="font-size:13px;color:#f0ebe3;">'+(cand.SalaryExpectation?(cand.Currency||'USD')+' '+cand.SalaryExpectation.toLocaleString():'&#8212;')+'</div></div>' +
+    '<div><div style="font-size:10px;color:#888;margin-bottom:3px;">Disponible desde</div><div style="font-size:13px;color:#f0ebe3;">'+(cand.AvailableFrom?new Date(cand.AvailableFrom).toLocaleDateString('es-AR'):'&#8212;')+'</div></div>' +
+    '<div><div style="font-size:10px;color:#888;margin-bottom:3px;">Fuente</div><div style="font-size:13px;color:#f0ebe3;">'+(cand.SourceType||'&#8212;')+'</div></div>' +
+    '</div>' +
+    (cand.Notes?'<div style="background:#111;border-radius:8px;padding:12px;margin-bottom:14px;"><div style="font-size:10px;color:#888;margin-bottom:5px;">Notas / Observaciones</div><div style="font-size:13px;color:#aaa;line-height:1.6;white-space:pre-wrap;">'+(cand.Notes||'').replace(/</g,'&lt;')+'</div></div>':'') +
+    '<div style="display:flex;gap:8px;">' +
+    '<button data-cid="'+cand.CandidateID+'" onclick="avanzarCandidato(this.dataset.cid)" style="flex:1;padding:8px;background:rgba(46,204,113,0.1);border:1px solid rgba(46,204,113,0.3);border-radius:8px;color:#2ECC71;font-size:12px;font-weight:700;cursor:pointer;">Avanzar etapa &#8594;</button>' +
+    '<button data-cid="'+cand.CandidateID+'" onclick="rechazarCandidato(this.dataset.cid)" style="padding:8px 16px;background:rgba(255,77,77,0.08);border:1px solid rgba(255,77,77,0.25);border-radius:8px;color:#FF4D4D;font-size:12px;cursor:pointer;">Rechazar</button>' +
+    '</div></div>';
+  document.body.appendChild(overlay);
+}
+
+async function avanzarCandidato(id) {
+  var overlay = document.getElementById('overlayCandidato');
+  if (overlay) overlay.remove();
+  try {
+    var me = allUsuarios.find(function(u){ return u.Email===window._userEmail; });
+    await fetch(API_BASE+'/candidates/'+id+'/advance', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ changedById: me?me.UserID:1, note:'Avanzado desde PeopleTrack' })
+    });
+    mostrarToast('Candidato avanzado a la siguiente etapa','success');
+    cargarCandidatos();
+  } catch(e) { mostrarToast('Error: '+e.message,'error'); }
+}
+
+async function rechazarCandidato(id) {
+  var motivo = prompt('Motivo del rechazo (opcional):') || 'Sin motivo';
+  if (motivo === null) return;
+  var overlay = document.getElementById('overlayCandidato');
+  if (overlay) overlay.remove();
+  try {
+    var me = allUsuarios.find(function(u){ return u.Email===window._userEmail; });
+    await fetch(API_BASE+'/candidates/'+id+'/reject', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ changedById: me?me.UserID:1, reason: motivo })
+    });
+    mostrarToast('Candidato rechazado','success');
+    cargarCandidatos();
+  } catch(e) { mostrarToast('Error: '+e.message,'error'); }
+}
+
+async function abrirModalNuevoCandidato() {
+  if (!allUsuarios.length) await loadUsuarios();
+  var me = allUsuarios.find(function(u){ return u.Email===window._userEmail; });
+  var overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:600;display:flex;align-items:center;justify-content:center;';
+  overlay.id = 'overlayNuevoCandidato';
+  overlay.innerHTML = '<div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:16px;padding:28px;width:600px;max-width:95vw;max-height:88vh;overflow-y:auto;">' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">' +
+    '<div style="font-size:16px;font-weight:800;color:#f0ebe3;">Nuevo Candidato</div>' +
+    '<button onclick="document.getElementById(\'overlayNuevoCandidato\').remove()" style="background:none;border:none;color:#666;font-size:22px;cursor:pointer;">&#x2715;</button></div>' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">' +
+    '<div><label class="form-label">Nombre completo *</label><input id="ncNombre" type="text" class="form-control" placeholder="Nombre y apellido" style="margin-top:4px;"></div>' +
+    '<div><label class="form-label">Email</label><input id="ncEmail" type="email" class="form-control" placeholder="candidato@email.com" style="margin-top:4px;"></div>' +
+    '<div><label class="form-label">Tel\xe9fono</label><input id="ncTelefono" type="text" class="form-control" placeholder="+54 11 ..." style="margin-top:4px;"></div>' +
+    '<div><label class="form-label">Fuente</label><select id="ncFuente" class="form-control" style="margin-top:4px;"><option value="LinkedIn">LinkedIn</option><option value="Consultora">Consultora</option><option value="Referido">Referido</option><option value="Formulario">Formulario</option><option value="Directo">Directo</option></select></div>' +
+    '<div><label class="form-label">Pretensi\xf3n salarial</label><input id="ncSalario" type="number" class="form-control" placeholder="3500" style="margin-top:4px;"></div>' +
+    '<div><label class="form-label">Disponible desde</label><input id="ncDisponible" type="date" class="form-control" style="margin-top:4px;"></div>' +
+    '<div style="grid-column:1/-1;"><label class="form-label">Stack tecnol\xf3gico</label><input id="ncStack" type="text" class="form-control" placeholder=".NET, Azure, SQL Server..." style="margin-top:4px;"></div>' +
+    '<div style="grid-column:1/-1;"><label class="form-label">Notas / Observaciones</label><textarea id="ncNotas" class="form-control" rows="3" style="margin-top:4px;height:80px;resize:none;overflow-y:auto;" placeholder="Viajes planificados, situaci\xf3n actual, referencias..."></textarea></div>' +
+    '</div>' +
+    '<div id="ncError" style="color:#FF4D4D;font-size:12px;margin-top:10px;display:none;"></div>' +
+    '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;">' +
+    '<button onclick="document.getElementById(\'overlayNuevoCandidato\').remove()" style="padding:9px 20px;background:#222;border:1px solid #333;border-radius:8px;color:#aaa;font-size:13px;cursor:pointer;">Cancelar</button>' +
+    '<button onclick="guardarNuevoCandidato()" style="padding:9px 20px;background:#FF5400;border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;">Crear Candidato</button>' +
+    '</div></div>';
+  document.body.appendChild(overlay);
+}
+
+async function guardarNuevoCandidato() {
+  var nombre = (document.getElementById('ncNombre')||{}).value||'';
+  var errEl = document.getElementById('ncError');
+  if (!nombre.trim()) { if(errEl){errEl.textContent='El nombre es obligatorio';errEl.style.display='block';} return; }
+  var me = allUsuarios.find(function(u){ return u.Email===window._userEmail; });
+  try {
+    var res = await fetch(API_BASE+'/candidates', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        fullName: nombre.trim(),
+        email: (document.getElementById('ncEmail')||{}).value||null,
+        phone: (document.getElementById('ncTelefono')||{}).value||null,
+        sourceType: (document.getElementById('ncFuente')||{}).value||'Directo',
+        salaryExpectation: parseFloat((document.getElementById('ncSalario')||{}).value)||null,
+        availableFrom: (document.getElementById('ncDisponible')||{}).value||null,
+        techStack: (document.getElementById('ncStack')||{}).value||null,
+        notes: (document.getElementById('ncNotas')||{}).value||null,
+        assignedToId: me?me.UserID:null
+      })
+    });
+    var data = await res.json();
+    if (data.ok===false) throw new Error(data.error||'Error');
+    var ov = document.getElementById('overlayNuevoCandidato'); if(ov) ov.remove();
+    mostrarToast('Candidato creado correctamente','success');
+    cargarCandidatos();
   } catch(e) { if(errEl){errEl.textContent='Error: '+e.message;errEl.style.display='block';} }
 }
 </script>

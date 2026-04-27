@@ -1160,99 +1160,65 @@ label { color: #888 !important; }
 
     <!-- ======== PLAN DE CARRERA ======== -->
     <div class="section" id="sec-career">
-      <div class="section-header">
+      <div class="section-header" style="margin-bottom:20px;">
         <div>
           <div class="section-heading">Plan de Carrera</div>
-          <div class="section-subheading">Desarrollo profesional e hitos de crecimiento por colaborador</div>
+          <div class="section-subheading">Desarrollo profesional, certificaciones y hitos de crecimiento</div>
         </div>
         <button class="btn btn-primary btn-sm" onclick="abrirModalNuevoPlan()">+ Nuevo Plan</button>
       </div>
+      <div id="careerContainer" style="max-height:calc(100vh - 220px);overflow-y:auto;padding-right:4px;">
+        <div style="text-align:center;padding:30px;color:#888;">Cargando planes de carrera...</div>
+      </div>
 
-      <div class="grid-2 gap-16">
-        <div class="card">
-          <div class="card-title">Jorge Mercado — Developer</div>
-          <div class="flex items-center gap-12 mb-12">
-            <div class="avatar-sm" style="background:#1B3A5C;width:44px;height:44px;font-size:14px">JM</div>
-            <div>
-              <div style="font-size:13px;font-weight:700;color:var(--primary)">Rol actual: Developer</div>
-              <div style="font-size:11px;color:var(--gray-500)">Rol objetivo: Senior Developer · FY26</div>
-              <div style="font-size:11px;color:var(--gray-500)">Evaluador: Gastón Salguero</div>
-            </div>
-            <div style="margin-left:auto;text-align:center">
-              <div style="font-size:22px;font-weight:800;color:var(--accent)">6.7%</div>
-              <div style="font-size:10px;color:var(--gray-500)">% Desarrollo</div>
-            </div>
+    <!-- MODAL NUEVO PLAN -->
+    <div class="modal-overlay" id="modalNuevoPlan">
+      <div class="modal" style="max-width:560px;">
+        <div class="modal-title">Nuevo Plan de Carrera</div>
+        <div style="display:grid;gap:14px;">
+          <div>
+            <label class="form-label">Colaborador *</label>
+            <input id="cpBuscar" type="text" class="form-control" placeholder="Buscar..." style="margin-bottom:4px;" oninput="filtrarColabCareer(this.value)">
+            <select id="cpColabSel" class="form-control"><option value="">&#8212; Seleccionar &#8212;</option></select>
           </div>
-          <div class="progress-bar mb-16"><div class="progress-fill" style="width:6.7%;background:var(--accent)"></div></div>
-          <div style="font-size:12px;font-weight:700;color:var(--gray-600);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">Hitos</div>
-          <div class="checklist-item">
-            <div class="check-box checked"></div>
-            <div class="check-text"><strong>Formación</strong> — Cursos y certificaciones</div>
-            <span class="badge badge-warning">20%</span>
+          <div>
+            <label class="form-label">Tipo de plan *</label>
+            <select id="cpTipo" class="form-control">
+              <option value="specialization">Especialización en rol actual</option>
+              <option value="role_change">Cambio de rol</option>
+              <option value="technical">Crecimiento técnico</option>
+              <option value="management">Crecimiento hacia gestión / liderazgo</option>
+            </select>
           </div>
-          <div class="checklist-item">
-            <div class="check-box"></div>
-            <div class="check-text"><strong>Aplicación</strong> — Procesos automatizados</div>
-            <span class="badge badge-gray">0%</span>
+          <div>
+            <label class="form-label">Rol objetivo</label>
+            <input id="cpTargetRole" type="text" class="form-control" placeholder="Ej: Tech Lead, Project Manager, Senior Dev...">
           </div>
-          <div class="checklist-item">
-            <div class="check-box"></div>
-            <div class="check-text"><strong>Consolidación</strong> — Presentación + Certificación</div>
-            <span class="badge badge-gray">0%</span>
-          </div>
-          <div class="divider"></div>
-          <div class="flex gap-8">
-            <button class="btn btn-secondary btn-sm flex-1">📧 Enviar Status</button>
-            <button class="btn btn-primary btn-sm flex-1">Actualizar</button>
+          <div>
+            <label class="form-label">Descripción del plan</label>
+            <textarea id="cpDesc" class="form-control" style="height:80px;resize:none;overflow-y:auto;" placeholder="Objetivos, motivación, contexto del plan..."></textarea>
           </div>
         </div>
-
-        <div class="card">
-          <div class="card-title">Miguel Rocha — SME</div>
-          <div class="flex items-center gap-12 mb-12">
-            <div class="avatar-sm" style="background:#00A3A3;width:44px;height:44px;font-size:14px">MR</div>
-            <div>
-              <div style="font-size:13px;font-weight:700;color:var(--primary)">Rol actual: SME</div>
-              <div style="font-size:11px;color:var(--gray-500)">Rol objetivo: Solutions Architect · FY26</div>
-              <div style="font-size:11px;color:var(--gray-500)">Evaluador: Orlando Sanchez</div>
-            </div>
-            <div style="margin-left:auto;text-align:center">
-              <div style="font-size:22px;font-weight:800;color:var(--success)">48%</div>
-              <div style="font-size:10px;color:var(--gray-500)">% Desarrollo</div>
-            </div>
-          </div>
-          <div class="progress-bar mb-16"><div class="progress-fill" style="width:48%;background:var(--success)"></div></div>
-          <div style="font-size:12px;font-weight:700;color:var(--gray-600);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">Hitos</div>
-          <div class="checklist-item">
-            <div class="check-box checked"></div>
-            <div class="check-text"><strong>AI Foundry + Demos</strong> — Conocimientos avanzados AI</div>
-            <span class="badge badge-success">75%</span>
-          </div>
-          <div class="checklist-item">
-            <div class="check-box checked"></div>
-            <div class="check-text"><strong>Certificación DP-100</strong> — Azure Data Scientist</div>
-            <span class="badge badge-warning">60%</span>
-          </div>
-          <div class="checklist-item">
-            <div class="check-box"></div>
-            <div class="check-text"><strong>Certificación PL-600</strong> — Power Platform Architect</div>
-            <span class="badge badge-gray">10%</span>
-          </div>
-          <div class="checklist-item">
-            <div class="check-box"></div>
-            <div class="check-text"><strong>Habilidades blandas</strong> — Comunicación y cliente</div>
-            <span class="badge badge-gray">45%</span>
-          </div>
-          <div class="divider"></div>
-          <div class="flex gap-8">
-            <button class="btn btn-secondary btn-sm flex-1">📧 Enviar Status</button>
-            <button class="btn btn-primary btn-sm flex-1">Actualizar</button>
-          </div>
+        <div id="cpError" style="color:#FF4D4D;font-size:12px;margin-top:10px;display:none;"></div>
+        <div class="modal-actions">
+          <button class="btn btn-secondary" onclick="closeModal('modalNuevoPlan')">Cancelar</button>
+          <button class="btn btn-primary" onclick="guardarNuevoPlan()">Crear Plan</button>
         </div>
       </div>
     </div>
 
-    <!-- ======== COMPETENCIAS ======== -->
+    <!-- MODAL DETALLE PLAN -->
+    <div class="modal-overlay" id="modalDetallePlan">
+      <div class="modal" style="max-width:700px;max-height:88vh;overflow-y:auto;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <div class="modal-title" id="cpDetalleTitle" style="margin:0;">Plan de Carrera</div>
+          <button onclick="closeModal('modalDetallePlan')" style="background:none;border:none;color:#888;font-size:20px;cursor:pointer;">&#x2715;</button>
+        </div>
+        <input type="hidden" id="cpDetallePlanId">
+        <div id="cpDetalleContenido"><div style="text-align:center;padding:20px;color:#888;">Cargando...</div></div>
+      </div>
+    </div>
+
     <div class="section" id="sec-pip">
       <div class="section-header" style="margin-bottom:16px;">
         <div>
@@ -4958,18 +4924,28 @@ async function ejecutarEliminarUsuario(id, btn) {
 async function loadHelpArticles() {
   var c   = document.getElementById('helpArticlesContainer');
   var idx = document.getElementById('helpIndex');
-  if (!c) { console.error('helpArticlesContainer no encontrado'); return; }
-  c.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Cargando...</div>';
+  if (!c) { console.error('helpArticlesContainer no encontrado en el DOM'); return; }
+  c.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Cargando art\xedculos...</div>';
   try {
-    var res = await fetch(API_BASE + '/help/articles');
+    var url = API_BASE + '/help/articles';
+    var res = await fetch(url);
     var txt = await res.text();
     var json;
-    try { json = JSON.parse(txt); } catch(pe) { throw new Error('JSON inválido: ' + txt.substring(0,100)); }
-    if (!res.ok) throw new Error('HTTP ' + res.status + ': ' + (json.error||txt.substring(0,80)));
+    try { json = JSON.parse(txt); } catch(pe) {
+      c.innerHTML = '<div style="padding:20px;color:#FF4D4D;font-size:13px;">Error de parseo: ' + txt.substring(0,200) + '</div>';
+      return;
+    }
+    if (!res.ok) {
+      c.innerHTML = '<div style="padding:20px;color:#FF4D4D;font-size:13px;">HTTP ' + res.status + ': ' + (json.error||json.message||txt.substring(0,100)) + '</div>';
+      return;
+    }
     var arts = Array.isArray(json) ? json : (json.data || []);
-    if (!arts.length) { c.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Sin artículos en la BD.</div>'; return; }
+    if (!arts.length) {
+      c.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Sin art\xedculos en la base de datos.</div>';
+      return;
+    }
     if (idx) {
-      idx.innerHTML = '<div style="font-size:10px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:12px;">Artículos</div>';
+      idx.innerHTML = '<div style="font-size:10px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:12px;">Art\xedculos</div>';
       arts.forEach(function(a) {
         var b = document.createElement('button');
         b.textContent = a.Title;
@@ -4989,53 +4965,9 @@ async function loadHelpArticles() {
     });
     c.innerHTML = html;
   } catch(e) {
-    c.innerHTML = '<div style="text-align:center;padding:30px;color:#FF4D4D;font-size:13px;">Error: '+e.message+'</div>';
+    c.innerHTML = '<div style="padding:20px;color:#FF4D4D;font-size:13px;">Error: ' + e.message + '</div>';
   }
-}// Cargar ayuda al entrar a la sección
-
-// ══════════════════════════════════════════════════════════════
-// VER PIP COMPLETO (modal detalle, solo admin/manager/lider)
-// ══════════════════════════════════════════════════════════════
-function verPIPCompleto(pipId) {
-  var pip = allPIPs.find(function(p){ return String(p.PIPID)===String(pipId); });
-  if (!pip) { mostrarToast('PIP no encontrado','error'); return; }
-  var overlay = document.createElement('div');
-  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:600;display:flex;align-items:center;justify-content:center;';
-  overlay.id = 'overlayVerPIP';
-  var inicio = pip.StartDate ? new Date(pip.StartDate).toLocaleDateString('es-AR') : '&#8212;';
-  var t15 = pip.Target15Days ? new Date(pip.Target15Days).toLocaleDateString('es-AR') : '&#8212;';
-  var t30 = pip.Target30Days ? new Date(pip.Target30Days).toLocaleDateString('es-AR') : '&#8212;';
-  var t60 = pip.Target60Days ? new Date(pip.Target60Days).toLocaleDateString('es-AR') : '&#8212;';
-  var sc = pip.Status==='closed'?(pip.Achieved?'#2ECC71':'#FF4D4D'):'#F59E0B';
-  var sl = pip.Status==='closed'?(pip.Achieved?'Logrado':'No logrado'):'Activo';
-  overlay.innerHTML = '<div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:16px;padding:28px;width:620px;max-width:95vw;max-height:90vh;overflow-y:auto;">' +
-    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">' +
-    '<div><div style="font-size:16px;font-weight:800;color:#f0ebe3;">PIP &#8212; '+(pip.EmployeeName||'').replace(/</g,'&lt;')+'</div>' +
-    '<div style="font-size:11px;color:#888;margin-top:3px;">Creado por '+(pip.CreatedByName||'').replace(/</g,'&lt;')+'</div></div>' +
-    '<div style="display:flex;gap:10px;align-items:center;">' +
-    '<span style="font-size:11px;font-weight:700;color:'+sc+';background:'+sc+'22;padding:3px 12px;border-radius:20px;">'+sl+'</span>' +
-    '<button onclick="document.getElementById(\'overlayVerPIP\').remove()" style="background:none;border:none;color:#888;font-size:20px;cursor:pointer;">&#x2715;</button>' +
-    '</div></div>' +
-    '<div style="background:#111;border:1px solid #2a2a2a;border-radius:10px;padding:16px;margin-bottom:16px;">' +
-    '<div style="font-size:12px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:10px;">Fechas</div>' +
-    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;text-align:center;">' +
-    '<div><div style="font-size:10px;color:#888;">Inicio</div><div style="font-size:13px;font-weight:700;color:#f0ebe3;margin-top:3px;">'+inicio+'</div></div>' +
-    '<div><div style="font-size:10px;color:#888;">15 d\xedas</div><div style="font-size:13px;font-weight:700;color:#F59E0B;margin-top:3px;">'+t15+'</div></div>' +
-    '<div><div style="font-size:10px;color:#888;">30 d\xedas</div><div style="font-size:13px;font-weight:700;color:#F59E0B;margin-top:3px;">'+t30+'</div></div>' +
-    '<div><div style="font-size:10px;color:#888;">60 d\xedas</div><div style="font-size:13px;font-weight:700;color:#F59E0B;margin-top:3px;">'+t60+'</div></div>' +
-    '</div></div>' +
-    '<div style="margin-bottom:16px;">' +
-    '<div style="font-size:12px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:8px;">Motivo del PIP</div>' +
-    '<div style="font-size:13px;color:#aaa;line-height:1.7;background:#111;border-radius:8px;padding:14px;white-space:pre-wrap;">'+(pip.Reason||'').replace(/</g,'&lt;')+'</div>' +
-    '</div>' +
-    (pip.Milestones ? '<div style="margin-bottom:16px;"><div style="font-size:12px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:8px;">Hitos del plan</div>' +
-    '<div style="font-size:13px;color:#aaa;line-height:1.7;background:#111;border-radius:8px;padding:14px;white-space:pre-wrap;">'+(pip.Milestones||'').replace(/</g,'&lt;')+'</div></div>' : '') +
-    (pip.ReviewNotes ? '<div><div style="font-size:12px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:8px;">Notas de revisi\xf3n</div>' +
-    '<div style="font-size:13px;color:#aaa;line-height:1.7;background:#111;border-radius:8px;padding:14px;white-space:pre-wrap;">'+(pip.ReviewNotes||'').replace(/</g,'&lt;')+'</div></div>' : '') +
-    '</div>';
-  document.body.appendChild(overlay);
 }
-
 
 // ══════════════════════════════════════════════════════════════
 // ONBOARDING - JS
@@ -5448,49 +5380,50 @@ async function verCandidato(id) {
   if (!cand) { mostrarToast('Candidato no encontrado','error'); return; }
   var nombre   = (cand.FullName||'').replace(/</g,'&lt;');
   var stageMap = {screening:'Screening',technical:'T\xe9cnica',client:'Cliente',offer:'Oferta',hired:'Contratado',rejected:'Rechazado'};
-  var stageColor = {screening:'#888',technical:'#3B82F6',client:'#A855F7',offer:'#F59E0B',hired:'#2ECC71',rejected:'#FF4D4D'};
-  var sc = stageColor[cand.Status]||'#888';
+  var stageCol = {screening:'#888',technical:'#3B82F6',client:'#A855F7',offer:'#F59E0B',hired:'#2ECC71',rejected:'#FF4D4D'};
+  var sc = stageCol[cand.Status]||'#888';
   var sl = stageMap[cand.Status]||cand.Status;
 
-  // Archivos adjuntos del candidato
-  var adjuntosSection = '<div style="margin-bottom:14px;">' +
-    '<div style="font-size:10px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:8px;">Archivos adjuntos (CV, certificaciones, médicos, etc.)</div>' +
-    '<div id="cvFileList_'+cand.CandidateID+'" style="margin-bottom:8px;"></div>' +
-    '<label style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:#222;border:1px solid #333;border-radius:6px;color:#aaa;font-size:12px;cursor:pointer;">' +
-    '&#128206; Adjuntar archivo' +
-    '<input type="file" accept=".pdf,image/*,.doc,.docx" multiple data-cid="'+cand.CandidateID+'" onchange="subirArchivosCandidato(this)" style="display:none;">' +
-    '</label>' +
-    '<span style="font-size:10px;color:#555;margin-left:8px;">PDF, imágenes, documentos — sin límite de archivos</span>' +
-    '</div>';
-  cargarArchivosCandidato(cand.CandidateID);
-
-  // Campos por etapa
+  // Campos según etapa activa
   var stageFields = '';
-  if (cand.Status==='screening'||cand.Status==='technical'||cand.Status==='client'||cand.Status==='offer') {
-    stageFields += '<div style="margin-bottom:14px;"><div style="font-size:10px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:8px;">Info de la etapa: '+sl+'</div>';
-    stageFields += '<textarea id="cvStageNotes" class="form-control" style="height:80px;resize:none;overflow-y:auto;" placeholder="'
-      + (cand.Status==='screening'?'Primeras impresiones, disponibilidad, fit cultural...'
-        :cand.Status==='technical'?'Resultado t\xe9cnico, stack evaluado, puntaje...'
-        :cand.Status==='client'?'Feedback del cliente, aprobaci\xf3n, comentarios...'
-        :'Salario ofrecido, fecha de ingreso, condiciones...')
-      + '">'+(cand.Notes||'').replace(/</g,'&lt;')+'</textarea></div>';
-    
-    // Entrevistas
-    stageFields += '<div style="margin-bottom:14px;"><div style="font-size:10px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:8px;">Registro de entrevista</div>';
-    stageFields += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">';
-    stageFields += '<div><label style="font-size:11px;color:#888;display:block;margin-bottom:4px;">Entrevistador</label><input id="cvInterviewer" type="text" class="form-control" placeholder="Nombre del entrevistador"></div>';
-    stageFields += '<div><label style="font-size:11px;color:#888;display:block;margin-bottom:4px;">Resultado</label><select id="cvResult" class="form-control"><option value="">-- Resultado --</option><option>Aprobado</option><option>Aprobado con observaciones</option><option>Rechazado</option><option>Pendiente</option></select></div>';
-    stageFields += '</div>';
-    stageFields += '<textarea id="cvInterviewFeedback" class="form-control" style="height:60px;resize:none;overflow-y:auto;" placeholder="Feedback de la entrevista..."></textarea>';
-    stageFields += '</div>';
+  if (cand.Status!=='hired' && cand.Status!=='rejected') {
+    var ph = cand.Status==='screening' ? 'Primeras impresiones, disponibilidad, fit cultural...'
+           : cand.Status==='technical' ? 'Resultado técnico, stack evaluado, puntaje...'
+           : cand.Status==='client'    ? 'Feedback del cliente, aprobación...'
+           : 'Salario ofrecido, fecha de ingreso, condiciones...';
+    stageFields =
+      '<div style="margin-bottom:14px;">' +
+      '<div style="font-size:10px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:8px;">Notas etapa: '+sl+'</div>' +
+      '<textarea id="cvStageNotes" class="form-control" style="height:75px;resize:none;overflow-y:auto;" placeholder="'+ph+'">'+(cand.Notes||'').replace(/</g,'&lt;')+'</textarea>' +
+      '</div>' +
+      '<div style="margin-bottom:14px;">' +
+      '<div style="font-size:10px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:8px;">Entrevista</div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">' +
+      '<div><label style="font-size:11px;color:#888;display:block;margin-bottom:3px;">Entrevistador</label>' +
+      '<input id="cvInterviewer" type="text" class="form-control" placeholder="Nombre..."></div>' +
+      '<div><label style="font-size:11px;color:#888;display:block;margin-bottom:3px;">Resultado</label>' +
+      '<select id="cvResult" class="form-control"><option value="">-- Resultado --</option><option>Aprobado</option><option>Aprobado con observaciones</option><option>Rechazado</option><option>Pendiente</option></select></div>' +
+      '</div>' +
+      '<textarea id="cvInterviewFeedback" class="form-control" style="height:55px;resize:none;overflow-y:auto;margin-top:8px;" placeholder="Feedback de la entrevista..."></textarea>' +
+      '</div>';
   }
 
-  var overlay = document.createElement('div');
-  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:600;display:flex;align-items:center;justify-content:center;';
-  overlay.id = 'overlayCandidato';
+  var ov = document.createElement('div');
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:600;display:flex;align-items:center;justify-content:center;';
+  ov.id = 'overlayCandidato';
 
-  overlay.innerHTML = '<div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:16px;padding:28px;width:620px;max-width:95vw;max-height:88vh;overflow-y:auto;">' +
-    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">' +
+  var btns = '';
+  if (cand.Status!=='hired' && cand.Status!=='rejected') {
+    btns = '<button data-cid="'+cand.CandidateID+'" onclick="guardarYAvanzar(this.dataset.cid)" style="flex:1;padding:8px;background:rgba(46,204,113,0.1);border:1px solid rgba(46,204,113,0.3);border-radius:8px;color:#2ECC71;font-size:12px;font-weight:700;cursor:pointer;">Guardar y avanzar &#8594;</button>' +
+           '<button data-cid="'+cand.CandidateID+'" onclick="guardarNotas(this.dataset.cid)" style="padding:8px 16px;background:#222;border:1px solid #333;border-radius:8px;color:#aaa;font-size:12px;cursor:pointer;">Guardar notas</button>' +
+           '<button data-cid="'+cand.CandidateID+'" onclick="pedirRechazo(this.dataset.cid)" style="padding:8px 14px;background:rgba(255,77,77,0.08);border:1px solid rgba(255,77,77,0.25);border-radius:8px;color:#FF4D4D;font-size:12px;cursor:pointer;">Rechazar</button>';
+  } else {
+    btns = '<span style="font-size:12px;color:#888;padding:8px;">Estado final: '+sl+'</span>';
+  }
+
+  ov.innerHTML =
+    '<div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:16px;padding:28px;width:640px;max-width:95vw;max-height:90vh;overflow-y:auto;">' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">' +
     '<div><div style="font-size:16px;font-weight:800;color:#f0ebe3;">'+nombre+'</div>' +
     '<span style="font-size:11px;font-weight:700;color:'+sc+';background:'+sc+'22;padding:2px 10px;border-radius:10px;margin-top:4px;display:inline-block;">'+sl+'</span></div>' +
     '<button onclick="document.getElementById(\'overlayCandidato\').remove()" style="background:none;border:none;color:#666;font-size:22px;cursor:pointer;line-height:1;">&#x2715;</button></div>' +
@@ -5498,33 +5431,32 @@ async function verCandidato(id) {
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">' +
     '<div><div style="font-size:10px;color:#888;margin-bottom:3px;">Email</div><div style="font-size:13px;color:#f0ebe3;">'+(cand.Email||'&#8212;').replace(/</g,'&lt;')+'</div></div>' +
     '<div><div style="font-size:10px;color:#888;margin-bottom:3px;">Tel\xe9fono</div><div style="font-size:13px;color:#f0ebe3;">'+(cand.Phone||'&#8212;')+'</div></div>' +
-    '<div><div style="font-size:10px;color:#888;margin-bottom:3px;">Stack tecnol\xf3gico</div><div style="font-size:13px;color:#f0ebe3;">'+(cand.TechStack||'&#8212;').replace(/</g,'&lt;')+'</div></div>' +
-    '<div><div style="font-size:10px;color:#888;margin-bottom:3px;">Pretensi\xf3n salarial</div><div style="font-size:13px;color:#f0ebe3;">'+(cand.SalaryExpectation?(cand.Currency||'USD')+' '+Number(cand.SalaryExpectation).toLocaleString():'&#8212;')+'</div></div>' +
-    '<div><div style="font-size:10px;color:#888;margin-bottom:3px;">Disponible desde</div><div style="font-size:13px;color:#f0ebe3;">'+(cand.AvailableFrom?new Date(cand.AvailableFrom).toLocaleDateString('es-AR'):'&#8212;')+'</div></div>' +
+    '<div><div style="font-size:10px;color:#888;margin-bottom:3px;">Stack</div><div style="font-size:13px;color:#f0ebe3;">'+(cand.TechStack||'&#8212;').replace(/</g,'&lt;')+'</div></div>' +
+    '<div><div style="font-size:10px;color:#888;margin-bottom:3px;">Pretensi\xf3n</div><div style="font-size:13px;color:#f0ebe3;">'+(cand.SalaryExpectation?(cand.Currency||'USD')+' '+Number(cand.SalaryExpectation).toLocaleString():'&#8212;')+'</div></div>' +
+    '<div><div style="font-size:10px;color:#888;margin-bottom:3px;">Disponible</div><div style="font-size:13px;color:#f0ebe3;">'+(cand.AvailableFrom?new Date(cand.AvailableFrom).toLocaleDateString('es-AR'):'&#8212;')+'</div></div>' +
     '<div><div style="font-size:10px;color:#888;margin-bottom:3px;">Fuente</div><div style="font-size:13px;color:#f0ebe3;">'+(cand.SourceType||'&#8212;')+'</div></div>' +
     '</div>' +
 
     stageFields +
 
-    (cand.RejectionReason ? '<div style="background:rgba(255,77,77,0.08);border:1px solid rgba(255,77,77,0.2);border-radius:8px;padding:12px;margin-bottom:14px;"><div style="font-size:10px;color:#FF4D4D;font-weight:700;text-transform:uppercase;margin-bottom:4px;">Motivo de rechazo</div><div style="font-size:13px;color:#aaa;">'+(cand.RejectionReason||'').replace(/</g,'&lt;')+'</div></div>' : '') +
+    '<div style="margin-bottom:16px;">' +
+    '<div style="font-size:10px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:8px;">Archivos adjuntos (CV, certificaciones, m\xe9dicos...)</div>' +
+    '<div id="cvFileList_'+cand.CandidateID+'" style="margin-bottom:8px;min-height:24px;"></div>' +
+    '<label style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:#222;border:1px solid #333;border-radius:6px;color:#aaa;font-size:12px;cursor:pointer;">' +
+    '&#128206; Adjuntar archivo(s)' +
+    '<input type="file" accept=".pdf,.doc,.docx,image/*" multiple data-cid="'+cand.CandidateID+'" onchange="subirArchivosCandidato(this)" style="display:none;">' +
+    '</label>' +
+    '<span style="font-size:10px;color:#555;margin-left:8px;">PDF, im\xe1genes, documentos — m\xfaltiples archivos</span>' +
+    '</div>' +
 
-    '<div style="display:flex;gap:8px;flex-wrap:wrap;">';
+    (cand.RejectionReason ? '<div style="background:rgba(255,77,77,0.08);border:1px solid rgba(255,77,77,0.2);border-radius:8px;padding:12px;margin-bottom:14px;"><div style="font-size:10px;color:#FF4D4D;font-weight:700;margin-bottom:4px;">Motivo de rechazo</div><div style="font-size:13px;color:#aaa;">'+(cand.RejectionReason||'').replace(/</g,'&lt;')+'</div></div>' : '') +
 
-  var innerDiv = overlay.querySelector('div > div');
-  // Armar botones según estado
-  var btns = '';
-  if (cand.Status !== 'hired' && cand.Status !== 'rejected') {
-    btns += '<button data-cid="'+cand.CandidateID+'" onclick="guardarYAvanzar(this.dataset.cid)" style="flex:1;padding:8px;background:rgba(46,204,113,0.1);border:1px solid rgba(46,204,113,0.3);border-radius:8px;color:#2ECC71;font-size:12px;font-weight:700;cursor:pointer;">Guardar y avanzar &#8594;</button>';
-    btns += '<button data-cid="'+cand.CandidateID+'" onclick="guardarNotas(this.dataset.cid)" style="padding:8px 16px;background:#222;border:1px solid #333;border-radius:8px;color:#aaa;font-size:12px;cursor:pointer;">Guardar notas</button>';
-    btns += '<button data-cid="'+cand.CandidateID+'" onclick="pedirRechazo(this.dataset.cid)" style="padding:8px 16px;background:rgba(255,77,77,0.08);border:1px solid rgba(255,77,77,0.25);border-radius:8px;color:#FF4D4D;font-size:12px;cursor:pointer;">Rechazar</button>';
-  } else {
-    btns += '<span style="font-size:12px;color:#888;padding:8px;">Estado final: '+sl+'</span>';
-  }
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;">'+btns+'</div>' +
+    '</div>';
 
-  overlay.innerHTML = overlay.innerHTML + btns + '</div></div>';
-  document.body.appendChild(overlay);
+  document.body.appendChild(ov);
+  cargarArchivosCandidato(cand.CandidateID);
 }
-
 async function guardarNotas(candId) {
   var notas  = (document.getElementById('cvStageNotes')||{}).value||'';
   var interv = (document.getElementById('cvInterviewer')||{}).value||'';
@@ -5797,6 +5729,332 @@ async function eliminarArchivoCandidato(candId, fileId) {
     mostrarToast('Archivo eliminado','success');
     cargarArchivosCandidato(candId);
   } catch(e){ mostrarToast('Error: '+e.message,'error'); }
+}
+
+// ══════════════════════════════════════════════════════
+// PLAN DE CARRERA — JS
+// ══════════════════════════════════════════════════════
+var allCareerPlans = [];
+var planTypeLabels = {
+  specialization: 'Especializaci\xf3n',
+  role_change:    'Cambio de rol',
+  technical:      'T\xe9cnico',
+  management:     'Gesti\xf3n / Liderazgo'
+};
+var planTypeColors = {
+  specialization: '#3B82F6',
+  role_change:    '#A855F7',
+  technical:      '#FF5400',
+  management:     '#2ECC71'
+};
+
+function filtrarColabCareer(q) {
+  var sel = document.getElementById('cpColabSel');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">&#8212; Seleccionar &#8212;</option>';
+  allUsuarios.filter(function(u){
+    return u.IsActive !== false && (!q || (u.FullName||'').toLowerCase().includes(q.toLowerCase()));
+  }).sort(function(a,b){ return (a.FullName||'').localeCompare(b.FullName||''); })
+  .forEach(function(u){ sel.add(new Option((u.FullName||u.Email)+' \u2014 '+(u.Email||''), u.UserID)); });
+}
+
+async function loadCareerPlans() {
+  var c = document.getElementById('careerContainer');
+  if (!c) return;
+  c.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Cargando...</div>';
+  if (!allUsuarios.length) await loadUsuarios();
+  filtrarColabCareer('');
+  try {
+    var res  = await fetch(API_BASE + '/career/all');
+    var txt  = await res.text();
+    var json;
+    try { json = JSON.parse(txt); } catch(e){ throw new Error('JSON inválido: '+txt.substring(0,80)); }
+    if (!res.ok) throw new Error('HTTP '+res.status+': '+(json.error||''));
+    allCareerPlans = Array.isArray(json) ? json : (json.data||[]);
+    renderCareerPlans(allCareerPlans);
+  } catch(e) {
+    c.innerHTML = '<div style="text-align:center;padding:20px;color:#FF4D4D;font-size:13px;">Error: '+e.message+'</div>';
+  }
+}
+
+function renderCareerPlans(plans) {
+  var c = document.getElementById('careerContainer');
+  if (!c) return;
+  if (!plans.length) {
+    c.innerHTML = '<div style="text-align:center;padding:40px;color:#888;">Sin planes de carrera. Cre\xe1 el primero con + Nuevo Plan.</div>';
+    return;
+  }
+  var html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;">';
+  plans.forEach(function(p) {
+    var tipo   = planTypeLabels[p.PlanType] || p.PlanType || 'Plan';
+    var color  = planTypeColors[p.PlanType] || '#888';
+    var pct    = p.ProgressPct || 0;
+    var pctCol = pct>=80?'#2ECC71':pct>=50?'#FF5400':'#F59E0B';
+    var nombre = (p.EmployeeName||'&#8212;').replace(/</g,'&lt;');
+    var initials = (p.EmployeeName||'?').split(' ').map(function(w){return w[0]||'';}).join('').substring(0,2).toUpperCase();
+
+    html += '<div style="background:#1a1a1a;border:1px solid #252525;border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:12px;">';
+
+    // Header
+    html += '<div style="display:flex;align-items:center;gap:12px;">';
+    html += '<div style="width:42px;height:42px;border-radius:50%;background:'+color+'22;border:2px solid '+color+'44;display:flex;align-items:center;justify-content:center;font-weight:800;color:'+color+';font-size:13px;flex-shrink:0;">'+initials+'</div>';
+    html += '<div style="flex:1;min-width:0;">';
+    html += '<div style="font-weight:800;color:#f0ebe3;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+nombre+'</div>';
+    html += '<div style="font-size:11px;color:#888;margin-top:1px;">'+(p.CurrentRole||p.EmployeeEmail||'').replace(/</g,'&lt;')+'</div>';
+    html += '</div>';
+    html += '<span style="font-size:10px;font-weight:700;color:'+color+';background:'+color+'18;padding:2px 8px;border-radius:10px;white-space:nowrap;">'+tipo+'</span>';
+    html += '</div>';
+
+    // Rol objetivo
+    if (p.TargetRole) {
+      html += '<div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#aaa;">';
+      html += '<span style="color:#555;">&#8594;</span> <span style="color:#f0ebe3;font-weight:600;">'+p.TargetRole.replace(/</g,'&lt;')+'</span>';
+      html += '</div>';
+    }
+
+    // Progreso
+    html += '<div>';
+    html += '<div style="display:flex;justify-content:space-between;font-size:11px;color:#888;margin-bottom:5px;">';
+    html += '<span>Hitos: '+(p.CompletedMilestones||0)+'/'+(p.TotalMilestones||0)+'</span>';
+    html += '<span style="color:'+pctCol+';font-weight:700;">'+pct+'%</span></div>';
+    html += '<div style="background:#222;border-radius:4px;height:5px;">';
+    html += '<div style="background:'+pctCol+';height:5px;border-radius:4px;width:'+pct+'%;transition:width 0.4s;"></div></div>';
+    html += '</div>';
+
+    // Botones
+    html += '<div style="display:flex;gap:8px;">';
+    html += '<button data-pid="'+p.PlanID+'" data-nombre="'+nombre.replace(/"/g,'&quot;')+'" onclick="abrirDetallePlan(this.dataset.pid,this.dataset.nombre)" style="flex:1;padding:7px;background:#222;border:1px solid #333;border-radius:7px;color:#aaa;font-size:12px;cursor:pointer;">Ver / Editar</button>';
+    html += '</div>';
+    html += '</div>';
+  });
+  html += '</div>';
+  c.innerHTML = html;
+}
+
+async function guardarNuevoPlan() {
+  var userId = (document.getElementById('cpColabSel')||{}).value||'';
+  var tipo   = (document.getElementById('cpTipo')||{}).value||'specialization';
+  var target = (document.getElementById('cpTargetRole')||{}).value||'';
+  var desc   = (document.getElementById('cpDesc')||{}).value||'';
+  var errEl  = document.getElementById('cpError');
+  if (!userId) { errEl.textContent='Seleccion\xe1 un colaborador'; errEl.style.display='block'; return; }
+  errEl.style.display='none';
+  try {
+    var res  = await fetch(API_BASE+'/career/'+userId, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ planType:tipo, targetRole:target||null, description:desc||null })
+    });
+    var data = await res.json();
+    if (data.ok===false) throw new Error(data.error||'Error');
+    closeModal('modalNuevoPlan');
+    mostrarToast('Plan de carrera creado','success');
+    loadCareerPlans();
+  } catch(e){ errEl.textContent='Error: '+e.message; errEl.style.display='block'; }
+}
+
+async function abrirDetallePlan(planId, nombre) {
+  var tEl = document.getElementById('cpDetalleTitle');
+  if (tEl) tEl.textContent = 'Plan de Carrera \u2014 '+nombre;
+  document.getElementById('cpDetallePlanId').value = planId;
+  var inner = document.getElementById('cpDetalleContenido');
+  if (inner) inner.innerHTML = '<div style="text-align:center;padding:20px;color:#888;">Cargando...</div>';
+  showModal('modalDetallePlan');
+  try {
+    var res  = await fetch(API_BASE+'/career/plan/'+planId);
+    var json = await res.json();
+    var data = Array.isArray(json) ? json : (json.data||json);
+    var plan = data.plan || data;
+    var milestones = data.milestones || [];
+    renderDetallePlan(plan, milestones);
+  } catch(e){ if(inner) inner.innerHTML='<div style="color:#FF4D4D;padding:16px;">Error: '+e.message+'</div>'; }
+}
+
+function renderDetallePlan(plan, milestones) {
+  var inner = document.getElementById('cpDetalleContenido');
+  if (!inner) return;
+  var tipo  = planTypeLabels[plan.PlanType] || plan.PlanType || '';
+  var color = planTypeColors[plan.PlanType] || '#888';
+
+  var html = '';
+
+  // Info del plan
+  html += '<div style="background:#111;border-radius:10px;padding:16px;margin-bottom:16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">';
+  html += '<div><div style="font-size:10px;color:#888;margin-bottom:4px;">Tipo</div><span style="font-size:12px;font-weight:700;color:'+color+';">'+tipo+'</span></div>';
+  html += '<div><div style="font-size:10px;color:#888;margin-bottom:4px;">Rol objetivo</div><div style="font-size:12px;color:#f0ebe3;">'+(plan.TargetRole||'&#8212;').replace(/</g,'&lt;')+'</div></div>';
+  html += '<div><div style="font-size:10px;color:#888;margin-bottom:4px;">Progreso</div><div style="font-size:12px;font-weight:700;color:#FF5400;">'+(plan.ProgressPct||0)+'%</div></div>';
+  html += '</div>';
+
+  if (plan.Description) {
+    html += '<div style="font-size:13px;color:#aaa;line-height:1.7;background:#111;border-radius:8px;padding:14px;margin-bottom:16px;white-space:pre-wrap;">'+plan.Description.replace(/</g,'&lt;')+'</div>';
+  }
+
+  // Hitos
+  html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">';
+  html += '<div style="font-size:12px;font-weight:700;color:#888;text-transform:uppercase;">Hitos del plan</div>';
+  html += '<button onclick="abrirModalNuevoHito()" style="padding:5px 14px;background:rgba(255,84,0,0.1);border:1px solid rgba(255,84,0,0.3);border-radius:6px;color:#FF5400;font-size:11px;cursor:pointer;">+ Agregar hito</button>';
+  html += '</div>';
+
+  if (!milestones.length) {
+    html += '<div style="text-align:center;padding:20px;color:#555;font-size:13px;">Sin hitos. Agre g\xe1 el primero con el bot\xf3n + Agregar hito.</div>';
+  } else {
+    milestones.forEach(function(m) {
+      var done = m.IsCompleted;
+      var bc   = done ? 'rgba(46,204,113,0.2)' : '#1e1e1e';
+      var tc   = done ? '#2ECC71' : '#f0ebe3';
+      html += '<div style="background:#111;border:1px solid '+bc+';border-radius:10px;padding:14px;margin-bottom:10px;">';
+      html += '<div style="display:flex;align-items:flex-start;gap:10px;">';
+      html += '<input type="checkbox" '+(done?'checked':'')+' data-mid="'+m.MilestoneID+'" onchange="toggleMilestoneCareer(this)" style="width:17px;height:17px;cursor:pointer;accent-color:#FF5400;flex-shrink:0;margin-top:2px;">';
+      html += '<div style="flex:1;">';
+      html += '<div style="font-weight:700;color:'+tc+';font-size:13px;">'+(m.Title||'').replace(/</g,'&lt;')+'</div>';
+      if (m.MilestoneCategory) html += '<div style="font-size:10px;color:#FF5400;text-transform:uppercase;margin-top:2px;">'+m.MilestoneCategory+'</div>';
+      if (m.CertificationName) html += '<div style="font-size:12px;color:#aaa;margin-top:4px;">&#127942; '+m.CertificationName.replace(/</g,'&lt;')+'</div>';
+      if (m.BadgeURL) html += '<div style="margin-top:6px;"><a href="'+m.BadgeURL+'" target="_blank" style="font-size:11px;color:#FF5400;text-decoration:none;">&#127894; Ver badge</a></div>';
+      if (m.Description) html += '<div style="font-size:12px;color:#888;margin-top:6px;line-height:1.5;">'+m.Description.replace(/</g,'&lt;')+'</div>';
+      if (m.DueDate) html += '<div style="font-size:11px;color:#888;margin-top:6px;">Fecha: '+new Date(m.DueDate).toLocaleDateString("es-AR")+'</div>';
+
+      // Evidencia
+      html += '<div style="display:flex;gap:6px;align-items:center;margin-top:10px;flex-wrap:wrap;">';
+      html += '<label style="padding:4px 10px;background:#222;border:1px solid #333;border-radius:5px;color:#aaa;font-size:11px;cursor:pointer;">&#128206; Evidencia<input type="file" accept="image/*,.pdf" data-mid="'+m.MilestoneID+'" onchange="subirEvidenciaCareer(this)" style="display:none;"></label>';
+      if (m.FileName) html += '<button data-mid="'+m.MilestoneID+'" onclick="verEvidenciaCareer(this.dataset.mid)" style="padding:4px 10px;background:#222;border:1px solid #333;border-radius:5px;color:#FF5400;font-size:11px;cursor:pointer;">&#128065; '+m.FileName.replace(/</g,'&lt;').substring(0,18)+'</button>';
+      html += '</div>';
+
+      // Comentario
+      html += '<textarea data-mid="'+m.MilestoneID+'" class="cp-comment form-control" style="margin-top:8px;height:55px;resize:none;overflow-y:auto;font-size:12px;" placeholder="Comentario o nota...">'+(m.EmployeeComment||'')+'</textarea>';
+      html += '<div style="display:flex;justify-content:flex-end;margin-top:6px;"><button data-mid="'+m.MilestoneID+'" onclick="guardarComentarioCareer(this.dataset.mid)" style="padding:4px 12px;background:rgba(255,84,0,0.1);border:1px solid rgba(255,84,0,0.3);border-radius:5px;color:#FF5400;font-size:11px;cursor:pointer;">Guardar</button></div>';
+      html += '</div></div></div>';
+    });
+  }
+
+  inner.innerHTML = html;
+  inner._planData = { plan: plan, milestones: milestones };
+}
+
+function abrirModalNuevoHito() {
+  var planId = document.getElementById('cpDetallePlanId').value;
+  var ov = document.createElement('div');
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:700;display:flex;align-items:center;justify-content:center;';
+  ov.id = 'ovNuevoHito';
+  ov.innerHTML = '<div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:16px;padding:28px;width:520px;max-width:95vw;max-height:88vh;overflow-y:auto;">' +
+    '<div style="font-size:15px;font-weight:800;color:#f0ebe3;margin-bottom:18px;">Nuevo hito del plan</div>' +
+    '<div style="display:grid;gap:12px;">' +
+    '<div><label class="form-label">T\xedtulo *</label><input id="hitoTitle" type="text" class="form-control" placeholder="Ej: Aprobar AZ-900, Completar curso de liderazgo..." style="margin-top:4px;"></div>' +
+    '<div><label class="form-label">Categor\xeda</label><select id="hitoCategoria" class="form-control" style="margin-top:4px;"><option value="course">Curso / Capacitaci\xf3n</option><option value="certification">Certificaci\xf3n</option><option value="task">Tarea / Proyecto</option><option value="softskill">Habilidad blanda</option><option value="other">Otro</option></select></div>' +
+    '<div><label class="form-label">Certificaci\xf3n (si aplica)</label><input id="hitoCert" type="text" class="form-control" placeholder="Ej: AZ-900, PMP, ITIL 4..." style="margin-top:4px;" list="certList"><datalist id="certList"></datalist></div>' +
+    '<div><label class="form-label">URL del badge / credencial</label><input id="hitoBadge" type="url" class="form-control" placeholder="https://www.credly.com/badges/..." style="margin-top:4px;"></div>' +
+    '<div><label class="form-label">Descripci\xf3n</label><textarea id="hitoDesc" class="form-control" style="height:70px;resize:none;overflow-y:auto;margin-top:4px;" placeholder="Detalle del hito, proveedores, plataforma..."></textarea></div>' +
+    '<div><label class="form-label">Fecha objetivo</label><input id="hitoFecha" type="date" class="form-control" style="margin-top:4px;"></div>' +
+    '</div>' +
+    '<div id="hitoError" style="color:#FF4D4D;font-size:12px;margin-top:10px;display:none;"></div>' +
+    '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;">' +
+    '<button onclick="document.getElementById(\'ovNuevoHito\').remove()" style="padding:9px 20px;background:#222;border:1px solid #333;border-radius:8px;color:#aaa;font-size:13px;cursor:pointer;">Cancelar</button>' +
+    '<button data-pid="'+planId+'" onclick="guardarNuevoHito(this.dataset.pid)" style="padding:9px 20px;background:#FF5400;border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;">Agregar hito</button>' +
+    '</div></div>';
+  document.body.appendChild(ov);
+  // Poblar datalist de certificaciones
+  if (typeof certCatalog !== 'undefined' && certCatalog.length) {
+    var dl = document.getElementById('certList');
+    certCatalog.forEach(function(c){ var o=document.createElement('option'); o.value=c.Name; dl.appendChild(o); });
+  } else {
+    cargarCertCatalog();
+  }
+}
+
+var certCatalog = [];
+async function cargarCertCatalog() {
+  try {
+    var res = await fetch(API_BASE+'/certifications');
+    var json = await res.json();
+    certCatalog = Array.isArray(json) ? json : (json.data||[]);
+    var dl = document.getElementById('certList');
+    if (dl) certCatalog.forEach(function(c){ var o=document.createElement('option'); o.value=c.Name; dl.appendChild(o); });
+  } catch(e){}
+}
+
+async function guardarNuevoHito(planId) {
+  var title = (document.getElementById('hitoTitle')||{}).value||'';
+  var cat   = (document.getElementById('hitoCategoria')||{}).value||'';
+  var cert  = (document.getElementById('hitoCert')||{}).value||'';
+  var badge = (document.getElementById('hitoBadge')||{}).value||'';
+  var desc  = (document.getElementById('hitoDesc')||{}).value||'';
+  var fecha = (document.getElementById('hitoFecha')||{}).value||'';
+  var errEl = document.getElementById('hitoError');
+  if (!title.trim()) { errEl.textContent='El título es obligatorio'; errEl.style.display='block'; return; }
+  errEl.style.display='none';
+  try {
+    var res = await fetch(API_BASE+'/career/milestone', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ planId:parseInt(planId), title:title, milestoneCategory:cat||null,
+        certificationName:cert||null, badgeURL:badge||null, description:desc||null, dueDate:fecha||null })
+    });
+    var data = await res.json();
+    if (data.ok===false) throw new Error(data.error||'Error');
+    var ov = document.getElementById('ovNuevoHito'); if(ov) ov.remove();
+    mostrarToast('Hito agregado','success');
+    abrirDetallePlan(planId, document.getElementById('cpDetalleTitle').textContent.replace('Plan de Carrera \u2014 ',''));
+  } catch(e){ errEl.textContent='Error: '+e.message; errEl.style.display='block'; }
+}
+
+async function toggleMilestoneCareer(cb) {
+  var mid = cb.dataset.mid;
+  try {
+    await fetch(API_BASE+'/career/milestone/'+mid, {
+      method:'PUT', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ isCompleted: cb.checked })
+    });
+    mostrarToast(cb.checked?'Hito completado':'Hito desmarcado','success');
+    loadCareerPlans();
+  } catch(e){ mostrarToast('Error: '+e.message,'error'); }
+}
+
+async function guardarComentarioCareer(mid) {
+  var ta = document.querySelector('textarea.cp-comment[data-mid="'+mid+'"]');
+  var comment = ta ? ta.value.trim() : '';
+  try {
+    await fetch(API_BASE+'/career/milestone/'+mid, {
+      method:'PUT', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ employeeComment: comment })
+    });
+    mostrarToast('Comentario guardado','success');
+  } catch(e){ mostrarToast('Error: '+e.message,'error'); }
+}
+
+async function subirEvidenciaCareer(input) {
+  var mid  = input.dataset.mid;
+  var file = input.files[0];
+  if (!file) return;
+  if (file.size > 5*1024*1024) { mostrarToast('M\xe1ximo 5MB por archivo','error'); return; }
+  var reader = new FileReader();
+  reader.onload = async function(e) {
+    var base64 = e.target.result.split(',')[1];
+    try {
+      await fetch(API_BASE+'/career/milestone/'+mid, {
+        method:'PUT', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ fileData: base64, fileName: file.name, fileType: file.type })
+      });
+      mostrarToast('Evidencia subida: '+file.name,'success');
+      var planId = document.getElementById('cpDetallePlanId').value;
+      var nombre = document.getElementById('cpDetalleTitle').textContent.replace('Plan de Carrera \u2014 ','');
+      if (planId) abrirDetallePlan(planId, nombre);
+    } catch(e){ mostrarToast('Error: '+e.message,'error'); }
+  };
+  reader.readAsDataURL(file);
+}
+
+function verEvidenciaCareer(mid) {
+  var inner = document.getElementById('cpDetalleContenido');
+  if (!inner || !inner._planData) return;
+  var m = (inner._planData.milestones||[]).find(function(x){ return String(x.MilestoneID)===String(mid); });
+  if (!m || !m.FileData) { mostrarToast('Sin evidencia subida','error'); return; }
+  var dataUrl = 'data:'+m.FileType+';base64,'+m.FileData;
+  var ov = document.createElement('div');
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:800;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;';
+  ov.onclick = function(){ ov.remove(); };
+  if (m.FileType && m.FileType.startsWith('image/')) {
+    ov.innerHTML = '<img src="'+dataUrl+'" style="max-width:90vw;max-height:82vh;border-radius:8px;"><div style="color:#aaa;font-size:12px;">'+m.FileName+'</div><div style="color:#555;font-size:11px;">Click para cerrar</div>';
+  } else {
+    ov.innerHTML = '<iframe src="'+dataUrl+'" style="width:85vw;height:85vh;border:none;border-radius:8px;"></iframe><div style="color:#aaa;font-size:12px;">'+m.FileName+'</div><div style="color:#555;font-size:11px;">Click para cerrar</div>';
+  }
+  document.body.appendChild(ov);
 }
 </script>
 

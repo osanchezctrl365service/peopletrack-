@@ -1092,7 +1092,7 @@ label { color: #888 !important; }
         </div>
         <div class="flex gap-8">
           <button class="btn btn-secondary btn-sm" onclick="showModal('importModal')">↑ Importar</button>
-          <button class="btn btn-primary btn-sm" onclick="try{var el=document.getElementById('newObjectiveModal');console.log('DIAG: el=',el?'existe':'NULL',', display=',el?getComputedStyle(el).display:'?',', open=',el?el.classList.contains('open'):'?');showModal('newObjectiveModal');}catch(e){console.error('DIAG ERROR:',e.message);}">+ Nuevo Objetivo</button>
+          <button class="btn btn-primary btn-sm" onclick="showModal('newObjectiveModal')">+ Nuevo Objetivo</button>
         </div>
       </div>
 
@@ -1793,101 +1793,6 @@ label { color: #888 !important; }
       </div>
     </div><!-- /sec-help -->
 
-<!-- MODAL NUEVO OBJETIVO -->
-<div class="modal-overlay" id="newObjectiveModal">
-  <div class="modal" style="max-width:640px;">
-    <div class="modal-title" id="newObjModalTitle">Nuevo Objetivo Core Empresa</div>
-
-    <!-- SELECTOR DE TIPO -->
-    <div style="display:flex;gap:8px;margin-bottom:20px;">
-      <button id="btnTipoCore" onclick="setTipoObjetivo('company')" style="flex:1;padding:10px;border-radius:8px;border:2px solid #FF5400;background:rgba(255,84,0,0.15);color:#FF5400;font-weight:700;font-size:13px;cursor:pointer;">🏢 Core Empresa</button>
-      <button id="btnTipoPersonal" onclick="setTipoObjetivo('personal')" style="flex:1;padding:10px;border-radius:8px;border:2px solid #333;background:#111;color:#888;font-weight:700;font-size:13px;cursor:pointer;">👤 Personal</button>
-    </div>
-    <input type="hidden" id="newObjTipo" value="company">
-    
-    <div class="grid-2 gap-16">
-      <div class="form-group" style="grid-column:1/-1">
-        <label class="form-label">Título del Objetivo *</label>
-        <input id="newObjTitulo" class="form-control" placeholder="Ej: Certificación MS oficial anual">
-      </div>
-      
-      <!-- CAMPOS CORE -->
-      <div id="camposCore" class="grid-2 gap-16" style="grid-column:1/-1;display:grid;">
-        <div class="form-group">
-          <label class="form-label">Ponderación (%)</label>
-          <input id="newObjPeso" class="form-control" type="number" value="20" min="0" max="100">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Área aplicable</label>
-          <select id="newObjArea" class="form-control">
-            <option value="">Todas las áreas</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label" style="font-size:11px;">Período</label>
-          <select id="objPeriodoSel" class="form-control"><option value="">— Período —</option></select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Fecha Límite</label>
-          <input id="newObjFechaCore" class="form-control" type="date">
-        </div>
-        <div class="form-group" style="grid-column:1/-1">
-          <label class="form-label">Descripción</label>
-          <textarea id="newObjDescCore" class="form-control" placeholder="Descripción del objetivo core..." rows="2"></textarea>
-        </div>
-      </div>
-      
-      <!-- CAMPOS PERSONAL -->
-      <div id="camposPersonal" style="grid-column:1/-1;display:none;">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-          <div class="form-group" style="grid-column:1/-1">
-            <label class="form-label">Colaborador *</label>
-            <input id="objColabBuscar" type="text" class="form-control" placeholder="🔍 Buscar colaborador..." style="margin-bottom:4px;" oninput="filtrarColabObj(this.value)">
-            <select id="objColabSel" class="form-control"><option value="">— Seleccionar colaborador —</option></select>
-          </div>
-          <div class="form-group" style="grid-column:1/-1;">
-            <div style="background:rgba(255,84,0,0.06);border:1px solid rgba(255,84,0,0.2);border-radius:8px;padding:12px 14px;">
-              <div style="font-size:11px;font-weight:700;color:#FF5400;text-transform:uppercase;margin-bottom:6px;">📌 Asignar desde objetivos Core de la empresa</div>
-              <select id="newObjCoreRef" class="form-control" onchange="precargarDesdeCore(this.value)">
-                <option value="">— Crear objetivo personal nuevo desde cero —</option>
-              </select>
-              <div style="font-size:11px;color:#888;margin-top:6px;">Al seleccionar un Core, el título y ponderación se precargan automáticamente</div>
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Ponderación (%)</label>
-            <input id="newObjPesoPersonal" class="form-control" type="number" value="20" min="0" max="100">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Competencia</label>
-            <select id="newObjCompetencia" class="form-control">
-              <option value="">— Competencia —</option>
-              <option>Aprendizaje</option><option>Innovación</option><option>Orientación al Cliente</option>
-              <option>Comunicación</option><option>Liderazgo</option><option>Adaptabilidad</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label" style="font-size:11px;">Período</label>
-            <select id="objPeriodoSelPersonal" class="form-control"><option value="">— Período —</option></select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Fecha Límite</label>
-            <input id="newObjFechaPersonal" class="form-control" type="date">
-          </div>
-          <div class="form-group" style="grid-column:1/-1">
-            <label class="form-label">Descripción</label>
-            <textarea id="newObjDescPersonal" class="form-control" placeholder="Descripción del objetivo personal..." rows="2"></textarea>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div id="newObjError" style="color:#FF4D4D;font-size:12px;margin-top:8px;display:none;"></div>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="closeModal('newObjectiveModal')">Cancelar</button>
-      <button class="btn btn-primary" onclick="guardarNuevoObjetivo()">Guardar Objetivo</button>
-    </div>
-  </div>
-</div>
 
 <div class="modal-overlay" id="checkinModal">
   <div class="modal">
@@ -6338,5 +6243,102 @@ function verEvidenciaCareer(mid) {
 
 
 
+
+
+<!-- MODAL NUEVO OBJETIVO -->
+<div class="modal-overlay" id="newObjectiveModal">
+  <div class="modal" style="max-width:640px;">
+    <div class="modal-title" id="newObjModalTitle">Nuevo Objetivo Core Empresa</div>
+
+    <!-- SELECTOR DE TIPO -->
+    <div style="display:flex;gap:8px;margin-bottom:20px;">
+      <button id="btnTipoCore" onclick="setTipoObjetivo('company')" style="flex:1;padding:10px;border-radius:8px;border:2px solid #FF5400;background:rgba(255,84,0,0.15);color:#FF5400;font-weight:700;font-size:13px;cursor:pointer;">🏢 Core Empresa</button>
+      <button id="btnTipoPersonal" onclick="setTipoObjetivo('personal')" style="flex:1;padding:10px;border-radius:8px;border:2px solid #333;background:#111;color:#888;font-weight:700;font-size:13px;cursor:pointer;">👤 Personal</button>
+    </div>
+    <input type="hidden" id="newObjTipo" value="company">
+    
+    <div class="grid-2 gap-16">
+      <div class="form-group" style="grid-column:1/-1">
+        <label class="form-label">Título del Objetivo *</label>
+        <input id="newObjTitulo" class="form-control" placeholder="Ej: Certificación MS oficial anual">
+      </div>
+      
+      <!-- CAMPOS CORE -->
+      <div id="camposCore" class="grid-2 gap-16" style="grid-column:1/-1;display:grid;">
+        <div class="form-group">
+          <label class="form-label">Ponderación (%)</label>
+          <input id="newObjPeso" class="form-control" type="number" value="20" min="0" max="100">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Área aplicable</label>
+          <select id="newObjArea" class="form-control">
+            <option value="">Todas las áreas</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" style="font-size:11px;">Período</label>
+          <select id="objPeriodoSel" class="form-control"><option value="">— Período —</option></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Fecha Límite</label>
+          <input id="newObjFechaCore" class="form-control" type="date">
+        </div>
+        <div class="form-group" style="grid-column:1/-1">
+          <label class="form-label">Descripción</label>
+          <textarea id="newObjDescCore" class="form-control" placeholder="Descripción del objetivo core..." rows="2"></textarea>
+        </div>
+      </div>
+      
+      <!-- CAMPOS PERSONAL -->
+      <div id="camposPersonal" style="grid-column:1/-1;display:none;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div class="form-group" style="grid-column:1/-1">
+            <label class="form-label">Colaborador *</label>
+            <input id="objColabBuscar" type="text" class="form-control" placeholder="🔍 Buscar colaborador..." style="margin-bottom:4px;" oninput="filtrarColabObj(this.value)">
+            <select id="objColabSel" class="form-control"><option value="">— Seleccionar colaborador —</option></select>
+          </div>
+          <div class="form-group" style="grid-column:1/-1;">
+            <div style="background:rgba(255,84,0,0.06);border:1px solid rgba(255,84,0,0.2);border-radius:8px;padding:12px 14px;">
+              <div style="font-size:11px;font-weight:700;color:#FF5400;text-transform:uppercase;margin-bottom:6px;">📌 Asignar desde objetivos Core de la empresa</div>
+              <select id="newObjCoreRef" class="form-control" onchange="precargarDesdeCore(this.value)">
+                <option value="">— Crear objetivo personal nuevo desde cero —</option>
+              </select>
+              <div style="font-size:11px;color:#888;margin-top:6px;">Al seleccionar un Core, el título y ponderación se precargan automáticamente</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Ponderación (%)</label>
+            <input id="newObjPesoPersonal" class="form-control" type="number" value="20" min="0" max="100">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Competencia</label>
+            <select id="newObjCompetencia" class="form-control">
+              <option value="">— Competencia —</option>
+              <option>Aprendizaje</option><option>Innovación</option><option>Orientación al Cliente</option>
+              <option>Comunicación</option><option>Liderazgo</option><option>Adaptabilidad</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="font-size:11px;">Período</label>
+            <select id="objPeriodoSelPersonal" class="form-control"><option value="">— Período —</option></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Fecha Límite</label>
+            <input id="newObjFechaPersonal" class="form-control" type="date">
+          </div>
+          <div class="form-group" style="grid-column:1/-1">
+            <label class="form-label">Descripción</label>
+            <textarea id="newObjDescPersonal" class="form-control" placeholder="Descripción del objetivo personal..." rows="2"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="newObjError" style="color:#FF4D4D;font-size:12px;margin-top:8px;display:none;"></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('newObjectiveModal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarNuevoObjetivo()">Guardar Objetivo</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>

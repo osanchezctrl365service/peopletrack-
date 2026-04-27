@@ -3193,33 +3193,37 @@ async function verReporteLider() {
 
 // ═══ GUARDAR NUEVO OBJETIVO ══════════════════════════════════
 async function guardarNuevoObjetivo() {
-  const tipo = document.getElementById('newObjTipo')?.value || 'company';
-  const titulo = document.getElementById('newObjTitulo')?.value?.trim();
-  const errEl = document.getElementById('newObjError');
+  var tipo = (document.getElementById('newObjTipo')||{}).value || 'company';
+  var titulo = (document.getElementById('newObjTitulo')||{}).value;
+  if (titulo) titulo = titulo.trim();
+  var errEl = document.getElementById('newObjError');
   if (!titulo) { if(errEl){errEl.textContent='El titulo es obligatorio';errEl.style.display='block';} return; }
   if(errEl) errEl.style.display='none';
 
-  let body = { title: titulo, objectiveType: tipo, status: 'not_started', progress: 0 };
+  var body = { title: titulo, objectiveType: tipo, status: 'not_started', progress: 0 };
 
   if (tipo === 'company') {
-    body.weight = parseFloat(document.getElementById('newObjPeso')?.value||'0');
-    body.periodId = document.getElementById('objPeriodoSel')?.value ? parseInt(document.getElementById('objPeriodoSel').value) : null;
-    body.dueDate = document.getElementById('newObjFechaCore')?.value || null;
-    var areaVal = document.getElementById('newObjArea')?.value;
+    body.weight = parseFloat((document.getElementById('newObjPeso')||{}).value||'0');
+    var perVal = (document.getElementById('objPeriodoSel')||{}).value;
+    body.periodId = perVal ? parseInt(perVal) : null;
+    body.dueDate = (document.getElementById('newObjFechaCore')||{}).value || null;
+    var areaEl = document.getElementById('newObjArea');
+    var areaVal = areaEl ? areaEl.value : '';
     body.areaId = areaVal ? parseInt(areaVal) : null;
-    body.description = document.getElementById('newObjDescCore')?.value || null;
+    body.description = (document.getElementById('newObjDescCore')||{}).value || null;
   } else {
-    var userId = document.getElementById('objColabSel')?.value;
+    var userId = (document.getElementById('objColabSel')||{}).value;
     if (!userId) { if(errEl){errEl.textContent='Selecciona un colaborador';errEl.style.display='block';} return; }
     body.userId = parseInt(userId);
-    body.weight = parseFloat(document.getElementById('newObjPesoPersonal')?.value||'0');
-    body.periodId = document.getElementById('objPeriodoSelPersonal')?.value ? parseInt(document.getElementById('objPeriodoSelPersonal').value) : null;
-    body.dueDate = document.getElementById('newObjFechaPersonal')?.value || null;
-    body.description = document.getElementById('newObjDescPersonal')?.value || null;
-    var coreRefId = document.getElementById('newObjCoreRef')?.value;
+    body.weight = parseFloat((document.getElementById('newObjPesoPersonal')||{}).value||'0');
+    var perValP = (document.getElementById('objPeriodoSelPersonal')||{}).value;
+    body.periodId = perValP ? parseInt(perValP) : null;
+    body.dueDate = (document.getElementById('newObjFechaPersonal')||{}).value || null;
+    body.description = (document.getElementById('newObjDescPersonal')||{}).value || null;
+    var coreRefId = (document.getElementById('newObjCoreRef')||{}).value;
     if (coreRefId) {
-      var core = allObjetivosCache[coreRefId] || allObjetivosCore.find(function(o){return String(o.ObjectiveID)===String(coreRefId);});
-      if (core && !body.description) body.description = '[Core ref: ' + (core.Title||core.title) + ']';
+      var core = allObjetivosCache[coreRefId] || (allObjetivosCore||[]).find(function(o){return String(o.ObjectiveID)===String(coreRefId);});
+      if (core && !body.description) body.description = '[Core ref: ' + (core.Title||core.title||'') + ']';
     }
   }
 
@@ -3245,7 +3249,6 @@ async function guardarNuevoObjetivo() {
     if(btn){btn.textContent='Guardar Objetivo';btn.disabled=false;}
   }
 }
-
 // ═══ GUARDAR CHECKIN ═════════════════════════════════════════
 async function guardarCheckin() {
   closeModal('checkinModal');
@@ -4452,18 +4455,23 @@ async function guardarNuevoPIP() {
 async function cargarPIPs() {
   var c = document.getElementById('pipContainer');
   if (!c) return;
-  c.innerHTML = '<div style="text-align:center;padding:20px;color:#888;">Cargando...</div>';
+  c.innerHTML = '<div style="text-align:center;padding:20px;color:#888;">Cargando PIPs...</div>';
   try {
-    var res  = await fetch(API_BASE + '/pips');
-    var txt  = await res.text();
+    var res = await fetch(API_BASE + '/pips');
+    var txt = await res.text();
+    if (!txt || !txt.trim()) {
+      allPIPs = [];
+      renderPIPs([]);
+      return;
+    }
     var json;
-    try { json = JSON.parse(txt); } catch(e){ throw new Error('JSON: '+txt.substring(0,80)); }
-    if (!res.ok) throw new Error('HTTP '+res.status+': '+(json.error||''));
+    try { json = JSON.parse(txt); } catch(e){ throw new Error('Respuesta invalida: '+txt.substring(0,80)); }
+    if (!res.ok) throw new Error('HTTP '+res.status+': '+((json&&json.error)||''));
     allPIPs = Array.isArray(json) ? json : (json.data||[]);
     allPIPs = allPIPs.filter(function(p){ return p.Status !== 'deleted'; });
     renderPIPs(allPIPs);
   } catch(e) {
-    c.innerHTML = '<div style="text-align:center;padding:20px;color:#FF4D4D;font-size:13px;">Error PIP: '+e.message+'</div>';
+    c.innerHTML = '<div style="text-align:center;padding:30px;color:#FF4D4D;font-size:13px;">Error al cargar PIPs: '+e.message+'<br><button class="btn btn-secondary btn-sm" style="margin-top:12px;" onclick="cargarPIPs()">Reintentar</button></div>';
   }
 }
 function filtrarPIPs(q) {
@@ -5881,6 +5889,89 @@ function verEvidenciaCareer(mid) {
 }
 </script>
 
+<!-- MODAL EDITAR OBJETIVO -->
+<div class="modal-overlay" id="editObjectiveModal">
+  <div class="modal" style="max-width:560px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <div class="modal-title" id="editObjModalTitle" style="margin:0;">Editar Objetivo</div>
+      <span id="editObjTipoBadge" style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:rgba(255,84,0,0.15);color:#FF5400;"></span>
+    </div>
+    <input type="hidden" id="editObjId">
+    <input type="hidden" id="editObjTipoHidden">
+    <div class="grid-2 gap-16">
+      <div class="form-group" style="grid-column:1/-1">
+        <label class="form-label">Título del Objetivo</label>
+        <input id="editObjTitulo" class="form-control" type="text" placeholder="Título del objetivo">
+      </div>
+
+      <!-- CAMPOS SOLO PARA CORE -->
+      <div id="editCoreFields" style="grid-column:1/-1;display:none;">
+        <div class="grid-2 gap-16">
+          <div class="form-group">
+            <label class="form-label">Ponderación (%)</label>
+            <input id="editObjPeso" class="form-control" type="number" min="0" max="100" value="20">
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="font-size:11px;">Período</label>
+            <select id="editObjPeriodo" class="form-control">
+              <option value="">— Período —</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Fecha Límite</label>
+            <input id="editObjFecha" class="form-control" type="date">
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="color:#FF5400;font-weight:700;">📋 Estado Organizacional</label>
+            <select id="editObjEstadoOrg" class="form-control">
+              <option value="active">✅ Activo</option>
+              <option value="approved">🏛️ Aprobado por Dirección</option>
+              <option value="paused">⏸️ Pausado</option>
+              <option value="cancelled">❌ Cancelado por Dirección</option>
+            </select>
+          </div>
+          <div class="form-group" style="grid-column:1/-1">
+            <label class="form-label">Nota de dirección (opcional)</label>
+            <textarea id="editObjNotaDir" class="form-control" placeholder="Ej: Cancelado por reestructuración Q3..." rows="2"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- CAMPOS SOLO PARA PERSONAL -->
+      <div id="editPersonalFields" style="grid-column:1/-1;display:none;">
+        <div class="grid-2 gap-16">
+          <div class="form-group">
+            <label class="form-label">Avance (%)</label>
+            <input id="editObjAvance" class="form-control" type="number" min="0" max="100" value="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Estado de cumplimiento</label>
+            <select id="editObjEstado" class="form-control">
+              <option value="not_started">No Iniciado</option>
+              <option value="in_progress">En Curso</option>
+              <option value="at_risk">En Riesgo</option>
+              <option value="completed">Completado ✓</option>
+              <option value="not_met">No Cumplido</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Ponderación (%)</label>
+            <input id="editObjPesoPersonal" class="form-control" type="number" min="0" max="100" value="20">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Fecha Límite</label>
+            <input id="editObjFechaPersonal" class="form-control" type="date">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="editObjError" style="color:#FF4D4D;font-size:12px;margin-top:8px;display:none;"></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('editObjectiveModal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarEdicionObjetivo()">Guardar Cambios</button>
+    </div>
+  </div>
+</div>
 
       <div id="rep-cambios" style="display:none;margin-top:16px;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
@@ -6103,91 +6194,6 @@ function verEvidenciaCareer(mid) {
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeModal('newObjectiveModal')">Cancelar</button>
       <button class="btn btn-primary" onclick="guardarNuevoObjetivo()">Guardar Objetivo</button>
-    </div>
-  </div>
-</div>
-
-
-<!-- MODAL EDITAR OBJETIVO -->
-<div class="modal-overlay" id="editObjectiveModal">
-  <div class="modal" style="max-width:560px;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-      <div class="modal-title" id="editObjModalTitle" style="margin:0;">Editar Objetivo</div>
-      <span id="editObjTipoBadge" style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:rgba(255,84,0,0.15);color:#FF5400;"></span>
-    </div>
-    <input type="hidden" id="editObjId">
-    <input type="hidden" id="editObjTipoHidden">
-    <div class="grid-2 gap-16">
-      <div class="form-group" style="grid-column:1/-1">
-        <label class="form-label">Título del Objetivo</label>
-        <input id="editObjTitulo" class="form-control" type="text" placeholder="Título del objetivo">
-      </div>
-
-      <!-- CAMPOS SOLO PARA CORE -->
-      <div id="editCoreFields" style="grid-column:1/-1;display:none;">
-        <div class="grid-2 gap-16">
-          <div class="form-group">
-            <label class="form-label">Ponderación (%)</label>
-            <input id="editObjPeso" class="form-control" type="number" min="0" max="100" value="20">
-          </div>
-          <div class="form-group">
-            <label class="form-label" style="font-size:11px;">Período</label>
-            <select id="editObjPeriodo" class="form-control">
-              <option value="">— Período —</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Fecha Límite</label>
-            <input id="editObjFecha" class="form-control" type="date">
-          </div>
-          <div class="form-group">
-            <label class="form-label" style="color:#FF5400;font-weight:700;">📋 Estado Organizacional</label>
-            <select id="editObjEstadoOrg" class="form-control">
-              <option value="active">✅ Activo</option>
-              <option value="approved">🏛️ Aprobado por Dirección</option>
-              <option value="paused">⏸️ Pausado</option>
-              <option value="cancelled">❌ Cancelado por Dirección</option>
-            </select>
-          </div>
-          <div class="form-group" style="grid-column:1/-1">
-            <label class="form-label">Nota de dirección (opcional)</label>
-            <textarea id="editObjNotaDir" class="form-control" placeholder="Ej: Cancelado por reestructuración Q3..." rows="2"></textarea>
-          </div>
-        </div>
-      </div>
-
-      <!-- CAMPOS SOLO PARA PERSONAL -->
-      <div id="editPersonalFields" style="grid-column:1/-1;display:none;">
-        <div class="grid-2 gap-16">
-          <div class="form-group">
-            <label class="form-label">Avance (%)</label>
-            <input id="editObjAvance" class="form-control" type="number" min="0" max="100" value="0">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Estado de cumplimiento</label>
-            <select id="editObjEstado" class="form-control">
-              <option value="not_started">No Iniciado</option>
-              <option value="in_progress">En Curso</option>
-              <option value="at_risk">En Riesgo</option>
-              <option value="completed">Completado ✓</option>
-              <option value="not_met">No Cumplido</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Ponderación (%)</label>
-            <input id="editObjPesoPersonal" class="form-control" type="number" min="0" max="100" value="20">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Fecha Límite</label>
-            <input id="editObjFechaPersonal" class="form-control" type="date">
-          </div>
-        </div>
-      </div>
-    </div>
-    <div id="editObjError" style="color:#FF4D4D;font-size:12px;margin-top:8px;display:none;"></div>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="closeModal('editObjectiveModal')">Cancelar</button>
-      <button class="btn btn-primary" onclick="guardarEdicionObjetivo()">Guardar Cambios</button>
     </div>
   </div>
 </div>

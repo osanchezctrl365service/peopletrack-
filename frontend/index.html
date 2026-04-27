@@ -4955,43 +4955,43 @@ async function ejecutarEliminarUsuario(id, btn) {
 // AYUDA - carga desde BD
 // ══════════════════════════════════════════════════════════════
 async function loadHelpArticles() {
-  var c = document.getElementById('helpArticlesContainer');
+  var c   = document.getElementById('helpArticlesContainer');
   var idx = document.getElementById('helpIndex');
-  if (!c) return;
-  c.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Cargando...</div>';
+  if (!c) { console.error('helpArticlesContainer no encontrado en DOM'); return; }
+  c.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Cargando art\xedculos...</div>';
   try {
-    var arts = await apiGet('help/articles');
+    var res = await fetch(API_BASE + '/help/articles');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    var json = await res.json();
+    var arts = json.data || json;
     if (!Array.isArray(arts) || !arts.length) {
-      c.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Sin art\xedculos cargados</div>';
+      c.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Sin art\xedculos cargados en la BD.</div>';
       return;
     }
-    // Índice lateral
     if (idx) {
-      idx.innerHTML = '';
+      idx.innerHTML = '<div style="font-size:10px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:12px;">Art\xedculos</div>';
       arts.forEach(function(a) {
         var b = document.createElement('button');
         b.textContent = a.Title;
-        b.style.cssText = 'display:block;width:100%;text-align:left;padding:8px 12px;background:none;border:none;border-radius:6px;color:#aaa;font-size:12px;cursor:pointer;margin-bottom:2px;';
+        b.style.cssText = 'display:block;width:100%;text-align:left;padding:8px 12px;background:none;border:none;border-radius:6px;color:#aaa;font-size:12px;cursor:pointer;margin-bottom:2px;line-height:1.3;';
         b.onmouseenter = function(){ this.style.background='rgba(255,84,0,0.08)'; this.style.color='#FF5400'; };
         b.onmouseleave = function(){ this.style.background='none'; this.style.color='#aaa'; };
-        b.onclick = function(){ document.getElementById('help-art-'+a.ArticleID).scrollIntoView({behavior:'smooth',block:'start'}); };
+        b.onclick = function(){ var el=document.getElementById('help-art-'+a.ArticleID); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); };
         idx.appendChild(b);
       });
     }
-    // Contenido
     var html = '';
     arts.forEach(function(a) {
       html += '<div id="help-art-'+a.ArticleID+'" style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:12px;padding:20px 24px;margin-bottom:16px;">';
-      html += '<div style="font-size:15px;font-weight:800;color:#f0ebe3;margin-bottom:12px;">'+( a.Title||'').replace(/</g,'&lt;')+'</div>';
-      html += '<div style="font-size:13px;color:#aaa;line-height:1.8;white-space:pre-wrap;">'+( a.Content||'').replace(/</g,'&lt;')+'</div>';
+      html += '<div style="font-size:15px;font-weight:800;color:#f0ebe3;margin-bottom:12px;">'+(a.Title||'').replace(/</g,'&lt;')+'</div>';
+      html += '<div style="font-size:13px;color:#aaa;line-height:1.8;white-space:pre-wrap;">'+(a.Content||'').replace(/</g,'&lt;')+'</div>';
       html += '</div>';
     });
     c.innerHTML = html;
   } catch(e) {
-    c.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Error al cargar: '+e.message+'</div>';
+    c.innerHTML = '<div style="text-align:center;padding:30px;color:#FF4D4D;">Error al cargar: '+e.message+'</div>';
   }
 }
-
 // Cargar ayuda al entrar a la sección
 
 // ══════════════════════════════════════════════════════════════
@@ -5153,7 +5153,9 @@ function renderOnboardings(obs) {
     if (o.Status==='in_progress') {
       html += '<button data-obid="'+o.OnboardingID+'" onclick="completarOnboarding(this.dataset.obid)" style="padding:6px 12px;background:rgba(46,204,113,0.1);border:1px solid rgba(46,204,113,0.3);border-radius:6px;color:#2ECC71;font-size:11px;cursor:pointer;">Completar</button>';
     }
-        html += '<button onclick="confirmarEliminarOnboarding('+o.OnboardingID+',\''+( o.EmployeeName||'').replace(/'/g,'')+'\')" style="padding:6px 10px;background:rgba(255,77,77,0.08);border:1px solid rgba(255,77,77,0.25);border-radius:6px;color:#FF4D4D;font-size:11px;cursor:pointer;margin-left:4px;">&#x2715;</button>';
+      (function(oid, onombre){
+        html += '<button onclick="confirmarEliminarOnboarding(' + oid + ',\'' + onombre.replace(/'/g, '') + '\')" style="padding:6px 10px;background:rgba(255,77,77,0.08);border:1px solid rgba(255,77,77,0.25);border-radius:6px;color:#FF4D4D;font-size:11px;cursor:pointer;">&#x2715;</button>';
+      })(o.OnboardingID, o.EmployeeName||'');
 html += '</div></div>';
   });
   html += '</div>';
@@ -5443,28 +5445,112 @@ function renderKanban(candidatos) {
 async function verCandidato(id) {
   var cand = allCandidatos.find(function(c){ return String(c.CandidateID)===String(id); });
   if (!cand) { mostrarToast('Candidato no encontrado','error'); return; }
-  var nombre = (cand.FullName||'').replace(/</g,'&lt;');
+  var nombre   = (cand.FullName||'').replace(/</g,'&lt;');
+  var stageMap = {screening:'Screening',technical:'T\xe9cnica',client:'Cliente',offer:'Oferta',hired:'Contratado',rejected:'Rechazado'};
+  var stageColor = {screening:'#888',technical:'#3B82F6',client:'#A855F7',offer:'#F59E0B',hired:'#2ECC71',rejected:'#FF4D4D'};
+  var sc = stageColor[cand.Status]||'#888';
+  var sl = stageMap[cand.Status]||cand.Status;
+
+  // Campos por etapa
+  var stageFields = '';
+  if (cand.Status==='screening'||cand.Status==='technical'||cand.Status==='client'||cand.Status==='offer') {
+    stageFields += '<div style="margin-bottom:14px;"><div style="font-size:10px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:8px;">Info de la etapa: '+sl+'</div>';
+    stageFields += '<textarea id="cvStageNotes" class="form-control" style="height:80px;resize:none;overflow-y:auto;" placeholder="'
+      + (cand.Status==='screening'?'Primeras impresiones, disponibilidad, fit cultural...'
+        :cand.Status==='technical'?'Resultado t\xe9cnico, stack evaluado, puntaje...'
+        :cand.Status==='client'?'Feedback del cliente, aprobaci\xf3n, comentarios...'
+        :'Salario ofrecido, fecha de ingreso, condiciones...')
+      + '">'+(cand.Notes||'').replace(/</g,'&lt;')+'</textarea></div>';
+    
+    // Entrevistas
+    stageFields += '<div style="margin-bottom:14px;"><div style="font-size:10px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:8px;">Registro de entrevista</div>';
+    stageFields += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">';
+    stageFields += '<div><label style="font-size:11px;color:#888;display:block;margin-bottom:4px;">Entrevistador</label><input id="cvInterviewer" type="text" class="form-control" placeholder="Nombre del entrevistador"></div>';
+    stageFields += '<div><label style="font-size:11px;color:#888;display:block;margin-bottom:4px;">Resultado</label><select id="cvResult" class="form-control"><option value="">-- Resultado --</option><option>Aprobado</option><option>Aprobado con observaciones</option><option>Rechazado</option><option>Pendiente</option></select></div>';
+    stageFields += '</div>';
+    stageFields += '<textarea id="cvInterviewFeedback" class="form-control" style="height:60px;resize:none;overflow-y:auto;" placeholder="Feedback de la entrevista..."></textarea>';
+    stageFields += '</div>';
+  }
+
   var overlay = document.createElement('div');
   overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:600;display:flex;align-items:center;justify-content:center;';
   overlay.id = 'overlayCandidato';
-  overlay.innerHTML = '<div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:16px;padding:28px;width:560px;max-width:95vw;max-height:88vh;overflow-y:auto;">' +
+
+  overlay.innerHTML = '<div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:16px;padding:28px;width:620px;max-width:95vw;max-height:88vh;overflow-y:auto;">' +
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">' +
-    '<div style="font-size:16px;font-weight:800;color:#f0ebe3;">'+nombre+'</div>' +
-    '<button onclick="document.getElementById(\'overlayCandidato\').remove()" style="background:none;border:none;color:#666;font-size:22px;cursor:pointer;">&#x2715;</button></div>' +
-    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">' +
+    '<div><div style="font-size:16px;font-weight:800;color:#f0ebe3;">'+nombre+'</div>' +
+    '<span style="font-size:11px;font-weight:700;color:'+sc+';background:'+sc+'22;padding:2px 10px;border-radius:10px;margin-top:4px;display:inline-block;">'+sl+'</span></div>' +
+    '<button onclick="document.getElementById(\'overlayCandidato\').remove()" style="background:none;border:none;color:#666;font-size:22px;cursor:pointer;line-height:1;">&#x2715;</button></div>' +
+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">' +
     '<div><div style="font-size:10px;color:#888;margin-bottom:3px;">Email</div><div style="font-size:13px;color:#f0ebe3;">'+(cand.Email||'&#8212;').replace(/</g,'&lt;')+'</div></div>' +
-    '<div><div style="font-size:10px;color:#888;margin-bottom:3px;">Tel\xe9fono</div><div style="font-size:13px;color:#f0ebe3;">'+(cand.Phone||'&#8212;').replace(/</g,'&lt;')+'</div></div>' +
+    '<div><div style="font-size:10px;color:#888;margin-bottom:3px;">Tel\xe9fono</div><div style="font-size:13px;color:#f0ebe3;">'+(cand.Phone||'&#8212;')+'</div></div>' +
     '<div><div style="font-size:10px;color:#888;margin-bottom:3px;">Stack tecnol\xf3gico</div><div style="font-size:13px;color:#f0ebe3;">'+(cand.TechStack||'&#8212;').replace(/</g,'&lt;')+'</div></div>' +
-    '<div><div style="font-size:10px;color:#888;margin-bottom:3px;">Pretensi\xf3n salarial</div><div style="font-size:13px;color:#f0ebe3;">'+(cand.SalaryExpectation?(cand.Currency||'USD')+' '+cand.SalaryExpectation.toLocaleString():'&#8212;')+'</div></div>' +
+    '<div><div style="font-size:10px;color:#888;margin-bottom:3px;">Pretensi\xf3n salarial</div><div style="font-size:13px;color:#f0ebe3;">'+(cand.SalaryExpectation?(cand.Currency||'USD')+' '+Number(cand.SalaryExpectation).toLocaleString():'&#8212;')+'</div></div>' +
     '<div><div style="font-size:10px;color:#888;margin-bottom:3px;">Disponible desde</div><div style="font-size:13px;color:#f0ebe3;">'+(cand.AvailableFrom?new Date(cand.AvailableFrom).toLocaleDateString('es-AR'):'&#8212;')+'</div></div>' +
     '<div><div style="font-size:10px;color:#888;margin-bottom:3px;">Fuente</div><div style="font-size:13px;color:#f0ebe3;">'+(cand.SourceType||'&#8212;')+'</div></div>' +
     '</div>' +
-    (cand.Notes?'<div style="background:#111;border-radius:8px;padding:12px;margin-bottom:14px;"><div style="font-size:10px;color:#888;margin-bottom:5px;">Notas / Observaciones</div><div style="font-size:13px;color:#aaa;line-height:1.6;white-space:pre-wrap;">'+(cand.Notes||'').replace(/</g,'&lt;')+'</div></div>':'') +
-    '<div style="display:flex;gap:8px;">' +
-    '<button data-cid="'+cand.CandidateID+'" onclick="avanzarCandidato(this.dataset.cid)" style="flex:1;padding:8px;background:rgba(46,204,113,0.1);border:1px solid rgba(46,204,113,0.3);border-radius:8px;color:#2ECC71;font-size:12px;font-weight:700;cursor:pointer;">Avanzar etapa &#8594;</button>' +
-    '<button data-cid="'+cand.CandidateID+'" onclick="rechazarCandidato(this.dataset.cid)" style="padding:8px 16px;background:rgba(255,77,77,0.08);border:1px solid rgba(255,77,77,0.25);border-radius:8px;color:#FF4D4D;font-size:12px;cursor:pointer;">Rechazar</button>' +
-    '</div></div>';
+
+    stageFields +
+
+    (cand.RejectionReason ? '<div style="background:rgba(255,77,77,0.08);border:1px solid rgba(255,77,77,0.2);border-radius:8px;padding:12px;margin-bottom:14px;"><div style="font-size:10px;color:#FF4D4D;font-weight:700;text-transform:uppercase;margin-bottom:4px;">Motivo de rechazo</div><div style="font-size:13px;color:#aaa;">'+(cand.RejectionReason||'').replace(/</g,'&lt;')+'</div></div>' : '') +
+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;">';
+
+  var innerDiv = overlay.querySelector('div > div');
+  // Armar botones según estado
+  var btns = '';
+  if (cand.Status !== 'hired' && cand.Status !== 'rejected') {
+    btns += '<button data-cid="'+cand.CandidateID+'" onclick="guardarYAvanzar(this.dataset.cid)" style="flex:1;padding:8px;background:rgba(46,204,113,0.1);border:1px solid rgba(46,204,113,0.3);border-radius:8px;color:#2ECC71;font-size:12px;font-weight:700;cursor:pointer;">Guardar y avanzar &#8594;</button>';
+    btns += '<button data-cid="'+cand.CandidateID+'" onclick="guardarNotas(this.dataset.cid)" style="padding:8px 16px;background:#222;border:1px solid #333;border-radius:8px;color:#aaa;font-size:12px;cursor:pointer;">Guardar notas</button>';
+    btns += '<button data-cid="'+cand.CandidateID+'" onclick="pedirRechazo(this.dataset.cid)" style="padding:8px 16px;background:rgba(255,77,77,0.08);border:1px solid rgba(255,77,77,0.25);border-radius:8px;color:#FF4D4D;font-size:12px;cursor:pointer;">Rechazar</button>';
+  } else {
+    btns += '<span style="font-size:12px;color:#888;padding:8px;">Estado final: '+sl+'</span>';
+  }
+
+  overlay.innerHTML = overlay.innerHTML + btns + '</div></div>';
   document.body.appendChild(overlay);
+}
+
+async function guardarNotas(candId) {
+  var notas  = (document.getElementById('cvStageNotes')||{}).value||'';
+  var interv = (document.getElementById('cvInterviewer')||{}).value||'';
+  var result = (document.getElementById('cvResult')||{}).value||'';
+  var feed   = (document.getElementById('cvInterviewFeedback')||{}).value||'';
+  try {
+    await fetch(API_BASE+'/candidates/'+candId+'/notes', {
+      method:'PUT', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ notes: notas, interviewer: interv, result: result, feedback: feed })
+    });
+    mostrarToast('Notas guardadas','success');
+  } catch(e){ mostrarToast('Error: '+e.message,'error'); }
+}
+
+async function guardarYAvanzar(candId) {
+  await guardarNotas(candId);
+  var ov = document.getElementById('overlayCandidato'); if(ov) ov.remove();
+  try {
+    var me = allUsuarios.find(function(u){ return u.Email===window._userEmail; });
+    await fetch(API_BASE+'/candidates/'+candId+'/advance', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ changedById: me?me.UserID:1, note:'Avanzado' })
+    });
+    mostrarToast('Candidato avanzado a la siguiente etapa','success');
+    cargarCandidatos();
+  } catch(e){ mostrarToast('Error: '+e.message,'error'); }
+}
+
+function pedirRechazo(candId) {
+  var motivo = prompt('Motivo del rechazo (opcional):');
+  if (motivo === null) return;
+  var ov = document.getElementById('overlayCandidato'); if(ov) ov.remove();
+  var me = allUsuarios.find(function(u){ return u.Email===window._userEmail; });
+  fetch(API_BASE+'/candidates/'+candId+'/reject', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ changedById: me?me.UserID:1, reason: motivo||'Sin motivo' })
+  }).then(function(){
+    mostrarToast('Candidato rechazado','success'); cargarCandidatos();
+  }).catch(function(e){ mostrarToast('Error: '+e.message,'error'); });
 }
 
 async function avanzarCandidato(id) {

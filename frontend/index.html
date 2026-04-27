@@ -3474,21 +3474,37 @@ function filtrarColabObj(q) {
 
 function poblarModalObjetivo() {
   filtrarColabObj('');
-  // Poblar período core
+  // Períodos core
   const perSel = document.getElementById('objPeriodoSel');
-  if (perSel && perSel.options.length <= 1 && allPeriods.length) {
-    allPeriods.forEach(p => perSel.add(new Option(p.PeriodName, p.PeriodID)));
-    const active = allPeriods.find(p=>p.IsActive);
-    if (active) perSel.value = active.PeriodID;
+  if (perSel && perSel.options.length <= 1) {
+    if (allPeriods.length) {
+      allPeriods.forEach(p => perSel.add(new Option(p.PeriodName, p.PeriodID)));
+      const act = allPeriods.find(p=>p.IsActive);
+      if (act) perSel.value = act.PeriodID;
+    } else {
+      loadPeriods().then(() => {
+        allPeriods.forEach(p => perSel.add(new Option(p.PeriodName, p.PeriodID)));
+        const act = allPeriods.find(p=>p.IsActive);
+        if (act) perSel.value = act.PeriodID;
+      });
+    }
   }
-  // Poblar período personal
+  // Períodos personal
   const perSelP = document.getElementById('objPeriodoSelPersonal');
-  if (perSelP && perSelP.options.length <= 1 && allPeriods.length) {
-    allPeriods.forEach(p => perSelP.add(new Option(p.PeriodName, p.PeriodID)));
-    const active = allPeriods.find(p=>p.IsActive);
-    if (active) perSelP.value = active.PeriodID;
+  if (perSelP && perSelP.options.length <= 1) {
+    if (allPeriods.length) {
+      allPeriods.forEach(p => perSelP.add(new Option(p.PeriodName, p.PeriodID)));
+      const act = allPeriods.find(p=>p.IsActive);
+      if (act) perSelP.value = act.PeriodID;
+    } else {
+      loadPeriods().then(() => {
+        allPeriods.forEach(p => perSelP.add(new Option(p.PeriodName, p.PeriodID)));
+        const act = allPeriods.find(p=>p.IsActive);
+        if (act) perSelP.value = act.PeriodID;
+      });
+    }
   }
-  // Poblar áreas en modal core
+  // Áreas en modal core
   const areaSel = document.getElementById('newObjArea');
   if (areaSel && areaSel.options.length <= 1) {
     const poblar = () => {
@@ -3497,7 +3513,7 @@ function poblarModalObjetivo() {
     };
     if (allAreas.length) poblar(); else loadAreas().then(poblar);
   }
-  // Poblar referencia a core en modal personal
+  // Referencia a core en modal personal
   const coreRef = document.getElementById('newObjCoreRef');
   if (coreRef && coreRef.options.length <= 1 && allObjetivosCore.length) {
     allObjetivosCore.forEach(o => coreRef.add(new Option(o.Title||o.title, o.ObjectiveID)));
@@ -3791,27 +3807,6 @@ async function guardarEdicionObjetivo() {
   }
 }
 
-// Fix para poblarModalObjetivo: cargar períodos si faltan
-const _origPoblarModal = poblarModalObjetivo;
-poblarModalObjetivo = function() {
-  _origPoblarModal();
-  // Si no hay períodos, cargarlos
-  const perSel = document.getElementById('objPeriodoSel');
-  if (perSel && perSel.options.length <= 1) {
-    if (allPeriods.length) {
-      allPeriods.forEach(p => perSel.add(new Option(p.PeriodName, p.PeriodID)));
-      const active = allPeriods.find(p=>p.IsActive);
-      if (active) perSel.value = active.PeriodID;
-    } else {
-      loadPeriods().then(() => {
-        allPeriods.forEach(p => perSel.add(new Option(p.PeriodName, p.PeriodID)));
-        const active = allPeriods.find(p=>p.IsActive);
-        if (active) perSel.value = active.PeriodID;
-      });
-    }
-  }
-};
-
 
 
 // ═══ FILTRAR COLABORADORES EN OBJETIVOS PERSONALES ═══════════
@@ -3964,12 +3959,14 @@ function estadoLabel(status) {
 
 // ═══ SELECTOR DE TIPO EN MODAL NUEVO OBJETIVO ════════════════
 function setTipoObjetivo(tipo) {
-  document.getElementById('newObjTipo').value = tipo;
+  var tipoEl = document.getElementById('newObjTipo');
+  if (tipoEl) tipoEl.value = tipo;
   const btnCore = document.getElementById('btnTipoCore');
   const btnPers = document.getElementById('btnTipoPersonal');
   const camposCore = document.getElementById('camposCore');
   const camposPers = document.getElementById('camposPersonal');
   const title = document.getElementById('newObjModalTitle');
+  if (!btnCore || !btnPers || !camposCore || !camposPers) return;
   if (tipo === 'company') {
     btnCore.style.cssText = 'flex:1;padding:10px;border-radius:8px;border:2px solid #FF5400;background:rgba(255,84,0,0.15);color:#FF5400;font-weight:700;font-size:13px;cursor:pointer;';
     btnPers.style.cssText = 'flex:1;padding:10px;border-radius:8px;border:2px solid #333;background:#111;color:#888;font-weight:700;font-size:13px;cursor:pointer;';
@@ -4103,19 +4100,6 @@ document.addEventListener('DOMContentLoaded', function() {
   // Poblar selector de objetivos personales con período por defecto
   setTipoObjetivo('company'); // iniciar en modo Core
 });
-
-// ═══ OVERRIDE poblarModalObjetivo: llamar setTipoObjetivo ════
-const _origPMO2 = poblarModalObjetivo;
-poblarModalObjetivo = function() {
-  if(allPeriods.length) {
-    const perSel = document.getElementById('objPeriodoSel');
-    if (perSel && perSel.options.length <= 1) {
-      allPeriods.forEach(p=>perSel.add(new Option(p.PeriodName, p.PeriodID)));
-      const act = allPeriods.find(p=>p.IsActive);
-      if(act) perSel.value = act.PeriodID;
-    }
-  }
-};
 
 // ═══ PRECARGAR DESDE OBJETIVO CORE ═══════════════════════════
 function precargarDesdeCore(coreId) {

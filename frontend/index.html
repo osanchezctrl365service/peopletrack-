@@ -1820,7 +1820,7 @@ label { color: #888 !important; }
           <div style="font-size:10px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:12px;">Artículos</div>
         </div>
         <!-- Contenido -->
-        <div id="helpArticlesContainer" style="flex:1;overflow-y:auto;padding:20px 28px;">
+        <div id="helpArticlesContainer" style="flex:1;overflow-y:auto;padding:20px 28px;min-height:200px;">
           <div style="text-align:center;padding:40px;color:#888;">Cargando artículos...</div>
         </div>
       </div>
@@ -4301,7 +4301,10 @@ function renderBitacora(data) {
       html += '<div style="font-size:10px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:6px;">Pr\xf3ximos pasos</div>';
       html += '<div style="font-size:13px;color:#ccc;line-height:1.7;white-space:pre-wrap;background:#111;border-radius:8px;padding:12px;margin-bottom:10px;">'+(r.NextSteps||'').replace(/</g,'&lt;')+'</div>';
     }
-    html += '<button data-rid="'+rid+'" data-title="'+tEsc+'" data-notes="'+nEsc+'" data-steps="'+sEsc+'" onclick="abrirEditarNota(this)" style="padding:5px 14px;background:#222;border:1px solid #333;border-radius:6px;color:#aaa;font-size:11px;cursor:pointer;">&#9998; Editar nota</button>';
+    html += '<div style="display:flex;gap:6px;margin-top:8px;">' +
+      '<button data-rid="'+rid+'" data-title="'+tEsc+'" data-notes="'+nEsc+'" data-steps="'+sEsc+'" onclick="abrirEditarNota(this)" style="padding:5px 14px;background:#222;border:1px solid #333;border-radius:6px;color:#aaa;font-size:11px;cursor:pointer;">&#9998; Editar</button>' +
+      '<button data-rid="'+rid+'" onclick="confirmarEliminarNota(this.dataset.rid)" style="padding:5px 12px;background:rgba(255,77,77,0.08);border:1px solid rgba(255,77,77,0.25);border-radius:6px;color:#FF4D4D;font-size:11px;cursor:pointer;">&#x2715; Eliminar</button>' +
+      '</div>';
     html += '</div></div>';
   });
   html += '</div>';
@@ -5041,17 +5044,26 @@ function verPIPCompleto(pipId) {
 var allOnboardings = [];
 
 function filtrarObColab(q) {
-  ['obColabSel','obAsignado'].forEach(function(selId) {
-    var sel = document.getElementById(selId);
-    if (!sel) return;
-    sel.innerHTML = '<option value="">&#8212; Seleccionar &#8212;</option>';
+  var selColab = document.getElementById('obColabSel');
+  if (selColab) {
+    selColab.innerHTML = '<option value="">&#8212; Seleccionar &#8212;</option>';
     allUsuarios.filter(function(u){
-      return u.IsActive && (!q || (u.FullName||'').toLowerCase().includes(q.toLowerCase()));
+      return u.IsActive !== false && (!q || (u.FullName||'').toLowerCase().includes(q.toLowerCase()));
     }).sort(function(a,b){ return (a.FullName||'').localeCompare(b.FullName||''); })
-    .forEach(function(u){ sel.add(new Option((u.FullName||u.Email)+' \u2014 '+(u.Email||''), u.UserID)); });
-  });
+    .forEach(function(u){ selColab.add(new Option((u.FullName||u.Email)+' — '+(u.Email||''), u.UserID)); });
+  }
+  var selHR = document.getElementById('obAsignado');
+  if (selHR) {
+    selHR.innerHTML = '<option value="">&#8212; Seleccionar &#8212;</option>';
+    allUsuarios.filter(function(u){
+      return u.IsActive !== false && (u.AppRole==='leader'||u.AppRole==='manager'||u.AppRole==='admin');
+    }).sort(function(a,b){ return (a.FullName||'').localeCompare(b.FullName||''); })
+    .forEach(function(u){
+      var rol = u.AppRole==='manager'?'Manager':u.AppRole==='admin'?'Admin':'Líder';
+      selHR.add(new Option((u.FullName||u.Email)+' ('+rol+')', u.UserID));
+    });
+  }
 }
-
 function abrirModalNuevoOnboarding() {
   if (!allUsuarios.length) loadUsuarios().then(function(){ filtrarObColab(''); });
   else filtrarObColab('');
@@ -5141,7 +5153,8 @@ function renderOnboardings(obs) {
     if (o.Status==='in_progress') {
       html += '<button data-obid="'+o.OnboardingID+'" onclick="completarOnboarding(this.dataset.obid)" style="padding:6px 12px;background:rgba(46,204,113,0.1);border:1px solid rgba(46,204,113,0.3);border-radius:6px;color:#2ECC71;font-size:11px;cursor:pointer;">Completar</button>';
     }
-    html += '</div></div>';
+        html += '<button onclick="confirmarEliminarOnboarding('+o.OnboardingID+',\''+( o.EmployeeName||'').replace(/'/g,'')+'\')" style="padding:6px 10px;background:rgba(255,77,77,0.08);border:1px solid rgba(255,77,77,0.25);border-radius:6px;color:#FF4D4D;font-size:11px;cursor:pointer;margin-left:4px;">&#x2715;</button>';
+html += '</div></div>';
   });
   html += '</div>';
   c.innerHTML = html;
@@ -5539,6 +5552,62 @@ async function guardarNuevoCandidato() {
     cargarCandidatos();
   } catch(e) { if(errEl){errEl.textContent='Error: '+e.message;errEl.style.display='block';} }
 }
+
+// ─── Eliminar PIP ─────────────────────────────────────
+function confirmarEliminarPIP(pipId, nombre) {
+  var ov = document.createElement('div');
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:700;display:flex;align-items:center;justify-content:center;';
+  ov.id = 'ovElimPIP';
+  ov.innerHTML = '<div style="background:#1a1a1a;border:1px solid rgba(255,77,77,0.4);border-radius:16px;padding:28px;width:380px;max-width:90vw;text-align:center;"><div style="font-size:28px;margin-bottom:10px;">&#9888;&#65039;</div><div style="font-size:15px;font-weight:800;color:#f0ebe3;margin-bottom:8px;">Eliminar PIP</div><div style="font-size:13px;color:#aaa;margin-bottom:20px;">\xbfEliminar el PIP de <strong style=\"color:#f0ebe3;\">'+String(nombre).replace(/</g,"&lt;")+'</strong>?<br><span style=\"font-size:11px;color:#888;\">No se puede deshacer.</span></div><div style=\"display:flex;gap:10px;justify-content:center;\"><button onclick=\"document.getElementById(\'ovElimPIP\').remove()\" style=\"padding:9px 20px;background:#222;border:1px solid #333;border-radius:8px;color:#aaa;font-size:13px;cursor:pointer;\">Cancelar</button><button id=\"btnElimPIPConfirm\" style=\"padding:9px 20px;background:#FF4D4D;border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;\">S\xed, eliminar</button></div></div>';
+  document.body.appendChild(ov);
+  document.getElementById('btnElimPIPConfirm').onclick = function(){ ov.remove(); ejecutarEliminarPIP(pipId); };
+}
+async function ejecutarEliminarPIP(pipId) {
+  try {
+    var res = await fetch(API_BASE+'/pips/'+pipId, { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify({status:'deleted',reviewNotes:null,achieved:null}) });
+    var d = await res.json();
+    if(d.ok===false) throw new Error(d.error||'Error');
+    mostrarToast('PIP eliminado','success'); cargarPIPs();
+  } catch(e){ mostrarToast('Error: '+e.message,'error'); }
+}
+
+// ─── Eliminar Onboarding ──────────────────────────────
+function confirmarEliminarOnboarding(obId, nombre) {
+  var ov = document.createElement('div');
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:700;display:flex;align-items:center;justify-content:center;';
+  ov.id = 'ovElimOb';
+  ov.innerHTML = '<div style="background:#1a1a1a;border:1px solid rgba(255,77,77,0.4);border-radius:16px;padding:28px;width:380px;max-width:90vw;text-align:center;"><div style="font-size:28px;margin-bottom:10px;">&#9888;&#65039;</div><div style="font-size:15px;font-weight:800;color:#f0ebe3;margin-bottom:8px;">Eliminar Onboarding</div><div style="font-size:13px;color:#aaa;margin-bottom:20px;">\xbfEliminar el plan de <strong style=\"color:#f0ebe3;\">'+String(nombre).replace(/</g,"&lt;")+'</strong>?</div><div style=\"display:flex;gap:10px;justify-content:center;\"><button onclick=\"document.getElementById(\'ovElimOb\').remove()\" style=\"padding:9px 20px;background:#222;border:1px solid #333;border-radius:8px;color:#aaa;font-size:13px;cursor:pointer;\">Cancelar</button><button id=\"btnElimObConfirm\" style=\"padding:9px 20px;background:#FF4D4D;border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;\">S\xed, eliminar</button></div></div>';
+  document.body.appendChild(ov);
+  document.getElementById('btnElimObConfirm').onclick = function(){ ov.remove(); ejecutarEliminarOb(obId); };
+}
+async function ejecutarEliminarOb(obId) {
+  try {
+    var res = await fetch(API_BASE+'/onboarding/'+obId, { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify({status:'deleted'}) });
+    var d = await res.json();
+    if(d.ok===false) throw new Error(d.error||'Error');
+    mostrarToast('Onboarding eliminado','success'); cargarOnboardings();
+  } catch(e){ mostrarToast('Error: '+e.message,'error'); }
+}
+
+// ─── Eliminar nota reunión ────────────────────────────
+function confirmarEliminarNota(rid) {
+  var ov = document.createElement('div');
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:700;display:flex;align-items:center;justify-content:center;';
+  ov.id = 'ovElimNota';
+  ov.innerHTML = '<div style="background:#1a1a1a;border:1px solid rgba(255,77,77,0.4);border-radius:16px;padding:28px;width:360px;max-width:90vw;text-align:center;"><div style="font-size:28px;margin-bottom:10px;">&#9888;&#65039;</div><div style="font-size:15px;font-weight:800;color:#f0ebe3;margin-bottom:8px;">Eliminar nota</div><div style="font-size:13px;color:#aaa;margin-bottom:20px;">\xbfEliminar esta reuni\xf3n del historial?</div><div style=\"display:flex;gap:10px;justify-content:center;\"><button onclick=\"document.getElementById(\'ovElimNota\').remove()\" style=\"padding:9px 20px;background:#222;border:1px solid #333;border-radius:8px;color:#aaa;font-size:13px;cursor:pointer;\">Cancelar</button><button id=\"btnElimNotaConfirm\" style=\"padding:9px 20px;background:#FF4D4D;border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;\">S\xed, eliminar</button></div></div>';
+  document.body.appendChild(ov);
+  document.getElementById('btnElimNotaConfirm').onclick = function(){ ov.remove(); ejecutarEliminarNota(rid); };
+}
+async function ejecutarEliminarNota(rid) {
+  try {
+    var res = await fetch(API_BASE+'/meetings/'+rid, { method:'DELETE' });
+    if(res.status===204||res.status===200){ mostrarToast('Nota eliminada','success'); if(typeof reunionColabActual!=='undefined'&&reunionColabActual) cargarBitacoraUsuario(reunionColabActual); return; }
+    var d = await res.json();
+    if(d.ok===false) throw new Error(d.error||'Error');
+    mostrarToast('Nota eliminada','success');
+    if(typeof reunionColabActual!=='undefined'&&reunionColabActual) cargarBitacoraUsuario(reunionColabActual);
+  } catch(e){ mostrarToast('Error: '+e.message,'error'); }
+}
 </script>
 
 <!-- MODAL EDITAR OBJETIVO -->
@@ -5679,66 +5748,18 @@ async function guardarNuevoCandidato() {
     <!-- RECRUITING -->
     <div class="section" id="sec-recruiting">
       <div class="section-header" style="margin-bottom:20px;">
-        <div><div class="section-heading">Recruiting</div>
-          <div class="section-subheading">Pipeline de candidatos</div></div>
-        <button class="btn btn-primary btn-sm" onclick="mostrarToast('Próximamente: carga de candidatos desde la BD','info')">+ Nuevo Candidato</button>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(6,minmax(140px,1fr));gap:10px;overflow-x:auto;">
-        <div style="background:#111;border:1px solid #1e1e1e;border-radius:10px;padding:12px;">
-          <div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:10px;display:flex;justify-content:space-between;"><span>Screening</span><span style="background:#333;color:#aaa;padding:1px 7px;border-radius:10px;font-size:10px;">1</span></div>
-          <div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:10px;">
-            <div style="font-weight:700;color:#f0ebe3;font-size:12px;margin-bottom:3px;">Martina Lopez</div>
-            <div style="font-size:10px;color:#888;margin-bottom:4px;">.NET &middot; Azure</div>
-            <div style="font-size:10px;color:#aaa;">USD 3.500</div>
-            <div style="margin-top:6px;"><span style="font-size:9px;background:rgba(59,130,246,0.15);color:#3B82F6;padding:2px 6px;border-radius:4px;">LinkedIn</span></div>
-          </div>
+        <div>
+          <div class="section-heading">Recruiting</div>
+          <div class="section-subheading">Pipeline de candidatos — Screening hasta contratación</div>
         </div>
-        <div style="background:#111;border:1px solid #1e1e1e;border-radius:10px;padding:12px;">
-          <div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:10px;display:flex;justify-content:space-between;"><span>T&eacute;cnica</span><span style="background:#333;color:#aaa;padding:1px 7px;border-radius:10px;font-size:10px;">1</span></div>
-          <div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:10px;">
-            <div style="font-weight:700;color:#f0ebe3;font-size:12px;margin-bottom:3px;">Diego Fernandez</div>
-            <div style="font-size:10px;color:#888;margin-bottom:4px;">Java &middot; AWS</div>
-            <div style="font-size:10px;color:#aaa;">USD 4.000</div>
-            <div style="margin-top:6px;"><span style="font-size:9px;background:rgba(239,68,68,0.15);color:#EF4444;padding:2px 6px;border-radius:4px;">Viaje jun</span></div>
-          </div>
-        </div>
-        <div style="background:#111;border:1px solid #1e1e1e;border-radius:10px;padding:12px;">
-          <div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:10px;display:flex;justify-content:space-between;"><span>Cliente</span><span style="background:#333;color:#aaa;padding:1px 7px;border-radius:10px;font-size:10px;">1</span></div>
-          <div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:10px;">
-            <div style="font-weight:700;color:#f0ebe3;font-size:12px;margin-bottom:3px;">Sofia Ramos</div>
-            <div style="font-size:10px;color:#888;margin-bottom:4px;">Python &middot; Data</div>
-            <div style="font-size:10px;color:#aaa;">USD 2.800</div>
-          </div>
-        </div>
-        <div style="background:#111;border:1px solid #1e1e1e;border-radius:10px;padding:12px;">
-          <div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:10px;display:flex;justify-content:space-between;"><span>Oferta</span><span style="background:#333;color:#aaa;padding:1px 7px;border-radius:10px;font-size:10px;">1</span></div>
-          <div style="background:#1a1a1a;border:1px solid rgba(245,158,11,0.3);border-radius:8px;padding:10px;">
-            <div style="font-weight:700;color:#f0ebe3;font-size:12px;margin-bottom:3px;">Lucas Martinez</div>
-            <div style="font-size:10px;color:#888;margin-bottom:4px;">React &middot; Node.js</div>
-            <div style="font-size:10px;color:#F59E0B;font-weight:700;">Oferta enviada</div>
-          </div>
-        </div>
-        <div style="background:#111;border:1px solid rgba(46,204,113,0.2);border-radius:10px;padding:12px;">
-          <div style="font-size:11px;font-weight:700;color:#2ECC71;text-transform:uppercase;margin-bottom:10px;display:flex;justify-content:space-between;"><span>Contratado</span><span style="background:rgba(46,204,113,0.15);color:#2ECC71;padding:1px 7px;border-radius:10px;font-size:10px;">1</span></div>
-          <div style="background:#1a1a1a;border:1px solid rgba(46,204,113,0.3);border-radius:8px;padding:10px;">
-            <div style="font-weight:700;color:#f0ebe3;font-size:12px;margin-bottom:3px;">Carolina Benitez</div>
-            <div style="font-size:10px;color:#888;margin-bottom:4px;">.NET &middot; DevOps</div>
-            <div style="font-size:10px;color:#2ECC71;font-weight:700;">Inicia 01/05</div>
-          </div>
-        </div>
-        <div style="background:#111;border:1px solid rgba(255,77,77,0.15);border-radius:10px;padding:12px;">
-          <div style="font-size:11px;font-weight:700;color:#FF4D4D;text-transform:uppercase;margin-bottom:10px;display:flex;justify-content:space-between;"><span>Rechazado</span><span style="background:rgba(255,77,77,0.15);color:#FF4D4D;padding:1px 7px;border-radius:10px;font-size:10px;">1</span></div>
-          <div style="background:#1a1a1a;border:1px solid rgba(255,77,77,0.2);border-radius:8px;padding:10px;">
-            <div style="font-weight:700;color:#888;font-size:12px;margin-bottom:3px;">Rodrigo Salinas</div>
-            <div style="font-size:10px;color:#666;margin-bottom:4px;">Java &middot; Microservices</div>
-            <div style="font-size:10px;color:#FF4D4D;">No pas&oacute; t&eacute;cnica</div>
-          </div>
+        <div style="display:flex;gap:8px;">
+          <input id="recBuscador" type="text" class="form-control" placeholder="Buscar candidato..." style="width:220px;" oninput="filtrarCandidatos(this.value)">
+          <button class="btn btn-primary btn-sm" onclick="abrirModalNuevoCandidato()">+ Nuevo Candidato</button>
         </div>
       </div>
-    </div>
-
-    <!-- ONBOARDING -->
-        <!-- ONBOARDING -->
+      <div id="recruitingContainer" style="overflow-y:auto;max-height:calc(100vh - 220px);">
+        <div style="text-align:center;padding:30px;color:#888;">Cargando candidatos...</div>
+      </div>
     <div class="section" id="sec-onboarding">
       <div class="section-header" style="margin-bottom:20px;">
         <div><div class="section-heading">Onboarding</div>

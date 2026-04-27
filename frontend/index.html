@@ -2948,8 +2948,7 @@ function poblarColaboradoresReunion() {
   if (current) sel.value = current;
 }
 
-// Parchar showModal para poblar colaboradores cuando se abre modal reunión
-// (consolidado con el patch de newObjectiveModal más abajo — no hacer override aquí)
+// (patch de newMeetingModal consolidado en el override de newObjectiveModal más abajo)
 
 
 // ═══ MODAL NUEVO PLAN DE CARRERA ════════════════════════════
@@ -3502,11 +3501,12 @@ function poblarModalObjetivo() {
   }
 }
 
-// Parchar showModal para poblar cuando se abre newObjectiveModal o newMeetingModal
+// Parchar showModal para poblar cuando se abre newObjectiveModal
 const _origShowModalObj = showModal;
 showModal = function(id) {
   var el = document.getElementById(id);
   if (!el) { console.warn('showModal: elemento no encontrado:', id); return; }
+  // Soporte modal-overlay con clase .open y modales con style.display
   if (el.classList.contains('modal-overlay') || el.classList.contains('modal')) {
     el.classList.add('open');
   } else {
@@ -5449,7 +5449,7 @@ async function verCandidato(id) {
     '</label>' +
     '<span style="font-size:10px;color:#555;margin-left:8px;">PDF, imágenes, documentos — sin límite de archivos</span>' +
     '</div>';
-  // cargarArchivosCandidato se llama DESPUÉS del appendChild (ver abajo)
+  cargarArchivosCandidato(cand.CandidateID);
 
   // Campos por etapa
   var stageFields = '';
@@ -5510,12 +5510,6 @@ async function verCandidato(id) {
 
   overlay.innerHTML = overlay.innerHTML + btns + '</div></div>';
   document.body.appendChild(overlay);
-  // Ahora que el overlay está en el DOM, cargar los archivos
-  cargarArchivosCandidato(cand.CandidateID);
-  // Pre-cargar valores guardados de entrevistador/resultado si existen
-  if (cand.InterviewerName) { var ivEl = document.getElementById('cvInterviewer'); if(ivEl) ivEl.value = cand.InterviewerName; }
-  if (cand.Result) { var rvEl = document.getElementById('cvResult'); if(rvEl) rvEl.value = cand.Result; }
-  if (cand.Feedback) { var fvEl = document.getElementById('cvInterviewFeedback'); if(fvEl) fvEl.value = cand.Feedback; }
 }
 
 async function guardarNotas(candId) {
@@ -5524,29 +5518,19 @@ async function guardarNotas(candId) {
   var result = (document.getElementById('cvResult')||{}).value||'';
   var feed   = (document.getElementById('cvInterviewFeedback')||{}).value||'';
   try {
-    // Intentar endpoint específico de notas; si falla, usar PUT general
-    var url = API_BASE+'/candidates/'+candId+'/notes';
-    var body = JSON.stringify({ notes: notas, interviewer: interv, result: result, feedback: feed });
-    var res = await fetch(url, { method:'PUT', headers:{'Content-Type':'application/json'}, body: body });
-    if (res.status === 404) {
-      // Fallback: usar PUT /candidates/:id con los campos disponibles
-      res = await fetch(API_BASE+'/candidates/'+candId, {
-        method:'PUT', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ notes: notas, interviewerName: interv, result: result, feedback: feed })
-      });
-    }
+    var res = await fetch(API_BASE+'/candidates/'+candId+'/notes', {
+      method:'PUT', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ notes: notas, interviewer: interv, result: result, feedback: feed })
+    });
     var txt  = await res.text();
-    var data; try { data = JSON.parse(txt); } catch(e){ data = {}; }
-    if (data.ok===false) throw new Error(data.error||'Error HTTP '+res.status);
-    mostrarToast('Notas guardadas ✓','success');
-    // Actualizar el candidato en cache local
-    var idx = allCandidatos.findIndex(function(c){ return String(c.CandidateID)===String(candId); });
-    if (idx>=0) {
-      allCandidatos[idx].Notes = notas;
-      allCandidatos[idx].InterviewerName = interv;
-      allCandidatos[idx].Result = result;
-      allCandidatos[idx].Feedback = feed;
-    }
+    var data = JSON.parse(txt);
+    if (data.ok===false) throw new Error(data.error||'Error');
+    mostrarToast('Notas guardadas','success');
+    // Recargar candidatos sin cerrar modal
+    var buscador = document.getElementById('recBuscador');
+    cargarCandidatos().then(function(){
+      // Re-abrir el modal con datos frescos
+    });
   } catch(e){ mostrarToast('Error al guardar: '+e.message,'error'); }
 }
 async function guardarYAvanzar(candId) {

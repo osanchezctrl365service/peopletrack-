@@ -1273,7 +1273,7 @@ label { color: #888 !important; }
           <option value="closed">Cerrados</option>
         </select>
       </div>
-      <div id="pipContainer">
+      <div id="pipContainer" style="max-height:calc(100vh - 280px);overflow-y:auto;padding-right:4px;">
         <div style="text-align:center;padding:40px;color:#888;">Cargando PIPs...</div>
       </div>
     </div>
@@ -1358,7 +1358,7 @@ label { color: #888 !important; }
       </div>
 
       <div id="comp-global">
-        <div class="card mb-16">
+        <div class="card" style="margin-bottom:16px;">
           <div class="card-title">Escala de Evaluación</div>
           <div class="flex gap-8">
             <span class="badge badge-danger">No lo tiene muy desarrollado (1-3) · 25pts</span>
@@ -1370,7 +1370,7 @@ label { color: #888 !important; }
 
         <div class="card">
           <div class="card-title">Evaluación — Jorge Mercado · FY26</div>
-          <div class="flex gap-8 mb-16">
+          <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
             <select class="form-control" style="width:200px"><option>Jorge Mercado</option><option>Miguel Rocha</option></select>
             <select class="form-control" style="width:140px"><option>FY26</option><option>FY25</option></select>
           </div>
@@ -1488,7 +1488,7 @@ label { color: #888 !important; }
               <option value="biweekly">Quincenal</option>
             </select>
           </div>
-          <div id="reunionBitacoraContent" style="overflow-y:auto;flex:1;padding:16px;">
+          <div id="reunionBitacoraContent" style="max-height:calc(100vh - 340px);overflow-y:auto;flex:1;padding:16px;">
             <div style="text-align:center;padding:40px;color:#888;">
               <div style="font-size:32px;margin-bottom:12px;">👥</div>
               <div>Seleccioná un colaborador para ver su bitácora de reuniones</div>
@@ -1597,7 +1597,7 @@ label { color: #888 !important; }
         <div class="tab" onclick="switchTab('rep','empresa',this);initReporteTab('empresa')">General Empresa</div>
       </div>
       <div id="rep-persona" style="margin-top:16px;">
-        <div class="flex gap-8 mb-16">
+        <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
           <select id="repPersonaSel" class="form-control" style="width:260px" onchange="verReportePersona()"><option value="">— Seleccionar colaborador —</option></select>
           <select id="repPeriodoSel" class="form-control" style="width:140px" onchange="verReportePersona()"><option value="">— Período —</option></select>
         </div>
@@ -1613,7 +1613,7 @@ label { color: #888 !important; }
         </div>
       </div>
       <div id="rep-lider" style="display:none;margin-top:16px;">
-        <div class="flex gap-8 mb-16">
+        <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
           <select id="repLiderSel" class="form-control" style="width:260px" onchange="verReporteLider()"><option value="">— Seleccionar líder —</option></select>
         </div>
         <div id="repLiderResult"></div>
@@ -1775,7 +1775,7 @@ label { color: #888 !important; }
         <div class="card">
           <div class="card-title">Importación / Exportación de Usuarios</div>
           <div class="help-tip"><span class="help-tip-icon">💡</span>Un colaborador puede tener <strong>más de un líder</strong> (multi-proyecto). En ese caso, cargue una fila por cada relación lider-colaborador con el mismo email de empleado.</div>
-          <div class="flex gap-8 mb-16">
+          <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
             <button class="btn btn-secondary" onclick="alert('Descargando template CSV...')">⬇ Descargar Template CSV</button>
             <button class="btn btn-primary">↑ Importar CSV de Usuarios</button>
           </div>
@@ -4296,7 +4296,7 @@ async function cargarBitacoraUsuario(userId) {
 }
 
 function renderBitacora(data) {
-  var c = document.getElementById('reunionBitacora');
+  var c = document.getElementById('reunionBitacoraContent');
   if (!c) return;
   if (!data || !data.length) {
     c.innerHTML = '<div style="text-align:center;padding:30px;color:#888;font-size:13px;">Sin reuniones registradas para este colaborador.</div>';
@@ -5780,7 +5780,7 @@ async function guardarNuevoCandidato() {
         <div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:10px;padding:16px;text-align:center;"><div style="font-size:28px;font-weight:800;color:#3B82F6;" id="obKpiHitos">&#8212;</div><div style="font-size:11px;color:#888;margin-top:4px;">Hitos pendientes</div></div>
         <div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:10px;padding:16px;text-align:center;"><div style="font-size:28px;font-weight:800;color:#A855F7;" id="obKpiCursos">&#8212;</div><div style="font-size:11px;color:#888;margin-top:4px;">Cursos pendientes</div></div>
       </div>
-      <div id="onboardingContainer">
+      <div id="onboardingContainer" style="max-height:calc(100vh - 300px);overflow-y:auto;padding-right:4px;">
         <div style="text-align:center;padding:30px;color:#888;">Cargando planes de onboarding...</div>
       </div>
     </div>

@@ -4680,12 +4680,18 @@ async function cargarPIPs() {
   if (!c) return;
   c.innerHTML = '<div style="text-align:center;padding:20px;color:#888;">Cargando...</div>';
   try {
-    var data = await apiGet('pips');
-    allPIPs = Array.isArray(data) ? data : [];
+    var res  = await fetch(API_BASE + '/pips');
+    var txt  = await res.text();
+    var json;
+    try { json = JSON.parse(txt); } catch(e){ throw new Error('JSON: '+txt.substring(0,80)); }
+    if (!res.ok) throw new Error('HTTP '+res.status+': '+(json.error||''));
+    allPIPs = Array.isArray(json) ? json : (json.data||[]);
+    allPIPs = allPIPs.filter(function(p){ return p.Status !== 'deleted'; });
     renderPIPs(allPIPs);
-  } catch(e) { c.innerHTML = '<div style="padding:20px;color:#888;text-align:center;">Error al cargar</div>'; }
+  } catch(e) {
+    c.innerHTML = '<div style="text-align:center;padding:20px;color:#FF4D4D;font-size:13px;">Error PIP: '+e.message+'</div>';
+  }
 }
-
 function filtrarPIPs(q) {
   var status = (document.getElementById('pipFiltroStatus')||{}).value||'';
   var filtered = allPIPs.filter(function(p){
@@ -4924,28 +4930,18 @@ async function ejecutarEliminarUsuario(id, btn) {
 async function loadHelpArticles() {
   var c   = document.getElementById('helpArticlesContainer');
   var idx = document.getElementById('helpIndex');
-  if (!c) { console.error('helpArticlesContainer no encontrado en el DOM'); return; }
-  c.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Cargando art\xedculos...</div>';
+  if (!c) { console.error('helpArticlesContainer no encontrado'); return; }
+  c.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Cargando...</div>';
   try {
-    var url = API_BASE + '/help/articles';
-    var res = await fetch(url);
+    var res = await fetch(API_BASE + '/help/articles');
     var txt = await res.text();
     var json;
-    try { json = JSON.parse(txt); } catch(pe) {
-      c.innerHTML = '<div style="padding:20px;color:#FF4D4D;font-size:13px;">Error de parseo: ' + txt.substring(0,200) + '</div>';
-      return;
-    }
-    if (!res.ok) {
-      c.innerHTML = '<div style="padding:20px;color:#FF4D4D;font-size:13px;">HTTP ' + res.status + ': ' + (json.error||json.message||txt.substring(0,100)) + '</div>';
-      return;
-    }
+    try { json = JSON.parse(txt); } catch(pe) { throw new Error('JSON inválido: ' + txt.substring(0,100)); }
+    if (!res.ok) throw new Error('HTTP ' + res.status + ': ' + (json.error||txt.substring(0,80)));
     var arts = Array.isArray(json) ? json : (json.data || []);
-    if (!arts.length) {
-      c.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Sin art\xedculos en la base de datos.</div>';
-      return;
-    }
+    if (!arts.length) { c.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Sin artículos en la BD.</div>'; return; }
     if (idx) {
-      idx.innerHTML = '<div style="font-size:10px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:12px;">Art\xedculos</div>';
+      idx.innerHTML = '<div style="font-size:10px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:12px;">Artículos</div>';
       arts.forEach(function(a) {
         var b = document.createElement('button');
         b.textContent = a.Title;
@@ -4965,9 +4961,53 @@ async function loadHelpArticles() {
     });
     c.innerHTML = html;
   } catch(e) {
-    c.innerHTML = '<div style="padding:20px;color:#FF4D4D;font-size:13px;">Error: ' + e.message + '</div>';
+    c.innerHTML = '<div style="text-align:center;padding:30px;color:#FF4D4D;font-size:13px;">Error: '+e.message+'</div>';
   }
+}// Cargar ayuda al entrar a la sección
+
+// ══════════════════════════════════════════════════════════════
+// VER PIP COMPLETO (modal detalle, solo admin/manager/lider)
+// ══════════════════════════════════════════════════════════════
+function verPIPCompleto(pipId) {
+  var pip = allPIPs.find(function(p){ return String(p.PIPID)===String(pipId); });
+  if (!pip) { mostrarToast('PIP no encontrado','error'); return; }
+  var overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:600;display:flex;align-items:center;justify-content:center;';
+  overlay.id = 'overlayVerPIP';
+  var inicio = pip.StartDate ? new Date(pip.StartDate).toLocaleDateString('es-AR') : '&#8212;';
+  var t15 = pip.Target15Days ? new Date(pip.Target15Days).toLocaleDateString('es-AR') : '&#8212;';
+  var t30 = pip.Target30Days ? new Date(pip.Target30Days).toLocaleDateString('es-AR') : '&#8212;';
+  var t60 = pip.Target60Days ? new Date(pip.Target60Days).toLocaleDateString('es-AR') : '&#8212;';
+  var sc = pip.Status==='closed'?(pip.Achieved?'#2ECC71':'#FF4D4D'):'#F59E0B';
+  var sl = pip.Status==='closed'?(pip.Achieved?'Logrado':'No logrado'):'Activo';
+  overlay.innerHTML = '<div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:16px;padding:28px;width:620px;max-width:95vw;max-height:90vh;overflow-y:auto;">' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">' +
+    '<div><div style="font-size:16px;font-weight:800;color:#f0ebe3;">PIP &#8212; '+(pip.EmployeeName||'').replace(/</g,'&lt;')+'</div>' +
+    '<div style="font-size:11px;color:#888;margin-top:3px;">Creado por '+(pip.CreatedByName||'').replace(/</g,'&lt;')+'</div></div>' +
+    '<div style="display:flex;gap:10px;align-items:center;">' +
+    '<span style="font-size:11px;font-weight:700;color:'+sc+';background:'+sc+'22;padding:3px 12px;border-radius:20px;">'+sl+'</span>' +
+    '<button onclick="document.getElementById(\'overlayVerPIP\').remove()" style="background:none;border:none;color:#888;font-size:20px;cursor:pointer;">&#x2715;</button>' +
+    '</div></div>' +
+    '<div style="background:#111;border:1px solid #2a2a2a;border-radius:10px;padding:16px;margin-bottom:16px;">' +
+    '<div style="font-size:12px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:10px;">Fechas</div>' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;text-align:center;">' +
+    '<div><div style="font-size:10px;color:#888;">Inicio</div><div style="font-size:13px;font-weight:700;color:#f0ebe3;margin-top:3px;">'+inicio+'</div></div>' +
+    '<div><div style="font-size:10px;color:#888;">15 d\xedas</div><div style="font-size:13px;font-weight:700;color:#F59E0B;margin-top:3px;">'+t15+'</div></div>' +
+    '<div><div style="font-size:10px;color:#888;">30 d\xedas</div><div style="font-size:13px;font-weight:700;color:#F59E0B;margin-top:3px;">'+t30+'</div></div>' +
+    '<div><div style="font-size:10px;color:#888;">60 d\xedas</div><div style="font-size:13px;font-weight:700;color:#F59E0B;margin-top:3px;">'+t60+'</div></div>' +
+    '</div></div>' +
+    '<div style="margin-bottom:16px;">' +
+    '<div style="font-size:12px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:8px;">Motivo del PIP</div>' +
+    '<div style="font-size:13px;color:#aaa;line-height:1.7;background:#111;border-radius:8px;padding:14px;white-space:pre-wrap;">'+(pip.Reason||'').replace(/</g,'&lt;')+'</div>' +
+    '</div>' +
+    (pip.Milestones ? '<div style="margin-bottom:16px;"><div style="font-size:12px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:8px;">Hitos del plan</div>' +
+    '<div style="font-size:13px;color:#aaa;line-height:1.7;background:#111;border-radius:8px;padding:14px;white-space:pre-wrap;">'+(pip.Milestones||'').replace(/</g,'&lt;')+'</div></div>' : '') +
+    (pip.ReviewNotes ? '<div><div style="font-size:12px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:8px;">Notas de revisi\xf3n</div>' +
+    '<div style="font-size:13px;color:#aaa;line-height:1.7;background:#111;border-radius:8px;padding:14px;white-space:pre-wrap;">'+(pip.ReviewNotes||'').replace(/</g,'&lt;')+'</div></div>' : '') +
+    '</div>';
+  document.body.appendChild(overlay);
 }
+
 
 // ══════════════════════════════════════════════════════════════
 // ONBOARDING - JS
@@ -5380,50 +5420,49 @@ async function verCandidato(id) {
   if (!cand) { mostrarToast('Candidato no encontrado','error'); return; }
   var nombre   = (cand.FullName||'').replace(/</g,'&lt;');
   var stageMap = {screening:'Screening',technical:'T\xe9cnica',client:'Cliente',offer:'Oferta',hired:'Contratado',rejected:'Rechazado'};
-  var stageCol = {screening:'#888',technical:'#3B82F6',client:'#A855F7',offer:'#F59E0B',hired:'#2ECC71',rejected:'#FF4D4D'};
-  var sc = stageCol[cand.Status]||'#888';
+  var stageColor = {screening:'#888',technical:'#3B82F6',client:'#A855F7',offer:'#F59E0B',hired:'#2ECC71',rejected:'#FF4D4D'};
+  var sc = stageColor[cand.Status]||'#888';
   var sl = stageMap[cand.Status]||cand.Status;
 
-  // Campos según etapa activa
+  // Archivos adjuntos del candidato
+  var adjuntosSection = '<div style="margin-bottom:14px;">' +
+    '<div style="font-size:10px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:8px;">Archivos adjuntos (CV, certificaciones, médicos, etc.)</div>' +
+    '<div id="cvFileList_'+cand.CandidateID+'" style="margin-bottom:8px;"></div>' +
+    '<label style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:#222;border:1px solid #333;border-radius:6px;color:#aaa;font-size:12px;cursor:pointer;">' +
+    '&#128206; Adjuntar archivo' +
+    '<input type="file" accept=".pdf,image/*,.doc,.docx" multiple data-cid="'+cand.CandidateID+'" onchange="subirArchivosCandidato(this)" style="display:none;">' +
+    '</label>' +
+    '<span style="font-size:10px;color:#555;margin-left:8px;">PDF, imágenes, documentos — sin límite de archivos</span>' +
+    '</div>';
+  cargarArchivosCandidato(cand.CandidateID);
+
+  // Campos por etapa
   var stageFields = '';
-  if (cand.Status!=='hired' && cand.Status!=='rejected') {
-    var ph = cand.Status==='screening' ? 'Primeras impresiones, disponibilidad, fit cultural...'
-           : cand.Status==='technical' ? 'Resultado técnico, stack evaluado, puntaje...'
-           : cand.Status==='client'    ? 'Feedback del cliente, aprobación...'
-           : 'Salario ofrecido, fecha de ingreso, condiciones...';
-    stageFields =
-      '<div style="margin-bottom:14px;">' +
-      '<div style="font-size:10px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:8px;">Notas etapa: '+sl+'</div>' +
-      '<textarea id="cvStageNotes" class="form-control" style="height:75px;resize:none;overflow-y:auto;" placeholder="'+ph+'">'+(cand.Notes||'').replace(/</g,'&lt;')+'</textarea>' +
-      '</div>' +
-      '<div style="margin-bottom:14px;">' +
-      '<div style="font-size:10px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:8px;">Entrevista</div>' +
-      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">' +
-      '<div><label style="font-size:11px;color:#888;display:block;margin-bottom:3px;">Entrevistador</label>' +
-      '<input id="cvInterviewer" type="text" class="form-control" placeholder="Nombre..."></div>' +
-      '<div><label style="font-size:11px;color:#888;display:block;margin-bottom:3px;">Resultado</label>' +
-      '<select id="cvResult" class="form-control"><option value="">-- Resultado --</option><option>Aprobado</option><option>Aprobado con observaciones</option><option>Rechazado</option><option>Pendiente</option></select></div>' +
-      '</div>' +
-      '<textarea id="cvInterviewFeedback" class="form-control" style="height:55px;resize:none;overflow-y:auto;margin-top:8px;" placeholder="Feedback de la entrevista..."></textarea>' +
-      '</div>';
+  if (cand.Status==='screening'||cand.Status==='technical'||cand.Status==='client'||cand.Status==='offer') {
+    stageFields += '<div style="margin-bottom:14px;"><div style="font-size:10px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:8px;">Info de la etapa: '+sl+'</div>';
+    stageFields += '<textarea id="cvStageNotes" class="form-control" style="height:80px;resize:none;overflow-y:auto;" placeholder="'
+      + (cand.Status==='screening'?'Primeras impresiones, disponibilidad, fit cultural...'
+        :cand.Status==='technical'?'Resultado t\xe9cnico, stack evaluado, puntaje...'
+        :cand.Status==='client'?'Feedback del cliente, aprobaci\xf3n, comentarios...'
+        :'Salario ofrecido, fecha de ingreso, condiciones...')
+      + '">'+(cand.Notes||'').replace(/</g,'&lt;')+'</textarea></div>';
+    
+    // Entrevistas
+    stageFields += '<div style="margin-bottom:14px;"><div style="font-size:10px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:8px;">Registro de entrevista</div>';
+    stageFields += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">';
+    stageFields += '<div><label style="font-size:11px;color:#888;display:block;margin-bottom:4px;">Entrevistador</label><input id="cvInterviewer" type="text" class="form-control" placeholder="Nombre del entrevistador"></div>';
+    stageFields += '<div><label style="font-size:11px;color:#888;display:block;margin-bottom:4px;">Resultado</label><select id="cvResult" class="form-control"><option value="">-- Resultado --</option><option>Aprobado</option><option>Aprobado con observaciones</option><option>Rechazado</option><option>Pendiente</option></select></div>';
+    stageFields += '</div>';
+    stageFields += '<textarea id="cvInterviewFeedback" class="form-control" style="height:60px;resize:none;overflow-y:auto;" placeholder="Feedback de la entrevista..."></textarea>';
+    stageFields += '</div>';
   }
 
-  var ov = document.createElement('div');
-  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:600;display:flex;align-items:center;justify-content:center;';
-  ov.id = 'overlayCandidato';
+  var overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:600;display:flex;align-items:center;justify-content:center;';
+  overlay.id = 'overlayCandidato';
 
-  var btns = '';
-  if (cand.Status!=='hired' && cand.Status!=='rejected') {
-    btns = '<button data-cid="'+cand.CandidateID+'" onclick="guardarYAvanzar(this.dataset.cid)" style="flex:1;padding:8px;background:rgba(46,204,113,0.1);border:1px solid rgba(46,204,113,0.3);border-radius:8px;color:#2ECC71;font-size:12px;font-weight:700;cursor:pointer;">Guardar y avanzar &#8594;</button>' +
-           '<button data-cid="'+cand.CandidateID+'" onclick="guardarNotas(this.dataset.cid)" style="padding:8px 16px;background:#222;border:1px solid #333;border-radius:8px;color:#aaa;font-size:12px;cursor:pointer;">Guardar notas</button>' +
-           '<button data-cid="'+cand.CandidateID+'" onclick="pedirRechazo(this.dataset.cid)" style="padding:8px 14px;background:rgba(255,77,77,0.08);border:1px solid rgba(255,77,77,0.25);border-radius:8px;color:#FF4D4D;font-size:12px;cursor:pointer;">Rechazar</button>';
-  } else {
-    btns = '<span style="font-size:12px;color:#888;padding:8px;">Estado final: '+sl+'</span>';
-  }
-
-  ov.innerHTML =
-    '<div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:16px;padding:28px;width:640px;max-width:95vw;max-height:90vh;overflow-y:auto;">' +
-    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">' +
+  overlay.innerHTML = '<div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:16px;padding:28px;width:620px;max-width:95vw;max-height:88vh;overflow-y:auto;">' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">' +
     '<div><div style="font-size:16px;font-weight:800;color:#f0ebe3;">'+nombre+'</div>' +
     '<span style="font-size:11px;font-weight:700;color:'+sc+';background:'+sc+'22;padding:2px 10px;border-radius:10px;margin-top:4px;display:inline-block;">'+sl+'</span></div>' +
     '<button onclick="document.getElementById(\'overlayCandidato\').remove()" style="background:none;border:none;color:#666;font-size:22px;cursor:pointer;line-height:1;">&#x2715;</button></div>' +
@@ -5431,32 +5470,33 @@ async function verCandidato(id) {
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">' +
     '<div><div style="font-size:10px;color:#888;margin-bottom:3px;">Email</div><div style="font-size:13px;color:#f0ebe3;">'+(cand.Email||'&#8212;').replace(/</g,'&lt;')+'</div></div>' +
     '<div><div style="font-size:10px;color:#888;margin-bottom:3px;">Tel\xe9fono</div><div style="font-size:13px;color:#f0ebe3;">'+(cand.Phone||'&#8212;')+'</div></div>' +
-    '<div><div style="font-size:10px;color:#888;margin-bottom:3px;">Stack</div><div style="font-size:13px;color:#f0ebe3;">'+(cand.TechStack||'&#8212;').replace(/</g,'&lt;')+'</div></div>' +
-    '<div><div style="font-size:10px;color:#888;margin-bottom:3px;">Pretensi\xf3n</div><div style="font-size:13px;color:#f0ebe3;">'+(cand.SalaryExpectation?(cand.Currency||'USD')+' '+Number(cand.SalaryExpectation).toLocaleString():'&#8212;')+'</div></div>' +
-    '<div><div style="font-size:10px;color:#888;margin-bottom:3px;">Disponible</div><div style="font-size:13px;color:#f0ebe3;">'+(cand.AvailableFrom?new Date(cand.AvailableFrom).toLocaleDateString('es-AR'):'&#8212;')+'</div></div>' +
+    '<div><div style="font-size:10px;color:#888;margin-bottom:3px;">Stack tecnol\xf3gico</div><div style="font-size:13px;color:#f0ebe3;">'+(cand.TechStack||'&#8212;').replace(/</g,'&lt;')+'</div></div>' +
+    '<div><div style="font-size:10px;color:#888;margin-bottom:3px;">Pretensi\xf3n salarial</div><div style="font-size:13px;color:#f0ebe3;">'+(cand.SalaryExpectation?(cand.Currency||'USD')+' '+Number(cand.SalaryExpectation).toLocaleString():'&#8212;')+'</div></div>' +
+    '<div><div style="font-size:10px;color:#888;margin-bottom:3px;">Disponible desde</div><div style="font-size:13px;color:#f0ebe3;">'+(cand.AvailableFrom?new Date(cand.AvailableFrom).toLocaleDateString('es-AR'):'&#8212;')+'</div></div>' +
     '<div><div style="font-size:10px;color:#888;margin-bottom:3px;">Fuente</div><div style="font-size:13px;color:#f0ebe3;">'+(cand.SourceType||'&#8212;')+'</div></div>' +
     '</div>' +
 
     stageFields +
 
-    '<div style="margin-bottom:16px;">' +
-    '<div style="font-size:10px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:8px;">Archivos adjuntos (CV, certificaciones, m\xe9dicos...)</div>' +
-    '<div id="cvFileList_'+cand.CandidateID+'" style="margin-bottom:8px;min-height:24px;"></div>' +
-    '<label style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:#222;border:1px solid #333;border-radius:6px;color:#aaa;font-size:12px;cursor:pointer;">' +
-    '&#128206; Adjuntar archivo(s)' +
-    '<input type="file" accept=".pdf,.doc,.docx,image/*" multiple data-cid="'+cand.CandidateID+'" onchange="subirArchivosCandidato(this)" style="display:none;">' +
-    '</label>' +
-    '<span style="font-size:10px;color:#555;margin-left:8px;">PDF, im\xe1genes, documentos — m\xfaltiples archivos</span>' +
-    '</div>' +
+    (cand.RejectionReason ? '<div style="background:rgba(255,77,77,0.08);border:1px solid rgba(255,77,77,0.2);border-radius:8px;padding:12px;margin-bottom:14px;"><div style="font-size:10px;color:#FF4D4D;font-weight:700;text-transform:uppercase;margin-bottom:4px;">Motivo de rechazo</div><div style="font-size:13px;color:#aaa;">'+(cand.RejectionReason||'').replace(/</g,'&lt;')+'</div></div>' : '') +
 
-    (cand.RejectionReason ? '<div style="background:rgba(255,77,77,0.08);border:1px solid rgba(255,77,77,0.2);border-radius:8px;padding:12px;margin-bottom:14px;"><div style="font-size:10px;color:#FF4D4D;font-weight:700;margin-bottom:4px;">Motivo de rechazo</div><div style="font-size:13px;color:#aaa;">'+(cand.RejectionReason||'').replace(/</g,'&lt;')+'</div></div>' : '') +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;">';
 
-    '<div style="display:flex;gap:8px;flex-wrap:wrap;">'+btns+'</div>' +
-    '</div>';
+  var innerDiv = overlay.querySelector('div > div');
+  // Armar botones según estado
+  var btns = '';
+  if (cand.Status !== 'hired' && cand.Status !== 'rejected') {
+    btns += '<button data-cid="'+cand.CandidateID+'" onclick="guardarYAvanzar(this.dataset.cid)" style="flex:1;padding:8px;background:rgba(46,204,113,0.1);border:1px solid rgba(46,204,113,0.3);border-radius:8px;color:#2ECC71;font-size:12px;font-weight:700;cursor:pointer;">Guardar y avanzar &#8594;</button>';
+    btns += '<button data-cid="'+cand.CandidateID+'" onclick="guardarNotas(this.dataset.cid)" style="padding:8px 16px;background:#222;border:1px solid #333;border-radius:8px;color:#aaa;font-size:12px;cursor:pointer;">Guardar notas</button>';
+    btns += '<button data-cid="'+cand.CandidateID+'" onclick="pedirRechazo(this.dataset.cid)" style="padding:8px 16px;background:rgba(255,77,77,0.08);border:1px solid rgba(255,77,77,0.25);border-radius:8px;color:#FF4D4D;font-size:12px;cursor:pointer;">Rechazar</button>';
+  } else {
+    btns += '<span style="font-size:12px;color:#888;padding:8px;">Estado final: '+sl+'</span>';
+  }
 
-  document.body.appendChild(ov);
-  cargarArchivosCandidato(cand.CandidateID);
+  overlay.innerHTML = overlay.innerHTML + btns + '</div></div>';
+  document.body.appendChild(overlay);
 }
+
 async function guardarNotas(candId) {
   var notas  = (document.getElementById('cvStageNotes')||{}).value||'';
   var interv = (document.getElementById('cvInterviewer')||{}).value||'';
@@ -5639,14 +5679,18 @@ function confirmarEliminarNota(rid) {
 async function ejecutarEliminarNota(rid) {
   try {
     var res = await fetch(API_BASE+'/meetings/'+rid, { method:'DELETE' });
-    if(res.status===204||res.status===200){ mostrarToast('Nota eliminada','success'); if(typeof reunionColabActual!=='undefined'&&reunionColabActual) cargarBitacoraUsuario(reunionColabActual); return; }
-    var d = await res.json();
-    if(d.ok===false) throw new Error(d.error||'Error');
-    mostrarToast('Nota eliminada','success');
-    if(typeof reunionColabActual!=='undefined'&&reunionColabActual) cargarBitacoraUsuario(reunionColabActual);
+    if (res.status===204||res.status===200||res.status===201) {
+      mostrarToast('Reuni\xf3n eliminada','success');
+      setTimeout(function(){ if(typeof reunionColabActual!=='undefined'&&reunionColabActual) cargarBitacoraUsuario(reunionColabActual); }, 400);
+      return;
+    }
+    var txt = await res.text();
+    var data; try { data = JSON.parse(txt); } catch(e){ throw new Error(txt.substring(0,80)); }
+    if (data.ok===false) throw new Error(data.error||'Error');
+    mostrarToast('Reuni\xf3n eliminada','success');
+    setTimeout(function(){ if(typeof reunionColabActual!=='undefined'&&reunionColabActual) cargarBitacoraUsuario(reunionColabActual); }, 400);
   } catch(e){ mostrarToast('Error: '+e.message,'error'); }
 }
-
 // ─── Archivos de candidatos ───────────────────────────
 var candArchivos = {}; // cache en memoria
 
@@ -5706,22 +5750,27 @@ async function subirArchivosCandidato(input) {
   input.value = '';
 }
 
-function verArchivoCandidato(candId, fileId) {
-  var files = candArchivos[candId] || [];
-  var f = files.find(function(x){ return String(x.FileID)===String(fileId); });
-  if (!f || !f.FileData) { mostrarToast('Archivo no disponible','error'); return; }
-  var dataUrl = 'data:'+f.FileType+';base64,'+f.FileData;
-  var ov = document.createElement('div');
-  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:800;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;';
-  ov.onclick = function(){ ov.remove(); };
-  if (f.FileType && f.FileType.startsWith('image/')) {
-    ov.innerHTML = '<img src="'+dataUrl+'" style="max-width:90vw;max-height:82vh;border-radius:8px;"><div style="color:#aaa;font-size:12px;">'+f.FileName+'</div><div style="color:#555;font-size:11px;">Click para cerrar</div>';
-  } else {
-    ov.innerHTML = '<iframe src="'+dataUrl+'" style="width:85vw;height:85vh;border:none;border-radius:8px;"></iframe><div style="color:#aaa;font-size:12px;">'+f.FileName+'</div><div style="color:#555;font-size:11px;">Click para cerrar</div>';
-  }
-  document.body.appendChild(ov);
+async function verArchivoCandidato(candId, fileId) {
+  try {
+    var cached = (candArchivos[candId]||[]).find(function(x){ return String(x.FileID)===String(fileId); });
+    var f = (cached && cached.FileData) ? cached : null;
+    if (!f) {
+      var res = await fetch(API_BASE+'/candidates/'+candId+'/files/'+fileId);
+      var json = await res.json();
+      f = json.data || json;
+    }
+    if (!f||!f.FileData) { mostrarToast('Archivo no disponible','error'); return; }
+    var dataUrl = 'data:'+(f.FileType||'application/octet-stream')+';base64,'+f.FileData;
+    var ov = document.createElement('div');
+    ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:800;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;cursor:pointer;';
+    ov.onclick = function(){ ov.remove(); };
+    var isImg = f.FileType && f.FileType.startsWith('image/');
+    ov.innerHTML = isImg
+      ? '<img src="'+dataUrl+'" style="max-width:90vw;max-height:82vh;border-radius:8px;"><div style="color:#aaa;font-size:12px;">'+f.FileName+'</div><div style="color:#555;font-size:11px;">Click para cerrar</div>'
+      : '<iframe src="'+dataUrl+'" style="width:85vw;height:85vh;border:none;border-radius:8px;"></iframe><div style="color:#aaa;font-size:12px;">'+f.FileName+'</div><div style="color:#555;font-size:11px;">Click para cerrar</div>';
+    document.body.appendChild(ov);
+  } catch(e){ mostrarToast('Error: '+e.message,'error'); }
 }
-
 async function eliminarArchivoCandidato(candId, fileId) {
   if (!confirm('Eliminar este archivo?')) return;
   try {

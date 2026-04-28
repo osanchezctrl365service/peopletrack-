@@ -5041,10 +5041,7 @@ function renderKanban(candidatos) {
   var stageTxtColors = {hired:'#2ECC71',rejected:'#FF4D4D'};
   
   if (!candidatos.length && allCandidatos.length === 0) {
-    // Mostrar el kanban hardcodeado que ya existe en el HTML
-    c.innerHTML = '';
-    var k = document.getElementById('recruitingKanban');
-    if (k) k.style.display = 'grid';
+    c.innerHTML = '<div style="text-align:center;padding:40px;color:#888;">Sin candidatos registrados. Cre&aacute; el primero con el bot&oacute;n + Nuevo Candidato.</div>';
     return;
   }
   

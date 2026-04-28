@@ -5792,22 +5792,69 @@ function verEvidenciaCareer(mid) {
     p.innerHTML = html + ' <button onclick="document.getElementById(\'__pt_debug\').remove()" style="background:#000;color:#FF5400;border:0;padding:2px 6px;border-radius:3px;margin-left:6px;cursor:pointer">×</button>';
   }
 
+  // Guardar referencia del parent original para poder restaurar
+  var __originalParents = new Map();
+
   function fixLayout(secId){
     var sec = document.getElementById('sec-'+secId);
     if(!sec) return false;
     var rect = sec.getBoundingClientRect();
-    if(rect.width > 100 && rect.height > 50) return true; // ya está visible
-    // Reparar: forzar dimensiones inline
-    sec.style.cssText += ';display:block !important;width:100% !important;min-height:calc(100vh - 100px) !important;visibility:visible !important;opacity:1 !important;position:relative !important;left:0 !important;top:0 !important;';
-    // También verificar si ssoScreen está bloqueando (caso edge)
+    if(rect.width > 100 && rect.height > 50) return true;
+
+    // FIX MÁS BESTIA: mover la sección al body directamente.
+    // Esto la saca del parent flexbox roto.
+    if(sec.parentElement !== document.body){
+      __originalParents.set(secId, {
+        parent: sec.parentElement,
+        nextSibling: sec.nextSibling
+      });
+      document.body.appendChild(sec);
+    }
+
+    var sidebar = document.querySelector('.sidebar');
+    var sidebarW = sidebar ? sidebar.offsetWidth : 240;
+    var topbar = document.querySelector('.topbar');
+    var topbarH = topbar ? topbar.offsetHeight : 60;
+    var availW = window.innerWidth - sidebarW;
+    var availH = window.innerHeight - topbarH;
+    sec.style.cssText =
+      'display:block !important;' +
+      'position:fixed !important;' +
+      'top:'+topbarH+'px !important;' +
+      'left:'+sidebarW+'px !important;' +
+      'width:'+availW+'px !important;' +
+      'height:'+availH+'px !important;' +
+      'padding:24px !important;' +
+      'box-sizing:border-box !important;' +
+      'visibility:visible !important; opacity:1 !important;' +
+      'overflow-y:auto !important;' +
+      'background:#0d0d0d !important;' +
+      'z-index:50 !important;';
     var sso = document.getElementById('ssoScreen');
     if(sso && getComputedStyle(sso).display !== 'none'){
-      // Si estamos en una sección distinta a dashboard, el sso no debería verse
       sso.style.display = 'none';
     }
-    // Re-medir
     rect = sec.getBoundingClientRect();
     return rect.width > 100 && rect.height > 50;
+  }
+
+  function clearAbsoluteFix(){
+    document.querySelectorAll('.section').forEach(function(s){
+      if(s.style.position === 'fixed' || s.style.position === 'absolute'){
+        s.style.cssText = '';
+        // Restaurar al parent original si lo movimos
+        var secId = s.id.replace('sec-','');
+        var orig = __originalParents.get(secId);
+        if(orig && orig.parent){
+          if(orig.nextSibling && orig.nextSibling.parentElement === orig.parent){
+            orig.parent.insertBefore(s, orig.nextSibling);
+          } else {
+            orig.parent.appendChild(s);
+          }
+          __originalParents.delete(secId);
+        }
+      }
+    });
   }
 
   // Wrap showSection
@@ -5815,14 +5862,13 @@ function verEvidenciaCareer(mid) {
     var orig = window.showSection;
     window.showSection = function(id){
       var p = document.getElementById('__pt_debug'); if(p) p.remove();
+      // Limpiar cualquier fix absolute previo
+      clearAbsoluteFix();
       var r = orig.apply(this, arguments);
-      // Verificar layout 1.5s y 4s después (la API puede tardar)
+      // Verificar layout 1.5s y 4s después
       setTimeout(function(){
-        var ok = fixLayout(id);
-        if(!ok){
-          debugPanel('<strong>⚠ Layout reparado en '+id+'</strong>Si lo ves, refrescá con Ctrl+F5.');
-        }
-      }, 1500);
+        fixLayout(id);
+      }, 800);
       setTimeout(function(){
         var sec = document.getElementById('sec-'+id);
         if(!sec) return;
@@ -5831,11 +5877,16 @@ function verEvidenciaCareer(mid) {
         var contEmpty = cont && (cont.innerHTML||'').trim().length < 20;
         if(rect.width < 100 || rect.height < 50){
           fixLayout(id);
-          debugPanel('<strong>Layout 0x0 detectado y forzado en '+id+'</strong>');
+          rect = sec.getBoundingClientRect();
+          if(rect.width > 100 && rect.height > 50){
+            // Fix exitoso, no mostrar panel
+          } else {
+            debugPanel('<strong>⚠ Layout no se pudo reparar en '+id+'</strong>w='+Math.round(rect.width)+' h='+Math.round(rect.height));
+          }
         } else if(contEmpty){
           debugPanel('<strong>Container vacío en '+id+'</strong>API no respondió. <button onclick="showSection(\''+id+'\')" style="background:#000;color:#FF5400;border:0;padding:2px 8px;border-radius:3px;cursor:pointer">Reintentar</button>');
         }
-      }, 4000);
+      }, 3000);
       return r;
     };
   }

@@ -347,31 +347,24 @@ app.http('getCareer', {
     try {
       const user = await getAuthUser(req);
       if (!user) return err('No autorizado', 401);
-      const res = await query(`SELECT * FROM vw_CareerPlanDetails WHERE UserID = @uid`, { uid: parseInt(req.params.userId) });
-      return ok(res.recordset);
-    } catch (e) { return err(e.message, 500); }
-  }
-});
-app.http('updateMilestone', {
-  methods: ['PUT'],
-  authLevel: 'anonymous',
-  route: 'career/milestone/{id}',
-  handler: async (req) => {
-    try {
-      const user = await getAuthUser(req);
-      if (!user) return err('No autorizado', 401);
-      const body = await req.json();
-      await query(
-        `UPDATE CareerMilestones SET Progress=@progress, Status=@status, Feedback=@feedback,
-         LastReviewDate=CAST(GETDATE() AS DATE) WHERE MilestoneID=@id`,
-        { id: parseInt(req.params.id), progress: body.progress, status: body.status, feedback: body.feedback||null }
-      );
-      await query(
-        `UPDATE CareerPlans SET OverallProgress=(SELECT AVG(Progress) FROM CareerMilestones WHERE PlanID=CareerPlans.PlanID),
-         UpdatedAt=GETDATE() WHERE PlanID=(SELECT PlanID FROM CareerMilestones WHERE MilestoneID=@id)`,
-        { id: parseInt(req.params.id) }
-      );
-      return ok({ updated: true });
+      const uid = parseInt(req.params.userId);
+      // Intento 1: usar la vista si existe
+      try {
+        const res = await query(`SELECT * FROM vw_CareerPlanDetails WHERE UserID = @uid`, { uid });
+        return ok(res.recordset);
+      } catch(e1) {
+        // Fallback: query directa al schema real
+        const res = await query(
+          `SELECT cp.PlanID, cp.UserID, cp.PlanType, cp.TargetRole, cp.Description,
+                  cp.OverallProgress, cp.Notes, cp.IsActive, cp.CreatedAt, cp.UpdatedAt,
+                  u.FullName AS EmployeeName, u.Email AS EmployeeEmail
+           FROM CareerPlans cp
+           JOIN Users u ON cp.UserID = u.UserID
+           WHERE cp.UserID = @uid AND (cp.IsActive IS NULL OR cp.IsActive = 1)`,
+          { uid }
+        );
+        return ok(res.recordset);
+      }
     } catch (e) { return err(e.message, 500); }
   }
 });
@@ -1528,15 +1521,18 @@ app.http('getAllCareerPlans', {
         `SELECT cp.PlanID, cp.PlanType, cp.TargetRole, cp.Description,
                 u.FullName AS EmployeeName, u.Email AS EmployeeEmail,
                 r.RoleName AS CurrentRole,
-                (SELECT COUNT(*) FROM CareerMilestones cm WHERE cm.CareerPlanID=cp.PlanID) AS TotalMilestones,
-                (SELECT COUNT(*) FROM CareerMilestones cm WHERE cm.CareerPlanID=cp.PlanID AND cm.IsCompleted=1) AS CompletedMilestones,
-                CASE WHEN (SELECT COUNT(*) FROM CareerMilestones cm WHERE cm.CareerPlanID=cp.PlanID)=0 THEN 0
-                  ELSE CAST((SELECT COUNT(*) FROM CareerMilestones cm WHERE cm.CareerPlanID=cp.PlanID AND cm.IsCompleted=1)*100.0/
-                       (SELECT COUNT(*) FROM CareerMilestones cm WHERE cm.CareerPlanID=cp.PlanID) AS INT)
+                (SELECT COUNT(*) FROM CareerMilestones cm WHERE cm.PlanID=cp.PlanID) AS TotalMilestones,
+                (SELECT COUNT(*) FROM CareerMilestones cm WHERE cm.PlanID=cp.PlanID
+                   AND (cm.Status IN ('completed','done','finished') OR cm.Progress >= 100)) AS CompletedMilestones,
+                CASE WHEN (SELECT COUNT(*) FROM CareerMilestones cm WHERE cm.PlanID=cp.PlanID)=0 THEN 0
+                  ELSE CAST((SELECT COUNT(*) FROM CareerMilestones cm WHERE cm.PlanID=cp.PlanID
+                              AND (cm.Status IN ('completed','done','finished') OR cm.Progress >= 100))*100.0/
+                       (SELECT COUNT(*) FROM CareerMilestones cm WHERE cm.PlanID=cp.PlanID) AS INT)
                 END AS ProgressPct
          FROM CareerPlans cp
          JOIN Users u ON cp.UserID=u.UserID
          LEFT JOIN Roles r ON u.RoleID=r.RoleID
+         WHERE (cp.IsActive IS NULL OR cp.IsActive = 1)
          ORDER BY cp.PlanID DESC`
       );
       return ok(res.recordset);
@@ -1553,7 +1549,7 @@ app.http('getCareerPlanDetail', {
         query(`SELECT cp.*, u.FullName AS EmployeeName, u.Email AS EmployeeEmail
                FROM CareerPlans cp JOIN Users u ON cp.UserID=u.UserID
                WHERE cp.PlanID=@id`, { id }),
-        query(`SELECT * FROM CareerMilestones WHERE CareerPlanID=@id ORDER BY SortOrder, MilestoneID`, { id })
+        query(`SELECT * FROM CareerMilestones WHERE PlanID=@id ORDER BY ISNULL(SortOrder,0), MilestoneID`, { id })
       ]);
       if (!plan.recordset.length) return err('Not found', 404);
       return ok({ plan: plan.recordset[0], milestones: milestones.recordset });
@@ -1589,10 +1585,11 @@ app.http('createCareerMilestone', {
     try {
       const b = await req.json();
       const res = await query(
-        `INSERT INTO CareerMilestones (CareerPlanID, Title, MilestoneCategory, CertificationName, BadgeURL, Description, DueDate, SortOrder)
+        `INSERT INTO CareerMilestones (PlanID, MilestoneTitle, MilestoneCategory, CertificationName, BadgeURL, Description, DueDate, SortOrder, Status, Progress, CreatedAt, UpdatedAt)
          OUTPUT INSERTED.MilestoneID
-         VALUES (@pid, @title, @cat, @cert, @badge, @desc, @due, 
-           (SELECT ISNULL(MAX(SortOrder),0)+1 FROM CareerMilestones WHERE CareerPlanID=@pid))`,
+         VALUES (@pid, @title, @cat, @cert, @badge, @desc, @due,
+           (SELECT ISNULL(MAX(SortOrder),0)+1 FROM CareerMilestones WHERE PlanID=@pid),
+           'pending', 0, GETDATE(), GETDATE())`,
         { pid: b.planId, title: b.title, cat: b.milestoneCategory||null,
           cert: b.certificationName||null, badge: b.badgeURL||null,
           desc: b.description||null, due: b.dueDate||null }
@@ -1608,17 +1605,27 @@ app.http('updateCareerMilestone', {
     try {
       const id = parseInt(req.params.id);
       const b  = await req.json();
+      // Mapear isCompleted booleano del frontend a Status + Progress + CompletedAt
+      const completed = (b.isCompleted != null) ? (b.isCompleted ? 1 : 0) : null;
       await query(
         `UPDATE CareerMilestones SET
-           IsCompleted     = COALESCE(@completed, IsCompleted),
-           CompletedAt     = CASE WHEN @completed=1 THEN GETDATE() WHEN @completed=0 THEN NULL ELSE CompletedAt END,
+           Status          = CASE WHEN @completed = 1 THEN 'completed'
+                                  WHEN @completed = 0 THEN 'pending'
+                                  ELSE Status END,
+           Progress        = CASE WHEN @completed = 1 THEN 100
+                                  WHEN @completed = 0 THEN 0
+                                  ELSE Progress END,
+           CompletedAt     = CASE WHEN @completed = 1 THEN GETDATE()
+                                  WHEN @completed = 0 THEN NULL
+                                  ELSE CompletedAt END,
            EmployeeComment = COALESCE(@comment, EmployeeComment),
            FileData        = COALESCE(@fileData, FileData),
            FileName        = COALESCE(@fileName, FileName),
-           FileType        = COALESCE(@fileType, FileType)
+           FileType        = COALESCE(@fileType, FileType),
+           UpdatedAt       = GETDATE()
          WHERE MilestoneID=@id`,
-        { completed: b.isCompleted!=null?b.isCompleted?1:0:null,
-          comment: b.employeeComment!=null?b.employeeComment:null,
+        { completed,
+          comment: b.employeeComment != null ? b.employeeComment : null,
           fileData: b.fileData||null, fileName: b.fileName||null,
           fileType: b.fileType||null, id }
       );

@@ -5132,6 +5132,10 @@ async function verCandidato(id) {
   // Armar botones según estado
   var btns = '';
   if (cand.Status !== 'hired' && cand.Status !== 'rejected') {
+    // Botón retroceder solo si no está en la primera etapa
+    if (cand.Status !== 'screening') {
+      btns += '<button data-cid="'+cand.CandidateID+'" onclick="retrocederCandidato(this.dataset.cid)" style="padding:8px 14px;background:#222;border:1px solid #444;border-radius:8px;color:#aaa;font-size:12px;cursor:pointer;">&#8592; Paso anterior</button>';
+    }
     btns += '<button data-cid="'+cand.CandidateID+'" onclick="guardarYAvanzar(this.dataset.cid)" style="flex:1;padding:8px;background:rgba(46,204,113,0.1);border:1px solid rgba(46,204,113,0.3);border-radius:8px;color:#2ECC71;font-size:12px;font-weight:700;cursor:pointer;">Guardar y avanzar &#8594;</button>';
     btns += '<button data-cid="'+cand.CandidateID+'" onclick="guardarNotas(this.dataset.cid)" style="padding:8px 16px;background:#222;border:1px solid #333;border-radius:8px;color:#aaa;font-size:12px;cursor:pointer;">Guardar notas</button>';
     btns += '<button data-cid="'+cand.CandidateID+'" onclick="pedirRechazo(this.dataset.cid)" style="padding:8px 16px;background:rgba(255,77,77,0.08);border:1px solid rgba(255,77,77,0.25);border-radius:8px;color:#FF4D4D;font-size:12px;cursor:pointer;">Rechazar</button>';
@@ -5152,21 +5156,24 @@ async function guardarNotas(candId) {
   var interv = (document.getElementById('cvInterviewer')||{}).value||'';
   var result = (document.getElementById('cvResult')||{}).value||'';
   var feed   = (document.getElementById('cvInterviewFeedback')||{}).value||'';
+  // Obtener el estado actual del candidato (será el InterviewType)
+  var cand = (allCandidatos||[]).find(function(c){ return String(c.CandidateID) === String(candId); });
+  var stage = cand ? (cand.Status || 'general') : 'general';
   try {
     var res = await fetch(API_BASE+'/candidates/'+candId+'/notes', {
       method:'PUT', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ notes: notas, interviewer: interv, result: result, feedback: feed })
+      body: JSON.stringify({ notes: notas, interviewer: interv, result: result, feedback: feed, stage: stage })
     });
     var txt  = await res.text();
-    var data = JSON.parse(txt);
-    if (data.ok===false) throw new Error(data.error||'Error');
-    mostrarToast('Notas guardadas','success');
+    var data;
+    try { data = JSON.parse(txt); } catch(_) { throw new Error('Respuesta inválida del servidor'); }
+    if (!res.ok || data.ok === false) throw new Error(data.error || ('HTTP '+res.status));
+    mostrarToast('Notas y entrevista guardadas','success');
     // Recargar historial de entrevistas y limpiar campos del formulario nuevo
     cargarHistorialEntrevistas(candId);
-    var i1 = document.getElementById('cvInterviewer');     if (i1) i1.value = '';
-    var i2 = document.getElementById('cvResult');          if (i2) i2.value = '';
+    var i1 = document.getElementById('cvInterviewer');       if (i1) i1.value = '';
+    var i2 = document.getElementById('cvResult');            if (i2) i2.value = '';
     var i3 = document.getElementById('cvInterviewFeedback'); if (i3) i3.value = '';
-    // Recargar candidatos sin cerrar modal
     cargarCandidatos();
   } catch(e){ mostrarToast('Error al guardar: '+e.message,'error'); }
 }
@@ -5180,6 +5187,28 @@ async function guardarYAvanzar(candId) {
       body: JSON.stringify({ changedById: me?me.UserID:1, note:'Avanzado' })
     });
     mostrarToast('Candidato avanzado a la siguiente etapa','success');
+    cargarCandidatos();
+  } catch(e){ mostrarToast('Error: '+e.message,'error'); }
+}
+
+async function retrocederCandidato(candId) {
+  if (!confirm('¿Volver a la etapa anterior? Esta acción quedará registrada en el historial.')) return;
+  var ov = document.getElementById('overlayCandidato'); if(ov) ov.remove();
+  try {
+    var me = allUsuarios.find(function(u){ return u.Email===window._userEmail; });
+    var res = await fetch(API_BASE+'/candidates/'+candId+'/retrocede', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ changedById: me?me.UserID:1, note:'Retrocedido a etapa anterior' })
+    });
+    var txt = await res.text();
+    var data;
+    try { data = JSON.parse(txt); } catch(_) { throw new Error('Respuesta inválida del servidor'); }
+    if (!res.ok || data.ok === false) throw new Error(data.error || ('HTTP '+res.status));
+    if (data.data && data.data.message) {
+      mostrarToast(data.data.message, 'info');
+    } else {
+      mostrarToast('Candidato retrocedido a la etapa anterior','success');
+    }
     cargarCandidatos();
   } catch(e){ mostrarToast('Error: '+e.message,'error'); }
 }

@@ -377,6 +377,8 @@ app.http('getCompetencies', {
   route: 'competencies',
   handler: async (req) => {
     try {
+      const user = await getAuthUser(req);
+      if (!user) return err('No autorizado', 401);
       const type  = req.query.get('type')  || null;  // 'generic', 'leadership', 'personal', etc.
       const level = req.query.get('level') || null;  // 'company', 'team', 'personal'
       const res = await query(
@@ -399,6 +401,8 @@ app.http('getEvaluation', {
   route: 'competencies/evaluation/{userId}/{periodId}',
   handler: async (req) => {
     try {
+      const user = await getAuthUser(req);
+      if (!user) return err('No autorizado', 401);
       const uid = parseInt(req.params.userId);
       const pid = parseInt(req.params.periodId);
       // Intento 1: usar la vista (si tiene datos joineados)
@@ -434,6 +438,8 @@ app.http('saveEvaluation', {
   route: 'competencies/evaluation',
   handler: async (req) => {
     try {
+      const user = await getAuthUser(req);
+      if (!user) return err('No autorizado', 401);
       const body = await req.json();
       // Validaciones defensivas
       if (!body.userId)       return err('Falta userId', 400);
@@ -457,7 +463,7 @@ app.http('saveEvaluation', {
         { uid: parseInt(body.userId), cid: parseInt(body.competencyId), pid: parseInt(body.periodId),
           scaleId: body.scaleId ? parseInt(body.scaleId) : null,
           score: score, feedback: body.feedback || null,
-          evalBy: body.evaluatedBy ? parseInt(body.evaluatedBy) : 1 }
+          evalBy: user.UserID || (body.evaluatedBy ? parseInt(body.evaluatedBy) : 1) }
       );
       return ok({ saved: true });
     } catch (e) { return err(e.message, 500); }

@@ -3227,29 +3227,21 @@ async function comp_initSection() {
 }
 
 async function comp_loadCatalog() {
-  comp_state.loadError = null;
   try {
-    var resC = await fetch(API_BASE + '/competencies');
-    if (!resC.ok) {
-      var errTxt = await resC.text();
-      throw new Error('GET /competencies → HTTP '+resC.status+': '+errTxt.substring(0,150));
+    var [resC, resS] = await Promise.all([
+      fetch(API_BASE + '/competencies'),
+      fetch(API_BASE + '/competencies/scales')
+    ]);
+    if (resC.ok) {
+      var jc = await resC.json();
+      comp_state.competencies = jc.data || [];
     }
-    var jc = await resC.json();
-    if (jc.ok === false) throw new Error('API error: '+(jc.error||'desconocido'));
-    comp_state.competencies = jc.data || [];
-  } catch(e) {
-    console.error('comp_loadCatalog (competencies) error:', e);
-    comp_state.competencies = [];
-    comp_state.loadError = e.message;
-  }
-  try {
-    var resS = await fetch(API_BASE + '/competencies/scales');
     if (resS.ok) {
       var js = await resS.json();
       comp_state.scales = js.data || [];
     }
   } catch(e) {
-    console.error('comp_loadCatalog (scales) error:', e);
+    console.error('comp_loadCatalog error:', e);
   }
 }
 
@@ -3336,10 +3328,6 @@ function comp_renderTab(tipo) {
   });
 
   if (!comps.length) {
-    if (comp_state.loadError) {
-      el.innerHTML = '<div style="text-align:center;padding:20px;color:#FF4D4D;font-size:12px;background:rgba(255,77,77,0.05);border:1px solid rgba(255,77,77,0.2);border-radius:8px;">⚠ Error al cargar competencias del catálogo:<br><span style="color:#aaa;font-size:11px;">'+comp_state.loadError.replace(/</g,'&lt;')+'</span><br><br>Abrí F12 → Network → /competencies para ver detalles.</div>';
-      return;
-    }
     if (tipo === 'global') {
       el.innerHTML = '<div style="text-align:center;padding:20px;color:#888;font-size:13px;">No hay competencias globales configuradas en el catálogo.</div>';
     } else if (tipo === 'leadership') {

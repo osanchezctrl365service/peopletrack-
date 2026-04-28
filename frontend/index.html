@@ -1888,20 +1888,20 @@ function showSection(id){
   if(id==='objectives'){
     ['obj-core','obj-personal','obj-tasks'].forEach(function(pid,i){var el=document.getElementById(pid);if(el)el.style.display=i===0?'':'none';});
     document.querySelectorAll('#sec-objectives .tab').forEach(function(t,i){t.classList.toggle('active',i===0);});
-    if(!allUsuarios.length){loadUsuarios().then(function(){try{cargarObjetivosCoreEmpresa();poblarSelectoresTabObjetivos();}catch(e){console.warn('objectives init:',e.message);}if(!allPeriods.length)loadPeriods().then(poblarModalObjetivo).catch(function(e){console.warn(e);});else poblarModalObjetivo();}).catch(function(e){console.warn('showSection objectives:',e.message);});}
-    else{try{cargarObjetivosCoreEmpresa();poblarSelectoresTabObjetivos();}catch(e){console.warn(e);}if(!allPeriods.length)loadPeriods().then(poblarModalObjetivo).catch(function(e){console.warn(e);});else poblarModalObjetivo();}
+    if(!allUsuarios.length){loadUsuarios().then(function(){cargarObjetivosCoreEmpresa();poblarSelectoresTabObjetivos();if(!allPeriods.length)loadPeriods().then(poblarModalObjetivo);else poblarModalObjetivo();});}
+    else{cargarObjetivosCoreEmpresa();poblarSelectoresTabObjetivos();if(!allPeriods.length)loadPeriods().then(poblarModalObjetivo);else poblarModalObjetivo();}
   }
-  if(id==='career'){if(!allUsuarios.length)loadUsuarios().then(loadCareerPlans).catch(function(e){console.warn('career:',e.message);try{loadCareerPlans();}catch(_){}});else loadCareerPlans();}
-  if(id==='competencies'){if(!allUsuarios.length)loadUsuarios().then(poblarSelectoresCompetencias).catch(function(e){console.warn('competencies:',e.message);try{poblarSelectoresCompetencias();}catch(_){}});else poblarSelectoresCompetencias();}
-  if(id==='reports'){if(!allUsuarios.length)loadUsuarios().then(initReportes).catch(function(e){console.warn('reports:',e.message);try{initReportes();}catch(_){}});else initReportes();}
-  if(id==='oneononex'){if(!allColabReuniones||!allColabReuniones.length){try{initReuniones();}catch(e){console.warn('oneononex:',e.message);}}}
-  if(id==='feedback360'){if(!allUsuarios.length)loadUsuarios().then(initFeedback360).catch(function(e){console.warn('feedback360:',e.message);try{initFeedback360();}catch(_){}});else initFeedback360();if(!allPeriods.length)loadPeriods().catch(function(e){console.warn(e);});}
+  if(id==='career'){if(!allUsuarios.length)loadUsuarios().then(loadCareerPlans);else loadCareerPlans();}
+  if(id==='competencies'){if(!allUsuarios.length)loadUsuarios().then(poblarSelectoresCompetencias);else poblarSelectoresCompetencias();}
+  if(id==='reports'){if(!allUsuarios.length)loadUsuarios().then(initReportes);else initReportes();}
+  if(id==='oneononex'){if(!allColabReuniones||!allColabReuniones.length)initReuniones();}
+  if(id==='feedback360'){if(!allUsuarios.length)loadUsuarios().then(initFeedback360);else initFeedback360();if(!allPeriods.length)loadPeriods();}
   if(id==='help'&&typeof loadHelpArticles==='function') loadHelpArticles();
   if(id==='orgchart'&&typeof loadOrgChartDynamic==='function'){if(!orgData||!orgData.length)loadOrgChartDynamic();}
   if(id==='alerts'&&typeof loadAlertas==='function') loadAlertas();
-  if(id==='pip'){if(!allUsuarios.length)loadUsuarios().then(cargarPIPs).catch(function(e){console.warn('pip:',e.message);try{cargarPIPs();}catch(_){}});else cargarPIPs();}
-  if(id==='onboarding'){if(!allUsuarios.length)loadUsuarios().then(cargarOnboardings).catch(function(e){console.warn('onboarding:',e.message);try{cargarOnboardings();}catch(_){}});else cargarOnboardings();}
-  if(id==='recruiting'){try{cargarCandidatos();}catch(e){console.warn('recruiting:',e.message);}}
+  if(id==='pip'){if(!allUsuarios.length)loadUsuarios().then(cargarPIPs);else cargarPIPs();}
+  if(id==='onboarding'){if(!allUsuarios.length)loadUsuarios().then(cargarOnboardings);else cargarOnboardings();}
+  if(id==='recruiting'){cargarCandidatos();}
 }
 
 function switchTab(prefix, id, el){
@@ -2025,11 +2025,10 @@ async function loadUsuarios() {
       allUsuarios = data;
       if (typeof renderUsuarios === 'function') renderUsuarios(allUsuarios);
     } else {
-      console.warn('loadUsuarios: API devolvio datos vacios o invalidos, continuando con allUsuarios=[]');
       allUsuarios = [];
     }
   } catch(e) {
-    console.warn('loadUsuarios falló:', e.message, '- continuando con allUsuarios=[]');
+    console.warn('loadUsuarios falló:', e.message);
     allUsuarios = [];
   }
   return allUsuarios;
@@ -2548,16 +2547,10 @@ renderLideres = function(grupos) {
 // ═══ PERÍODOS ════════════════════════════════════════════════
 let allPeriods=[];
 async function loadPeriods(){
-  try {
-    let d=await apiGet("periods/all");
-    if(!d||!Array.isArray(d)||!d.length) d=await apiGet("periods");
-    allPeriods=Array.isArray(d)?d:[];
-    if (typeof renderPeriods === 'function') renderPeriods();
-  } catch(e) {
-    console.warn('loadPeriods falló:', e.message);
-    allPeriods = [];
-  }
-  return allPeriods;
+  let d=await apiGet("periods/all");
+  if(!d||!Array.isArray(d)||!d.length) d=await apiGet("periods");
+  allPeriods=Array.isArray(d)?d:[];
+  renderPeriods();
 }
 function renderPeriods(){
   const tb=document.getElementById("periodsTbody"),tbl=document.getElementById("periodsTable"),ld=document.getElementById("periodsLoading");
@@ -5781,6 +5774,72 @@ function verEvidenciaCareer(mid) {
   }
   document.body.appendChild(ov);
 }
+
+// ════════════════════════════════════════════════════════════
+// RUNTIME LAYOUT OBSERVER + DEBUG VISUAL
+// Detecta secciones invisibles tras navegar y las repara.
+// Muestra un panel naranja arriba a la derecha si algo falla.
+// ════════════════════════════════════════════════════════════
+(function(){
+  function debugPanel(html){
+    var p = document.getElementById('__pt_debug');
+    if(!p){
+      p = document.createElement('div');
+      p.id = '__pt_debug';
+      p.style.cssText = 'position:fixed;top:10px;right:10px;z-index:99999;background:#FF5400;color:#000;padding:10px 14px;border-radius:8px;font:11px monospace;max-width:380px;box-shadow:0 4px 16px rgba(0,0,0,0.6)';
+      document.body.appendChild(p);
+    }
+    p.innerHTML = html + ' <button onclick="document.getElementById(\'__pt_debug\').remove()" style="background:#000;color:#FF5400;border:0;padding:2px 6px;border-radius:3px;margin-left:6px;cursor:pointer">×</button>';
+  }
+
+  function fixLayout(secId){
+    var sec = document.getElementById('sec-'+secId);
+    if(!sec) return false;
+    var rect = sec.getBoundingClientRect();
+    if(rect.width > 100 && rect.height > 50) return true; // ya está visible
+    // Reparar: forzar dimensiones inline
+    sec.style.cssText += ';display:block !important;width:100% !important;min-height:calc(100vh - 100px) !important;visibility:visible !important;opacity:1 !important;position:relative !important;left:0 !important;top:0 !important;';
+    // También verificar si ssoScreen está bloqueando (caso edge)
+    var sso = document.getElementById('ssoScreen');
+    if(sso && getComputedStyle(sso).display !== 'none'){
+      // Si estamos en una sección distinta a dashboard, el sso no debería verse
+      sso.style.display = 'none';
+    }
+    // Re-medir
+    rect = sec.getBoundingClientRect();
+    return rect.width > 100 && rect.height > 50;
+  }
+
+  // Wrap showSection
+  if(typeof window.showSection === 'function'){
+    var orig = window.showSection;
+    window.showSection = function(id){
+      var p = document.getElementById('__pt_debug'); if(p) p.remove();
+      var r = orig.apply(this, arguments);
+      // Verificar layout 1.5s y 4s después (la API puede tardar)
+      setTimeout(function(){
+        var ok = fixLayout(id);
+        if(!ok){
+          debugPanel('<strong>⚠ Layout reparado en '+id+'</strong>Si lo ves, refrescá con Ctrl+F5.');
+        }
+      }, 1500);
+      setTimeout(function(){
+        var sec = document.getElementById('sec-'+id);
+        if(!sec) return;
+        var rect = sec.getBoundingClientRect();
+        var cont = sec.querySelector('[id$="Container"]');
+        var contEmpty = cont && (cont.innerHTML||'').trim().length < 20;
+        if(rect.width < 100 || rect.height < 50){
+          fixLayout(id);
+          debugPanel('<strong>Layout 0x0 detectado y forzado en '+id+'</strong>');
+        } else if(contEmpty){
+          debugPanel('<strong>Container vacío en '+id+'</strong>API no respondió. <button onclick="showSection(\''+id+'\')" style="background:#000;color:#FF5400;border:0;padding:2px 8px;border-radius:3px;cursor:pointer">Reintentar</button>');
+        }
+      }, 4000);
+      return r;
+    };
+  }
+})();
 </script>
 
 <!-- MODAL EDITAR OBJETIVO -->

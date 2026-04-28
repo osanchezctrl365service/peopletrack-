@@ -2749,54 +2749,23 @@ function poblarColaboradoresReunion() {
 
 // ═══ MODAL NUEVO PLAN DE CARRERA ════════════════════════════
 function abrirModalNuevoPlan() {
-  // Modal simple inline para nuevo plan
-  const existente = document.getElementById('modalNuevoPlan');
-  if (existente) { existente.style.display='flex'; return; }
-  
-  const modal = document.createElement('div');
-  modal.id = 'modalNuevoPlan';
-  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:500;display:flex;align-items:center;justify-content:center;';
-  modal.innerHTML = `
-    <div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:16px;padding:28px;width:440px;max-width:95vw;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-        <h3 style="font-size:16px;font-weight:800;color:#f0ebe3;">Nuevo Plan de Carrera</h3>
-        <button onclick="document.getElementById('modalNuevoPlan').style.display='none'" style="background:none;border:none;color:#888;font-size:20px;cursor:pointer;">×</button>
-      </div>
-      <div style="display:grid;gap:14px;">
-        <div>
-          <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Colaborador *</label>
-          <select id="npColaborador" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px;color:#f0ebe3;font-size:13px;outline:none;">
-            <option value="">— Seleccionar —</option>
-            ${allUsuarios.filter(u=>u.IsActive).sort((a,b)=>(a.FullName||'').localeCompare(b.FullName||'')).map(u=>`<option value="${u.UserID}">${u.FullName||u.Email}</option>`).join('')}
-          </select>
-        </div>
-        <div>
-          <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Rol actual</label>
-          <input id="npRolActual" type="text" placeholder="Ej: Developer" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px;color:#f0ebe3;font-size:13px;outline:none;">
-        </div>
-        <div>
-          <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Rol objetivo</label>
-          <input id="npRolObjetivo" type="text" placeholder="Ej: Senior Developer" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px;color:#f0ebe3;font-size:13px;outline:none;">
-        </div>
-      </div>
-      <div id="npError" style="color:#FF4D4D;font-size:12px;margin-top:10px;display:none;"></div>
-      <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end;">
-        <button onclick="document.getElementById('modalNuevoPlan').style.display='none'" style="padding:10px 20px;background:#222;border:1px solid #333;border-radius:8px;color:#aaa;font-size:13px;cursor:pointer;">Cancelar</button>
-        <button onclick="guardarNuevoPlan()" style="padding:10px 24px;background:#FF5400;border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;">Crear Plan</button>
-      </div>
-    </div>`;
-  document.body.appendChild(modal);
+  // Abrir el modal estático que ya está en el HTML (modalNuevoPlan, IDs cp*)
+  // Llenar el select de colaboradores con la lista actual
+  if (typeof filtrarColabCareer === 'function') filtrarColabCareer('');
+  // Limpiar campos
+  var ids = ['cpBuscar','cpTargetRole','cpDesc'];
+  ids.forEach(function(id){ var el = document.getElementById(id); if(el) el.value = ''; });
+  var sel = document.getElementById('cpColabSel'); if(sel) sel.value = '';
+  var tipo = document.getElementById('cpTipo'); if(tipo) tipo.value = 'specialization';
+  var err = document.getElementById('cpError'); if(err) err.style.display = 'none';
+  // Mostrar modal usando el sistema estándar
+  if (typeof showModal === 'function') showModal('modalNuevoPlan');
+  else { var m = document.getElementById('modalNuevoPlan'); if(m) m.style.display = 'flex'; }
 }
 
-async function guardarNuevoPlan() {
-  const userId = document.getElementById('npColaborador')?.value;
-  const rolActual = document.getElementById('npRolActual')?.value?.trim();
-  const rolObjetivo = document.getElementById('npRolObjetivo')?.value?.trim();
-  const errEl = document.getElementById('npError');
-  if (!userId) { errEl.textContent='Seleccioná un colaborador'; errEl.style.display='block'; return; }
-  mostrarToast('Plan de carrera: funcionalidad en desarrollo. Próximamente disponible.', 'info');
-  document.getElementById('modalNuevoPlan').style.display='none';
-}
+// guardarNuevoPlan se define más abajo (línea ~5625) — esta es la versión definitiva
+
+
 
 // ═══ MODAL EVALUAR COMPETENCIA ═══════════════════════════════
 function abrirModalEvaluar() {
@@ -5103,8 +5072,8 @@ async function verCandidato(id) {
     '</label>' +
     '<span style="font-size:10px;color:#555;margin-left:8px;">PDF, imágenes, documentos — sin límite de archivos</span>' +
     '</div>';
-  cargarArchivosCandidato(cand.CandidateID);
-  cargarHistorialEntrevistas(cand.CandidateID);
+  // NOTA: cargarArchivosCandidato y cargarHistorialEntrevistas se invocan al final,
+  // después de appendChild(overlay), para que los containers existan en el DOM.
 
   // Campos por etapa
   var stageFields = '';
@@ -5151,6 +5120,8 @@ async function verCandidato(id) {
     '<div><div style="font-size:10px;color:#888;margin-bottom:3px;">Fuente</div><div style="font-size:13px;color:#f0ebe3;">'+(cand.SourceType||'&#8212;')+'</div></div>' +
     '</div>' +
 
+    adjuntosSection +
+
     stageFields +
 
     (cand.RejectionReason ? '<div style="background:rgba(255,77,77,0.08);border:1px solid rgba(255,77,77,0.2);border-radius:8px;padding:12px;margin-bottom:14px;"><div style="font-size:10px;color:#FF4D4D;font-weight:700;text-transform:uppercase;margin-bottom:4px;">Motivo de rechazo</div><div style="font-size:13px;color:#aaa;">'+(cand.RejectionReason||'').replace(/</g,'&lt;')+'</div></div>' : '') +
@@ -5170,6 +5141,10 @@ async function verCandidato(id) {
 
   overlay.innerHTML = overlay.innerHTML + btns + '</div></div>';
   document.body.appendChild(overlay);
+  // Cargar datos asíncronos DESPUÉS de que el modal esté en el DOM
+  // (los containers cvFileList_X y cvInterviewHistory_X ya existen)
+  cargarArchivosCandidato(cand.CandidateID);
+  cargarHistorialEntrevistas(cand.CandidateID);
 }
 
 async function guardarNotas(candId) {
@@ -5386,15 +5361,24 @@ async function cargarHistorialEntrevistas(candId) {
   var el = document.getElementById('cvInterviewHistory_'+candId);
   if (!el) return;
   try {
-    var res = await fetch(API_BASE+'/candidates/'+candId+'/interviews');
+    // Timeout de 10s para no quedar pegado en "Cargando..."
+    var ctl = new AbortController();
+    var tid = setTimeout(function(){ ctl.abort(); }, 10000);
+    var res = await fetch(API_BASE+'/candidates/'+candId+'/interviews', { signal: ctl.signal });
+    clearTimeout(tid);
     if (!res.ok) {
-      el.innerHTML = '<span style="color:#888;">No hay entrevistas registradas todavía.</span>';
+      el.innerHTML = '<span style="color:#888;">Aún no hay entrevistas registradas. Cargá una abajo.</span>';
       return;
     }
-    var json = await res.json();
+    var txt = await res.text();
+    var json;
+    try { json = JSON.parse(txt); } catch(_) {
+      el.innerHTML = '<span style="color:#888;">Aún no hay entrevistas registradas.</span>';
+      return;
+    }
     var interviews = json.data || [];
     if (!interviews.length) {
-      el.innerHTML = '<span style="color:#888;">No hay entrevistas registradas todavía.</span>';
+      el.innerHTML = '<span style="color:#888;">Aún no hay entrevistas registradas. Cargá una abajo.</span>';
       return;
     }
     var resultColors = {'Aprobado':'#2ECC71','Aprobado con observaciones':'#F59E0B','Rechazado':'#FF4D4D','Pendiente':'#888'};
@@ -5415,7 +5399,7 @@ async function cargarHistorialEntrevistas(candId) {
     });
     el.innerHTML = html;
   } catch(e) {
-    el.innerHTML = '<span style="color:#FF4D4D;font-size:11px;">Error al cargar historial: '+e.message+'</span>';
+    el.innerHTML = '<span style="color:#888;font-size:11px;">No se pudo cargar el historial. Cargá una entrevista abajo.</span>';
   }
 }
 

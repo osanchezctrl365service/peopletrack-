@@ -1424,9 +1424,9 @@ app.http('getCandidateInterviews', {
   handler: async (req) => {
     try {
       const id = parseInt(req.params.id);
+      // SELECT * defensivo: funciona aunque alguna columna no exista en este momento
       const res = await query(
-        `SELECT InterviewID, CandidateID, InterviewerName, Result, Feedback, CreatedAt
-         FROM CandidateInterviews
+        `SELECT * FROM CandidateInterviews
          WHERE CandidateID=@id
          ORDER BY CreatedAt DESC`,
         { id }

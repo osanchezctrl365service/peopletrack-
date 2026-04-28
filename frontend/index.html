@@ -1740,7 +1740,10 @@ function statusFor(pct) { return pct >= 70 ? 'success' : pct >= 40 ? 'warning' :
 
 async function apiGet(path) {
   try {
-    const res = await fetch(API_BASE + '/' + path);
+    const ctl = new AbortController();
+    const tid = setTimeout(()=>ctl.abort(), 15000);
+    const res = await fetch(API_BASE + '/' + path, { signal: ctl.signal });
+    clearTimeout(tid);
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const json = await res.json();
     return json.data !== undefined ? json.data : json;
@@ -1885,20 +1888,20 @@ function showSection(id){
   if(id==='objectives'){
     ['obj-core','obj-personal','obj-tasks'].forEach(function(pid,i){var el=document.getElementById(pid);if(el)el.style.display=i===0?'':'none';});
     document.querySelectorAll('#sec-objectives .tab').forEach(function(t,i){t.classList.toggle('active',i===0);});
-    if(!allUsuarios.length){loadUsuarios().then(function(){cargarObjetivosCoreEmpresa();poblarSelectoresTabObjetivos();if(!allPeriods.length)loadPeriods().then(poblarModalObjetivo);else poblarModalObjetivo();});}
-    else{cargarObjetivosCoreEmpresa();poblarSelectoresTabObjetivos();if(!allPeriods.length)loadPeriods().then(poblarModalObjetivo);else poblarModalObjetivo();}
+    if(!allUsuarios.length){loadUsuarios().then(function(){try{cargarObjetivosCoreEmpresa();poblarSelectoresTabObjetivos();}catch(e){console.warn('objectives init:',e.message);}if(!allPeriods.length)loadPeriods().then(poblarModalObjetivo).catch(function(e){console.warn(e);});else poblarModalObjetivo();}).catch(function(e){console.warn('showSection objectives:',e.message);});}
+    else{try{cargarObjetivosCoreEmpresa();poblarSelectoresTabObjetivos();}catch(e){console.warn(e);}if(!allPeriods.length)loadPeriods().then(poblarModalObjetivo).catch(function(e){console.warn(e);});else poblarModalObjetivo();}
   }
-  if(id==='career'){if(!allUsuarios.length)loadUsuarios().then(loadCareerPlans);else loadCareerPlans();}
-  if(id==='competencies'){if(!allUsuarios.length)loadUsuarios().then(poblarSelectoresCompetencias);else poblarSelectoresCompetencias();}
-  if(id==='reports'){if(!allUsuarios.length)loadUsuarios().then(initReportes);else initReportes();}
-  if(id==='oneononex'){if(!allColabReuniones||!allColabReuniones.length)initReuniones();}
-  if(id==='feedback360'){if(!allUsuarios.length)loadUsuarios().then(initFeedback360);else initFeedback360();if(!allPeriods.length)loadPeriods();}
+  if(id==='career'){if(!allUsuarios.length)loadUsuarios().then(loadCareerPlans).catch(function(e){console.warn('career:',e.message);try{loadCareerPlans();}catch(_){}});else loadCareerPlans();}
+  if(id==='competencies'){if(!allUsuarios.length)loadUsuarios().then(poblarSelectoresCompetencias).catch(function(e){console.warn('competencies:',e.message);try{poblarSelectoresCompetencias();}catch(_){}});else poblarSelectoresCompetencias();}
+  if(id==='reports'){if(!allUsuarios.length)loadUsuarios().then(initReportes).catch(function(e){console.warn('reports:',e.message);try{initReportes();}catch(_){}});else initReportes();}
+  if(id==='oneononex'){if(!allColabReuniones||!allColabReuniones.length){try{initReuniones();}catch(e){console.warn('oneononex:',e.message);}}}
+  if(id==='feedback360'){if(!allUsuarios.length)loadUsuarios().then(initFeedback360).catch(function(e){console.warn('feedback360:',e.message);try{initFeedback360();}catch(_){}});else initFeedback360();if(!allPeriods.length)loadPeriods().catch(function(e){console.warn(e);});}
   if(id==='help'&&typeof loadHelpArticles==='function') loadHelpArticles();
   if(id==='orgchart'&&typeof loadOrgChartDynamic==='function'){if(!orgData||!orgData.length)loadOrgChartDynamic();}
   if(id==='alerts'&&typeof loadAlertas==='function') loadAlertas();
-  if(id==='pip'){if(!allUsuarios.length)loadUsuarios().then(cargarPIPs);else cargarPIPs();}
-  if(id==='onboarding'){if(!allUsuarios.length)loadUsuarios().then(cargarOnboardings);else cargarOnboardings();}
-  if(id==='recruiting'){cargarCandidatos();}
+  if(id==='pip'){if(!allUsuarios.length)loadUsuarios().then(cargarPIPs).catch(function(e){console.warn('pip:',e.message);try{cargarPIPs();}catch(_){}});else cargarPIPs();}
+  if(id==='onboarding'){if(!allUsuarios.length)loadUsuarios().then(cargarOnboardings).catch(function(e){console.warn('onboarding:',e.message);try{cargarOnboardings();}catch(_){}});else cargarOnboardings();}
+  if(id==='recruiting'){try{cargarCandidatos();}catch(e){console.warn('recruiting:',e.message);}}
 }
 
 function switchTab(prefix, id, el){
@@ -2016,10 +2019,20 @@ let usuariosPagina = 1;
 const USUARIOS_POR_PAGINA = 20;
 
 async function loadUsuarios() {
-  const data = await apiGet('users/all');
-  if (!data) return;
-  allUsuarios = data;
-  renderUsuarios(allUsuarios);
+  try {
+    const data = await apiGet('users/all');
+    if (data && Array.isArray(data)) {
+      allUsuarios = data;
+      if (typeof renderUsuarios === 'function') renderUsuarios(allUsuarios);
+    } else {
+      console.warn('loadUsuarios: API devolvio datos vacios o invalidos, continuando con allUsuarios=[]');
+      allUsuarios = [];
+    }
+  } catch(e) {
+    console.warn('loadUsuarios falló:', e.message, '- continuando con allUsuarios=[]');
+    allUsuarios = [];
+  }
+  return allUsuarios;
 }
 
 function filtrarUsuarios() {
@@ -2535,10 +2548,16 @@ renderLideres = function(grupos) {
 // ═══ PERÍODOS ════════════════════════════════════════════════
 let allPeriods=[];
 async function loadPeriods(){
-  let d=await apiGet("periods/all");
-  if(!d||!Array.isArray(d)||!d.length) d=await apiGet("periods");
-  allPeriods=Array.isArray(d)?d:[];
-  renderPeriods();
+  try {
+    let d=await apiGet("periods/all");
+    if(!d||!Array.isArray(d)||!d.length) d=await apiGet("periods");
+    allPeriods=Array.isArray(d)?d:[];
+    if (typeof renderPeriods === 'function') renderPeriods();
+  } catch(e) {
+    console.warn('loadPeriods falló:', e.message);
+    allPeriods = [];
+  }
+  return allPeriods;
 }
 function renderPeriods(){
   const tb=document.getElementById("periodsTbody"),tbl=document.getElementById("periodsTable"),ld=document.getElementById("periodsLoading");

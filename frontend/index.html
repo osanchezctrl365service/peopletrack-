@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<!-- DIAGNOSTICO v2 28-Apr-2026 -->
 <title>PeopleTrack — Gestión de Objetivos y Carrera</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <style>
@@ -1179,7 +1178,7 @@ label { color: #888 !important; }
     <!-- MODAL DETALLE PLAN -->
     
 
-    <div class="section" id="sec-pip" style="width:100%;min-height:600px;">
+    <div class="section" id="sec-pip">
       <div class="section-header" style="margin-bottom:16px;">
         <div>
           <div class="section-heading">PIP — Plan de Improvement</div>
@@ -1199,7 +1198,7 @@ label { color: #888 !important; }
           <option value="closed">Cerrados</option>
         </select>
       </div>
-      <div id="pipContainer" style="width:100%;min-height:400px;max-height:calc(100vh - 280px);overflow-y:auto;padding-right:4px;">
+      <div id="pipContainer" style="width:100%;min-height:300px;max-height:calc(100vh - 280px);overflow-y:auto;padding-right:4px;">
         <div style="text-align:center;padding:40px;color:#888;">Cargando PIPs...</div>
       </div>
     </div>
@@ -4308,45 +4307,29 @@ async function guardarNuevoPIP() {
 }
 
 async function cargarPIPs() {
-  console.log('=== [PIP] cargarPIPs INICIADA ===');
   var c = document.getElementById('pipContainer');
-  if (!c) { alert('pipContainer no existe'); return; }
-  // Diagnostico de ancestros
-  console.log('[PIP] === ANCESTROS de pipContainer ===');
-  var node = c;
-  var lvl = 0;
-  while (node && node !== document.body && lvl < 10) {
-    var cs = getComputedStyle(node);
-    console.log('[PIP] nivel', lvl, ':', node.tagName, '#'+node.id, 'class='+node.className,
-      '| display='+cs.display, 'visibility='+cs.visibility,
-      '| dim='+node.offsetWidth+'x'+node.offsetHeight,
-      '| height='+cs.height, 'width='+cs.width);
-    node = node.parentElement;
-    lvl++;
-  }
-  c.innerHTML = '<div style="background:#FF5400;color:white;padding:30px;font-size:18px;font-weight:bold;border-radius:8px;">[1] Llamando fetch...</div>';
+  if (!c) return;
+  c.innerHTML = '<div style="text-align:center;padding:20px;color:#888;">Cargando PIPs...</div>';
   try {
     var res = await fetch(API_BASE + '/pips');
     var txt = await res.text();
     if (!res.ok) {
-      c.innerHTML = '<div style="background:#FF4D4D;color:white;padding:30px;border-radius:8px;">Error HTTP ' + res.status + '<br><pre style="background:#000;padding:10px;text-align:left;font-size:11px;">' + (txt||'').substring(0,500) + '</pre></div>';
+      c.innerHTML = '<div style="text-align:center;padding:30px;color:#FF4D4D;font-size:13px;">Error HTTP ' + res.status + ' al cargar PIPs<br><small style="color:#888;">El endpoint /pips no esta disponible en la API</small><br><button class="btn btn-secondary btn-sm" style="margin-top:12px;" onclick="cargarPIPs()">Reintentar</button></div>';
       return;
     }
-    var json = JSON.parse(txt);
-    var raw = Array.isArray(json) ? json : (json.data || []);
-    allPIPs = raw.filter(function(p){ return !p.IsDeleted && p.Status !== 'deleted'; });
-    if (!allPIPs.length) {
-      c.innerHTML = '<div style="background:#1a1a1a;color:#888;padding:40px;text-align:center;border-radius:8px;border:1px solid #2a2a2a;">Sin PIPs registrados</div>';
+    if (!txt || !txt.trim()) {
+      allPIPs = [];
+      renderPIPs([]);
       return;
     }
+    var json;
+    try { json = JSON.parse(txt); } catch(e){ throw new Error('Respuesta invalida: '+txt.substring(0,80)); }
+    if (!res.ok) throw new Error('HTTP '+res.status+': '+((json&&json.error)||''));
+    allPIPs = Array.isArray(json) ? json : (json.data||[]);
+    allPIPs = allPIPs.filter(function(p){ return p.Status !== 'deleted'; });
     renderPIPs(allPIPs);
-    // Tras renderizar, ver dimensiones del container
-    setTimeout(function(){
-      console.log('[PIP] DESPUES de renderPIPs - container dim:', c.offsetWidth+'x'+c.offsetHeight, '| childs:', c.children.length);
-    }, 100);
   } catch(e) {
-    console.error('[PIP] Excepcion:', e);
-    c.innerHTML = '<div style="background:#FF4D4D;color:white;padding:30px;">Excepcion: ' + e.message + '</div>';
+    c.innerHTML = '<div style="text-align:center;padding:30px;color:#FF4D4D;font-size:13px;">Error al cargar PIPs: '+e.message+'<br><button class="btn btn-secondary btn-sm" style="margin-top:12px;" onclick="cargarPIPs()">Reintentar</button></div>';
   }
 }
 function filtrarPIPs(q) {
@@ -4731,43 +4714,27 @@ async function guardarNuevoOnboarding() {
 }
 
 async function cargarOnboardings() {
-  console.log('=== [ONBOARDING] cargarOnboardings INICIADA ===');
-  var sec = document.getElementById('sec-onboarding');
   var c = document.getElementById('onboardingContainer');
-  console.log('[ONB] sec-onboarding existe:', !!sec, '| onboardingContainer existe:', !!c);
-  if (!c) {
-    if (sec) sec.innerHTML = '<div style="background:yellow;color:black;padding:40px;font-size:20px;font-weight:bold;">[ONB] onboardingContainer NO EXISTE</div>';
-    else alert('[ONB] sec-onboarding NO EXISTE');
-    return;
-  }
-  c.innerHTML = '<div style="background:#FF5400;color:white;padding:30px;font-size:18px;font-weight:bold;border-radius:8px;">[1] cargarOnboardings OK. Fetch...</div>';
+  if (!c) { console.error('onboardingContainer not found'); return; }
+  c.innerHTML = '<div style="text-align:center;padding:20px;color:#888;">Cargando...</div>';
   try {
     var res = await fetch(API_BASE + '/onboarding');
-    console.log('[ONB] Status:', res.status);
-    c.innerHTML = '<div style="background:#FF5400;color:white;padding:30px;font-size:18px;font-weight:bold;border-radius:8px;">[2] Status: ' + res.status + '</div>';
     var txt = await res.text();
-    console.log('[ONB] Body preview:', txt.substring(0,200));
-    if (!res.ok) {
-      c.innerHTML = '<div style="background:#FF4D4D;color:white;padding:30px;border-radius:8px;">Error HTTP ' + res.status + '<br><pre style="background:#000;padding:10px;text-align:left;font-size:11px;">' + (txt||'').substring(0,500) + '</pre></div>';
-      return;
-    }
-    var json = JSON.parse(txt);
+    var json;
+    try { json = JSON.parse(txt); } catch(pe) { throw new Error('JSON inválido: ' + txt.substring(0,100)); }
+    if (!res.ok) throw new Error('HTTP ' + res.status + ': ' + (json.error||txt.substring(0,80)));
     var data = Array.isArray(json) ? json : (json.data || []);
-    console.log('[ONB] Registros:', data.length);
     allOnboardings = data.filter(function(o){ return o.Status !== 'deleted'; });
+    var enProceso  = allOnboardings.filter(function(o){ return o.Status==='in_progress'; }).length;
+    var completos  = allOnboardings.filter(function(o){ return o.Status==='completed'; }).length;
+    var hitosPend  = allOnboardings.reduce(function(s,o){ return s+((o.TotalMilestones||0)-(o.CompletedMilestones||0)); }, 0);
+    var cursosPend = allOnboardings.reduce(function(s,o){ return s+((o.TotalCourses||0)-(o.CompletedCourses||0)); }, 0);
     var k = function(id,v){ var el=document.getElementById(id); if(el) el.textContent=v; };
-    k('obKpiEnProceso', allOnboardings.filter(function(o){return o.Status==='in_progress';}).length);
-    k('obKpiCompletos', allOnboardings.filter(function(o){return o.Status==='completed';}).length);
-    k('obKpiHitos', allOnboardings.reduce(function(s,o){return s+((o.TotalMilestones||0)-(o.CompletedMilestones||0));}, 0));
-    k('obKpiCursos', allOnboardings.reduce(function(s,o){return s+((o.TotalCourses||0)-(o.CompletedCourses||0));}, 0));
-    if (!allOnboardings.length) {
-      c.innerHTML = '<div style="background:#1a1a1a;color:#888;padding:40px;text-align:center;border:1px solid #2a2a2a;border-radius:8px;">Sin onboardings (API devolvió ' + data.length + ')</div>';
-      return;
-    }
+    k('obKpiEnProceso',enProceso); k('obKpiCompletos',completos);
+    k('obKpiHitos',hitosPend);     k('obKpiCursos',cursosPend);
     renderOnboardings(allOnboardings);
   } catch(e) {
-    console.error('[ONB] Excepción:', e);
-    c.innerHTML = '<div style="background:#FF4D4D;color:white;padding:30px;">Excepción: ' + e.message + '</div>';
+    c.innerHTML = '<div style="text-align:center;padding:20px;color:#FF4D4D;font-size:13px;">Error: '+e.message+'</div>';
   }
 }function renderOnboardings(obs) {
   var c = document.getElementById('onboardingContainer');
@@ -5024,37 +4991,17 @@ async function guardarEditarNota(rid) {
 var allCandidatos = [];
 
 async function cargarCandidatos() {
-  console.log('=== [RECRUITING] cargarCandidatos INICIADA ===');
-  var sec = document.getElementById('sec-recruiting');
   var c = document.getElementById('recruitingContainer');
-  console.log('[REC] sec-recruiting existe:', !!sec, '| recruitingContainer existe:', !!c);
-  if (!c) {
-    if (sec) sec.innerHTML = '<div style="background:yellow;color:black;padding:40px;font-size:20px;font-weight:bold;">[REC] recruitingContainer NO EXISTE</div>';
-    else alert('[REC] sec-recruiting NO EXISTE');
-    return;
-  }
-  c.innerHTML = '<div style="background:#FF5400;color:white;padding:30px;font-size:18px;font-weight:bold;border-radius:8px;">[1] cargarCandidatos OK. Fetch...</div>';
+  if (!c) return;
+  c.innerHTML = '<div style="text-align:center;padding:20px;color:#888;">Cargando...</div>';
   try {
-    var res = await fetch(API_BASE + '/candidates');
-    console.log('[REC] Status:', res.status);
-    c.innerHTML = '<div style="background:#FF5400;color:white;padding:30px;font-size:18px;font-weight:bold;border-radius:8px;">[2] Status: ' + res.status + '</div>';
-    var txt = await res.text();
-    console.log('[REC] Body preview:', txt.substring(0,200));
-    if (!res.ok) {
-      c.innerHTML = '<div style="background:#FF4D4D;color:white;padding:30px;border-radius:8px;">Error HTTP ' + res.status + '<br><pre style="background:#000;padding:10px;text-align:left;font-size:11px;">' + (txt||'').substring(0,500) + '</pre></div>';
-      return;
-    }
-    var json = JSON.parse(txt);
+    var res  = await fetch(API_BASE + '/candidates');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    var json = await res.json();
     allCandidatos = Array.isArray(json) ? json : (json.data || []);
-    console.log('[REC] Candidatos:', allCandidatos.length);
-    if (!allCandidatos.length) {
-      c.innerHTML = '<div style="background:#1a1a1a;color:#888;padding:40px;text-align:center;border:1px solid #2a2a2a;border-radius:8px;">Sin candidatos</div>';
-      return;
-    }
     renderKanban(allCandidatos);
   } catch(e) {
-    console.error('[REC] Excepción:', e);
-    c.innerHTML = '<div style="background:#FF4D4D;color:white;padding:30px;">Excepción: ' + e.message + '</div>';
+    c.innerHTML = '<div style="text-align:center;padding:20px;color:#FF4D4D;">Error al cargar candidatos: '+e.message+'</div>';
   }
 }
 function filtrarCandidatos(q) {
@@ -5816,7 +5763,7 @@ function verEvidenciaCareer(mid) {
     
 
     <!-- RECRUITING -->
-    <div class="section" id="sec-recruiting" style="width:100%;min-height:600px;">
+    <div class="section" id="sec-recruiting">
       <div class="section-header" style="margin-bottom:20px;">
         <div>
           <div class="section-heading">Recruiting</div>
@@ -5827,12 +5774,12 @@ function verEvidenciaCareer(mid) {
           <button class="btn btn-primary btn-sm" onclick="abrirModalNuevoCandidato()">+ Nuevo Candidato</button>
         </div>
       </div>
-      <div id="recruitingContainer" style="width:100%;min-height:400px;overflow-y:auto;max-height:calc(100vh - 220px);">
+      <div id="recruitingContainer" style="width:100%;min-height:300px;overflow-y:auto;max-height:calc(100vh - 220px);">
         <div style="text-align:center;padding:30px;color:#888;">Cargando candidatos...</div>
       </div>
     </div><!-- /sec-recruiting -->
 
-    <div class="section" id="sec-onboarding" style="width:100%;min-height:600px;">
+    <div class="section" id="sec-onboarding">
       <div class="section-header" style="margin-bottom:20px;">
         <div><div class="section-heading">Onboarding</div>
           <div class="section-subheading">Incorporaci&oacute;n de nuevos empleados</div></div>
@@ -5845,7 +5792,7 @@ function verEvidenciaCareer(mid) {
         <div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:10px;padding:16px;text-align:center;"><div style="font-size:28px;font-weight:800;color:#3B82F6;" id="obKpiHitos">&#8212;</div><div style="font-size:11px;color:#888;margin-top:4px;">Hitos pendientes</div></div>
         <div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:10px;padding:16px;text-align:center;"><div style="font-size:28px;font-weight:800;color:#A855F7;" id="obKpiCursos">&#8212;</div><div style="font-size:11px;color:#888;margin-top:4px;">Cursos pendientes</div></div>
       </div>
-      <div id="onboardingContainer" style="width:100%;min-height:400px;max-height:calc(100vh - 300px);overflow-y:auto;padding-right:4px;">
+      <div id="onboardingContainer" style="width:100%;min-height:300px;max-height:calc(100vh - 300px);overflow-y:auto;padding-right:4px;">
         <div style="text-align:center;padding:30px;color:#888;">Cargando planes de onboarding...</div>
       </div>
     </div>

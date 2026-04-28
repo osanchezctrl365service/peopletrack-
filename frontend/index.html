@@ -1205,8 +1205,6 @@ label { color: #888 !important; }
 
     <!-- MODAL NUEVO PIP -->
     
-    </div>
-
     <!-- MODAL REVISAR PIP -->
     
 
@@ -3083,7 +3081,6 @@ async function guardarNuevoObjetivo() {
     }
   }
 
-  console.log('[GUARDAR OBJ] body enviado:', JSON.stringify(body));
   var btn = document.querySelector('#newObjectiveModal .btn-primary');
   if(btn){btn.textContent='Guardando...';btn.disabled=true;}
   try {
@@ -3093,7 +3090,6 @@ async function guardarNuevoObjetivo() {
     });
     var data = {};
     try { data = await res.json(); } catch(e) {}
-    console.log('[GUARDAR OBJ] respuesta:', res.status, data);
     if (!res.ok || data.ok === false) throw new Error(data.error || 'Error ' + res.status);
     closeModal('newObjectiveModal');
     ['newObjTitulo','newObjDescCore','newObjDescPersonal'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
@@ -5813,7 +5809,8 @@ function verEvidenciaCareer(mid) {
 
 <!-- MODAL NUEVO OBJETIVO -->
 
-</div>
+</div><!-- /content -->
+</div><!-- /main-wrap -->
 
 <div class="modal-overlay" id="modalNuevoPlan">
       <div class="modal" style="max-width:560px;">

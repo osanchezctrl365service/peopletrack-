@@ -260,12 +260,13 @@ app.http('getObjectives', {
       const periodId = req.query.get('periodId') || null;
       const type = req.query.get('type') || null;
       const res = await query(
-        `SELECT o.*, u.FullName AS EmployeeName, fp.PeriodName, c.CompetencyName
+        `SELECT o.*, u.FullName AS EmployeeName, fp.PeriodName, c.CompetencyName, a.AreaName
          FROM Objectives o
          LEFT JOIN Users u ON o.UserID = u.UserID
          LEFT JOIN FiscalPeriods fp ON o.PeriodID = fp.PeriodID
          LEFT JOIN ObjectiveTasks ot ON o.ObjectiveID = ot.ObjectiveID
          LEFT JOIN Competencies c ON ot.CompetencyID = c.CompetencyID
+         LEFT JOIN Areas a ON o.AreaID = a.AreaID
          WHERE o.IsActive=1
            AND (@userId IS NULL OR o.UserID=@userId)
            AND (@periodId IS NULL OR o.PeriodID=@periodId)

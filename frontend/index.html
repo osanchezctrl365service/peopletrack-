@@ -1205,7 +1205,6 @@ label { color: #888 !important; }
 
     <!-- MODAL NUEVO PIP -->
     
-
     </div>
 
     <!-- MODAL REVISAR PIP -->
@@ -1694,6 +1693,13 @@ label { color: #888 !important; }
         </div>
       </div>
     </div><!-- /sec-help -->
+
+
+
+
+
+
+
 
 <script>
 const titles = {
@@ -4305,24 +4311,24 @@ async function cargarPIPs() {
   var c = document.getElementById('pipContainer');
   if (!c) return;
   c.innerHTML = '<div style="text-align:center;padding:30px;color:#888;font-size:13px;">Cargando PIPs...</div>';
-  var url = API_BASE + '/pips';
   try {
-    var res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+    var res = await fetch(API_BASE + '/pips', { headers: { 'Accept': 'application/json' } });
     var txt = await res.text();
+    if (!txt || !txt.trim()) { allPIPs = []; renderPIPs([]); return; }
     var json;
     try { json = JSON.parse(txt); } catch(pe) {
-      c.innerHTML = '<div style="text-align:center;padding:30px;"><div style="color:#FF4D4D;font-size:13px;margin-bottom:12px;">Error de formato en respuesta PIP</div><div style="color:#666;font-size:11px;">'+txt.substring(0,120)+'</div><button class="btn btn-secondary btn-sm" style="margin-top:12px;" onclick="cargarPIPs()">Reintentar</button></div>';
+      c.innerHTML = '<div style="text-align:center;padding:30px;color:#FF4D4D;font-size:13px;">Error de formato PIP<br><small style=\'color:#666;\'>' + txt.substring(0,100) + '</small><br><button class=\'btn btn-secondary btn-sm\' style=\'margin-top:12px;\' onclick=\'cargarPIPs()\'>Reintentar</button></div>';
       return;
     }
     if (!res.ok) {
-      c.innerHTML = '<div style="text-align:center;padding:30px;"><div style="color:#FF4D4D;font-size:13px;">Error HTTP '+res.status+' al cargar PIPs</div><button class="btn btn-secondary btn-sm" style="margin-top:12px;" onclick="cargarPIPs()">Reintentar</button></div>';
+      c.innerHTML = '<div style="text-align:center;padding:30px;color:#FF4D4D;font-size:13px;">Error HTTP ' + res.status + '<br><button class=\'btn btn-secondary btn-sm\' style=\'margin-top:12px;\' onclick=\'cargarPIPs()\'>Reintentar</button></div>';
       return;
     }
     allPIPs = Array.isArray(json) ? json : (json.data || []);
     allPIPs = allPIPs.filter(function(p){ return !p.IsDeleted && p.Status !== 'deleted'; });
     renderPIPs(allPIPs);
   } catch(e) {
-    c.innerHTML = '<div style="text-align:center;padding:30px;"><div style="color:#FF4D4D;font-size:13px;">Sin conexión con la API de PIPs</div><div style="color:#666;font-size:11px;margin-top:4px;">'+e.message+'</div><button class="btn btn-secondary btn-sm" style="margin-top:12px;" onclick="cargarPIPs()">Reintentar</button></div>';
+    c.innerHTML = '<div style="text-align:center;padding:30px;color:#FF4D4D;font-size:13px;">Error: ' + e.message + '<br><button class=\'btn btn-secondary btn-sm\' style=\'margin-top:12px;\' onclick=\'cargarPIPs()\'>Reintentar</button></div>';
   }
 }
 function filtrarPIPs(q) {
@@ -4561,30 +4567,25 @@ async function ejecutarEliminarUsuario(id, btn) {
 // AYUDA - carga desde BD
 // ══════════════════════════════════════════════════════════════
 async function loadHelpArticles() {
-  var c   = document.getElementById('helpArticlesContainer');
-  var idx = document.getElementById('helpIndex');
+  var c = document.getElementById('helpArticlesContainer');
+  var sidx = document.getElementById('helpIndex');
   if (!c) return;
-  c.innerHTML = '<div style="text-align:center;padding:30px;color:#888;font-size:13px;">Cargando artículos...</div>';
+  c.innerHTML = '<div style="text-align:center;padding:30px;color:#888;font-size:13px;">Cargando articulos...</div>';
   try {
     var res = await fetch(API_BASE + '/help/articles', { headers: { 'Accept': 'application/json' } });
     var txt = await res.text();
+    if (!txt || !txt.trim()) { c.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Sin articulos de ayuda.</div>'; return; }
     var json;
     try { json = JSON.parse(txt); } catch(pe) {
-      c.innerHTML = '<div style="text-align:center;padding:30px;"><div style="color:#FF4D4D;font-size:13px;">Error de formato en respuesta de Ayuda</div><div style="color:#666;font-size:11px;margin-top:4px;">'+txt.substring(0,120)+'</div></div>';
+      c.innerHTML = '<div style="text-align:center;padding:30px;color:#FF4D4D;font-size:13px;">Error de formato en Ayuda<br><small style=\'color:#666;\'>' + txt.substring(0,100) + '</small></div>';
       return;
     }
-    if (!res.ok) {
-      c.innerHTML = '<div style="text-align:center;padding:30px;color:#FF4D4D;font-size:13px;">Error HTTP '+res.status+' al cargar ayuda</div>';
-      return;
-    }
+    if (!res.ok) { c.innerHTML = '<div style="text-align:center;padding:30px;color:#FF4D4D;font-size:13px;">Error HTTP ' + res.status + ' al cargar ayuda</div>'; return; }
     var arts = Array.isArray(json) ? json : (json.data || []);
     arts = arts.filter(function(a){ return a.IsActive !== false && a.IsActive !== 0; });
-    if (!arts.length) {
-      c.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Sin artículos de ayuda en la base de datos.</div>';
-      return;
-    }
-    if (idx) {
-      idx.innerHTML = '<div style="font-size:10px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:12px;">Artículos</div>';
+    if (!arts.length) { c.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Sin articulos en la base de datos.</div>'; return; }
+    if (sidx) {
+      sidx.innerHTML = '<div style="font-size:10px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:12px;">Articulos</div>';
       arts.forEach(function(a) {
         var b = document.createElement('button');
         b.textContent = a.Title;
@@ -4592,7 +4593,7 @@ async function loadHelpArticles() {
         b.onmouseenter = function(){ this.style.background='rgba(255,84,0,0.08)'; this.style.color='#FF5400'; };
         b.onmouseleave = function(){ this.style.background='none'; this.style.color='#aaa'; };
         b.onclick = function(){ var el=document.getElementById('help-art-'+a.ArticleID); if(el) el.scrollIntoView({behavior:'smooth'}); };
-        idx.appendChild(b);
+        sidx.appendChild(b);
       });
     }
     var html = '';
@@ -4604,7 +4605,7 @@ async function loadHelpArticles() {
     });
     c.innerHTML = html;
   } catch(e) {
-    c.innerHTML = '<div style="text-align:center;padding:30px;"><div style="color:#FF4D4D;font-size:13px;">Error al cargar artículos de ayuda</div><div style="color:#666;font-size:11px;margin-top:4px;">'+e.message+'</div></div>';
+    c.innerHTML = '<div style="text-align:center;padding:30px;color:#FF4D4D;font-size:13px;">Error al cargar ayuda: ' + e.message + '</div>';
   }
 }// Cargar ayuda al entrar a la sección
 
@@ -5752,6 +5753,7 @@ function verEvidenciaCareer(mid) {
 
 <!-- MODAL EDITAR OBJETIVO -->
 
+
       <div id="rep-cambios" style="display:none;margin-top:16px;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
           <div style="font-size:13px;color:#aaa;">Registro de cambios de rol, proyecto o líder.</div>
@@ -5805,13 +5807,14 @@ function verEvidenciaCareer(mid) {
     <!-- MODAL DETALLE ONBOARDING -->
     
 
+
+
+
+
 <!-- MODAL NUEVO OBJETIVO -->
 
+</div>
 
-</div><!-- /content -->
-
-
-<!-- MODAL: modalNuevoPlan -->
 <div class="modal-overlay" id="modalNuevoPlan">
       <div class="modal" style="max-width:560px;">
         <div class="modal-title">Nuevo Plan de Carrera</div>
@@ -5847,7 +5850,6 @@ function verEvidenciaCareer(mid) {
       </div>
     </div>
 
-<!-- MODAL: modalDetallePlan -->
 <div class="modal-overlay" id="modalDetallePlan">
       <div class="modal" style="max-width:700px;max-height:88vh;overflow-y:auto;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
@@ -5859,7 +5861,6 @@ function verEvidenciaCareer(mid) {
       </div>
     </div>
 
-<!-- MODAL: modalNuevoPIP -->
 <div class="modal-overlay" id="modalNuevoPIP">
       <div class="modal" style="max-width:860px;">
         <div class="modal-title">Nuevo Plan de Improvement (PIP)</div>
@@ -5895,7 +5896,6 @@ function verEvidenciaCareer(mid) {
         </div>
       </div>
 
-<!-- MODAL: modalRevisarPIP -->
 <div class="modal-overlay" id="modalRevisarPIP">
       <div class="modal" style="max-width:560px;">
         <div class="modal-title" id="revisarPIPTitle">Revisar PIP</div>
@@ -5922,7 +5922,6 @@ function verEvidenciaCareer(mid) {
       </div>
     </div>
 
-<!-- MODAL: checkinModal -->
 <div class="modal-overlay" id="checkinModal">
   <div class="modal">
     <div class="modal-title">Registrar Check-in</div>
@@ -5937,7 +5936,6 @@ function verEvidenciaCareer(mid) {
   </div>
 </div>
 
-<!-- MODAL: newMeetingModal -->
 <div class="modal-overlay" id="newMeetingModal">
   <div class="modal">
     <div class="modal-title">Nueva Reunión 1:1</div>
@@ -5960,7 +5958,6 @@ function verEvidenciaCareer(mid) {
   </div>
 </div>
 
-<!-- MODAL: exportModal -->
 <div class="modal-overlay" id="exportModal">
   <div class="modal">
     <div class="modal-title">Exportar Datos</div>
@@ -5977,7 +5974,6 @@ function verEvidenciaCareer(mid) {
   </div>
 </div>
 
-<!-- MODAL: editObjectiveModal -->
 <div class="modal-overlay" id="editObjectiveModal">
   <div class="modal" style="max-width:560px;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
@@ -6061,7 +6057,6 @@ function verEvidenciaCareer(mid) {
   </div>
 </div>
 
-<!-- MODAL: modalNuevoCambio -->
 <div class="modal-overlay" id="modalNuevoCambio">
       <div class="modal" style="max-width:580px;">
         <div class="modal-title">Registrar Cambio</div>
@@ -6101,7 +6096,6 @@ function verEvidenciaCareer(mid) {
       </div>
     </div>
 
-<!-- MODAL: modalNuevoOnboarding -->
 <div class="modal-overlay" id="modalNuevoOnboarding">
       <div class="modal" style="max-width:560px;">
         <div class="modal-title">Nuevo Plan de Onboarding</div>
@@ -6130,7 +6124,6 @@ function verEvidenciaCareer(mid) {
       </div>
     </div>
 
-<!-- MODAL: modalDetalleOnboarding -->
 <div class="modal-overlay" id="modalDetalleOnboarding">
       <div class="modal" style="max-width:720px;max-height:85vh;overflow-y:auto;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
@@ -6142,7 +6135,6 @@ function verEvidenciaCareer(mid) {
       </div>
     </div>
 
-<!-- MODAL: newObjectiveModal -->
 <div class="modal-overlay" id="newObjectiveModal">
   <div class="modal" style="max-width:640px;">
     <div class="modal-title" id="newObjModalTitle">Nuevo Objetivo Core Empresa</div>

@@ -4307,29 +4307,47 @@ async function guardarNuevoPIP() {
 }
 
 async function cargarPIPs() {
+  // Buscar pipContainer pero si no existe inyectar uno gigante
   var c = document.getElementById('pipContainer');
-  if (!c) return;
-  c.innerHTML = '<div style="text-align:center;padding:20px;color:#888;">Cargando PIPs...</div>';
+  var sec = document.getElementById('sec-pip');
+  if (!c) {
+    if (sec) {
+      sec.innerHTML = '<div style="background:yellow;color:black;padding:40px;font-size:20px;font-weight:bold;">[PIP] pipContainer NO EXISTE. Sec-pip: ' + (sec ? 'SI' : 'NO') + '</div>';
+    } else {
+      alert('NI sec-pip NI pipContainer existen!');
+    }
+    return;
+  }
+  // Diagnóstico visible MUY claro
+  c.innerHTML = '<div style="background:#FF5400;color:white;padding:30px;font-size:18px;font-weight:bold;border-radius:8px;">[1] cargarPIPs INICIANDO. Container OK.</div>';
   try {
+    c.innerHTML = '<div style="background:#FF5400;color:white;padding:30px;font-size:18px;font-weight:bold;border-radius:8px;">[2] Llamando fetch(/pips)...</div>';
     var res = await fetch(API_BASE + '/pips');
+    c.innerHTML = '<div style="background:#FF5400;color:white;padding:30px;font-size:18px;font-weight:bold;border-radius:8px;">[3] Status HTTP: ' + res.status + '. Leyendo body...</div>';
     var txt = await res.text();
     if (!res.ok) {
-      c.innerHTML = '<div style="text-align:center;padding:30px;color:#FF4D4D;font-size:13px;">Error HTTP ' + res.status + ' al cargar PIPs<br><small style="color:#888;">El endpoint /pips no esta disponible en la API</small><br><button class="btn btn-secondary btn-sm" style="margin-top:12px;" onclick="cargarPIPs()">Reintentar</button></div>';
+      c.innerHTML = '<div style="background:#FF4D4D;color:white;padding:30px;font-size:16px;border-radius:8px;">Error HTTP ' + res.status + '<br><br>Body: <pre style="background:#000;padding:10px;font-size:12px;text-align:left;">' + (txt||'(vacio)').substring(0,500) + '</pre><button onclick="cargarPIPs()" style="margin-top:12px;padding:8px 16px;">Reintentar</button></div>';
       return;
     }
-    if (!txt || !txt.trim()) {
-      allPIPs = [];
-      renderPIPs([]);
+    var json = null;
+    try { json = JSON.parse(txt); } catch(pe) {
+      c.innerHTML = '<div style="background:#FF4D4D;color:white;padding:30px;font-size:16px;border-radius:8px;">JSON inválido<br><br>Body: <pre style="background:#000;padding:10px;font-size:12px;text-align:left;">' + txt.substring(0,500) + '</pre></div>';
       return;
     }
-    var json;
-    try { json = JSON.parse(txt); } catch(e){ throw new Error('Respuesta invalida: '+txt.substring(0,80)); }
-    if (!res.ok) throw new Error('HTTP '+res.status+': '+((json&&json.error)||''));
-    allPIPs = Array.isArray(json) ? json : (json.data||[]);
-    allPIPs = allPIPs.filter(function(p){ return p.Status !== 'deleted'; });
+    var raw = Array.isArray(json) ? json : (json.data || []);
+    c.innerHTML = '<div style="background:#FF5400;color:white;padding:30px;font-size:18px;font-weight:bold;border-radius:8px;">[4] Recibidos ' + raw.length + ' registros. Renderizando...</div>';
+    if (!Array.isArray(raw)) {
+      c.innerHTML = '<div style="background:#FF4D4D;color:white;padding:30px;">Respuesta no es array: ' + JSON.stringify(json).substring(0,300) + '</div>';
+      return;
+    }
+    allPIPs = raw.filter(function(p){ return !p.IsDeleted && p.Status !== 'deleted'; });
+    if (!allPIPs.length) {
+      c.innerHTML = '<div style="background:#1a1a1a;color:#888;padding:40px;text-align:center;border-radius:8px;">Sin PIPs registrados<br><small>(API devolvió ' + raw.length + ' registros, ' + (raw.length - allPIPs.length) + ' filtrados como eliminados)</small></div>';
+      return;
+    }
     renderPIPs(allPIPs);
   } catch(e) {
-    c.innerHTML = '<div style="text-align:center;padding:30px;color:#FF4D4D;font-size:13px;">Error al cargar PIPs: '+e.message+'<br><button class="btn btn-secondary btn-sm" style="margin-top:12px;" onclick="cargarPIPs()">Reintentar</button></div>';
+    c.innerHTML = '<div style="background:#FF4D4D;color:white;padding:30px;">Excepción: ' + e.message + '<br><pre>' + (e.stack||'').substring(0,500) + '</pre></div>';
   }
 }
 function filtrarPIPs(q) {
@@ -4715,26 +4733,36 @@ async function guardarNuevoOnboarding() {
 
 async function cargarOnboardings() {
   var c = document.getElementById('onboardingContainer');
-  if (!c) { console.error('onboardingContainer not found'); return; }
-  c.innerHTML = '<div style="text-align:center;padding:20px;color:#888;">Cargando...</div>';
+  var sec = document.getElementById('sec-onboarding');
+  if (!c) {
+    if (sec) sec.innerHTML = '<div style="background:yellow;color:black;padding:40px;font-size:20px;font-weight:bold;">[ONBOARDING] onboardingContainer NO EXISTE</div>';
+    else alert('NI sec-onboarding NI onboardingContainer existen!');
+    return;
+  }
+  c.innerHTML = '<div style="background:#FF5400;color:white;padding:30px;font-size:18px;font-weight:bold;border-radius:8px;">[1] cargarOnboardings INICIANDO</div>';
   try {
     var res = await fetch(API_BASE + '/onboarding');
+    c.innerHTML = '<div style="background:#FF5400;color:white;padding:30px;font-size:18px;font-weight:bold;border-radius:8px;">[2] Status: ' + res.status + '</div>';
     var txt = await res.text();
-    var json;
-    try { json = JSON.parse(txt); } catch(pe) { throw new Error('JSON inválido: ' + txt.substring(0,100)); }
-    if (!res.ok) throw new Error('HTTP ' + res.status + ': ' + (json.error||txt.substring(0,80)));
+    if (!res.ok) {
+      c.innerHTML = '<div style="background:#FF4D4D;color:white;padding:30px;border-radius:8px;">Error HTTP ' + res.status + '<br><pre style="background:#000;padding:10px;text-align:left;">' + (txt||'').substring(0,500) + '</pre></div>';
+      return;
+    }
+    var json = JSON.parse(txt);
     var data = Array.isArray(json) ? json : (json.data || []);
     allOnboardings = data.filter(function(o){ return o.Status !== 'deleted'; });
-    var enProceso  = allOnboardings.filter(function(o){ return o.Status==='in_progress'; }).length;
-    var completos  = allOnboardings.filter(function(o){ return o.Status==='completed'; }).length;
-    var hitosPend  = allOnboardings.reduce(function(s,o){ return s+((o.TotalMilestones||0)-(o.CompletedMilestones||0)); }, 0);
-    var cursosPend = allOnboardings.reduce(function(s,o){ return s+((o.TotalCourses||0)-(o.CompletedCourses||0)); }, 0);
     var k = function(id,v){ var el=document.getElementById(id); if(el) el.textContent=v; };
-    k('obKpiEnProceso',enProceso); k('obKpiCompletos',completos);
-    k('obKpiHitos',hitosPend);     k('obKpiCursos',cursosPend);
+    k('obKpiEnProceso', allOnboardings.filter(function(o){return o.Status==='in_progress';}).length);
+    k('obKpiCompletos', allOnboardings.filter(function(o){return o.Status==='completed';}).length);
+    k('obKpiHitos', allOnboardings.reduce(function(s,o){return s+((o.TotalMilestones||0)-(o.CompletedMilestones||0));}, 0));
+    k('obKpiCursos', allOnboardings.reduce(function(s,o){return s+((o.TotalCourses||0)-(o.CompletedCourses||0));}, 0));
+    if (!allOnboardings.length) {
+      c.innerHTML = '<div style="background:#1a1a1a;color:#888;padding:40px;text-align:center;">Sin onboardings (API devolvió ' + data.length + ')</div>';
+      return;
+    }
     renderOnboardings(allOnboardings);
   } catch(e) {
-    c.innerHTML = '<div style="text-align:center;padding:20px;color:#FF4D4D;font-size:13px;">Error: '+e.message+'</div>';
+    c.innerHTML = '<div style="background:#FF4D4D;color:white;padding:30px;">Excepción: ' + e.message + '</div>';
   }
 }function renderOnboardings(obs) {
   var c = document.getElementById('onboardingContainer');
@@ -4992,16 +5020,30 @@ var allCandidatos = [];
 
 async function cargarCandidatos() {
   var c = document.getElementById('recruitingContainer');
-  if (!c) return;
-  c.innerHTML = '<div style="text-align:center;padding:20px;color:#888;">Cargando...</div>';
+  var sec = document.getElementById('sec-recruiting');
+  if (!c) {
+    if (sec) sec.innerHTML = '<div style="background:yellow;color:black;padding:40px;font-size:20px;font-weight:bold;">[RECRUITING] recruitingContainer NO EXISTE</div>';
+    else alert('NI sec-recruiting NI recruitingContainer existen!');
+    return;
+  }
+  c.innerHTML = '<div style="background:#FF5400;color:white;padding:30px;font-size:18px;font-weight:bold;border-radius:8px;">[1] cargarCandidatos INICIANDO</div>';
   try {
-    var res  = await fetch(API_BASE + '/candidates');
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    var json = await res.json();
+    var res = await fetch(API_BASE + '/candidates');
+    c.innerHTML = '<div style="background:#FF5400;color:white;padding:30px;font-size:18px;font-weight:bold;border-radius:8px;">[2] Status: ' + res.status + '</div>';
+    var txt = await res.text();
+    if (!res.ok) {
+      c.innerHTML = '<div style="background:#FF4D4D;color:white;padding:30px;border-radius:8px;">Error HTTP ' + res.status + '<br><pre style="background:#000;padding:10px;text-align:left;">' + (txt||'').substring(0,500) + '</pre></div>';
+      return;
+    }
+    var json = JSON.parse(txt);
     allCandidatos = Array.isArray(json) ? json : (json.data || []);
+    if (!allCandidatos.length) {
+      c.innerHTML = '<div style="background:#1a1a1a;color:#888;padding:40px;text-align:center;">Sin candidatos</div>';
+      return;
+    }
     renderKanban(allCandidatos);
   } catch(e) {
-    c.innerHTML = '<div style="text-align:center;padding:20px;color:#FF4D4D;">Error al cargar candidatos: '+e.message+'</div>';
+    c.innerHTML = '<div style="background:#FF4D4D;color:white;padding:30px;">Excepción: ' + e.message + '</div>';
   }
 }
 function filtrarCandidatos(q) {

@@ -444,28 +444,13 @@ app.http('getMeetings', {
   route: 'meetings/{employeeId}',
   handler: async (req) => {
     try {
-      const empId = parseInt(req.params.employeeId);
-      // Intento 1: filtrar IsDeleted
-      let res;
-      try {
-        res = await query(
-          `SELECT m.*, n.NoteID, n.NoteText, n.NoteType, n.IsPrivate, n.ObjectiveID
-           FROM OneOnOneMeetings m LEFT JOIN OneOnOneNotes n ON m.MeetingID=n.MeetingID
-           WHERE m.EmployeeID=@empId
-             AND (m.IsDeleted IS NULL OR m.IsDeleted = 0)
-           ORDER BY m.MeetingDate DESC`,
-          { empId }
-        );
-      } catch(e1) {
-        // Fallback: sin filtro si la columna no existe
-        res = await query(
-          `SELECT m.*, n.NoteID, n.NoteText, n.NoteType, n.IsPrivate, n.ObjectiveID
-           FROM OneOnOneMeetings m LEFT JOIN OneOnOneNotes n ON m.MeetingID=n.MeetingID
-           WHERE m.EmployeeID=@empId
-           ORDER BY m.MeetingDate DESC`,
-          { empId }
-        );
-      }
+      const res = await query(
+        `SELECT m.*, n.NoteID, n.NoteText, n.NoteType, n.IsPrivate, n.ObjectiveID
+         FROM OneOnOneMeetings m LEFT JOIN OneOnOneNotes n ON m.MeetingID=n.MeetingID
+         WHERE m.EmployeeID=@empId
+         ORDER BY m.MeetingDate DESC`,
+        { empId: parseInt(req.params.employeeId) }
+      );
       const meetings = {};
       for (const row of res.recordset) {
         if (!meetings[row.MeetingID]) {
@@ -970,40 +955,18 @@ app.http('getPIPs', {
   handler: async (req) => {
     try {
       const employeeId = req.query.get('employeeId') || null;
-      const includeDeleted = req.query.get('includeDeleted') === '1';
-      // Filtro defensivo: excluye PIPs con Status='deleted' (soft-delete actual)
-      // y opcionalmente IsDeleted=1 si la columna existe
-      let res;
-      try {
-        res = await query(
-          `SELECT p.PIPID, p.Reason, p.StartDate, p.Target15Days, p.Target30Days, p.Target60Days,
-                  p.Milestones, p.ReviewNotes, p.Achieved, p.Status, p.CreatedAt,
-                  e.FullName AS EmployeeName, e.Email AS EmployeeEmail,
-                  c.FullName AS CreatedByName
-           FROM PIPs p
-           JOIN Users e ON p.EmployeeID = e.UserID
-           JOIN Users c ON p.CreatedByID = c.UserID
-           WHERE (@eid IS NULL OR p.EmployeeID = @eid)
-             AND (@inc = 1 OR (p.Status <> 'deleted' AND (p.IsDeleted IS NULL OR p.IsDeleted = 0)))
-           ORDER BY p.CreatedAt DESC`,
-          { eid: employeeId, inc: includeDeleted ? 1 : 0 }
-        );
-      } catch(e1) {
-        // Fallback si IsDeleted no existe en la tabla
-        res = await query(
-          `SELECT p.PIPID, p.Reason, p.StartDate, p.Target15Days, p.Target30Days, p.Target60Days,
-                  p.Milestones, p.ReviewNotes, p.Achieved, p.Status, p.CreatedAt,
-                  e.FullName AS EmployeeName, e.Email AS EmployeeEmail,
-                  c.FullName AS CreatedByName
-           FROM PIPs p
-           JOIN Users e ON p.EmployeeID = e.UserID
-           JOIN Users c ON p.CreatedByID = c.UserID
-           WHERE (@eid IS NULL OR p.EmployeeID = @eid)
-             AND (@inc = 1 OR p.Status <> 'deleted')
-           ORDER BY p.CreatedAt DESC`,
-          { eid: employeeId, inc: includeDeleted ? 1 : 0 }
-        );
-      }
+      const res = await query(
+        `SELECT p.PIPID, p.Reason, p.StartDate, p.Target15Days, p.Target30Days, p.Target60Days,
+                p.Milestones, p.ReviewNotes, p.Achieved, p.Status, p.CreatedAt,
+                e.FullName AS EmployeeName, e.Email AS EmployeeEmail,
+                c.FullName AS CreatedByName
+         FROM PIPs p
+         JOIN Users e ON p.EmployeeID = e.UserID
+         JOIN Users c ON p.CreatedByID = c.UserID
+         WHERE (@eid IS NULL OR p.EmployeeID = @eid)
+         ORDER BY p.CreatedAt DESC`,
+        { eid: employeeId }
+      );
       return ok(res.recordset);
     } catch(e) { return err(e.message, 500); }
   }
@@ -1039,31 +1002,6 @@ app.http('updatePIP', {
         { notes: b.reviewNotes||null, achieved: b.achieved!=null?b.achieved:null, status: b.status||'active', id }
       );
       return ok({ updated: true });
-    } catch(e) { return err(e.message, 500); }
-  }
-});
-
-// ─── DELETE /pips/:id (soft delete) ────────────────────
-app.http('deletePIP', {
-  methods: ['DELETE'], authLevel: 'anonymous', route: 'pips/{id}',
-  handler: async (req) => {
-    try {
-      const id = parseInt(req.params.id);
-      // Intento 1: usar columna IsDeleted (más limpio)
-      try {
-        await query(
-          `UPDATE PIPs SET IsDeleted=1, Status='deleted' WHERE PIPID=@id`,
-          { id }
-        );
-        return ok({ deleted: true, method: 'isdeleted' });
-      } catch(e1) {
-        // Fallback: solo actualizar Status (compatible con esquema actual)
-        await query(
-          `UPDATE PIPs SET Status='deleted' WHERE PIPID=@id`,
-          { id }
-        );
-        return ok({ deleted: true, method: 'status' });
-      }
     } catch(e) { return err(e.message, 500); }
   }
 });
@@ -1425,24 +1363,6 @@ app.http('candidateNotes', {
   }
 });
 
-// ─── GET /candidates/:id/interviews (historial de entrevistas) ─
-app.http('getCandidateInterviews', {
-  methods: ['GET'], authLevel: 'anonymous', route: 'candidates/{id}/interviews',
-  handler: async (req) => {
-    try {
-      const id = parseInt(req.params.id);
-      const res = await query(
-        `SELECT InterviewID, CandidateID, InterviewerName, Result, Feedback, CreatedAt
-         FROM CandidateInterviews
-         WHERE CandidateID=@id
-         ORDER BY CreatedAt DESC`,
-        { id }
-      );
-      return ok(res.recordset);
-    } catch(e) { return err(e.message, 500); }
-  }
-});
-
 // ─── Archivos de candidatos ────────────────────────────
 app.http('getCandidateFiles', {
   methods: ['GET'], authLevel: 'anonymous', route: 'candidates/{id}/files',
@@ -1465,27 +1385,15 @@ app.http('uploadCandidateFile', {
     try {
       const id = parseInt(req.params.id);
       const b  = await req.json();
-      // Validaciones defensivas
-      if (!b || !b.fileName) return err('Falta fileName', 400);
-      if (!b.fileData)       return err('Falta fileData (base64)', 400);
-      // Tamaño aproximado del archivo decodificado (base64 → bytes)
-      const sizeBytes = Math.round(b.fileData.length * 3 / 4);
-      // Limite razonable de Azure SQL (varbinary max ~ 2GB pero Functions tiene timeouts)
-      if (sizeBytes > 50 * 1024 * 1024) {
-        return err('Archivo demasiado grande (máx 50MB). Tamaño: ' + Math.round(sizeBytes/1024/1024) + 'MB', 400);
-      }
       const res = await query(
         `INSERT INTO CandidateFiles (CandidateID, FileName, FileType, FileData, FileSize)
          OUTPUT INSERTED.FileID
          VALUES (@cid, @name, @type, @data, @size)`,
         { cid: id, name: b.fileName, type: b.fileType||'application/octet-stream',
-          data: b.fileData, size: sizeBytes }
+          data: b.fileData, size: b.fileData ? Math.round(b.fileData.length*3/4) : 0 }
       );
-      return ok({ fileId: res.recordset[0].FileID, size: sizeBytes });
-    } catch(e) {
-      // Devolver error con detalles útiles para diagnosticar en frontend
-      return err('Upload falló: ' + e.message, 500);
-    }
+      return ok({ fileId: res.recordset[0].FileID });
+    } catch(e) { return err(e.message, 500); }
   }
 });
 

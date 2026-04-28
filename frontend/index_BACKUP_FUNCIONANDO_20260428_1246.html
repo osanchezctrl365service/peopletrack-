@@ -5104,7 +5104,6 @@ async function verCandidato(id) {
     '<span style="font-size:10px;color:#555;margin-left:8px;">PDF, imágenes, documentos — sin límite de archivos</span>' +
     '</div>';
   cargarArchivosCandidato(cand.CandidateID);
-  cargarHistorialEntrevistas(cand.CandidateID);
 
   // Campos por etapa
   var stageFields = '';
@@ -5117,18 +5116,13 @@ async function verCandidato(id) {
         :'Salario ofrecido, fecha de ingreso, condiciones...')
       + '">'+(cand.Notes||'').replace(/</g,'&lt;')+'</textarea></div>';
     
-    // Historial de entrevistas registradas
-    stageFields += '<div style="margin-bottom:14px;"><div style="font-size:10px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:8px;">Historial de entrevistas</div>';
-    stageFields += '<div id="cvInterviewHistory_'+cand.CandidateID+'" style="background:#0d0d0d;border:1px solid #222;border-radius:6px;padding:10px;font-size:11px;color:#888;min-height:36px;">Cargando historial...</div>';
-    stageFields += '</div>';
-
     // Entrevistas
-    stageFields += '<div style="margin-bottom:14px;"><div style="font-size:10px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:8px;">Registrar nueva entrevista</div>';
+    stageFields += '<div style="margin-bottom:14px;"><div style="font-size:10px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:8px;">Registro de entrevista</div>';
     stageFields += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">';
     stageFields += '<div><label style="font-size:11px;color:#888;display:block;margin-bottom:4px;">Entrevistador</label><input id="cvInterviewer" type="text" class="form-control" placeholder="Nombre del entrevistador"></div>';
     stageFields += '<div><label style="font-size:11px;color:#888;display:block;margin-bottom:4px;">Resultado</label><select id="cvResult" class="form-control"><option value="">-- Resultado --</option><option>Aprobado</option><option>Aprobado con observaciones</option><option>Rechazado</option><option>Pendiente</option></select></div>';
     stageFields += '</div>';
-    stageFields += '<textarea id="cvInterviewFeedback" class="form-control" style="height:60px;resize:none;overflow-y:auto;" placeholder="Feedback de la nueva entrevista..."></textarea>';
+    stageFields += '<textarea id="cvInterviewFeedback" class="form-control" style="height:60px;resize:none;overflow-y:auto;" placeholder="Feedback de la entrevista..."></textarea>';
     stageFields += '</div>';
   }
 
@@ -5186,13 +5180,11 @@ async function guardarNotas(candId) {
     var data = JSON.parse(txt);
     if (data.ok===false) throw new Error(data.error||'Error');
     mostrarToast('Notas guardadas','success');
-    // Recargar historial de entrevistas y limpiar campos del formulario nuevo
-    cargarHistorialEntrevistas(candId);
-    var i1 = document.getElementById('cvInterviewer');     if (i1) i1.value = '';
-    var i2 = document.getElementById('cvResult');          if (i2) i2.value = '';
-    var i3 = document.getElementById('cvInterviewFeedback'); if (i3) i3.value = '';
     // Recargar candidatos sin cerrar modal
-    cargarCandidatos();
+    var buscador = document.getElementById('recBuscador');
+    cargarCandidatos().then(function(){
+      // Re-abrir el modal con datos frescos
+    });
   } catch(e){ mostrarToast('Error al guardar: '+e.message,'error'); }
 }
 async function guardarYAvanzar(candId) {
@@ -5382,43 +5374,6 @@ async function cargarArchivosCandidato(candId) {
   } catch(e) { /* silencioso si el endpoint no existe aún */ }
 }
 
-async function cargarHistorialEntrevistas(candId) {
-  var el = document.getElementById('cvInterviewHistory_'+candId);
-  if (!el) return;
-  try {
-    var res = await fetch(API_BASE+'/candidates/'+candId+'/interviews');
-    if (!res.ok) {
-      el.innerHTML = '<span style="color:#888;">No hay entrevistas registradas todavía.</span>';
-      return;
-    }
-    var json = await res.json();
-    var interviews = json.data || [];
-    if (!interviews.length) {
-      el.innerHTML = '<span style="color:#888;">No hay entrevistas registradas todavía.</span>';
-      return;
-    }
-    var resultColors = {'Aprobado':'#2ECC71','Aprobado con observaciones':'#F59E0B','Rechazado':'#FF4D4D','Pendiente':'#888'};
-    var html = '';
-    interviews.forEach(function(iv) {
-      var fecha = iv.CreatedAt ? new Date(iv.CreatedAt).toLocaleDateString('es-AR',{day:'2-digit',month:'short',year:'numeric'}) : '';
-      var color = resultColors[iv.Result] || '#888';
-      html += '<div style="border-bottom:1px solid #1e1e1e;padding:6px 0;">';
-      html += '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:3px;">';
-      html += '<span style="font-size:11px;color:#f0ebe3;font-weight:700;">'+(iv.InterviewerName||'Sin entrevistador').replace(/</g,'&lt;')+'</span>';
-      html += '<span style="font-size:10px;color:'+color+';font-weight:700;">'+(iv.Result||'—').replace(/</g,'&lt;')+'</span>';
-      html += '<span style="font-size:10px;color:#666;">'+fecha+'</span>';
-      html += '</div>';
-      if (iv.Feedback) {
-        html += '<div style="font-size:11px;color:#aaa;line-height:1.4;">'+String(iv.Feedback).replace(/</g,'&lt;')+'</div>';
-      }
-      html += '</div>';
-    });
-    el.innerHTML = html;
-  } catch(e) {
-    el.innerHTML = '<span style="color:#FF4D4D;font-size:11px;">Error al cargar historial: '+e.message+'</span>';
-  }
-}
-
 function renderArchivosCandidato(candId, files) {
   var el = document.getElementById('cvFileList_'+candId);
   if (!el || !files.length) return;
@@ -5440,7 +5395,6 @@ async function subirArchivosCandidato(input) {
   if (!files.length) return;
   var total = files.length;
   var done  = 0;
-  var failed = [];
   mostrarToast('Subiendo '+total+' archivo(s)...','info');
   for (var i = 0; i < files.length; i++) {
     var file = files[i];
@@ -5449,34 +5403,18 @@ async function subirArchivosCandidato(input) {
       reader.onload = async function(e) {
         var base64 = e.target.result.split(',')[1];
         try {
-          var resp = await fetch(API_BASE+'/candidates/'+candId+'/files', {
+          await fetch(API_BASE+'/candidates/'+candId+'/files', {
             method:'POST', headers:{'Content-Type':'application/json'},
             body: JSON.stringify({ fileName: file.name, fileType: file.type, fileData: base64 })
           });
-          var txt = await resp.text();
-          var json = null;
-          try { json = JSON.parse(txt); } catch(_) {}
-          if (resp.ok && json && json.ok !== false) {
-            done++;
-          } else {
-            failed.push(file.name + ': ' + ((json && json.error) || ('HTTP '+resp.status)));
-            console.error('Error subiendo:', file.name, txt.substring(0,200));
-          }
-        } catch(err) {
-          failed.push(file.name + ': ' + err.message);
-          console.error('Excepción subiendo:', file.name, err);
-        }
+          done++;
+        } catch(err) { console.error('Error subiendo:', file.name, err); }
         resolve();
       };
       reader.readAsDataURL(file);
     });
   }
-  if (failed.length === 0) {
-    mostrarToast(done+'/'+total+' archivo(s) subidos','success');
-  } else {
-    mostrarToast(done+'/'+total+' subidos. Fallaron: '+failed.length+' (ver consola)','error');
-    console.error('Archivos fallidos:', failed);
-  }
+  mostrarToast(done+'/'+total+' archivo(s) subidos','success');
   cargarArchivosCandidato(candId);
   input.value = '';
 }

@@ -557,6 +557,26 @@ label { color: #888 !important; }
 }
 </style>
 
+
+<style id="fix-containers-visibility">
+/* Fix de dimensiones forzadas para containers que medían 0x0 */
+.section.active {
+  display: block !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+#pipContainer,
+#onboardingContainer,
+#recruitingContainer,
+#careerContainer,
+#cambiosContainer {
+  width: 100% !important;
+  min-height: 300px !important;
+  display: block !important;
+  box-sizing: border-box !important;
+}
+</style>
+
 </head>
 <body>
 
@@ -1198,7 +1218,7 @@ label { color: #888 !important; }
           <option value="closed">Cerrados</option>
         </select>
       </div>
-      <div id="pipContainer" style="width:100%;min-height:300px;max-height:calc(100vh - 280px);overflow-y:auto;padding-right:4px;">
+      <div id="pipContainer" style="max-height:calc(100vh - 280px);overflow-y:auto;padding-right:4px;">
         <div style="text-align:center;padding:40px;color:#888;">Cargando PIPs...</div>
       </div>
     </div>
@@ -5774,7 +5794,7 @@ function verEvidenciaCareer(mid) {
           <button class="btn btn-primary btn-sm" onclick="abrirModalNuevoCandidato()">+ Nuevo Candidato</button>
         </div>
       </div>
-      <div id="recruitingContainer" style="width:100%;min-height:300px;overflow-y:auto;max-height:calc(100vh - 220px);">
+      <div id="recruitingContainer" style="overflow-y:auto;max-height:calc(100vh - 220px);">
         <div style="text-align:center;padding:30px;color:#888;">Cargando candidatos...</div>
       </div>
     </div><!-- /sec-recruiting -->
@@ -5792,7 +5812,7 @@ function verEvidenciaCareer(mid) {
         <div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:10px;padding:16px;text-align:center;"><div style="font-size:28px;font-weight:800;color:#3B82F6;" id="obKpiHitos">&#8212;</div><div style="font-size:11px;color:#888;margin-top:4px;">Hitos pendientes</div></div>
         <div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:10px;padding:16px;text-align:center;"><div style="font-size:28px;font-weight:800;color:#A855F7;" id="obKpiCursos">&#8212;</div><div style="font-size:11px;color:#888;margin-top:4px;">Cursos pendientes</div></div>
       </div>
-      <div id="onboardingContainer" style="width:100%;min-height:300px;max-height:calc(100vh - 300px);overflow-y:auto;padding-right:4px;">
+      <div id="onboardingContainer" style="max-height:calc(100vh - 300px);overflow-y:auto;padding-right:4px;">
         <div style="text-align:center;padding:30px;color:#888;">Cargando planes de onboarding...</div>
       </div>
     </div>

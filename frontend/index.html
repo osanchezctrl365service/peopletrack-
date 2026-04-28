@@ -4310,25 +4310,23 @@ async function guardarNuevoPIP() {
 async function cargarPIPs() {
   var c = document.getElementById('pipContainer');
   if (!c) return;
-  c.innerHTML = '<div style="text-align:center;padding:30px;color:#888;font-size:13px;">Cargando PIPs...</div>';
+  c.innerHTML = '<div style="text-align:center;padding:20px;color:#888;">Cargando PIPs...</div>';
   try {
-    var res = await fetch(API_BASE + '/pips', { headers: { 'Accept': 'application/json' } });
+    var res = await fetch(API_BASE + '/pips');
     var txt = await res.text();
-    if (!txt || !txt.trim()) { allPIPs = []; renderPIPs([]); return; }
+    if (!txt || !txt.trim()) {
+      allPIPs = [];
+      renderPIPs([]);
+      return;
+    }
     var json;
-    try { json = JSON.parse(txt); } catch(pe) {
-      c.innerHTML = '<div style="text-align:center;padding:30px;color:#FF4D4D;font-size:13px;">Error de formato PIP<br><small style=\'color:#666;\'>' + txt.substring(0,100) + '</small><br><button class=\'btn btn-secondary btn-sm\' style=\'margin-top:12px;\' onclick=\'cargarPIPs()\'>Reintentar</button></div>';
-      return;
-    }
-    if (!res.ok) {
-      c.innerHTML = '<div style="text-align:center;padding:30px;color:#FF4D4D;font-size:13px;">Error HTTP ' + res.status + '<br><button class=\'btn btn-secondary btn-sm\' style=\'margin-top:12px;\' onclick=\'cargarPIPs()\'>Reintentar</button></div>';
-      return;
-    }
-    allPIPs = Array.isArray(json) ? json : (json.data || []);
-    allPIPs = allPIPs.filter(function(p){ return !p.IsDeleted && p.Status !== 'deleted'; });
+    try { json = JSON.parse(txt); } catch(e){ throw new Error('Respuesta invalida: '+txt.substring(0,80)); }
+    if (!res.ok) throw new Error('HTTP '+res.status+': '+((json&&json.error)||''));
+    allPIPs = Array.isArray(json) ? json : (json.data||[]);
+    allPIPs = allPIPs.filter(function(p){ return p.Status !== 'deleted'; });
     renderPIPs(allPIPs);
   } catch(e) {
-    c.innerHTML = '<div style="text-align:center;padding:30px;color:#FF4D4D;font-size:13px;">Error: ' + e.message + '<br><button class=\'btn btn-secondary btn-sm\' style=\'margin-top:12px;\' onclick=\'cargarPIPs()\'>Reintentar</button></div>';
+    c.innerHTML = '<div style="text-align:center;padding:30px;color:#FF4D4D;font-size:13px;">Error al cargar PIPs: '+e.message+'<br><button class="btn btn-secondary btn-sm" style="margin-top:12px;" onclick="cargarPIPs()">Reintentar</button></div>';
   }
 }
 function filtrarPIPs(q) {
@@ -4567,25 +4565,20 @@ async function ejecutarEliminarUsuario(id, btn) {
 // AYUDA - carga desde BD
 // ══════════════════════════════════════════════════════════════
 async function loadHelpArticles() {
-  var c = document.getElementById('helpArticlesContainer');
-  var sidx = document.getElementById('helpIndex');
-  if (!c) return;
-  c.innerHTML = '<div style="text-align:center;padding:30px;color:#888;font-size:13px;">Cargando articulos...</div>';
+  var c   = document.getElementById('helpArticlesContainer');
+  var idx = document.getElementById('helpIndex');
+  if (!c) { console.error('helpArticlesContainer no encontrado'); return; }
+  c.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Cargando...</div>';
   try {
-    var res = await fetch(API_BASE + '/help/articles', { headers: { 'Accept': 'application/json' } });
+    var res = await fetch(API_BASE + '/help/articles');
     var txt = await res.text();
-    if (!txt || !txt.trim()) { c.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Sin articulos de ayuda.</div>'; return; }
     var json;
-    try { json = JSON.parse(txt); } catch(pe) {
-      c.innerHTML = '<div style="text-align:center;padding:30px;color:#FF4D4D;font-size:13px;">Error de formato en Ayuda<br><small style=\'color:#666;\'>' + txt.substring(0,100) + '</small></div>';
-      return;
-    }
-    if (!res.ok) { c.innerHTML = '<div style="text-align:center;padding:30px;color:#FF4D4D;font-size:13px;">Error HTTP ' + res.status + ' al cargar ayuda</div>'; return; }
+    try { json = JSON.parse(txt); } catch(pe) { throw new Error('JSON inválido: ' + txt.substring(0,100)); }
+    if (!res.ok) throw new Error('HTTP ' + res.status + ': ' + (json.error||txt.substring(0,80)));
     var arts = Array.isArray(json) ? json : (json.data || []);
-    arts = arts.filter(function(a){ return a.IsActive !== false && a.IsActive !== 0; });
-    if (!arts.length) { c.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Sin articulos en la base de datos.</div>'; return; }
-    if (sidx) {
-      sidx.innerHTML = '<div style="font-size:10px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:12px;">Articulos</div>';
+    if (!arts.length) { c.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Sin artículos en la BD.</div>'; return; }
+    if (idx) {
+      idx.innerHTML = '<div style="font-size:10px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:12px;">Artículos</div>';
       arts.forEach(function(a) {
         var b = document.createElement('button');
         b.textContent = a.Title;
@@ -4593,7 +4586,7 @@ async function loadHelpArticles() {
         b.onmouseenter = function(){ this.style.background='rgba(255,84,0,0.08)'; this.style.color='#FF5400'; };
         b.onmouseleave = function(){ this.style.background='none'; this.style.color='#aaa'; };
         b.onclick = function(){ var el=document.getElementById('help-art-'+a.ArticleID); if(el) el.scrollIntoView({behavior:'smooth'}); };
-        sidx.appendChild(b);
+        idx.appendChild(b);
       });
     }
     var html = '';
@@ -4605,7 +4598,7 @@ async function loadHelpArticles() {
     });
     c.innerHTML = html;
   } catch(e) {
-    c.innerHTML = '<div style="text-align:center;padding:30px;color:#FF4D4D;font-size:13px;">Error al cargar ayuda: ' + e.message + '</div>';
+    c.innerHTML = '<div style="text-align:center;padding:30px;color:#FF4D4D;font-size:13px;">Error: '+e.message+'</div>';
   }
 }// Cargar ayuda al entrar a la sección
 

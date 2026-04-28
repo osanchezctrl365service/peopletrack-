@@ -379,17 +379,11 @@ app.http('getCompetencies', {
     try {
       const user = await getAuthUser(req);
       if (!user) return err('No autorizado', 401);
-      const type  = req.query.get('type')  || null;  // 'generic', 'leadership', 'personal', etc.
-      const level = req.query.get('level') || null;  // 'company', 'team', 'personal'
+      const type = req.query.get('type') || null;
       const res = await query(
-        `SELECT c.*, a.AreaName
-         FROM Competencies c
-         LEFT JOIN Areas a ON c.AreaID = a.AreaID
-         WHERE (c.IsActive = 1 OR c.IsActive IS NULL)
-           AND (@type  IS NULL OR c.CompetencyType = @type)
-           AND (@level IS NULL OR c.Level = @level)
-         ORDER BY ISNULL(c.SortOrder, 999), c.CompetencyID`,
-        { type, level }
+        `SELECT c.*, a.AreaName FROM Competencies c LEFT JOIN Areas a ON c.AreaID=a.AreaID
+         WHERE c.IsActive=1 AND (@type IS NULL OR c.CompetencyType=@type) ORDER BY c.SortOrder`,
+        { type }
       );
       return ok(res.recordset);
     } catch (e) { return err(e.message, 500); }
@@ -403,32 +397,12 @@ app.http('getEvaluation', {
     try {
       const user = await getAuthUser(req);
       if (!user) return err('No autorizado', 401);
-      const uid = parseInt(req.params.userId);
-      const pid = parseInt(req.params.periodId);
-      // Intento 1: usar la vista (si tiene datos joineados)
-      try {
-        const r1 = await query(
-          `SELECT * FROM vw_CompetencyReport
-           WHERE UserID = @uid
-             AND PeriodName = (SELECT PeriodName FROM FiscalPeriods WHERE PeriodID = @pid)`,
-          { uid, pid }
-        );
-        if (r1.recordset.length > 0) return ok(r1.recordset);
-      } catch (e1) { /* la vista no existe o tiene problemas, sigo al fallback */ }
-      // Fallback: query directa a UserCompetencyEvaluations
-      const r2 = await query(
-        `SELECT e.EvalID, e.UserID, e.CompetencyID, e.PeriodID, e.ScaleID, e.Score,
-                e.Feedback, e.EvaluatedBy, e.EvalDate,
-                c.CompetencyName, c.CompetencyType, c.Level, c.SortOrder,
-                s.ScaleName, s.Label, s.ColorHex, s.Points
-         FROM UserCompetencyEvaluations e
-         JOIN Competencies c ON e.CompetencyID = c.CompetencyID
-         LEFT JOIN EvaluationScales s ON e.ScaleID = s.ScaleID
-         WHERE e.UserID = @uid AND e.PeriodID = @pid
-         ORDER BY ISNULL(c.SortOrder, 999), c.CompetencyID`,
-        { uid, pid }
+      const res = await query(
+        `SELECT * FROM vw_CompetencyReport WHERE UserID=@uid
+         AND PeriodName=(SELECT PeriodName FROM FiscalPeriods WHERE PeriodID=@pid)`,
+        { uid: parseInt(req.params.userId), pid: parseInt(req.params.periodId) }
       );
-      return ok(r2.recordset);
+      return ok(res.recordset);
     } catch (e) { return err(e.message, 500); }
   }
 });
@@ -441,66 +415,16 @@ app.http('saveEvaluation', {
       const user = await getAuthUser(req);
       if (!user) return err('No autorizado', 401);
       const body = await req.json();
-      // Validaciones defensivas
-      if (!body.userId)       return err('Falta userId', 400);
-      if (!body.competencyId) return err('Falta competencyId', 400);
-      if (!body.periodId)     return err('Falta periodId', 400);
-      if (body.score == null) return err('Falta score', 400);
-      const score = Number(body.score);
-      if (isNaN(score) || score < 0 || score > 10) {
-        return err('Score debe estar entre 0 y 10', 400);
-      }
       await query(
         `IF EXISTS (SELECT 1 FROM UserCompetencyEvaluations WHERE UserID=@uid AND CompetencyID=@cid AND PeriodID=@pid)
-           UPDATE UserCompetencyEvaluations
-              SET ScaleID=@scaleId, Score=@score, Feedback=@feedback,
-                  EvaluatedBy=@evalBy, EvalDate=CAST(GETDATE() AS DATE)
-            WHERE UserID=@uid AND CompetencyID=@cid AND PeriodID=@pid
-         ELSE
-           INSERT INTO UserCompetencyEvaluations
-             (UserID, CompetencyID, PeriodID, ScaleID, Score, Feedback, EvaluatedBy, EvalDate, CreatedAt)
-           VALUES (@uid, @cid, @pid, @scaleId, @score, @feedback, @evalBy, CAST(GETDATE() AS DATE), GETDATE())`,
-        { uid: parseInt(body.userId), cid: parseInt(body.competencyId), pid: parseInt(body.periodId),
-          scaleId: body.scaleId ? parseInt(body.scaleId) : null,
-          score: score, feedback: body.feedback || null,
-          evalBy: user.UserID || (body.evaluatedBy ? parseInt(body.evaluatedBy) : 1) }
+         UPDATE UserCompetencyEvaluations SET ScaleID=@scaleId,Score=@score,Feedback=@feedback,EvaluatedBy=@evalBy,EvalDate=CAST(GETDATE() AS DATE)
+         WHERE UserID=@uid AND CompetencyID=@cid AND PeriodID=@pid
+         ELSE INSERT INTO UserCompetencyEvaluations (UserID,CompetencyID,PeriodID,ScaleID,Score,Feedback,EvaluatedBy)
+         VALUES (@uid,@cid,@pid,@scaleId,@score,@feedback,@evalBy)`,
+        { uid: body.userId, cid: body.competencyId, pid: body.periodId,
+          scaleId: body.scaleId||null, score: body.score, feedback: body.feedback||null, evalBy: user.UserID }
       );
       return ok({ saved: true });
-    } catch (e) { return err(e.message, 500); }
-  }
-});
-
-// ─── GET /competencies/scales (escalas de evaluación) ──
-app.http('getScales', {
-  methods: ['GET'],
-  authLevel: 'anonymous',
-  route: 'competencies/scales',
-  handler: async (req) => {
-    try {
-      const res = await query(
-        `SELECT ScaleID, ScaleName, MinValue, MaxValue, Label, Points, ColorHex, SortOrder
-         FROM EvaluationScales
-         ORDER BY ISNULL(SortOrder, 999), ScaleID`
-      );
-      return ok(res.recordset);
-    } catch (e) { return err(e.message, 500); }
-  }
-});
-
-// ─── GET /competencies/periods (períodos fiscales para Competencias) ──
-app.http('getCompPeriods', {
-  methods: ['GET'],
-  authLevel: 'anonymous',
-  route: 'competencies/periods',
-  handler: async (req) => {
-    try {
-      const res = await query(
-        `SELECT PeriodID, PeriodName, PeriodType, StartDate, EndDate, IsActive
-         FROM FiscalPeriods
-         WHERE (IsActive = 1 OR IsActive IS NULL)
-         ORDER BY StartDate DESC`
-      );
-      return ok(res.recordset);
     } catch (e) { return err(e.message, 500); }
   }
 });

@@ -401,18 +401,8 @@ app.http('getEvaluation', {
     try {
       const uid = parseInt(req.params.userId);
       const pid = parseInt(req.params.periodId);
-      // Intento 1: usar la vista (si tiene datos joineados)
-      try {
-        const r1 = await query(
-          `SELECT * FROM vw_CompetencyReport
-           WHERE UserID = @uid
-             AND PeriodName = (SELECT PeriodName FROM FiscalPeriods WHERE PeriodID = @pid)`,
-          { uid, pid }
-        );
-        if (r1.recordset.length > 0) return ok(r1.recordset);
-      } catch (e1) { /* la vista no existe o tiene problemas, sigo al fallback */ }
-      // Fallback: query directa a UserCompetencyEvaluations
-      const r2 = await query(
+      // Query directa a UserCompetencyEvaluations (más confiable que la vista)
+      const res = await query(
         `SELECT e.EvalID, e.UserID, e.CompetencyID, e.PeriodID, e.ScaleID, e.Score,
                 e.Feedback, e.EvaluatedBy, e.EvalDate,
                 c.CompetencyName, c.CompetencyType, c.Level, c.SortOrder,
@@ -424,7 +414,7 @@ app.http('getEvaluation', {
          ORDER BY ISNULL(c.SortOrder, 999), c.CompetencyID`,
         { uid, pid }
       );
-      return ok(r2.recordset);
+      return ok(res.recordset);
     } catch (e) { return err(e.message, 500); }
   }
 });

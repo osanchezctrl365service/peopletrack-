@@ -3300,23 +3300,11 @@ async function comp_loadEvaluationData() {
     if (res.ok) {
       var json = await res.json();
       var rows = json.data || [];
-      console.log('comp_loadEvaluationData: filas recibidas', rows.length, rows[0] || '(vacío)');
       rows.forEach(function(r){
-        // Defensivo: aceptar variaciones de nombre de columna
-        var cid = r.CompetencyID || r.competencyId || r.CompID || r.competency_id;
-        if (cid == null) {
-          console.warn('comp_loadEvaluationData: fila sin CompetencyID', r);
-          return;
-        }
-        var score = r.Score != null ? r.Score : (r.score != null ? r.score : null);
-        var scaleId = r.ScaleID != null ? r.ScaleID : (r.scaleId != null ? r.scaleId : null);
-        var feedback = r.Feedback != null ? r.Feedback : (r.feedback != null ? r.feedback : '');
-        comp_state.evaluations[cid] = {
-          score: score, scaleId: scaleId, feedback: feedback || ''
+        comp_state.evaluations[r.CompetencyID] = {
+          score: r.Score, scaleId: r.ScaleID, feedback: r.Feedback || ''
         };
       });
-    } else {
-      console.warn('comp_loadEvaluationData: HTTP', res.status);
     }
   } catch(e) {
     console.error('comp_loadEvaluationData error:', e);
@@ -3525,60 +3513,43 @@ async function comp_saveAll() {
     mostrarToast('Seleccioná un colaborador y un período antes de guardar', 'error');
     return;
   }
-  // Construir lista explícita con competencyId numérico válido
-  var toSave = [];
-  Object.keys(comp_state.evaluations || {}).forEach(function(cidStr){
-    var cidNum = parseInt(cidStr, 10);
-    var ev = comp_state.evaluations[cidStr];
-    if (!ev) return;
-    if (isNaN(cidNum) || cidNum <= 0) {
-      console.warn('comp_saveAll: cid inválido, saltando:', cidStr, ev);
-      return;
-    }
-    if (ev.score == null || ev.score === '' || Number(ev.score) <= 0) return;
-    toSave.push({ cid: cidNum, score: Number(ev.score), scaleId: ev.scaleId || null, feedback: ev.feedback || null });
-  });
-  if (!toSave.length) {
+  var entries = Object.entries(comp_state.evaluations || {})
+    .filter(function(e){ return e[1] && e[1].score != null && e[1].score > 0; });
+  if (!entries.length) {
     mostrarToast('No hay evaluaciones para guardar. Asigná al menos un score.', 'info');
     return;
   }
-  console.log('comp_saveAll: guardando', toSave.length, 'evaluaciones', toSave);
-  mostrarToast('Guardando ' + toSave.length + ' evaluación(es)...', 'info');
+  mostrarToast('Guardando ' + entries.length + ' evaluación(es)...', 'info');
   var ok_count = 0, fail = [];
-  for (var i = 0; i < toSave.length; i++) {
-    var item = toSave[i];
-    var bodyObj = {
-      userId: parseInt(comp_state.currentUser),
-      competencyId: item.cid,
-      periodId: parseInt(comp_state.currentPeriod),
-      scaleId: item.scaleId ? parseInt(item.scaleId) : null,
-      score: item.score,
-      feedback: item.feedback
-    };
+  for (var i = 0; i < entries.length; i++) {
+    var cid = entries[i][0];
+    var data = entries[i][1];
     try {
       var res = await fetch(API_BASE + '/competencies/evaluation', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(bodyObj)
+        body: JSON.stringify({
+          userId: parseInt(comp_state.currentUser),
+          competencyId: parseInt(cid),
+          periodId: parseInt(comp_state.currentPeriod),
+          scaleId: data.scaleId ? parseInt(data.scaleId) : null,
+          score: Number(data.score),
+          feedback: data.feedback || null
+        })
       });
       var txt = await res.text();
       var json = null;
       try { json = JSON.parse(txt); } catch(_) {}
-      if (res.ok && json && json.ok !== false) {
-        ok_count++;
-      } else {
-        fail.push('CompID '+item.cid+': '+((json && json.error) || ('HTTP '+res.status+' '+txt.substring(0,80))));
-      }
+      if (res.ok && json && json.ok !== false) ok_count++;
+      else fail.push('CompID '+cid+': '+((json && json.error) || ('HTTP '+res.status)));
     } catch(e) {
-      fail.push('CompID '+item.cid+': '+e.message);
+      fail.push('CompID '+cid+': '+e.message);
     }
   }
   if (fail.length === 0) {
     mostrarToast(ok_count + ' evaluación(es) guardada(s)', 'success');
-    // Recargar evaluaciones para reflejar lo guardado
-    await comp_loadEvaluationData();
   } else {
-    mostrarToast(ok_count + '/' + toSave.length + ' guardadas. Fallaron: ' + fail.length, 'error');
+    mostrarToast(ok_count + '/' + entries.length + ' guardadas. Fallaron: ' + fail.length, 'error');
     console.error('Fallos saveAll:', fail);
   }
 }

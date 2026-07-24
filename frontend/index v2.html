@@ -1776,27 +1776,22 @@ async function cargarProximasReunionesDashboard() {
       c.innerHTML = '<div style="text-align:center;padding:24px;color:#888;font-size:12px;">Sin reuniones pr\xf3ximas. Cre\xe1 una desde <b>Reuniones 1:1</b>.</div>';
       return;
     }
-    // Colores para los avatares y badges — soportamos tanto keys en inglés como labels en español
+    // Colores para los avatares y badges
     var typeBadge = {
-      weekly:     {label:'Semanal',    cls:'badge-info'},
-      Semanal:    {label:'Semanal',    cls:'badge-info'},
-      biweekly:   {label:'Quincenal',  cls:'badge-info'},
-      Quincenal:  {label:'Quincenal',  cls:'badge-info'},
-      monthly:    {label:'Mensual',    cls:'badge-info'},
-      Mensual:    {label:'Mensual',    cls:'badge-info'},
-      quarterly:  {label:'Trimestral', cls:'badge-primary'},
-      Trimestral: {label:'Trimestral', cls:'badge-primary'},
-      yearly:     {label:'Anual',      cls:'badge-primary'},
-      Anual:      {label:'Anual',      cls:'badge-primary'}
+      weekly:    {label:'Semanal',    cls:'badge-info'},
+      biweekly:  {label:'Quincenal',  cls:'badge-info'},
+      monthly:   {label:'Mensual',    cls:'badge-info'},
+      quarterly: {label:'Trimestral', cls:'badge-primary'},
+      yearly:    {label:'Anual',      cls:'badge-primary'}
     };
     var statusBadge = {
-      planned:    {label:'Planificada', cls:'badge-success'},
-      pending:    {label:'Pendiente',   cls:'badge-warning'},
-      completed:  {label:'Completada',  cls:'badge-success'},
-      cancelled:  {label:'Cancelada',   cls:'badge-danger'}
+      planned:   {label:'Planificada', cls:'badge-success'},
+      pending:   {label:'Pendiente',   cls:'badge-warning'},
+      completed: {label:'Completada',  cls:'badge-success'},
+      cancelled: {label:'Cancelada',   cls:'badge-danger'}
     };
     var html = '<table class="data-table">' +
-      '<thead><tr><th>Colaborador</th><th>Tipo</th><th>Fecha</th><th>Estado</th></tr></thead><tbody>';
+      '<thead><tr><th>Colaborador</th><th>Tipo</th><th>Fecha</th><th>Estado</th><th>Acci\xf3n</th></tr></thead><tbody>';
     reuniones.forEach(function(r, i) {
       var nombre = (r.EmployeeName || 'Sin nombre').replace(/</g,'&lt;');
       var initials = nombre.split(' ').map(function(w){return w[0]||'';}).join('').substring(0,2).toUpperCase();
@@ -1805,11 +1800,14 @@ async function cargarProximasReunionesDashboard() {
       var fecha = r.MeetingDate ? new Date(r.MeetingDate).toLocaleDateString('es-AR',{day:'2-digit',month:'short',year:'numeric'}) : '—';
       var tipo = typeBadge[r.MeetingType] || {label: r.MeetingType || '—', cls:'badge-info'};
       var estado = statusBadge[r.Status] || {label: r.Status || 'Pendiente', cls:'badge-warning'};
+      // JSON-escape del nombre para pasarlo por el onclick
+      var nombreEsc = String(r.EmployeeName||'').replace(/'/g, "\\'").replace(/"/g,'&quot;');
       html += '<tr>' +
         '<td><div class="person-chip"><div class="avatar-sm" style="background:'+color+'">'+initials+'</div><span>'+nombre+'</span></div></td>' +
         '<td><span class="badge '+tipo.cls+'">'+tipo.label+'</span></td>' +
         '<td>'+fecha+'</td>' +
         '<td><span class="badge '+estado.cls+'">'+estado.label+'</span></td>' +
+        '<td><button class="btn btn-secondary btn-sm" onclick="verBitacoraColab('+r.EmployeeID+',\''+nombreEsc+'\')">Ver bit\xe1cora</button></td>' +
       '</tr>';
     });
     html += '</tbody></table>';
@@ -1817,6 +1815,17 @@ async function cargarProximasReunionesDashboard() {
   } catch(e) {
     c.innerHTML = '<div style="text-align:center;padding:20px;color:#FF4D4D;font-size:12px;">Error cargando reuniones: '+e.message+'</div>';
   }
+}
+
+// Navegar a Reuniones 1:1 y seleccionar directamente al colaborador (Sesión 3)
+function verBitacoraColab(userId, nombre) {
+  showSection('sec-oneononex');
+  // Damos un pequeño delay para que la sección se muestre antes de intentar seleccionar
+  setTimeout(function(){
+    if (typeof seleccionarColabReunion === 'function') {
+      seleccionarColabReunion(parseInt(userId), nombre || '', '', '');
+    }
+  }, 300);
 }
 
 function drawDonutReal(rojo, naranja, verde, total) {

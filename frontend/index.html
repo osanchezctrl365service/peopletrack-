@@ -3593,15 +3593,42 @@ async function comp_saveAll() {
 
 // ═══ POBLAR MODAL NUEVO OBJETIVO ════════════════════════════
 function filtrarColabObj(q) {
-  const sel = document.getElementById('objColabSel');
-  if (!sel) return;
-  const query = q.toLowerCase();
-  sel.innerHTML = '<option value="">— Seleccionar colaborador —</option>';
-  allUsuarios.filter(u => u.IsActive && (!query || 
-    (u.FullName||'').toLowerCase().includes(query) || 
-    (u.Email||'').toLowerCase().includes(query)
-  )).sort((a,b)=>(a.FullName||'').localeCompare(b.FullName||''))
-  .forEach(u => sel.add(new Option((u.FullName||u.Email) + ' — ' + (u.Email||''), u.UserID)));
+  // Ahora populamos el <datalist> con TODOS los colaboradores activos.
+  // El browser filtra automáticamente mientras el usuario tipea en el input.
+  const dl = document.getElementById('objColabList');
+  if (!dl) return;
+  dl.innerHTML = '';
+  allUsuarios.filter(u => u.IsActive)
+    .sort((a,b)=>(a.FullName||'').localeCompare(b.FullName||''))
+    .forEach(u => {
+      const label = (u.FullName||u.Email||'') + ' — ' + (u.Email||'');
+      const opt = document.createElement('option');
+      opt.value = label;
+      opt.setAttribute('data-userid', u.UserID);
+      dl.appendChild(opt);
+    });
+  // Limpiar selección previa
+  const hid = document.getElementById('objColabSel');
+  const inp = document.getElementById('objColabInput');
+  if (hid) hid.value = '';
+  if (inp) inp.value = '';
+}
+
+// Resuelve el UserID a partir del texto tipeado en objColabInput
+// y lo guarda en el hidden input objColabSel (que es el que leen los otros lugares).
+function resolverColabObj(val) {
+  const hid = document.getElementById('objColabSel');
+  if (!hid) return;
+  const txt = (val||'').trim().toLowerCase();
+  if (!txt) { hid.value = ''; return; }
+  // Match exacto por "Nombre — Email" (cuando eligen del datalist)
+  let u = allUsuarios.find(x => {
+    const label = ((x.FullName||x.Email||'') + ' — ' + (x.Email||'')).toLowerCase();
+    return label === txt;
+  });
+  // Si no hay match exacto, probamos por email exacto
+  if (!u) u = allUsuarios.find(x => (x.Email||'').toLowerCase() === txt);
+  hid.value = u ? u.UserID : '';
 }
 
 function poblarModalObjetivo() {
@@ -3990,6 +4017,12 @@ function abrirNuevoObjetivoPersonal() {
   if (userId) setTimeout(() => {
     const s = document.getElementById('objColabSel');
     if (s) s.value = userId;
+    // También reflejar el nombre en el input visible
+    const inp = document.getElementById('objColabInput');
+    if (inp) {
+      const u = allUsuarios.find(x => String(x.UserID) === String(userId));
+      if (u) inp.value = (u.FullName||u.Email||'') + ' — ' + (u.Email||'');
+    }
   }, 100);
 }
 
@@ -5390,6 +5423,31 @@ async function cargarCandidatos() {
     c.innerHTML = '<div style="text-align:center;padding:20px;color:#FF4D4D;">Error al cargar candidatos: '+e.message+'</div>';
   }
 }
+
+// Mover candidato entre etapas del Kanban (Bug #5)
+// direccion = 1 → avanzar a etapa siguiente | direccion = -1 → volver a etapa anterior
+async function moverCandidatoEtapa(candId, direccion) {
+  if (!candId) return;
+  var ruta = direccion === 1 ? 'advance' : 'retrocede';
+  try {
+    var me = (allUsuarios||[]).find(function(u){ return u.Email === window._userEmail; });
+    var res = await fetch(API_BASE + '/candidates/' + candId + '/' + ruta, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ changedById: me ? me.UserID : 1 })
+    });
+    var data = await res.json();
+    if (!res.ok || data.ok === false) throw new Error(data.error || ('HTTP '+res.status));
+    if (data.data && data.data.message) {
+      mostrarToast(data.data.message, 'info');
+    } else {
+      mostrarToast('Candidato movido a: ' + (data.data ? data.data.newStatus : 'nueva etapa'), 'success');
+    }
+    cargarCandidatos();
+  } catch(e) {
+    mostrarToast('Error al mover candidato: ' + e.message, 'error');
+  }
+}
 function filtrarCandidatos(q) {
   var filtered = !q ? allCandidatos : allCandidatos.filter(function(c){
     return (c.FullName||'').toLowerCase().includes(q.toLowerCase()) ||
@@ -5421,6 +5479,9 @@ function renderKanban(candidatos) {
     html += '<span>'+stageLabels[stage]+'</span><span style="background:#333;color:#aaa;padding:1px 7px;border-radius:10px;font-size:10px;">'+grupo.length+'</span></div>';
     grupo.forEach(function(cand) {
       var nombre = (cand.FullName||'').replace(/</g,'&lt;');
+      // Determinar si puede avanzar/retroceder (hired/rejected no se mueven)
+      var canBack = ['technical','client','offer','hired'].indexOf(stage) !== -1;
+      var canFwd = ['screening','technical','client','offer'].indexOf(stage) !== -1;
       html += '<div style="background:#1a1a1a;border:1px solid '+(stageColors[stage]||'#2a2a2a')+';border-radius:8px;padding:10px;margin-bottom:8px;">';
       html += '<div style="font-weight:700;color:#f0ebe3;font-size:12px;margin-bottom:3px;">'+nombre+'</div>';
       html += '<div style="font-size:10px;color:#888;margin-bottom:4px;">'+(cand.TechStack||'').replace(/</g,'&lt;').substring(0,30)+'</div>';
@@ -5429,7 +5490,15 @@ function renderKanban(candidatos) {
         var srcColors = {LinkedIn:'#0A66C2',Consultora:'#F59E0B',Referido:'#A855F7',Formulario:'#2ECC71',Directo:'#888'};
         html += '<div style="margin-top:6px;"><span style="font-size:9px;background:rgba(255,255,255,0.05);color:'+(srcColors[cand.SourceType]||'#888')+';padding:2px 6px;border-radius:4px;">'+cand.SourceType+'</span></div>';
       }
+      // Botón Ver detalle
       html += '<button data-cid="'+cand.CandidateID+'" onclick="verCandidato(this.dataset.cid)" style="margin-top:8px;width:100%;padding:4px;background:#222;border:1px solid #333;border-radius:5px;color:#aaa;font-size:10px;cursor:pointer;">Ver detalle</button>';
+      // Botones ◀ ▶ para mover entre etapas (Bug #5)
+      if (canBack || canFwd) {
+        html += '<div style="display:flex;gap:4px;margin-top:4px;">';
+        html += '<button data-cid="'+cand.CandidateID+'" onclick="moverCandidatoEtapa(this.dataset.cid,-1)" '+(canBack?'':'disabled')+' title="Etapa anterior" style="flex:1;padding:4px;background:'+(canBack?'#222':'#161616')+';border:1px solid #333;border-radius:5px;color:'+(canBack?'#aaa':'#444')+';font-size:11px;cursor:'+(canBack?'pointer':'not-allowed')+';">◀</button>';
+        html += '<button data-cid="'+cand.CandidateID+'" onclick="moverCandidatoEtapa(this.dataset.cid,1)" '+(canFwd?'':'disabled')+' title="Etapa siguiente" style="flex:1;padding:4px;background:'+(canFwd?'#222':'#161616')+';border:1px solid #333;border-radius:5px;color:'+(canFwd?'#aaa':'#444')+';font-size:11px;cursor:'+(canFwd?'pointer':'not-allowed')+';">▶</button>';
+        html += '</div>';
+      }
       html += '</div>';
     });
     html += '</div>';
@@ -5771,6 +5840,16 @@ async function cargarArchivosCandidato(candId) {
   } catch(e) { /* silencioso si el endpoint no existe aún */ }
 }
 
+// Toggle expand/colapse de una fila del historial de entrevistas (Bug #4)
+function toggleHistorialEntrevista(bodyId, caretId) {
+  var body = document.getElementById(bodyId);
+  var caret = document.getElementById(caretId);
+  if (!body) return;
+  var isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'block';
+  if (caret) caret.textContent = isOpen ? '▶' : '▼';
+}
+
 async function cargarHistorialEntrevistas(candId) {
   var el = document.getElementById('cvInterviewHistory_'+candId);
   if (!el) return;
@@ -5797,17 +5876,26 @@ async function cargarHistorialEntrevistas(candId) {
     }
     var resultColors = {'Aprobado':'#2ECC71','Aprobado con observaciones':'#F59E0B','Rechazado':'#FF4D4D','Pendiente':'#888'};
     var html = '';
-    interviews.forEach(function(iv) {
+    interviews.forEach(function(iv, idx) {
       var fecha = iv.CreatedAt ? new Date(iv.CreatedAt).toLocaleDateString('es-AR',{day:'2-digit',month:'short',year:'numeric'}) : '';
       var color = resultColors[iv.Result] || '#888';
+      var rowId = 'ivRow_'+candId+'_'+idx;
+      var bodyId = 'ivBody_'+candId+'_'+idx;
+      var caretId = 'ivCaret_'+candId+'_'+idx;
+      var hasFeedback = !!iv.Feedback;
       html += '<div style="border-bottom:1px solid #1e1e1e;padding:6px 0;">';
-      html += '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:3px;">';
-      html += '<span style="font-size:11px;color:#f0ebe3;font-weight:700;">'+(iv.InterviewerName||'Sin entrevistador').replace(/</g,'&lt;')+'</span>';
+      // Fila colapsable: click en la fila expande/colapsa el feedback
+      html += '<div id="'+rowId+'" style="display:flex;justify-content:space-between;align-items:center;gap:8px;'+(hasFeedback?'cursor:pointer;':'')+'" '+(hasFeedback?'onclick="toggleHistorialEntrevista(\''+bodyId+'\',\''+caretId+'\')"':'')+'>';
+      html += '<span style="font-size:11px;color:#f0ebe3;font-weight:700;display:flex;align-items:center;gap:6px;">';
+      if (hasFeedback) html += '<span id="'+caretId+'" style="color:#888;font-size:10px;transition:transform 0.2s;">▶</span>';
+      html += (iv.InterviewerName||'Sin entrevistador').replace(/</g,'&lt;');
+      html += '</span>';
       html += '<span style="font-size:10px;color:'+color+';font-weight:700;">'+(iv.Result||'—').replace(/</g,'&lt;')+'</span>';
       html += '<span style="font-size:10px;color:#666;">'+fecha+'</span>';
       html += '</div>';
-      if (iv.Feedback) {
-        html += '<div style="font-size:11px;color:#aaa;line-height:1.4;">'+String(iv.Feedback).replace(/</g,'&lt;')+'</div>';
+      // Feedback colapsado por default
+      if (hasFeedback) {
+        html += '<div id="'+bodyId+'" style="display:none;font-size:11px;color:#aaa;line-height:1.4;margin-top:6px;padding:8px 10px;background:#141414;border-left:2px solid #FF5400;border-radius:4px;">'+String(iv.Feedback).replace(/</g,'&lt;')+'</div>';
       }
       html += '</div>';
     });
@@ -6493,13 +6581,14 @@ function verEvidenciaCareer(mid) {
               <textarea id="pipMilestones" class="form-control" placeholder="Semana 1: reunión de alineación&#10;Semana 2: entrega..." style="height:110px;resize:none;overflow-y:auto;margin-top:4px;"></textarea>
             </div>
           </div>
-        </div></div>
+        </div>
         <div id="pipError" style="color:#FF4D4D;font-size:12px;margin-top:10px;display:none;"></div>
         <div class="modal-actions">
           <button class="btn btn-secondary" onclick="closeModal('modalNuevoPIP')">Cancelar</button>
           <button class="btn btn-primary" onclick="guardarNuevoPIP()">Crear PIP</button>
         </div>
       </div>
+    </div>
 
 <div class="modal-overlay" id="modalRevisarPIP">
       <div class="modal" style="max-width:560px;">
@@ -6788,8 +6877,9 @@ function verEvidenciaCareer(mid) {
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
           <div class="form-group" style="grid-column:1/-1">
             <label class="form-label">Colaborador *</label>
-            <input id="objColabBuscar" type="text" class="form-control" placeholder="🔍 Buscar colaborador..." style="margin-bottom:4px;" oninput="filtrarColabObj(this.value)">
-            <select id="objColabSel" class="form-control"><option value="">— Seleccionar colaborador —</option></select>
+            <input id="objColabInput" type="text" class="form-control" list="objColabList" placeholder="🔍 Escribí nombre o email del colaborador..." autocomplete="off" oninput="resolverColabObj(this.value)">
+            <datalist id="objColabList"></datalist>
+            <input type="hidden" id="objColabSel">
           </div>
           <div class="form-group" style="grid-column:1/-1;">
             <div style="background:rgba(255,84,0,0.06);border:1px solid rgba(255,84,0,0.2);border-radius:8px;padding:12px 14px;">

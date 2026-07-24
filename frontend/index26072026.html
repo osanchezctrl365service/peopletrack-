@@ -4755,51 +4755,10 @@ function filtrarPipColab(q) {
   .forEach(function(u){ sel.add(new Option((u.FullName||u.Email)+' \u2014 '+(u.Email||''), u.UserID)); });
 }
 
-// Estado temporal de hitos mientras se crea el PIP (Sesión 3)
-var pipHitosTemp = [];
-
 function abrirModalNuevoPIP() {
   if (!allUsuarios.length) { loadUsuarios().then(function(){ filtrarPipColab(''); }); }
   else { filtrarPipColab(''); }
-  // Resetear hitos temp
-  pipHitosTemp = [];
-  renderHitosPIPTemp();
   showModal('modalNuevoPIP');
-}
-
-// Agregar un hito vacío al array temporal (Sesión 3)
-function agregarHitoPIPTemp() {
-  pipHitosTemp.push({ description: '', targetDate: '' });
-  renderHitosPIPTemp();
-}
-
-// Quitar un hito del array temporal por su índice (Sesión 3)
-function quitarHitoPIPTemp(idx) {
-  pipHitosTemp.splice(idx, 1);
-  renderHitosPIPTemp();
-}
-
-// Renderizar hitos temporales en el modal Nuevo PIP (Sesión 3)
-function renderHitosPIPTemp() {
-  var c = document.getElementById('pipHitosContainer');
-  if (!c) return;
-  if (!pipHitosTemp.length) {
-    c.innerHTML = '<div style="text-align:center;padding:20px;color:#666;font-size:11px;background:#111;border-radius:8px;border:1px dashed #2a2a2a;">Sin hitos. Agreg\xe1 al menos uno para el plan.</div>';
-    return;
-  }
-  var html = '';
-  pipHitosTemp.forEach(function(h, i) {
-    var idxStr = String(i);
-    html += '<div style="background:#111;border:1px solid #252525;border-radius:8px;padding:10px;">';
-    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">';
-    html += '<span style="font-size:11px;color:#FF5400;font-weight:700;">Hito #'+(i+1)+'</span>';
-    html += '<button type="button" data-idx="'+idxStr+'" onclick="quitarHitoPIPTemp(parseInt(this.dataset.idx))" style="background:none;border:none;color:#FF4D4D;font-size:14px;cursor:pointer;padding:2px 6px;">✕</button>';
-    html += '</div>';
-    html += '<input type="text" data-idx="'+idxStr+'" oninput="pipHitosTemp[parseInt(this.dataset.idx)].description=this.value" value="'+String(h.description||'').replace(/"/g,'&quot;')+'" placeholder="Descripci\xf3n del hito..." class="form-control" style="font-size:12px;margin-bottom:6px;">';
-    html += '<input type="date" data-idx="'+idxStr+'" onchange="pipHitosTemp[parseInt(this.dataset.idx)].targetDate=this.value" value="'+String(h.targetDate||'')+'" class="form-control" style="font-size:12px;">';
-    html += '</div>';
-  });
-  c.innerHTML = html;
 }
 
 async function guardarNuevoPIP() {
@@ -4810,48 +4769,24 @@ async function guardarNuevoPIP() {
   if (!empId) { errEl.textContent = 'Seleccion\xe1 un colaborador'; errEl.style.display='block'; return; }
   if (!reason) { errEl.textContent = 'El motivo es obligatorio'; errEl.style.display='block'; return; }
   if (!start) { errEl.textContent = 'La fecha de inicio es obligatoria'; errEl.style.display='block'; return; }
-  // Validar hitos (Sesión 3): al menos 1 con descripción
-  var hitosValidos = pipHitosTemp.filter(function(h){ return h.description && h.description.trim(); });
-  if (hitosValidos.length === 0) {
-    errEl.textContent = 'Agreg\xe1 al menos un hito con descripci\xf3n';
-    errEl.style.display = 'block';
-    return;
-  }
   errEl.style.display = 'none';
   var me = allUsuarios.find(function(u){ return u.Email === window._userEmail; });
   try {
-    // Paso 1: crear el PIP (sin los campos target 15/30/60 ni milestones textarea)
     var res = await fetch(API_BASE + '/pips', {
       method: 'POST', headers: {'Content-Type':'application/json'},
       body: JSON.stringify({ employeeId: parseInt(empId), createdById: me?me.UserID:1,
         reason: reason, startDate: start,
-        target15: null, target30: null, target60: null,
-        milestones: null })
+        target15: document.getElementById('pipTarget15').value||null,
+        target30: document.getElementById('pipTarget30').value||null,
+        target60: document.getElementById('pipTarget60').value||null,
+        milestones: document.getElementById('pipMilestones').value||null })
     });
     var data = await res.json();
     if (data.ok === false) throw new Error(data.error||'Error');
-    var newPipId = data.data && (data.data.pipId || data.data.PIPID);
-    if (!newPipId) throw new Error('No se recibió el PIPID creado');
-    // Paso 2: crear cada hito como POST individual a /pips/:id/milestones
-    for (var i = 0; i < hitosValidos.length; i++) {
-      var h = hitosValidos[i];
-      try {
-        await fetch(API_BASE + '/pips/' + newPipId + '/milestones', {
-          method: 'POST', headers: {'Content-Type':'application/json'},
-          body: JSON.stringify({
-            description: h.description.trim(),
-            targetDate: h.targetDate || null,
-            sortOrder: i + 1
-          })
-        });
-      } catch(hErr) {
-        console.warn('Error creando hito', i, hErr);
-      }
-    }
     closeModal('modalNuevoPIP');
-    ['pipReason','pipStartDate'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
-    pipHitosTemp = [];
-    mostrarToast('PIP creado correctamente con ' + hitosValidos.length + ' hito(s)', 'success');
+    ['pipReason','pipMilestones','pipTarget15','pipTarget30','pipTarget60','pipStartDate']
+      .forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
+    mostrarToast('PIP creado correctamente', 'success');
     cargarPIPs();
   } catch(e) { errEl.textContent = 'Error: '+e.message; errEl.style.display='block'; }
 }
@@ -5165,267 +5100,37 @@ function verPIPCompleto(pipId) {
   overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:600;display:flex;align-items:center;justify-content:center;';
   overlay.id = 'overlayVerPIP';
   var inicio = pip.StartDate ? new Date(pip.StartDate).toLocaleDateString('es-AR') : '&#8212;';
+  var t15 = pip.Target15Days ? new Date(pip.Target15Days).toLocaleDateString('es-AR') : '&#8212;';
+  var t30 = pip.Target30Days ? new Date(pip.Target30Days).toLocaleDateString('es-AR') : '&#8212;';
+  var t60 = pip.Target60Days ? new Date(pip.Target60Days).toLocaleDateString('es-AR') : '&#8212;';
   var sc = pip.Status==='closed'?(pip.Achieved?'#2ECC71':'#FF4D4D'):'#F59E0B';
   var sl = pip.Status==='closed'?(pip.Achieved?'Logrado':'No logrado'):'Activo';
-  overlay.innerHTML = '<div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:16px;padding:28px;width:720px;max-width:95vw;max-height:90vh;overflow-y:auto;">' +
+  overlay.innerHTML = '<div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:16px;padding:28px;width:620px;max-width:95vw;max-height:90vh;overflow-y:auto;">' +
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">' +
     '<div><div style="font-size:16px;font-weight:800;color:#f0ebe3;">PIP &#8212; '+(pip.EmployeeName||'').replace(/</g,'&lt;')+'</div>' +
-    '<div style="font-size:11px;color:#888;margin-top:3px;">Creado por '+(pip.CreatedByName||'').replace(/</g,'&lt;')+' &middot; Inicio '+inicio+'</div></div>' +
+    '<div style="font-size:11px;color:#888;margin-top:3px;">Creado por '+(pip.CreatedByName||'').replace(/</g,'&lt;')+'</div></div>' +
     '<div style="display:flex;gap:10px;align-items:center;">' +
     '<span style="font-size:11px;font-weight:700;color:'+sc+';background:'+sc+'22;padding:3px 12px;border-radius:20px;">'+sl+'</span>' +
     '<button onclick="document.getElementById(\'overlayVerPIP\').remove()" style="background:none;border:none;color:#888;font-size:20px;cursor:pointer;">&#x2715;</button>' +
+    '</div></div>' +
+    '<div style="background:#111;border:1px solid #2a2a2a;border-radius:10px;padding:16px;margin-bottom:16px;">' +
+    '<div style="font-size:12px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:10px;">Fechas</div>' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;text-align:center;">' +
+    '<div><div style="font-size:10px;color:#888;">Inicio</div><div style="font-size:13px;font-weight:700;color:#f0ebe3;margin-top:3px;">'+inicio+'</div></div>' +
+    '<div><div style="font-size:10px;color:#888;">15 d\xedas</div><div style="font-size:13px;font-weight:700;color:#F59E0B;margin-top:3px;">'+t15+'</div></div>' +
+    '<div><div style="font-size:10px;color:#888;">30 d\xedas</div><div style="font-size:13px;font-weight:700;color:#F59E0B;margin-top:3px;">'+t30+'</div></div>' +
+    '<div><div style="font-size:10px;color:#888;">60 d\xedas</div><div style="font-size:13px;font-weight:700;color:#F59E0B;margin-top:3px;">'+t60+'</div></div>' +
     '</div></div>' +
     '<div style="margin-bottom:16px;">' +
     '<div style="font-size:12px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:8px;">Motivo del PIP</div>' +
     '<div style="font-size:13px;color:#aaa;line-height:1.7;background:#111;border-radius:8px;padding:14px;white-space:pre-wrap;">'+(pip.Reason||'').replace(/</g,'&lt;')+'</div>' +
     '</div>' +
-    // Sección Hitos (Sesión 3)
-    '<div style="margin-bottom:16px;">' +
-    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
-    '<div style="font-size:12px;font-weight:700;color:#888;text-transform:uppercase;">🎯 Hitos del plan</div>' +
-    '<button onclick="agregarHitoAExistente('+pipId+')" style="padding:4px 10px;background:rgba(255,84,0,0.1);border:1px solid rgba(255,84,0,0.3);border-radius:5px;color:#FF5400;font-size:10px;font-weight:600;cursor:pointer;">+ Agregar hito</button>' +
-    '</div>' +
-    '<div id="pipHitosLista_'+pipId+'" style="display:flex;flex-direction:column;gap:8px;">' +
-    '<div style="text-align:center;padding:16px;color:#666;font-size:11px;">Cargando hitos...</div>' +
-    '</div>' +
-    '</div>' +
-    // Sección Archivos (Sesión 3)
-    '<div style="margin-bottom:16px;">' +
-    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
-    '<div style="font-size:12px;font-weight:700;color:#888;text-transform:uppercase;">📎 Evidencia (archivos)</div>' +
-    '<label style="padding:4px 10px;background:rgba(255,84,0,0.1);border:1px solid rgba(255,84,0,0.3);border-radius:5px;color:#FF5400;font-size:10px;font-weight:600;cursor:pointer;">+ Subir archivo<input type="file" id="pipFileUpload_'+pipId+'" accept=".pdf,.docx,.jpg,.jpeg,.png" style="display:none;" onchange="subirArchivoPIP('+pipId+',this)"></label>' +
-    '</div>' +
-    '<div style="font-size:10px;color:#666;margin-bottom:6px;">Tipos permitidos: PDF, DOCX, JPG, PNG · Máx 10 MB</div>' +
-    '<div id="pipArchivosLista_'+pipId+'" style="display:flex;flex-direction:column;gap:6px;">' +
-    '<div style="text-align:center;padding:16px;color:#666;font-size:11px;">Cargando archivos...</div>' +
-    '</div>' +
-    '</div>' +
+    (pip.Milestones ? '<div style="margin-bottom:16px;"><div style="font-size:12px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:8px;">Hitos del plan</div>' +
+    '<div style="font-size:13px;color:#aaa;line-height:1.7;background:#111;border-radius:8px;padding:14px;white-space:pre-wrap;">'+(pip.Milestones||'').replace(/</g,'&lt;')+'</div></div>' : '') +
     (pip.ReviewNotes ? '<div><div style="font-size:12px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:8px;">Notas de revisi\xf3n</div>' +
     '<div style="font-size:13px;color:#aaa;line-height:1.7;background:#111;border-radius:8px;padding:14px;white-space:pre-wrap;">'+(pip.ReviewNotes||'').replace(/</g,'&lt;')+'</div></div>' : '') +
     '</div>';
   document.body.appendChild(overlay);
-  // Cargar hitos y archivos async
-  cargarHitosPIP(pipId);
-  cargarArchivosPIP(pipId);
-}
-
-// Cargar hitos de un PIP existente y renderizarlos (Sesión 3)
-async function cargarHitosPIP(pipId) {
-  var el = document.getElementById('pipHitosLista_'+pipId);
-  if (!el) return;
-  try {
-    var res = await fetch(API_BASE + '/pips/' + pipId + '/milestones');
-    if (!res.ok) throw new Error('HTTP '+res.status);
-    var json = await res.json();
-    var hitos = Array.isArray(json) ? json : (json.data||[]);
-    if (!hitos.length) {
-      el.innerHTML = '<div style="text-align:center;padding:16px;color:#666;font-size:11px;background:#111;border-radius:8px;border:1px dashed #2a2a2a;">Sin hitos cargados. Hac\xe9 click en <b>+ Agregar hito</b> para crear el primero.</div>';
-      return;
-    }
-    var statusColors = { pending:'#F59E0B', completed:'#2ECC71', not_met:'#FF4D4D' };
-    var statusLabels = { pending:'Pendiente', completed:'Cumplido', not_met:'No cumplido' };
-    var html = '';
-    hitos.forEach(function(h) {
-      var col = statusColors[h.Status] || '#888';
-      var lbl = statusLabels[h.Status] || h.Status;
-      var td = h.TargetDate ? new Date(h.TargetDate).toLocaleDateString('es-AR') : '—';
-      var cd = h.ClosedDate ? new Date(h.ClosedDate).toLocaleDateString('es-AR') : '';
-      html += '<div style="background:#111;border:1px solid #252525;border-radius:8px;padding:12px;">';
-      html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px;">';
-      html += '<div style="flex:1;font-size:13px;color:#f0ebe3;font-weight:600;">'+(h.Description||'').replace(/</g,'&lt;')+'</div>';
-      html += '<span style="font-size:10px;font-weight:700;color:'+col+';background:'+col+'22;padding:2px 8px;border-radius:12px;white-space:nowrap;">'+lbl+'</span>';
-      html += '</div>';
-      html += '<div style="display:flex;gap:12px;font-size:10px;color:#888;margin-bottom:8px;">';
-      html += '<span>🎯 Target: <b style="color:#aaa;">'+td+'</b></span>';
-      if (cd) html += '<span>✓ Cerrado: <b style="color:#aaa;">'+cd+'</b></span>';
-      html += '</div>';
-      if (h.LeaderFeedback) {
-        html += '<div style="font-size:11px;color:#aaa;background:#0d0d0d;border-left:2px solid #FF5400;border-radius:4px;padding:8px 10px;margin-bottom:8px;white-space:pre-wrap;">'+String(h.LeaderFeedback).replace(/</g,'&lt;')+'</div>';
-      }
-      html += '<div style="display:flex;gap:6px;flex-wrap:wrap;">';
-      html += '<button onclick="editarHitoPIP('+h.PIPMilestoneID+','+pipId+')" style="padding:3px 10px;background:#222;border:1px solid #333;border-radius:5px;color:#aaa;font-size:10px;cursor:pointer;">Editar</button>';
-      if (h.Status === 'pending') {
-        html += '<button onclick="cerrarHitoPIP('+h.PIPMilestoneID+','+pipId+',\'completed\')" style="padding:3px 10px;background:rgba(46,204,113,0.1);border:1px solid rgba(46,204,113,0.3);border-radius:5px;color:#2ECC71;font-size:10px;cursor:pointer;">✓ Marcar cumplido</button>';
-        html += '<button onclick="cerrarHitoPIP('+h.PIPMilestoneID+','+pipId+',\'not_met\')" style="padding:3px 10px;background:rgba(255,77,77,0.1);border:1px solid rgba(255,77,77,0.3);border-radius:5px;color:#FF4D4D;font-size:10px;cursor:pointer;">✕ No cumplido</button>';
-      } else {
-        html += '<button onclick="cerrarHitoPIP('+h.PIPMilestoneID+','+pipId+',\'pending\')" style="padding:3px 10px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);border-radius:5px;color:#F59E0B;font-size:10px;cursor:pointer;">↩ Reabrir</button>';
-      }
-      html += '<button onclick="eliminarHitoPIP('+h.PIPMilestoneID+','+pipId+')" style="padding:3px 10px;background:transparent;border:1px solid #333;border-radius:5px;color:#666;font-size:10px;cursor:pointer;margin-left:auto;">🗑 Borrar</button>';
-      html += '</div>';
-      html += '</div>';
-    });
-    el.innerHTML = html;
-  } catch(e) {
-    el.innerHTML = '<div style="text-align:center;padding:16px;color:#FF4D4D;font-size:11px;">Error cargando hitos: '+e.message+'</div>';
-  }
-}
-
-// Agregar un hito nuevo a un PIP existente (Sesión 3)
-async function agregarHitoAExistente(pipId) {
-  var desc = prompt('Descripción del nuevo hito:');
-  if (!desc || !desc.trim()) return;
-  var target = prompt('Fecha objetivo (formato AAAA-MM-DD, opcional):');
-  try {
-    var res = await fetch(API_BASE + '/pips/' + pipId + '/milestones', {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ description: desc.trim(), targetDate: target || null })
-    });
-    if (!res.ok) throw new Error('HTTP '+res.status);
-    mostrarToast('Hito agregado', 'success');
-    cargarHitosPIP(pipId);
-  } catch(e) { mostrarToast('Error: '+e.message, 'error'); }
-}
-
-// Editar un hito (descripción, fecha, feedback) — usa prompts simples (Sesión 3)
-async function editarHitoPIP(mid, pipId) {
-  var newDesc = prompt('Nueva descripción del hito (dejá vacío para no cambiar):');
-  var newFb   = prompt('Feedback del líder (dejá vacío para no cambiar):');
-  var body = {};
-  if (newDesc !== null && newDesc.trim()) body.description = newDesc.trim();
-  if (newFb   !== null) body.leaderFeedback = newFb; // permitimos vaciar
-  if (Object.keys(body).length === 0) return;
-  try {
-    var res = await fetch(API_BASE + '/pips/milestones/' + mid, {
-      method: 'PUT', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify(body)
-    });
-    if (!res.ok) throw new Error('HTTP '+res.status);
-    mostrarToast('Hito actualizado', 'success');
-    cargarHitosPIP(pipId);
-  } catch(e) { mostrarToast('Error: '+e.message, 'error'); }
-}
-
-// Cambiar estado de un hito (completed / not_met / pending) (Sesión 3)
-async function cerrarHitoPIP(mid, pipId, nuevoStatus) {
-  try {
-    var res = await fetch(API_BASE + '/pips/milestones/' + mid, {
-      method: 'PUT', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ status: nuevoStatus })
-    });
-    if (!res.ok) throw new Error('HTTP '+res.status);
-    var labels = { completed:'cumplido', not_met:'no cumplido', pending:'reabierto' };
-    mostrarToast('Hito ' + (labels[nuevoStatus]||'actualizado'), 'success');
-    cargarHitosPIP(pipId);
-  } catch(e) { mostrarToast('Error: '+e.message, 'error'); }
-}
-
-// Eliminar un hito (Sesión 3)
-async function eliminarHitoPIP(mid, pipId) {
-  if (!confirm('¿Seguro que querés eliminar este hito?')) return;
-  try {
-    var res = await fetch(API_BASE + '/pips/milestones/' + mid, { method: 'DELETE' });
-    if (!res.ok) throw new Error('HTTP '+res.status);
-    mostrarToast('Hito eliminado', 'success');
-    cargarHitosPIP(pipId);
-  } catch(e) { mostrarToast('Error: '+e.message, 'error'); }
-}
-
-// Cargar lista de archivos de un PIP (Sesión 3)
-async function cargarArchivosPIP(pipId) {
-  var el = document.getElementById('pipArchivosLista_'+pipId);
-  if (!el) return;
-  try {
-    var res = await fetch(API_BASE + '/pips/' + pipId + '/files');
-    if (!res.ok) throw new Error('HTTP '+res.status);
-    var json = await res.json();
-    var files = Array.isArray(json) ? json : (json.data||[]);
-    if (!files.length) {
-      el.innerHTML = '<div style="text-align:center;padding:16px;color:#666;font-size:11px;background:#111;border-radius:8px;border:1px dashed #2a2a2a;">Sin archivos. Hac\xe9 click en <b>+ Subir archivo</b> para agregar evidencia.</div>';
-      return;
-    }
-    var html = '';
-    files.forEach(function(f) {
-      var fecha = f.UploadedAt ? new Date(f.UploadedAt).toLocaleDateString('es-AR') : '';
-      var sizeKB = f.FileSize ? Math.round(f.FileSize/1024) : 0;
-      var iconMap = { pdf:'📄', docx:'📝', doc:'📝', jpg:'🖼', jpeg:'🖼', png:'🖼' };
-      var ext = String(f.FileName||'').split('.').pop().toLowerCase();
-      var icon = iconMap[ext] || '📎';
-      html += '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;background:#111;border:1px solid #252525;border-radius:8px;padding:10px 12px;">';
-      html += '<div style="flex:1;min-width:0;">';
-      html += '<div style="font-size:12px;color:#f0ebe3;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+icon+' '+String(f.FileName||'').replace(/</g,'&lt;')+'</div>';
-      html += '<div style="font-size:10px;color:#888;margin-top:2px;">'+sizeKB+' KB · '+fecha+(f.UploadedByName?' · por '+String(f.UploadedByName).replace(/</g,'&lt;'):'')+'</div>';
-      html += '</div>';
-      html += '<button onclick="descargarArchivoPIP('+f.PIPFileID+')" style="padding:4px 12px;background:#222;border:1px solid #333;border-radius:5px;color:#aaa;font-size:11px;cursor:pointer;">⬇ Descargar</button>';
-      html += '<button onclick="eliminarArchivoPIP('+f.PIPFileID+','+pipId+')" style="padding:4px 8px;background:transparent;border:1px solid #333;border-radius:5px;color:#666;font-size:11px;cursor:pointer;">🗑</button>';
-      html += '</div>';
-    });
-    el.innerHTML = html;
-  } catch(e) {
-    el.innerHTML = '<div style="text-align:center;padding:16px;color:#FF4D4D;font-size:11px;">Error cargando archivos: '+e.message+'</div>';
-  }
-}
-
-// Subir archivo — convierte a base64 y hace POST (Sesión 3)
-async function subirArchivoPIP(pipId, inputEl) {
-  if (!inputEl || !inputEl.files || !inputEl.files.length) return;
-  var file = inputEl.files[0];
-  // Validación cliente-side
-  var allowedExt = /\.(pdf|docx|jpg|jpeg|png)$/i;
-  if (!allowedExt.test(file.name)) {
-    mostrarToast('Tipo de archivo no permitido. Sólo PDF, DOCX, JPG, PNG', 'error');
-    inputEl.value = ''; return;
-  }
-  if (file.size > 10 * 1024 * 1024) {
-    mostrarToast('Archivo demasiado grande (máx 10 MB)', 'error');
-    inputEl.value = ''; return;
-  }
-  mostrarToast('Subiendo archivo...', 'success');
-  try {
-    var reader = new FileReader();
-    reader.onload = async function() {
-      // reader.result es 'data:mimetype;base64,XXXX' — sacar solo la parte base64
-      var base64 = String(reader.result).split(',')[1];
-      var me = allUsuarios.find(function(u){ return u.Email === window._userEmail; });
-      var res = await fetch(API_BASE + '/pips/' + pipId + '/files', {
-        method: 'POST', headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({
-          fileName: file.name, fileData: base64,
-          mimeType: file.type || 'application/octet-stream',
-          uploadedById: me ? me.UserID : null
-        })
-      });
-      var data = await res.json();
-      if (!res.ok || data.ok === false) throw new Error(data.error || ('HTTP '+res.status));
-      mostrarToast('Archivo subido ✓', 'success');
-      inputEl.value = '';
-      cargarArchivosPIP(pipId);
-    };
-    reader.onerror = function() { mostrarToast('Error leyendo el archivo', 'error'); };
-    reader.readAsDataURL(file);
-  } catch(e) { mostrarToast('Error: '+e.message, 'error'); }
-}
-
-// Descargar archivo — pide base64 al backend y dispara descarga (Sesión 3)
-async function descargarArchivoPIP(fileId) {
-  try {
-    var res = await fetch(API_BASE + '/pips/files/' + fileId);
-    if (!res.ok) throw new Error('HTTP '+res.status);
-    var json = await res.json();
-    var data = json.data || json;
-    if (!data.fileData) throw new Error('Archivo vacío');
-    // Convertir base64 a Blob y disparar descarga
-    var byteChars = atob(data.fileData);
-    var byteNums = new Array(byteChars.length);
-    for (var i = 0; i < byteChars.length; i++) { byteNums[i] = byteChars.charCodeAt(i); }
-    var byteArr = new Uint8Array(byteNums);
-    var blob = new Blob([byteArr], { type: data.mimeType || 'application/octet-stream' });
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement('a');
-    a.href = url; a.download = data.fileName || 'archivo';
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  } catch(e) { mostrarToast('Error descargando: '+e.message, 'error'); }
-}
-
-// Eliminar archivo (Sesión 3)
-async function eliminarArchivoPIP(fileId, pipId) {
-  if (!confirm('¿Seguro que querés eliminar este archivo? Esta acción no se puede deshacer.')) return;
-  try {
-    var res = await fetch(API_BASE + '/pips/files/' + fileId, { method: 'DELETE' });
-    if (!res.ok) throw new Error('HTTP '+res.status);
-    mostrarToast('Archivo eliminado', 'success');
-    cargarArchivosPIP(pipId);
-  } catch(e) { mostrarToast('Error: '+e.message, 'error'); }
 }
 
 
@@ -6980,22 +6685,21 @@ function verEvidenciaCareer(mid) {
               <input id="pipBuscarColab" type="text" class="form-control" placeholder="Buscar..." style="margin-bottom:4px;" oninput="filtrarPipColab(this.value)">
               <select id="pipColabSel" class="form-control"><option value="">&#8212; Seleccionar &#8212;</option></select>
             </div>
-            <div>
-              <label class="form-label" style="font-size:11px;">Fecha inicio *</label>
-              <input id="pipStartDate" type="date" class="form-control">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <div><label class="form-label" style="font-size:11px;">Fecha inicio *</label><input id="pipStartDate" type="date" class="form-control"></div>
+              <div><label class="form-label" style="font-size:11px;">Target 15d</label><input id="pipTarget15" type="date" class="form-control"></div>
+              <div><label class="form-label" style="font-size:11px;">Target 30d</label><input id="pipTarget30" type="date" class="form-control"></div>
+              <div><label class="form-label" style="font-size:11px;">Target 60d</label><input id="pipTarget60" type="date" class="form-control"></div>
             </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
             <div style="flex:1;">
               <label class="form-label">Motivo del PIP *</label>
               <textarea id="pipReason" class="form-control" placeholder="Describí el motivo del plan de mejora..." style="height:110px;resize:none;overflow-y:auto;margin-top:4px;"></textarea>
             </div>
-          </div>
-          <div style="display:flex;flex-direction:column;gap:12px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;">
-              <label class="form-label" style="margin:0;">🎯 Hitos del plan</label>
-              <button type="button" onclick="agregarHitoPIPTemp()" style="padding:4px 12px;background:rgba(255,84,0,0.1);border:1px solid rgba(255,84,0,0.3);border-radius:6px;color:#FF5400;font-size:11px;font-weight:600;cursor:pointer;">+ Agregar hito</button>
-            </div>
-            <div id="pipHitosContainer" style="display:flex;flex-direction:column;gap:8px;max-height:280px;overflow-y:auto;padding-right:4px;">
-              <div style="text-align:center;padding:20px;color:#666;font-size:11px;background:#111;border-radius:8px;border:1px dashed #2a2a2a;">Sin hitos. Agregá al menos uno para el plan.</div>
+            <div style="flex:1;">
+              <label class="form-label">Hitos del plan</label>
+              <textarea id="pipMilestones" class="form-control" placeholder="Semana 1: reunión de alineación&#10;Semana 2: entrega..." style="height:110px;resize:none;overflow-y:auto;margin-top:4px;"></textarea>
             </div>
           </div>
         </div>

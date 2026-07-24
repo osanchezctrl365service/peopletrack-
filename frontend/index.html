@@ -625,7 +625,7 @@ label { color: #888 !important; }
       <h3 style="font-size:16px;font-weight:800;color:#f0ebe3;">Promover a Lider</h3>
       <button onclick="document.getElementById('modalPromoverLider').style.display='none'" style="background:none;border:none;color:#888;font-size:20px;cursor:pointer;">x</button>
     </div>
-    <p style="font-size:12px;color:#888;margin-bottom:16px;line-height:1.6;">Selecciona un empleado para asignarlo como lider. Aparecera en la seccion Lideres con sus colaboradores.</p>
+    <p style="font-size:12px;color:#888;margin-bottom:16px;line-height:1.6;">Selecciona un colaborador para asignarlo como líder. Aparecerá en la sección Líderes con sus colaboradores.</p>
     <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Buscar usuario</label>
     <input id="promoverSearch" type="text" placeholder="Nombre o email..." oninput="filtrarPromover()" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;box-sizing:border-box;">
     <div id="promoverLista" style="background:#111;border:1px solid #222;border-radius:8px;margin-top:8px;max-height:200px;overflow-y:auto;"></div>
@@ -662,8 +662,8 @@ label { color: #888 !important; }
         <div>
           <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Rol</label>
           <select id="editRol" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
-            <option value="employee">Empleado</option>
-            <option value="leader">Lider</option>
+            <option value="employee">Colaborador</option>
+            <option value="leader">Líder</option>
             <option value="manager">Manager</option>
             <option value="admin">Admin</option>
           </select>
@@ -685,6 +685,17 @@ label { color: #888 !important; }
         <select id="editManager" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;"></select>
       </div>
     </div>
+      <!-- Legajo + Fecha ingreso (Quick Win #5) -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Nro. de legajo</label>
+          <input id="editLegajo" type="number" min="0" step="1" placeholder="Ej: 12345" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
+        </div>
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Fecha de ingreso</label>
+          <input id="editHireDate" type="date" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
+        </div>
+      </div>
       <div>
         <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Área</label>
         <select id="editArea" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
@@ -721,7 +732,7 @@ label { color: #888 !important; }
         <div>
           <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Rol en la app</label>
           <select id="nuevoRol" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
-            <option value="employee">Empleado</option>
+            <option value="employee">Colaborador</option>
             <option value="leader">Líder</option>
             <option value="manager">Manager</option>
             <option value="admin">Admin</option>
@@ -746,6 +757,17 @@ label { color: #888 !important; }
         <select id="nuevoManager" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
           <option value="">— Sin manager —</option>
         </select>
+      </div>
+      <!-- Legajo + Fecha ingreso (Quick Win #5) - ambos opcionales -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Nro. de legajo</label>
+          <input id="nuevoLegajo" type="number" min="0" step="1" placeholder="Ej: 12345" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
+        </div>
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Fecha de ingreso</label>
+          <input id="nuevoHireDate" type="date" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
+        </div>
       </div>
       <div>
         <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Área</label>
@@ -1188,7 +1210,14 @@ label { color: #888 !important; }
         </div>
         <button class="btn btn-primary btn-sm" onclick="abrirModalNuevoPlan()">+ Nuevo Plan</button>
       </div>
-      <div id="careerContainer" style="max-height:calc(100vh - 220px);overflow-y:auto;padding-right:4px;">
+      <!-- Filtro por colaborador (Quick Win #4) -->
+      <div style="display:flex;gap:12px;align-items:center;margin-bottom:16px;">
+        <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap;">🔍 Filtrar por colaborador:</label>
+        <input id="careerFiltroInput" type="text" list="careerFiltroList" class="form-control" placeholder="Escribí nombre o dejá vacío para ver todos..." autocomplete="off" oninput="filtrarPlanesCarreraPorColab(this.value)" style="max-width:400px;">
+        <datalist id="careerFiltroList"></datalist>
+        <button onclick="limpiarFiltroCareer()" style="padding:6px 14px;background:#222;border:1px solid #333;border-radius:6px;color:#aaa;font-size:11px;cursor:pointer;white-space:nowrap;">Ver todos</button>
+      </div>
+      <div id="careerContainer" style="max-height:calc(100vh - 260px);overflow-y:auto;padding-right:4px;">
         <div style="text-align:center;padding:30px;color:#888;">Cargando planes de carrera...</div>
       </div>
 
@@ -1291,7 +1320,7 @@ label { color: #888 !important; }
       <!-- Tab Personales -->
       <div id="comp-personal" style="display:none;">
         <div class="card">
-          <div class="card-title">Competencias Personales / Acuerdo con el Empleado</div>
+          <div class="card-title">Competencias Personales / Acuerdo con el Colaborador</div>
           <p class="text-muted" style="font-size:13px;margin-bottom:12px;">Competencias adicionales acordadas entre el colaborador y el líder, fuera del marco global.</p>
           <div id="comp_personalList" style="color:#888;font-size:13px;padding:12px 0;">Seleccioná un colaborador y período para empezar.</div>
         </div>
@@ -1619,7 +1648,7 @@ label { color: #888 !important; }
       <div id="cfg-imports" style="display:none">
         <div class="card">
           <div class="card-title">Importación / Exportación de Usuarios</div>
-          <div class="help-tip"><span class="help-tip-icon">💡</span>Un colaborador puede tener <strong>más de un líder</strong> (multi-proyecto). En ese caso, cargue una fila por cada relación lider-colaborador con el mismo email de empleado.</div>
+          <div class="help-tip"><span class="help-tip-icon">💡</span>Un colaborador puede tener <strong>más de un líder</strong> (multi-proyecto). En ese caso, cargue una fila por cada relación líder-colaborador con el mismo email del colaborador.</div>
           <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
             <button class="btn btn-secondary" onclick="alert('Descargando template CSV...')">⬇ Descargar Template CSV</button>
             <button class="btn btn-primary">↑ Importar CSV de Usuarios</button>
@@ -2157,6 +2186,10 @@ async function guardarNuevoUsuario() {
   const liderId = document.getElementById('nuevoLider').value || null;
   const managerId = document.getElementById('nuevoManager').value || null;
   const area    = document.getElementById('nuevoArea').value.trim();
+  // Nuevos campos (Quick Win #5) - ambos opcionales
+  const legajoRaw = (document.getElementById('nuevoLegajo')||{}).value;
+  const legajo   = legajoRaw ? parseInt(legajoRaw, 10) : null;
+  const hireDate = (document.getElementById('nuevoHireDate')||{}).value || null;
   const errEl   = document.getElementById('modalUsuarioError');
   const btn     = document.getElementById('btnGuardarUsuario');
 
@@ -2171,7 +2204,7 @@ async function guardarNuevoUsuario() {
     const res = await fetch(API_BASE + '/manage/users', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fullName: nombre, email, appRole: rol, isActive: activo, leaderID: liderId ? parseInt(liderId) : null, managerID: managerId ? parseInt(managerId) : null, areaName: area || null })
+      body: JSON.stringify({ fullName: nombre, email, appRole: rol, isActive: activo, leaderID: liderId ? parseInt(liderId) : null, managerID: managerId ? parseInt(managerId) : null, areaName: area || null, employeeNumber: legajo, hireDate: hireDate })
     });
     const data = await res.json();
     if (data.ok === false) throw new Error(data.error || 'Error al guardar');
@@ -2234,6 +2267,15 @@ function abrirModalEditar(userId) {
   else loadAreas().then(poblarSelectAreas);
   const editArea = document.getElementById("editArea");
   if (editArea && u.AreaID) editArea.value = u.AreaID;
+  // Prepoblar legajo y fecha de ingreso (Quick Win #5)
+  const editLegajo = document.getElementById("editLegajo");
+  if (editLegajo) editLegajo.value = (u.EmployeeNumber != null ? u.EmployeeNumber : "");
+  const editHireDate = document.getElementById("editHireDate");
+  if (editHireDate) {
+    // Aceptar YYYY-MM-DD directo o ISO con timezone
+    var raw = u.HireDate || "";
+    editHireDate.value = raw ? String(raw).substring(0,10) : "";
+  }
   document.getElementById("modalEditarUsuario").style.display = "flex";
 }
 
@@ -2249,6 +2291,10 @@ async function guardarEdicionUsuario() {
   const activo  = document.getElementById("editEstado").value === "1";
   const liderId = document.getElementById("editLider").value || null;
   const managerId = document.getElementById("editManager").value || null;
+  // Nuevos campos (Quick Win #5)
+  const legajoRaw = (document.getElementById("editLegajo")||{}).value;
+  const legajo   = legajoRaw ? parseInt(legajoRaw, 10) : null;
+  const hireDate = (document.getElementById("editHireDate")||{}).value || null;
   const errEl   = document.getElementById("modalEditarError");
   const btn     = document.getElementById("btnGuardarEdicion");
   if (!nombre || !email) { errEl.textContent="Nombre y email son obligatorios"; errEl.style.display="block"; return; }
@@ -2260,7 +2306,9 @@ async function guardarEdicionUsuario() {
       body: JSON.stringify({ FullName: nombre, Email: email, AppRole: rol, IsActive: activo,
         LeaderID:  liderId   ? parseInt(liderId)  : null,
         ManagerID: managerId ? parseInt(managerId): null,
-        AreaID:    document.getElementById("editArea")?.value ? parseInt(document.getElementById("editArea").value) : null })
+        AreaID:    document.getElementById("editArea")?.value ? parseInt(document.getElementById("editArea").value) : null,
+        EmployeeNumber: legajo,
+        HireDate: hireDate })
     });
     const data = await res.json();
     if (data.ok === false) throw new Error(data.error || "Error al guardar");
@@ -3879,6 +3927,21 @@ async function editarObjetivo(id) {
       const fechaEl = document.getElementById('editObjFechaPersonal');
       if(fechaEl) fechaEl.value = obj.DueDate ? obj.DueDate.split('T')[0] : '';
     }
+    // Prepoblar Feedback + Áreas de mejora (Quick Win #6)
+    const fbEl = document.getElementById('editObjFeedback');
+    if (fbEl) fbEl.value = obj.Feedback || '';
+    const iaEl = document.getElementById('editObjImprovementAreas');
+    if (iaEl) iaEl.value = obj.ImprovementAreas || '';
+    const fbLabel = document.getElementById('editObjFeedbackDateLabel');
+    if (fbLabel) {
+      var fbDate = obj.FeedbackDate ? String(obj.FeedbackDate).substring(0,10) : '';
+      fbLabel.textContent = fbDate ? ('Última actualización: ' + fbDate) : 'Sin registros';
+    }
+    const iaLabel = document.getElementById('editObjImprovementDateLabel');
+    if (iaLabel) {
+      var iaDate = obj.ImprovementAreasDate ? String(obj.ImprovementAreasDate).substring(0,10) : '';
+      iaLabel.textContent = iaDate ? ('Última actualización: ' + iaDate) : 'Sin registros';
+    }
   }
   showModal('editObjectiveModal');
 }
@@ -3921,6 +3984,9 @@ async function guardarEdicionObjetivo() {
       body.status = document.getElementById('editObjEstado')?.value || 'not_started';
       body.progress = parseInt(document.getElementById('editObjAvance')?.value || '0');
     }
+    // Feedback + Áreas de mejora (Quick Win #6) - siempre se envían, el backend decide si actualiza la fecha
+    body.feedback = document.getElementById('editObjFeedback')?.value || '';
+    body.improvementAreas = document.getElementById('editObjImprovementAreas')?.value || '';
     const res = await fetch(API_BASE + '/objectives/' + id, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -5235,7 +5301,7 @@ function renderDetalleOnboarding(data) {
     if (m.DueDate) html += '<div style="font-size:10px;color:#888;">Vence: '+new Date(m.DueDate).toLocaleDateString('es-AR')+compDate+'</div>';
     html += '</div></div>';
     // Comentario
-    html += '<textarea data-mid="'+m.MilestoneID+'" class="form-control ob-comment" placeholder="Agreg\xe1 un comentario o evidencia..." style="font-size:12px;height:60px;resize:none;overflow-y:auto;margin-bottom:8px;">'+(m.EmployeeComment||'')+'</textarea>';
+    html += '<textarea data-mid="'+m.MilestoneID+'" class="form-control ob-comment" placeholder="Agreg\xe1 seguimiento o feedback..." style="font-size:12px;height:60px;resize:none;overflow-y:auto;margin-bottom:8px;">'+(m.EmployeeComment||'')+'</textarea>';
     // Upload archivo
     html += '<div style="display:flex;gap:8px;align-items:center;">';
     html += '<label style="padding:4px 10px;background:#222;border:1px solid #333;border-radius:5px;color:#aaa;font-size:11px;cursor:pointer;">';
@@ -6037,10 +6103,51 @@ async function loadCareerPlans() {
     try { json = JSON.parse(txt); } catch(e){ throw new Error('JSON inválido: '+txt.substring(0,80)); }
     if (!res.ok) throw new Error('HTTP '+res.status+': '+(json.error||''));
     allCareerPlans = Array.isArray(json) ? json : (json.data||[]);
+    // Populate el datalist del filtro (Quick Win #4)
+    poblarCareerFiltroList();
     renderCareerPlans(allCareerPlans);
   } catch(e) {
     c.innerHTML = '<div style="text-align:center;padding:20px;color:#FF4D4D;font-size:13px;">Error: '+e.message+'</div>';
   }
+}
+
+// Poblar datalist del filtro de Plan de Carrera con los colaboradores que tienen planes (Quick Win #4)
+function poblarCareerFiltroList() {
+  var dl = document.getElementById('careerFiltroList');
+  if (!dl) return;
+  dl.innerHTML = '';
+  // Sacar colaboradores únicos de los planes cargados
+  var seen = {};
+  allCareerPlans.forEach(function(p){
+    if (p.EmployeeName && !seen[p.EmployeeName]) {
+      seen[p.EmployeeName] = true;
+      var opt = document.createElement('option');
+      opt.value = (p.EmployeeName||'') + (p.EmployeeEmail ? ' \u2014 ' + p.EmployeeEmail : '');
+      dl.appendChild(opt);
+    }
+  });
+}
+
+// Filtrar el grid de planes según lo tipeado en el input de filtro (Quick Win #4)
+function filtrarPlanesCarreraPorColab(val) {
+  var q = (val||'').trim().toLowerCase();
+  if (!q) {
+    renderCareerPlans(allCareerPlans);
+    return;
+  }
+  var filtrados = allCareerPlans.filter(function(p){
+    var nombre = (p.EmployeeName||'').toLowerCase();
+    var email  = (p.EmployeeEmail||'').toLowerCase();
+    return nombre.indexOf(q) !== -1 || email.indexOf(q) !== -1;
+  });
+  renderCareerPlans(filtrados);
+}
+
+// Limpiar filtro y volver a mostrar todos los planes (Quick Win #4)
+function limpiarFiltroCareer() {
+  var inp = document.getElementById('careerFiltroInput');
+  if (inp) inp.value = '';
+  renderCareerPlans(allCareerPlans);
 }
 
 function renderCareerPlans(plans) {
@@ -6187,7 +6294,7 @@ function renderDetallePlan(plan, milestones) {
       html += '</div>';
 
       // Comentario
-      html += '<textarea data-mid="'+m.MilestoneID+'" class="cp-comment form-control" style="margin-top:8px;height:55px;resize:none;overflow-y:auto;font-size:12px;" placeholder="Comentario o nota...">'+(m.EmployeeComment||'')+'</textarea>';
+      html += '<textarea data-mid="'+m.MilestoneID+'" class="cp-comment form-control" style="margin-top:8px;height:55px;resize:none;overflow-y:auto;font-size:12px;" placeholder="Seguimiento o feedback...">'+(m.EmployeeComment||'')+'</textarea>';
       html += '<div style="display:flex;justify-content:flex-end;margin-top:6px;"><button data-mid="'+m.MilestoneID+'" onclick="guardarComentarioCareer(this.dataset.mid)" style="padding:4px 12px;background:rgba(255,84,0,0.1);border:1px solid rgba(255,84,0,0.3);border-radius:5px;color:#FF5400;font-size:11px;cursor:pointer;">Guardar</button></div>';
       html += '</div></div></div>';
     });
@@ -6478,7 +6585,7 @@ function verEvidenciaCareer(mid) {
     <div class="section" id="sec-onboarding">
       <div class="section-header" style="margin-bottom:20px;">
         <div><div class="section-heading">Onboarding</div>
-          <div class="section-subheading">Incorporaci&oacute;n de nuevos empleados</div></div>
+          <div class="section-subheading">Incorporaci&oacute;n de nuevos colaboradores</div></div>
         <button class="btn btn-primary btn-sm" onclick="abrirModalNuevoOnboarding()">+ Nuevo Onboarding</button>
       </div>
       <!-- KPIs dinámicos -->
@@ -6742,6 +6849,24 @@ function verEvidenciaCareer(mid) {
           </div>
         </div>
       </div>
+
+      <!-- FEEDBACK + ÁREAS DE MEJORA (Quick Win #6) - visible para ambos tipos -->
+      <div style="grid-column:1/-1;border-top:1px solid #2a2a2a;padding-top:16px;margin-top:8px;">
+        <div class="form-group" style="margin-bottom:14px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+            <label class="form-label" style="margin:0;">📝 Feedback</label>
+            <span id="editObjFeedbackDateLabel" style="font-size:10px;color:#888;">Sin registros</span>
+          </div>
+          <textarea id="editObjFeedback" class="form-control" rows="3" style="height:80px;resize:none;overflow-y:auto;" placeholder="Feedback sobre el objetivo, logros y observaciones..."></textarea>
+        </div>
+        <div class="form-group">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+            <label class="form-label" style="margin:0;">🎯 Áreas de mejora</label>
+            <span id="editObjImprovementDateLabel" style="font-size:10px;color:#888;">Sin registros</span>
+          </div>
+          <textarea id="editObjImprovementAreas" class="form-control" rows="3" style="height:80px;resize:none;overflow-y:auto;" placeholder="Aspectos a mejorar y próximos pasos..."></textarea>
+        </div>
+      </div>
     </div>
     <div id="editObjError" style="color:#FF4D4D;font-size:12px;margin-top:8px;display:none;"></div>
     <div class="modal-actions">
@@ -6805,9 +6930,9 @@ function verEvidenciaCareer(mid) {
             <div><label class="form-label">Fecha objetivo</label>
               <input id="obEndDate" type="date" class="form-control"></div>
           </div>
-          <div><label class="form-label">Descriptivo del rol</label>
-            <textarea id="obRoleDesc" class="form-control" rows="3" style="height:90px;resize:none;overflow-y:auto;" placeholder="Responsabilidades, objetivos, equipo, herramientas..."></textarea></div>
-          <div><label class="form-label">Responsable HR</label>
+          <!-- Campo 'Descriptivo del rol' oculto (Quick Win #2 - se mantiene en DB por compat con data histórica) -->
+          <textarea id="obRoleDesc" style="display:none;"></textarea>
+          <div><label class="form-label">Líder directo</label>
             <select id="obAsignado" class="form-control"><option value="">&#8212; Seleccionar &#8212;</option></select></div>
         </div>
         <div id="obError" style="color:#FF4D4D;font-size:12px;margin-top:10px;display:none;"></div>

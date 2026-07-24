@@ -6135,25 +6135,11 @@ function filtrarPlanesCarreraPorColab(val) {
     renderCareerPlans(allCareerPlans);
     return;
   }
-  // Si el usuario eligió una opción del datalist, el value viene con formato
-  // "Nombre \u2014 email@dominio.com". Separamos por el guion largo.
-  var parts = q.split(' \u2014 ');
-  var qNombre = (parts[0]||'').trim();
-  var qEmail  = parts.length > 1 ? (parts[1]||'').trim() : '';
   var filtrados = allCareerPlans.filter(function(p){
     var nombre = (p.EmployeeName||'').toLowerCase();
     var email  = (p.EmployeeEmail||'').toLowerCase();
-    // Match exacto por email si vino en el value (caso datalist elegido)
-    if (qEmail && email === qEmail) return true;
-    // Match parcial por nombre o email (caso usuario tipeando)
-    return (qNombre && (nombre.indexOf(qNombre) !== -1 || email.indexOf(qNombre) !== -1));
+    return nombre.indexOf(q) !== -1 || email.indexOf(q) !== -1;
   });
-  // Si hay filtro activo y no hay resultados, avisar con mensaje específico
-  if (filtrados.length === 0) {
-    var c = document.getElementById('careerContainer');
-    if (c) c.innerHTML = '<div style="text-align:center;padding:40px;color:#888;">No se encontraron planes para ese filtro. Prob\xe1 con otro nombre o hac\xe9 click en <b>Ver todos</b>.</div>';
-    return;
-  }
   renderCareerPlans(filtrados);
 }
 

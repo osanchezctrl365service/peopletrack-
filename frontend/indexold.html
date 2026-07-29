@@ -1768,11 +1768,7 @@ label { color: #888 !important; }
           <div class="section-heading">Alertas</div>
           <div class="section-subheading">Colaboradores con objetivos por debajo del umbral de rendimiento</div>
         </div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;">
-          <button class="btn btn-secondary btn-sm" onclick="probarTeamsWebhook()" title="Envía un mensaje de prueba a Teams" style="font-size:11px;">🧪 Probar Teams</button>
-          <button class="btn btn-secondary btn-sm" onclick="renotificarCriticas()" title="Re-envía a Teams las alertas críticas activas" style="font-size:11px;">📢 Renotificar críticas</button>
-          <button class="btn btn-secondary btn-sm" onclick="generarAlertas()">⟳ Actualizar alertas</button>
-        </div>
+        <button class="btn btn-secondary btn-sm" onclick="generarAlertas()">⟳ Actualizar alertas</button>
       </div>
 
       <!-- Descripción de la sección -->
@@ -5336,49 +5332,6 @@ async function generarAlertas() {
   } catch(e) {
     // Si falla, solo recargar
     await loadAlertas();
-  }
-}
-
-// Sesión 4 Bloque 4: probar el webhook de Teams con un mensaje de test
-async function probarTeamsWebhook() {
-  mostrarToast('Enviando mensaje de prueba a Teams...', 'info');
-  try {
-    const res = await fetch(API_BASE + '/alerts/test-teams', {
-      method: 'POST', headers: {'Content-Type':'application/json'}, body: '{}'
-    });
-    const json = await res.json();
-    const data = json.data || {};
-    console.log('[Teams test]', data);
-    if (data.sent) {
-      mostrarToast('✅ Mensaje enviado a Teams. Revisá el canal.', 'success');
-    } else {
-      mostrarToast('❌ No se pudo enviar: ' + (data.reason || 'sin razón'), 'error');
-    }
-  } catch(e) {
-    mostrarToast('Error de red: ' + e.message, 'error');
-  }
-}
-
-// Sesión 4 Bloque 4: re-enviar a Teams las alertas críticas activas
-async function renotificarCriticas() {
-  if (!confirm('¿Re-enviar a Teams todas las alertas críticas (activas y muy atrasadas)? Puede generar múltiples mensajes.')) return;
-  mostrarToast('Re-enviando alertas críticas a Teams...', 'info');
-  try {
-    const res = await fetch(API_BASE + '/alerts/renotify-critical', {
-      method: 'POST', headers: {'Content-Type':'application/json'}, body: '{}'
-    });
-    const json = await res.json();
-    const data = json.data || {};
-    console.log('[Teams re-notify]', data);
-    if (data.criticalAlertsFound === 0) {
-      mostrarToast('No hay alertas críticas activas para re-enviar', 'info');
-    } else if (data.sent > 0) {
-      mostrarToast('✅ ' + data.sent + ' alerta(s) enviada(s) a Teams' + (data.failed > 0 ? ' · ' + data.failed + ' fallaron' : ''), 'success');
-    } else {
-      mostrarToast('❌ No se envió ninguna. ' + (data.reason || ''), 'error');
-    }
-  } catch(e) {
-    mostrarToast('Error de red: ' + e.message, 'error');
   }
 }
 

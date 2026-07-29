@@ -702,13 +702,6 @@ label { color: #888 !important; }
           <option value="">— Sin área —</option>
         </select>
       </div>
-      <!-- Rol de negocio (Sesión 4) -->
-      <div>
-        <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Rol de negocio</label>
-        <select id="editJobRole" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
-          <option value="">— Sin rol —</option>
-        </select>
-      </div>
     </div>
     <div id="modalEditarError" style="color:#FF4D4D;font-size:12px;margin-top:12px;display:none;"></div>
     <div style="display:flex;gap:10px;margin-top:24px;justify-content:flex-end;">
@@ -780,13 +773,6 @@ label { color: #888 !important; }
         <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Área</label>
         <select id="nuevoArea" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
           <option value="">— Sin área —</option>
-        </select>
-      </div>
-      <!-- Rol de negocio (Sesión 4) -->
-      <div>
-        <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Rol de negocio</label>
-        <select id="nuevoJobRole" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
-          <option value="">— Sin rol —</option>
         </select>
       </div>
     </div>
@@ -904,10 +890,6 @@ label { color: #888 !important; }
   <div class="nav-item" onclick="showSection('areas')">
     <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
     Áreas
-  </div>
-  <div class="nav-item" onclick="showSection('roles')">
-    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><path d="M17 11h.01"/><path d="M20 8h.01"/><path d="M23 11h.01"/></svg>
-    Roles
   </div>
 
   <div class="sidebar-section-label">Sistema</div>
@@ -1073,106 +1055,6 @@ label { color: #888 !important; }
       </thead>
       <tbody id="areasTbody"></tbody>
     </table>
-  </div>
-</div>
-
-<!-- SECCIÓN ROLES (Sesión 4 - Módulo Roles de negocio) -->
-<div class="section" id="sec-roles">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-    <div>
-      <h2 style="font-size:20px;font-weight:800;color:#f0ebe3;">Roles</h2>
-      <p style="font-size:12px;color:#888;margin-top:2px;">Roles de negocio de la empresa (distinto de los permisos del sistema)</p>
-    </div>
-    <button onclick="abrirModalRol()" style="padding:8px 16px;background:#FF5400;border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;">+ Nuevo Rol</button>
-  </div>
-  <div style="display:flex;gap:12px;align-items:center;margin-bottom:14px;flex-wrap:wrap;">
-    <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Filtro:</label>
-    <select id="rolesFilterCategoria" onchange="renderRolesTable()" style="padding:6px 10px;background:#111;border:1px solid #333;border-radius:6px;color:#f0ebe3;font-size:12px;">
-      <option value="">Todas las categorías</option>
-      <option value="Management">Management</option>
-      <option value="Delivery">Delivery</option>
-      <option value="Desarrollo">Desarrollo</option>
-      <option value="Infraestructura">Infraestructura</option>
-      <option value="Seguridad">Seguridad</option>
-      <option value="Comercial">Comercial</option>
-    </select>
-    <select id="rolesFilterEstado" onchange="renderRolesTable()" style="padding:6px 10px;background:#111;border:1px solid #333;border-radius:6px;color:#f0ebe3;font-size:12px;">
-      <option value="all">Todos</option>
-      <option value="1" selected>Solo activos</option>
-      <option value="0">Solo inactivos</option>
-    </select>
-  </div>
-  <div class="card" style="padding:0;overflow:hidden;">
-    <div id="rolesLoading" style="text-align:center;padding:40px;color:#888;">Cargando roles...</div>
-    <table class="data-table" id="rolesTable" style="display:none;">
-      <thead>
-        <tr>
-          <th>Rol</th>
-          <th>Categoría</th>
-          <th>Nivel</th>
-          <th># usuarios</th>
-          <th>Estado</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody id="rolesTbody"></tbody>
-    </table>
-  </div>
-</div>
-
-<!-- MODAL: Alta/Edición de Rol -->
-<div id="modalRol" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:500;align-items:center;justify-content:center;">
-  <div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:16px;padding:32px;width:520px;max-width:95vw;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
-      <h3 id="modalRolTitle" style="font-size:16px;font-weight:800;color:#f0ebe3;">Nuevo Rol</h3>
-      <button onclick="cerrarModalRol()" style="background:none;border:none;color:#888;font-size:20px;cursor:pointer;">×</button>
-    </div>
-    <input type="hidden" id="modalRolId" value="">
-    <div style="display:flex;flex-direction:column;gap:14px;">
-      <div>
-        <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Nombre del rol *</label>
-        <input id="rolNombre" type="text" placeholder="Ej: Desarrollador Senior" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
-      </div>
-      <div>
-        <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Descripción</label>
-        <textarea id="rolDescripcion" rows="3" placeholder="Descripción o responsabilidades del rol..." style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;resize:vertical;"></textarea>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-        <div>
-          <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Categoría</label>
-          <select id="rolCategoria" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
-            <option value="">— Sin categoría —</option>
-            <option value="Management">Management</option>
-            <option value="Delivery">Delivery</option>
-            <option value="Desarrollo">Desarrollo</option>
-            <option value="Infraestructura">Infraestructura</option>
-            <option value="Seguridad">Seguridad</option>
-            <option value="Comercial">Comercial</option>
-          </select>
-        </div>
-        <div>
-          <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Nivel</label>
-          <select id="rolNivel" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
-            <option value="">— Sin nivel —</option>
-            <option value="Junior">Junior</option>
-            <option value="Semi-Senior">Semi-Senior</option>
-            <option value="Senior">Senior</option>
-          </select>
-        </div>
-      </div>
-      <div>
-        <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Estado</label>
-        <select id="rolEstado" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
-          <option value="1">Activo</option>
-          <option value="0">Inactivo</option>
-        </select>
-      </div>
-    </div>
-    <div id="modalRolError" style="color:#FF4D4D;font-size:12px;margin-top:12px;display:none;"></div>
-    <div style="display:flex;gap:10px;margin-top:24px;justify-content:flex-end;">
-      <button onclick="cerrarModalRol()" style="padding:10px 20px;background:#222;border:1px solid #333;border-radius:8px;color:#aaa;font-size:13px;cursor:pointer;">Cancelar</button>
-      <button onclick="guardarRol()" id="btnGuardarRol" style="padding:10px 24px;background:#FF5400;border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;">Guardar</button>
-    </div>
   </div>
 </div>
 
@@ -1804,7 +1686,7 @@ label { color: #888 !important; }
 
 <script>
 const titles = {
-  dashboard:'Dashboard',recruiting:'Recruiting',onboarding:'Onboarding',usuarios:'Usuarios',lideres:'Líderes',areas:'Áreas',roles:'Roles',objectives:'Objetivos',career:'Plan de Carrera',pip:'PIP — Improvement',pip:'PIP — Plan de Improvement',
+  dashboard:'Dashboard',recruiting:'Recruiting',onboarding:'Onboarding',usuarios:'Usuarios',lideres:'Líderes',areas:'Áreas',objectives:'Objetivos',career:'Plan de Carrera',pip:'PIP — Improvement',pip:'PIP — Plan de Improvement',
   competencies:'Competencias',oneononex:'Reuniones 1:1',feedback360:'Feedback 360°',reports:'Reportes',
   orgchart:'Organigrama',alerts:'Alertas',periods:'Períodos',settings:'Configuración',help:'Ayuda'
 };
@@ -2026,7 +1908,6 @@ function showSection(id){
   if(id==='usuarios'&&!allUsuarios.length) loadUsuarios();
   if(id==='lideres'){if(!Object.keys(allLideres||{}).length) loadLideres();}
   if(id==='areas'&&!allAreas.length) loadAreas();
-  if(id==='roles'){ loadJobRoles(); }
   if(id==='periods'&&!allPeriods.length) loadPeriods();
   if(id==='objectives'){
     ['obj-core','obj-personal','obj-tasks'].forEach(function(pid,i){var el=document.getElementById(pid);if(el)el.style.display=i===0?'':'none';});
@@ -2309,9 +2190,6 @@ function abrirModalUsuario() {
   modal.style.display = 'flex';
   if (allAreas.length) poblarSelectAreas();
   else loadAreas();
-  // Poblar select de rol de negocio (Sesión 4)
-  if (allJobRoles.length) poblarSelectsJobRole();
-  else loadJobRoles().then(poblarSelectsJobRole);
   const liderSel = document.getElementById('nuevoLider');
   const managerSel = document.getElementById('nuevoManager');
   // Limpiar
@@ -2348,8 +2226,6 @@ async function guardarNuevoUsuario() {
   const legajoRaw = (document.getElementById('nuevoLegajo')||{}).value;
   const legajo   = legajoRaw ? parseInt(legajoRaw, 10) : null;
   const hireDate = (document.getElementById('nuevoHireDate')||{}).value || null;
-  // Rol de negocio (Sesión 4)
-  const jobRoleId = (document.getElementById('nuevoJobRole')||{}).value || null;
   const errEl   = document.getElementById('modalUsuarioError');
   const btn     = document.getElementById('btnGuardarUsuario');
 
@@ -2364,7 +2240,7 @@ async function guardarNuevoUsuario() {
     const res = await fetch(API_BASE + '/manage/users', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fullName: nombre, email, appRole: rol, isActive: activo, leaderID: liderId ? parseInt(liderId) : null, managerID: managerId ? parseInt(managerId) : null, areaName: area || null, employeeNumber: legajo, hireDate: hireDate, jobRoleID: jobRoleId ? parseInt(jobRoleId) : null })
+      body: JSON.stringify({ fullName: nombre, email, appRole: rol, isActive: activo, leaderID: liderId ? parseInt(liderId) : null, managerID: managerId ? parseInt(managerId) : null, areaName: area || null, employeeNumber: legajo, hireDate: hireDate })
     });
     const data = await res.json();
     if (data.ok === false) throw new Error(data.error || 'Error al guardar');
@@ -2436,14 +2312,6 @@ function abrirModalEditar(userId) {
     var raw = u.HireDate || "";
     editHireDate.value = raw ? String(raw).substring(0,10) : "";
   }
-  // Rol de negocio (Sesión 4)
-  const doPoblarRol = function(){
-    poblarSelectsJobRole();
-    const editJR = document.getElementById("editJobRole");
-    if (editJR) editJR.value = (u.JobRoleID != null ? String(u.JobRoleID) : "");
-  };
-  if (allJobRoles.length) doPoblarRol();
-  else loadJobRoles().then(doPoblarRol);
   document.getElementById("modalEditarUsuario").style.display = "flex";
 }
 
@@ -2463,9 +2331,6 @@ async function guardarEdicionUsuario() {
   const legajoRaw = (document.getElementById("editLegajo")||{}).value;
   const legajo   = legajoRaw ? parseInt(legajoRaw, 10) : null;
   const hireDate = (document.getElementById("editHireDate")||{}).value || null;
-  // Rol de negocio (Sesión 4)
-  const jobRoleRaw = (document.getElementById("editJobRole")||{}).value;
-  const jobRoleId = jobRoleRaw ? parseInt(jobRoleRaw, 10) : null;
   const errEl   = document.getElementById("modalEditarError");
   const btn     = document.getElementById("btnGuardarEdicion");
   if (!nombre || !email) { errEl.textContent="Nombre y email son obligatorios"; errEl.style.display="block"; return; }
@@ -2479,8 +2344,7 @@ async function guardarEdicionUsuario() {
         ManagerID: managerId ? parseInt(managerId): null,
         AreaID:    document.getElementById("editArea")?.value ? parseInt(document.getElementById("editArea").value) : null,
         EmployeeNumber: legajo,
-        HireDate: hireDate,
-        JobRoleID: jobRoleId })
+        HireDate: hireDate })
     });
     const data = await res.json();
     if (data.ok === false) throw new Error(data.error || "Error al guardar");
@@ -2597,176 +2461,6 @@ function nuevoContextual() {
   showModal("newObjectiveModal");
 }
 
-
-// ══════════════════════════════════════════
-// SECCIÓN ROLES (Sesión 4 - Módulo Roles de negocio)
-// ══════════════════════════════════════════
-let allJobRoles = [];
-
-async function loadJobRoles() {
-  const c = document.getElementById('rolesLoading');
-  const t = document.getElementById('rolesTable');
-  if (c) c.style.display = 'block';
-  if (t) t.style.display = 'none';
-  try {
-    // Traer TODOS (activos + inactivos) para poder filtrar en la UI
-    const res = await fetch(API_BASE + '/job-roles?all=1');
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const json = await res.json();
-    allJobRoles = Array.isArray(json) ? json : (json.data || []);
-    renderRolesTable();
-  } catch(e) {
-    if (c) c.innerHTML = '<div style="color:#FF4D4D;">Error cargando roles: ' + e.message + '</div>';
-  }
-}
-
-function renderRolesTable() {
-  const c = document.getElementById('rolesLoading');
-  const t = document.getElementById('rolesTable');
-  const tb = document.getElementById('rolesTbody');
-  if (!tb) return;
-  // Filtros
-  const filtCat = (document.getElementById('rolesFilterCategoria') || {}).value || '';
-  const filtEst = (document.getElementById('rolesFilterEstado') || {}).value || 'all';
-  let filtrados = allJobRoles.slice();
-  if (filtCat) filtrados = filtrados.filter(function(r){ return (r.Category || '') === filtCat; });
-  if (filtEst !== 'all') {
-    const wantActive = filtEst === '1';
-    filtrados = filtrados.filter(function(r){ return !!r.IsActive === wantActive; });
-  }
-  if (!filtrados.length) {
-    tb.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:#888;">No hay roles para mostrar con los filtros actuales.</td></tr>';
-  } else {
-    let html = '';
-    filtrados.forEach(function(r){
-      const nivel = r.Level ? '<span style="font-size:11px;color:#aaa;">' + r.Level + '</span>' : '<span style="font-size:11px;color:#555;">—</span>';
-      const cat = r.Category ? '<span class="badge badge-info">' + r.Category + '</span>' : '<span style="color:#555;">—</span>';
-      const estadoBadge = r.IsActive ? '<span class="badge badge-success">Activo</span>' : '<span class="badge badge-danger">Inactivo</span>';
-      const userCount = r.UserCount || 0;
-      html += '<tr>' +
-        '<td><div style="font-weight:600;color:#f0ebe3;">' + String(r.RoleName || '').replace(/</g,'&lt;') + '</div>' +
-          (r.Description ? '<div style="font-size:10px;color:#888;margin-top:2px;">' + String(r.Description).replace(/</g,'&lt;').substring(0,80) + '</div>' : '') + '</td>' +
-        '<td>' + cat + '</td>' +
-        '<td>' + nivel + '</td>' +
-        '<td style="text-align:center;font-weight:700;color:' + (userCount > 0 ? '#FF5400' : '#666') + ';">' + userCount + '</td>' +
-        '<td>' + estadoBadge + '</td>' +
-        '<td>' +
-          '<button onclick="abrirModalRol(' + r.JobRoleID + ')" style="padding:4px 12px;background:#222;border:1px solid #333;border-radius:5px;color:#aaa;font-size:11px;cursor:pointer;margin-right:4px;">Editar</button>' +
-          '<button onclick="eliminarRol(' + r.JobRoleID + ',' + userCount + ')" style="padding:4px 12px;background:transparent;border:1px solid #333;border-radius:5px;color:#666;font-size:11px;cursor:pointer;">' + (userCount > 0 ? '🚫 Desactivar' : '🗑 Borrar') + '</button>' +
-        '</td>' +
-      '</tr>';
-    });
-    tb.innerHTML = html;
-  }
-  if (c) c.style.display = 'none';
-  if (t) t.style.display = 'table';
-}
-
-function abrirModalRol(rolId) {
-  const modal = document.getElementById('modalRol');
-  const title = document.getElementById('modalRolTitle');
-  document.getElementById('modalRolError').style.display = 'none';
-  if (rolId) {
-    // Edición
-    const r = allJobRoles.find(function(x){ return x.JobRoleID === rolId; });
-    if (!r) { mostrarToast('Rol no encontrado', 'error'); return; }
-    title.textContent = 'Editar Rol';
-    document.getElementById('modalRolId').value = rolId;
-    document.getElementById('rolNombre').value = r.RoleName || '';
-    document.getElementById('rolDescripcion').value = r.Description || '';
-    document.getElementById('rolCategoria').value = r.Category || '';
-    document.getElementById('rolNivel').value = r.Level || '';
-    document.getElementById('rolEstado').value = r.IsActive ? '1' : '0';
-  } else {
-    // Alta
-    title.textContent = 'Nuevo Rol';
-    document.getElementById('modalRolId').value = '';
-    document.getElementById('rolNombre').value = '';
-    document.getElementById('rolDescripcion').value = '';
-    document.getElementById('rolCategoria').value = '';
-    document.getElementById('rolNivel').value = '';
-    document.getElementById('rolEstado').value = '1';
-  }
-  modal.style.display = 'flex';
-}
-
-function cerrarModalRol() {
-  document.getElementById('modalRol').style.display = 'none';
-}
-
-async function guardarRol() {
-  const id = document.getElementById('modalRolId').value;
-  const nombre = document.getElementById('rolNombre').value.trim();
-  const desc = document.getElementById('rolDescripcion').value.trim();
-  const cat = document.getElementById('rolCategoria').value;
-  const nivel = document.getElementById('rolNivel').value;
-  const estado = document.getElementById('rolEstado').value === '1';
-  const errEl = document.getElementById('modalRolError');
-  const btn = document.getElementById('btnGuardarRol');
-  if (!nombre) { errEl.textContent = 'El nombre es obligatorio'; errEl.style.display = 'block'; return; }
-  btn.textContent = 'Guardando...'; btn.disabled = true;
-  errEl.style.display = 'none';
-  try {
-    const method = id ? 'PUT' : 'POST';
-    const url = id ? (API_BASE + '/job-roles/' + id) : (API_BASE + '/job-roles');
-    const body = {
-      roleName: nombre,
-      description: desc || null,
-      category: cat || null,
-      level: nivel || null
-    };
-    if (id) body.isActive = estado; // sólo se manda en edición
-    const res = await fetch(url, {
-      method: method,
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(body)
-    });
-    const data = await res.json();
-    if (!res.ok || data.ok === false) throw new Error(data.error || ('HTTP ' + res.status));
-    mostrarToast(id ? 'Rol actualizado' : 'Rol creado', 'success');
-    cerrarModalRol();
-    loadJobRoles();
-  } catch(e) {
-    errEl.textContent = 'Error: ' + e.message;
-    errEl.style.display = 'block';
-  } finally {
-    btn.textContent = 'Guardar'; btn.disabled = false;
-  }
-}
-
-async function eliminarRol(rolId, userCount) {
-  const msg = userCount > 0
-    ? '⚠️ Este rol tiene ' + userCount + ' usuario(s) asignado(s). Al eliminarlo se desactiva (no se borra). ¿Continuar?'
-    : '¿Seguro que querés borrar este rol? Esta acción no se puede deshacer.';
-  if (!confirm(msg)) return;
-  try {
-    const res = await fetch(API_BASE + '/job-roles/' + rolId, { method: 'DELETE' });
-    const data = await res.json();
-    if (!res.ok || data.ok === false) throw new Error(data.error || ('HTTP ' + res.status));
-    mostrarToast(data.data && data.data.deactivated ? 'Rol desactivado' : 'Rol borrado', 'success');
-    loadJobRoles();
-  } catch(e) {
-    mostrarToast('Error: ' + e.message, 'error');
-  }
-}
-
-// Poblar selects de rol en el modal Nuevo Usuario y Editar Usuario
-function poblarSelectsJobRole() {
-  ['nuevoJobRole', 'editJobRole'].forEach(function(selId){
-    const sel = document.getElementById(selId);
-    if (!sel) return;
-    const currentVal = sel.value;
-    sel.innerHTML = '<option value="">— Sin rol —</option>';
-    allJobRoles.filter(function(r){ return r.IsActive; })
-      .forEach(function(r){
-        const opt = document.createElement('option');
-        opt.value = r.JobRoleID;
-        opt.textContent = r.RoleName + (r.Level ? ' (' + r.Level + ')' : '');
-        sel.appendChild(opt);
-      });
-    if (currentVal) sel.value = currentVal;
-  });
-}
 
 // ══════════════════════════════════════════
 // SECCIÓN ÁREAS

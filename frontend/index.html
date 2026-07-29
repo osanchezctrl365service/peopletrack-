@@ -4719,10 +4719,14 @@ function initReportes() {
   poblarFiltrosReportes();
   // Aplicar filtros (con default = ninguno) para poblar los dropdowns de cada tab
   aplicarFiltrosReportes();
-  // Períodos
+  // Períodos — Sesión 5 fix: cargar si no están
   const perSel = document.getElementById('repPeriodoSel');
-  if (perSel && perSel.options.length <= 1 && allPeriods.length) {
-    allPeriods.forEach(p=>perSel.add(new Option(p.PeriodName, p.PeriodID)));
+  if (perSel && perSel.options.length <= 1) {
+    const cargarPer = function(){
+      (allPeriods || []).forEach(function(p){ perSel.add(new Option(p.PeriodName, p.PeriodID)); });
+    };
+    if (!allPeriods.length) loadPeriods().then(cargarPer);
+    else cargarPer();
   }
 }
 

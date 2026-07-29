@@ -2122,6 +2122,7 @@ async function cargarProximasReunionesDashboard() {
     };
     var html = '<table class="data-table">' +
       '<thead><tr><th>Colaborador</th><th>Tipo</th><th>Fecha</th><th>Estado</th></tr></thead><tbody>';
+    var hoy = new Date(); hoy.setHours(0,0,0,0);
     reuniones.forEach(function(r, i) {
       var nombre = (r.EmployeeName || 'Sin nombre').replace(/</g,'&lt;');
       var initials = nombre.split(' ').map(function(w){return w[0]||'';}).join('').substring(0,2).toUpperCase();
@@ -2129,7 +2130,14 @@ async function cargarProximasReunionesDashboard() {
       var color = colors[i % colors.length];
       var fecha = r.MeetingDate ? new Date(r.MeetingDate).toLocaleDateString('es-AR',{day:'2-digit',month:'short',year:'numeric'}) : '—';
       var tipo = typeBadge[r.MeetingType] || {label: r.MeetingType || '—', cls:'badge-info'};
-      var estado = statusBadge[r.Status] || {label: r.Status || 'Pendiente', cls:'badge-warning'};
+      // Sesión 5 fix: si la reunión es futura, mostrar "Agendada" — no puede estar "completada"
+      var esFutura = r.MeetingDate ? (new Date(r.MeetingDate) >= hoy) : false;
+      var estado;
+      if (esFutura) {
+        estado = {label:'Agendada', cls:'badge-info'};
+      } else {
+        estado = statusBadge[r.Status] || {label: r.Status || 'Pendiente', cls:'badge-warning'};
+      }
       html += '<tr>' +
         '<td><div class="person-chip"><div class="avatar-sm" style="background:'+color+'">'+initials+'</div><span>'+nombre+'</span></div></td>' +
         '<td><span class="badge '+tipo.cls+'">'+tipo.label+'</span></td>' +
@@ -2155,14 +2163,21 @@ let dashViewActual = 'team';
 // Si es employee → solo ve personal, sin toggle
 // Si es leader/manager/admin → ve toggle y arranca en team
 function inicializarDashboardToggle() {
-  const me = allUsuarios.find(function(u){ return u.Email === window._userEmail; });
+  // Sesión 5 fix: comparación case-insensitive en email por si viene con distinto casing desde SWA
+  const myEmail = (window._userEmail || '').toLowerCase().trim();
+  const me = allUsuarios.find(function(u){ return String(u.Email||'').toLowerCase().trim() === myEmail; });
   const toggleCont = document.getElementById('dashToggleContainer');
+  console.log('[Dashboard] Usuario detectado:', me ? {UserID: me.UserID, Email: me.Email, AppRole: me.AppRole, FullName: me.FullName} : 'NO ENCONTRADO');
+  console.log('[Dashboard] window._userEmail:', window._userEmail);
   if (!me) {
     // Si no encontramos al usuario (raro), asumimos líder para no romper
     if (toggleCont) toggleCont.style.display = 'block';
     return;
   }
-  const isEmployeeOnly = me.AppRole === 'employee';
+  // Comparación case-insensitive en AppRole por robustez
+  const role = String(me.AppRole || '').toLowerCase().trim();
+  const isEmployeeOnly = role === 'employee' || role === 'colaborador' || role === '';
+  console.log('[Dashboard] Rol detectado:', role, '→ isEmployeeOnly:', isEmployeeOnly);
   if (isEmployeeOnly) {
     // Colaborador puro: sin toggle, arranca directo en personal
     if (toggleCont) toggleCont.style.display = 'none';
@@ -2207,7 +2222,8 @@ function cambiarVistaDashboard(vista) {
 // Cargar todo el dashboard personal en paralelo
 async function cargarDashboardPersonal() {
   if (!allUsuarios.length) await loadUsuarios();
-  const me = allUsuarios.find(function(u){ return u.Email === window._userEmail; });
+  const myEmail = (window._userEmail || '').toLowerCase().trim();
+  const me = allUsuarios.find(function(u){ return String(u.Email||'').toLowerCase().trim() === myEmail; });
   if (!me) {
     document.getElementById('dashPersonalObjetivos').innerHTML = '<div style="color:#FF4D4D;padding:15px;font-size:12px;">No se pudo identificar al usuario logueado.</div>';
     return;

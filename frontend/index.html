@@ -1338,6 +1338,8 @@ label { color: #888 !important; }
       <option value="project">Proyecto</option>
       <option value="cell">Célula</option>
       <option value="staff_augmentation">Staff Augmentation</option>
+      <option value="turnkey">Llave en Mano</option>
+      <option value="support">Soporte</option>
       <option value="consulting">Consultoría</option>
       <option value="internal">Interno</option>
     </select>
@@ -1357,6 +1359,8 @@ label { color: #888 !important; }
           <th>Tipo</th>
           <th>Cliente</th>
           <th>Líder</th>
+          <th>FTE Ops</th>
+          <th>FTE TI</th>
           <th># colabs</th>
           <th>Estado</th>
           <th>Acciones</th>
@@ -1387,6 +1391,8 @@ label { color: #888 !important; }
             <option value="project">Proyecto</option>
             <option value="cell">Célula</option>
             <option value="staff_augmentation">Staff Augmentation</option>
+            <option value="turnkey">Llave en Mano</option>
+            <option value="support">Soporte</option>
             <option value="consulting">Consultoría</option>
             <option value="internal">Interno</option>
           </select>
@@ -1423,6 +1429,16 @@ label { color: #888 !important; }
           <option value="on_hold">En pausa</option>
           <option value="closed">Cerrado</option>
         </select>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">FTE Ops</label>
+          <input id="proyFteOps" type="number" step="0.01" min="0" placeholder="Ej: 3 o 0.25" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
+        </div>
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">FTE TI</label>
+          <input id="proyFteTi" type="number" step="0.01" min="0" placeholder="Ej: 1 o 0.5" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
+        </div>
       </div>
       <div>
         <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Descripción</label>
@@ -3527,13 +3543,13 @@ function renderProyectosTable() {
   if (filtTipo) filtrados = filtrados.filter(function(p){ return (p.ProjectType || '') === filtTipo; });
   if (filtEst !== 'all') filtrados = filtrados.filter(function(p){ return (p.Status || '') === filtEst; });
 
-  const tipoLabels = {project:'Proyecto', cell:'Célula', staff_augmentation:'Staff Aug', consulting:'Consultoría', internal:'Interno'};
-  const tipoColors = {project:'#3B82F6', cell:'#A855F7', staff_augmentation:'#F59E0B', consulting:'#14B8A6', internal:'#888'};
+  const tipoLabels = {project:'Proyecto', cell:'Célula', staff_augmentation:'Staff Aug', turnkey:'Llave en Mano', support:'Soporte', consulting:'Consultoría', internal:'Interno'};
+  const tipoColors = {project:'#3B82F6', cell:'#A855F7', staff_augmentation:'#F59E0B', turnkey:'#14B8A6', support:'#EC4899', consulting:'#06B6D4', internal:'#888'};
   const statusLabels = {active:'Activo', closed:'Cerrado', on_hold:'En pausa'};
   const statusColors = {active:'#2ECC71', closed:'#FF4D4D', on_hold:'#F59E0B'};
 
   if (!filtrados.length) {
-    tb.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:30px;color:#888;">No hay proyectos que coincidan con los filtros.</td></tr>';
+    tb.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:30px;color:#888;">No hay proyectos que coincidan con los filtros.</td></tr>';
   } else {
     let html = '';
     filtrados.forEach(function(p){
@@ -3544,12 +3560,16 @@ function renderProyectosTable() {
       const leader = p.ProjectLeaderName ? String(p.ProjectLeaderName).replace(/</g,'&lt;') : '<span style="color:#555;">—</span>';
       const client = p.Client ? String(p.Client).replace(/</g,'&lt;') : '<span style="color:#555;">—</span>';
       const users = p.UserCount || 0;
+      const fteOps = (p.FTEOps != null && p.FTEOps !== '') ? String(p.FTEOps).replace('.', ',') : '<span style="color:#555;">—</span>';
+      const fteTi  = (p.FTETI  != null && p.FTETI  !== '') ? String(p.FTETI).replace('.', ',')  : '<span style="color:#555;">—</span>';
       html += '<tr>' +
         '<td><div style="font-weight:600;color:#f0ebe3;">' + String(p.ProjectName || '').replace(/</g,'&lt;') + '</div>' +
           (p.Code ? '<div style="font-size:10px;color:#888;margin-top:2px;">' + String(p.Code).replace(/</g,'&lt;') + '</div>' : '') + '</td>' +
         '<td><span style="font-size:10px;font-weight:700;color:' + tipoCol + ';background:' + tipoCol + '22;padding:2px 8px;border-radius:8px;">' + tipoLabel + '</span></td>' +
         '<td style="font-size:12px;color:#aaa;">' + client + '</td>' +
         '<td style="font-size:12px;color:#aaa;">' + leader + '</td>' +
+        '<td style="text-align:center;font-size:12px;color:#aaa;">' + fteOps + '</td>' +
+        '<td style="text-align:center;font-size:12px;color:#aaa;">' + fteTi + '</td>' +
         '<td style="text-align:center;font-weight:700;color:' + (users > 0 ? '#FF5400' : '#666') + ';">' + users + '</td>' +
         '<td><span style="font-size:10px;font-weight:700;color:' + stCol + ';background:' + stCol + '22;padding:2px 8px;border-radius:8px;">' + stLabel + '</span></td>' +
         '<td>' +
@@ -3594,6 +3614,8 @@ function abrirModalProyecto(projId) {
     document.getElementById('proyStart').value = p.StartDate ? String(p.StartDate).substring(0, 10) : '';
     document.getElementById('proyEnd').value = p.EndDate ? String(p.EndDate).substring(0, 10) : '';
     document.getElementById('proyStatus').value = p.Status || 'active';
+    document.getElementById('proyFteOps').value = (p.FTEOps != null ? String(p.FTEOps) : '');
+    document.getElementById('proyFteTi').value = (p.FTETI != null ? String(p.FTETI) : '');
     document.getElementById('proyDesc').value = p.Description || '';
   } else {
     title.textContent = 'Nuevo Proyecto';
@@ -3606,6 +3628,8 @@ function abrirModalProyecto(projId) {
     document.getElementById('proyStart').value = '';
     document.getElementById('proyEnd').value = '';
     document.getElementById('proyStatus').value = 'active';
+    document.getElementById('proyFteOps').value = '';
+    document.getElementById('proyFteTi').value = '';
     document.getElementById('proyDesc').value = '';
   }
   modal.style.display = 'flex';
@@ -3625,6 +3649,10 @@ async function guardarProyecto() {
   const start = document.getElementById('proyStart').value;
   const endD = document.getElementById('proyEnd').value;
   const status = document.getElementById('proyStatus').value;
+  const fteOpsRaw = document.getElementById('proyFteOps').value;
+  const fteTiRaw = document.getElementById('proyFteTi').value;
+  const fteOps = fteOpsRaw !== '' ? parseFloat(fteOpsRaw) : null;
+  const fteTi = fteTiRaw !== '' ? parseFloat(fteTiRaw) : null;
   const desc = document.getElementById('proyDesc').value.trim();
   const errEl = document.getElementById('modalProyectoError');
   const btn = document.getElementById('btnGuardarProyecto');
@@ -3643,7 +3671,9 @@ async function guardarProyecto() {
       startDate: start || null,
       endDate: endD || null,
       status: status,
-      description: desc || null
+      description: desc || null,
+      fteOps: fteOps,
+      fteTi: fteTi
     };
     const res = await fetch(url, {
       method: method,
@@ -3690,7 +3720,7 @@ function poblarSelectsProject() {
       .forEach(function(p){
         const opt = document.createElement('option');
         opt.value = p.ProjectID;
-        const typeLabels = {project:'Proyecto', cell:'Célula', staff_augmentation:'Staff Aug', consulting:'Consultoría', internal:'Interno'};
+        const typeLabels = {project:'Proyecto', cell:'Célula', staff_augmentation:'Staff Aug', turnkey:'Llave en Mano', support:'Soporte', consulting:'Consultoría', internal:'Interno'};
         const tLabel = typeLabels[p.ProjectType] || p.ProjectType || '';
         opt.textContent = p.ProjectName + (tLabel ? ' (' + tLabel + ')' : '');
         sel.appendChild(opt);

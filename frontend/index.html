@@ -5188,12 +5188,32 @@ let allAlertas = [];
 async function loadAlertas() {
   const container = document.getElementById('alertasContainer');
   if (!container) return;
-  container.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Cargando alertas...</div>';
+  container.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Analizando reuniones y generando alertas...</div>';
   try {
-    // Calcular alertas desde los usuarios: buscar quienes tienen objetivos en riesgo
     if (!allUsuarios.length) await loadUsuarios();
-    
-    // Intentar cargar desde la API de alertas
+
+    // Sesión 4 Bloque 4: primero disparar generación de alertas de reuniones atrasadas
+    try {
+      const genRes = await fetch(API_BASE + '/alerts/generate-meeting-overdue', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: '{}'
+      });
+      if (genRes.ok) {
+        const genData = await genRes.json();
+        const g = genData.data || genData;
+        console.log('[Alertas] Generación completa:', g);
+        if (g.alertsCreated > 0) {
+          const msg = g.alertsCreated + ' alerta(s) nueva(s) generada(s)' +
+                      (g.teamsNotifications > 0 ? ' · ' + g.teamsNotifications + ' aviso(s) enviado(s) a Teams' : '');
+          if (typeof mostrarToast === 'function') mostrarToast(msg, 'success');
+        }
+      }
+    } catch(genErr) {
+      console.warn('[Alertas] Error generando alertas de reuniones:', genErr);
+    }
+
+    // Ahora cargar todas las alertas del líder
     let alertas = [];
     try {
       const data = await apiGet('alerts');
@@ -5201,17 +5221,13 @@ async function loadAlertas() {
         alertas = data;
       }
     } catch(e) {}
-    
-    // Si no hay alertas en la API, calcular desde usuarios con bajo avance
+
     if (!alertas.length) {
-      // Generar alertas basadas en datos de equipo del dashboard si los hay
-      const usuarios = allUsuarios.filter(u => u.IsActive);
-      // Mostrar aviso de que se necesita generar alertas
       allAlertas = [];
       renderAlertas([]);
       return;
     }
-    
+
     allAlertas = alertas;
     renderAlertas(alertas);
   } catch(e) {
@@ -5245,21 +5261,34 @@ function renderAlertas(alertas) {
   }
   
   container.innerHTML = alertas.map(a => {
-    const isRisk = (a.AlertType||'').includes('risk') || a.Severity === 'danger';
-    const color = isRisk ? '#FF4D4D' : '#F59E0B';
-    const icon = isRisk ? '⚠️' : '⚡';
-    const bgColor = isRisk ? 'rgba(255,77,77,0.06)' : 'rgba(245,158,11,0.06)';
-    const borderColor = isRisk ? 'rgba(255,77,77,0.2)' : 'rgba(245,158,11,0.2)';
+    // Detección de tipo/severidad — Sesión 4 Bloque 4 amplía para meeting_overdue
+    const isMeetingOverdue = (a.AlertType || '') === 'meeting_overdue';
+    const currentVal = parseFloat(a.CurrentValue) || 0;
+    const threshold = parseFloat(a.Threshold) || 0;
+    // Para meeting_overdue, crítica si daysSince >= threshold + 14 (segundo ciclo de gracia)
+    const isCritical = isMeetingOverdue
+      ? (threshold > 0 && currentVal >= threshold + 14)
+      : ((a.AlertType||'').includes('risk') || a.Severity === 'danger');
+    const color = isCritical ? '#FF4D4D' : '#F59E0B';
+    const icon = isMeetingOverdue
+      ? (isCritical ? '🚨' : '⏰')
+      : (isCritical ? '⚠️' : '⚡');
+    const bgColor = isCritical ? 'rgba(255,77,77,0.06)' : 'rgba(245,158,11,0.06)';
+    const borderColor = isCritical ? 'rgba(255,77,77,0.2)' : 'rgba(245,158,11,0.2)';
     const nombre = a.FullName || a.UserName || a.userName || '—';
-    const objetivo = a.ObjectiveTitle || a.Title || a.message || '—';
-    const avance = a.Progress !== undefined ? a.Progress : (a.progress || '—');
+    const mensaje = a.Message || a.message || a.ObjectiveTitle || a.Title || '—';
+    const avance = (!isMeetingOverdue && a.Progress !== undefined) ? a.Progress : null;
     const fecha = a.CreatedAt ? new Date(a.CreatedAt).toLocaleDateString('es-AR') : '';
-    
+    // Etiqueta descriptiva del tipo de alerta
+    const typeLabel = isMeetingOverdue
+      ? '<span style="font-size:9px;font-weight:700;color:'+color+';background:'+color+'22;padding:2px 8px;border-radius:10px;margin-right:6px;">'+(isCritical?'REUNIÓN MUY ATRASADA':'REUNIÓN ATRASADA')+'</span>'
+      : '';
+
     return `<div style="background:${bgColor};border:1px solid ${borderColor};border-radius:10px;padding:14px 16px;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start;">
       <span style="font-size:20px;flex-shrink:0;">${icon}</span>
       <div style="flex:1;">
-        <div style="font-weight:700;color:#f0ebe3;margin-bottom:4px;">${nombre}</div>
-        <div style="font-size:13px;color:#aaa;margin-bottom:6px;">${objetivo}${avance!=='—'?' — Avance: <strong style="color:'+color+';">'+avance+'%</strong>':''}</div>
+        <div style="margin-bottom:4px;">${typeLabel}<span style="font-weight:700;color:#f0ebe3;">${nombre}</span></div>
+        <div style="font-size:13px;color:#aaa;margin-bottom:6px;">${mensaje}${avance!==null?' — Avance: <strong style="color:'+color+';">'+avance+'%</strong>':''}</div>
         ${fecha?`<div style="font-size:10px;color:#666;">Detectada: ${fecha}</div>`:''}
       </div>
       <button onclick="resolverAlerta(${a.AlertID||a.alertId})" style="padding:4px 12px;background:#222;border:1px solid #333;border-radius:6px;color:#aaa;font-size:11px;cursor:pointer;flex-shrink:0;">Resolver</button>

@@ -167,6 +167,39 @@ body { font-family: var(--font); font-size: 14px; color: var(--gray-800); backgr
 .topbar-btn.primary:hover { background: var(--accent-dark); }
 .content { flex: 1; overflow-y: auto; background:#0d0d0d; padding: 24px; }
 
+/* Layout responsive de Reuniones 1:1 (Sesión 4 Bloque 3) */
+/* >= 1280px: 3 columnas horizontales — colaboradores + bitácora + objetivos */
+.reunion-3col-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr 340px;
+  grid-template-rows: 1fr;
+  gap: 12px;
+  height: calc(100vh - 200px);
+}
+/* 1024-1279px: 2 columnas — colaboradores + bitácora arriba, objetivos abajo */
+@media (max-width: 1279px) {
+  .reunion-3col-layout {
+    grid-template-columns: 240px 1fr;
+    grid-template-rows: 1fr auto;
+    height: auto;
+    min-height: calc(100vh - 200px);
+  }
+  .reunion-3col-layout > .card:nth-child(3) {
+    grid-column: 1 / -1;
+    max-height: 320px;
+  }
+}
+/* < 1024px: apilar todo verticalmente para tablets/móvil */
+@media (max-width: 1023px) {
+  .reunion-3col-layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+  }
+  .reunion-3col-layout > .card:nth-child(1) { max-height: 260px; }
+  .reunion-3col-layout > .card:nth-child(2) { min-height: 420px; }
+  .reunion-3col-layout > .card:nth-child(3) { max-height: 340px; grid-column: 1; }
+}
+
 /* SECTIONS (pages) */
 .section { display: none; }
 .section.active { display: block; }
@@ -1494,7 +1527,7 @@ label { color: #888 !important; }
         <button class="btn btn-primary btn-sm" onclick="abrirModalNuevaReunion()">+ Nueva Reunión</button>
       </div>
 
-      <div style="display:grid;grid-template-columns:300px 1fr;gap:16px;height:calc(100vh - 200px);">
+      <div class="reunion-3col-layout" id="reunion-layout-grid">
         
         <!-- PANEL IZQUIERDO: lista de colaboradores -->
         <div class="card" style="padding:0;overflow:hidden;display:flex;flex-direction:column;">
@@ -1507,7 +1540,7 @@ label { color: #888 !important; }
           </div>
         </div>
 
-        <!-- PANEL DERECHO: bitácora del colaborador seleccionado -->
+        <!-- PANEL CENTRAL: bitácora del colaborador seleccionado -->
         <div class="card" style="padding:0;overflow:hidden;display:flex;flex-direction:column;">
           <div style="padding:12px 16px;border-bottom:1px solid #2a2a2a;display:flex;justify-content:space-between;align-items:center;">
             <div id="reunionBitacoraTitle" style="font-size:13px;font-weight:700;color:#FF5400;">Seleccioná un colaborador</div>
@@ -1523,6 +1556,20 @@ label { color: #888 !important; }
             <div style="text-align:center;padding:40px;color:#888;">
               <div style="font-size:32px;margin-bottom:12px;">👥</div>
               <div>Seleccioná un colaborador para ver su bitácora de reuniones</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PANEL DERECHO: objetivos del colaborador (Sesión 4 Bloque 3) -->
+        <div class="card" style="padding:0;overflow:hidden;display:flex;flex-direction:column;">
+          <div style="padding:12px 16px;border-bottom:1px solid #2a2a2a;">
+            <div style="font-size:11px;font-weight:700;color:#FF5400;text-transform:uppercase;letter-spacing:0.5px;">🎯 Objetivos del colaborador</div>
+            <div style="font-size:10px;color:#666;margin-top:2px;">Activos + completados del trimestre</div>
+          </div>
+          <div id="reunionObjetivosPanel" style="overflow-y:auto;flex:1;padding:12px;">
+            <div style="text-align:center;padding:30px 20px;color:#888;font-size:11px;">
+              <div style="font-size:24px;margin-bottom:8px;">🎯</div>
+              Elegí un colaborador para ver sus objetivos
             </div>
           </div>
         </div>
@@ -4925,6 +4972,107 @@ async function seleccionarColabReunion(userId, nombre, rol, area) {
   if (filtro) filtro.disabled = false;
   // Cargar bitácora
   await cargarBitacoraUsuario(userId);
+  // Sesión 4 Bloque 3: cargar objetivos del colaborador en paralelo
+  cargarObjetivosPanelReunion(userId);
+}
+
+// Sesión 4 Bloque 3: cargar objetivos del colaborador (personales + core empresa)
+// Muestra activos + completados en los últimos 90 días
+async function cargarObjetivosPanelReunion(userId) {
+  const panel = document.getElementById('reunionObjetivosPanel');
+  if (!panel) return;
+  panel.innerHTML = '<div style="text-align:center;padding:20px;color:#888;font-size:11px;">Cargando objetivos...</div>';
+  try {
+    // 2 llamadas en paralelo: personales del user y core empresa
+    const [personalRes, coreRes] = await Promise.all([
+      fetch(API_BASE + '/objectives?userId=' + userId + '&type=personal').then(r => r.ok ? r.json() : {ok:false}).catch(() => ({ok:false})),
+      fetch(API_BASE + '/objectives?type=company').then(r => r.ok ? r.json() : {ok:false}).catch(() => ({ok:false}))
+    ]);
+    const personales = Array.isArray(personalRes) ? personalRes : (personalRes.data || []);
+    const core = Array.isArray(coreRes) ? coreRes : (coreRes.data || []);
+    // Marcar el tipo en cada uno para que el render sepa qué badge poner
+    personales.forEach(function(o){ o._objType = 'personal'; });
+    core.forEach(function(o){ o._objType = 'core'; });
+    // Combinar
+    let todos = personales.concat(core);
+    // Filtrar: activos + completados en los últimos 90 días
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - 90);
+    todos = todos.filter(function(o){
+      const st = String(o.Status || '').toLowerCase();
+      if (st === 'cancelled' || st === 'not_met' || st === 'deleted') return false;
+      if (st === 'completed') {
+        // Solo mostrar si UpdatedAt en los últimos 90 días
+        const upd = o.UpdatedAt ? new Date(o.UpdatedAt) : null;
+        return upd && upd >= cutoff;
+      }
+      return true; // in_progress, not_started, at_risk, active → mostrar
+    });
+    // Ordenar: personales primero, después core; dentro de cada grupo por progreso desc
+    todos.sort(function(a, b){
+      if (a._objType !== b._objType) return a._objType === 'personal' ? -1 : 1;
+      return (b.Progress || 0) - (a.Progress || 0);
+    });
+    renderObjetivosPanelReunion(todos);
+  } catch(e) {
+    panel.innerHTML = '<div style="color:#FF4D4D;padding:15px;font-size:11px;">Error: ' + e.message + '</div>';
+  }
+}
+
+function renderObjetivosPanelReunion(objetivos) {
+  const panel = document.getElementById('reunionObjetivosPanel');
+  if (!panel) return;
+  if (!objetivos.length) {
+    panel.innerHTML = '<div style="text-align:center;padding:30px 20px;color:#888;font-size:11px;">' +
+      '<div style="font-size:24px;margin-bottom:8px;">🎯</div>' +
+      'Este colaborador no tiene objetivos activos' +
+      '</div>';
+    return;
+  }
+  const statusColors = {
+    in_progress: {label: 'En Curso',    col: '#F59E0B'},
+    not_started: {label: 'No Iniciado', col: '#888'},
+    at_risk:     {label: 'En Riesgo',   col: '#FF4D4D'},
+    completed:   {label: 'Completado',  col: '#2ECC71'},
+    active:      {label: 'Activo',      col: '#3B82F6'}
+  };
+  let html = '';
+  // Contadores para el summary superior
+  const cntPer = objetivos.filter(function(o){ return o._objType === 'personal'; }).length;
+  const cntCore = objetivos.filter(function(o){ return o._objType === 'core'; }).length;
+  html += '<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">';
+  html += '<span style="font-size:10px;background:rgba(59,130,246,0.15);color:#3B82F6;padding:2px 8px;border-radius:10px;font-weight:600;">Personales: ' + cntPer + '</span>';
+  html += '<span style="font-size:10px;background:rgba(255,84,0,0.15);color:#FF5400;padding:2px 8px;border-radius:10px;font-weight:600;">Core: ' + cntCore + '</span>';
+  html += '</div>';
+  objetivos.forEach(function(o){
+    const isCore = o._objType === 'core';
+    const st = String(o.Status || 'in_progress').toLowerCase();
+    const stInfo = statusColors[st] || {label: o.Status || '—', col: '#888'};
+    const progress = Math.min(100, Math.max(0, parseFloat(o.Progress) || 0));
+    const badgeType = isCore
+      ? '<span style="font-size:9px;font-weight:700;color:#FF5400;background:rgba(255,84,0,0.15);padding:1px 7px;border-radius:8px;">CORE</span>'
+      : '<span style="font-size:9px;font-weight:700;color:#3B82F6;background:rgba(59,130,246,0.15);padding:1px 7px;border-radius:8px;">PERSONAL</span>';
+    const badgeStatus = '<span style="font-size:9px;font-weight:700;color:' + stInfo.col + ';background:' + stInfo.col + '22;padding:1px 7px;border-radius:8px;">' + stInfo.label + '</span>';
+    const periodo = o.PeriodName ? '<span style="font-size:9px;color:#666;">' + String(o.PeriodName).replace(/</g,'&lt;') + '</span>' : '';
+    html += '<div style="background:#111;border:1px solid #252525;border-radius:8px;padding:10px;margin-bottom:8px;">';
+    html += '<div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap;align-items:center;">';
+    html += badgeType + badgeStatus + periodo;
+    html += '</div>';
+    html += '<div style="font-size:12px;color:#f0ebe3;font-weight:600;line-height:1.3;margin-bottom:6px;">' + String(o.Title || '').replace(/</g,'&lt;') + '</div>';
+    // Progress bar
+    html += '<div style="display:flex;align-items:center;gap:6px;">';
+    html += '<div style="flex:1;height:4px;background:#1a1a1a;border-radius:2px;overflow:hidden;">';
+    const barColor = progress >= 70 ? '#2ECC71' : progress >= 40 ? '#F59E0B' : '#FF4D4D';
+    html += '<div style="width:' + progress + '%;height:100%;background:' + barColor + ';"></div>';
+    html += '</div>';
+    html += '<div style="font-size:10px;font-weight:700;color:' + barColor + ';min-width:32px;text-align:right;">' + Math.round(progress) + '%</div>';
+    html += '</div>';
+    if (o.Weight) {
+      html += '<div style="font-size:9px;color:#666;margin-top:4px;">Ponderación: ' + o.Weight + '%</div>';
+    }
+    html += '</div>';
+  });
+  panel.innerHTML = html;
 }
 
 async function cargarBitacoraUsuario(userId) {

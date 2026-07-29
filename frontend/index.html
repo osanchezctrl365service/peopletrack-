@@ -979,6 +979,16 @@ label { color: #888 !important; }
 
     <!-- ======== DASHBOARD ======== -->
     <div class="section active" id="sec-dashboard">
+      <!-- Toggle entre "Mi Equipo" y "Mi Dashboard Personal" (Sesión 5 - B4) -->
+      <div id="dashToggleContainer" style="display:none;margin-bottom:16px;">
+        <div style="display:inline-flex;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:10px;padding:4px;">
+          <button id="dashTabTeam" onclick="cambiarVistaDashboard('team')" style="padding:8px 16px;background:#FF5400;border:none;border-radius:6px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;">👥 Mi Equipo</button>
+          <button id="dashTabPersonal" onclick="cambiarVistaDashboard('personal')" style="padding:8px 16px;background:transparent;border:none;border-radius:6px;color:#888;font-size:12px;font-weight:700;cursor:pointer;">🎯 Mi Dashboard Personal</button>
+        </div>
+      </div>
+
+      <!-- VISTA 1: Mi Equipo (para líderes/managers/admin) -->
+      <div id="dashViewTeam">
       <div class="section-header">
         <div>
           <div class="section-heading">Mi Equipo</div>
@@ -1034,6 +1044,86 @@ label { color: #888 !important; }
         <div class="card-title">Próximas Reuniones 1:1</div>
         <div id="dashProximasReunionesContainer">
           <div style="text-align:center;padding:20px;color:#888;font-size:12px;">Cargando próximas reuniones...</div>
+        </div>
+      </div>
+      </div><!-- fin dashViewTeam -->
+
+      <!-- VISTA 2: Mi Dashboard Personal (para todos los usuarios que quieren ver su propio detalle) -->
+      <div id="dashViewPersonal" style="display:none;">
+        <div class="section-header">
+          <div>
+            <div class="section-heading" id="dashPersonalHeading">Mi Dashboard</div>
+            <div class="section-subheading">Tu progreso personal · Objetivos, Carrera, Reuniones y Onboarding</div>
+          </div>
+        </div>
+
+        <!-- KPIs personales -->
+        <div class="grid-4 mb-16" id="dashPersonalKPIs">
+          <div class="kpi-card">
+            <div class="kpi-label">Objetivos activos</div>
+            <div class="kpi-value" id="kpiObjActivos" style="color:#f0ebe3;">—</div>
+            <div style="font-size:10px;color:#888;margin-top:2px;">Personales + Core</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Avance promedio</div>
+            <div class="kpi-value" id="kpiAvancePromedio" style="color:#FF5400;">—</div>
+            <div style="font-size:10px;color:#888;margin-top:2px;">De tus objetivos</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Plan carrera</div>
+            <div class="kpi-value" id="kpiCareerProgress" style="color:#3B82F6;">—</div>
+            <div style="font-size:10px;color:#888;margin-top:2px;">Hitos completados</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Onboarding</div>
+            <div class="kpi-value" id="kpiOnboardingProgress" style="color:#2ECC71;">—</div>
+            <div style="font-size:10px;color:#888;margin-top:2px;">Progreso general</div>
+          </div>
+        </div>
+
+        <!-- Widgets: 2 columnas -->
+        <div class="grid-2 mb-16">
+          <!-- Objetivos -->
+          <div class="card">
+            <div class="card-title">🎯 Mis Objetivos</div>
+            <div id="dashPersonalObjetivos" style="max-height:340px;overflow-y:auto;">
+              <div style="text-align:center;padding:20px;color:#888;font-size:12px;">Cargando...</div>
+            </div>
+          </div>
+
+          <!-- Plan de Carrera -->
+          <div class="card">
+            <div class="card-title">🚀 Mi Plan de Carrera</div>
+            <div id="dashPersonalCarrera" style="max-height:340px;overflow-y:auto;">
+              <div style="text-align:center;padding:20px;color:#888;font-size:12px;">Cargando...</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-2 mb-16">
+          <!-- Próximas Reuniones 1:1 -->
+          <div class="card">
+            <div class="card-title">📅 Mis Próximas Reuniones 1:1</div>
+            <div id="dashPersonalReuniones" style="max-height:300px;overflow-y:auto;">
+              <div style="text-align:center;padding:20px;color:#888;font-size:12px;">Cargando...</div>
+            </div>
+          </div>
+
+          <!-- Onboarding -->
+          <div class="card">
+            <div class="card-title">📋 Mi Onboarding</div>
+            <div id="dashPersonalOnboarding" style="max-height:300px;overflow-y:auto;">
+              <div style="text-align:center;padding:20px;color:#888;font-size:12px;">Cargando...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Feedback y áreas de mejora (a full-width) -->
+        <div class="card">
+          <div class="card-title">💬 Mi Feedback y Áreas de Mejora</div>
+          <div id="dashPersonalFeedback">
+            <div style="text-align:center;padding:20px;color:#888;font-size:12px;">Cargando...</div>
+          </div>
         </div>
       </div>
     </div>
@@ -1992,6 +2082,10 @@ async function loadDashboardFromAPI() {
 
   // Cargar próximas reuniones reales para el widget del dashboard (Sesión 3)
   cargarProximasReunionesDashboard();
+
+  // Sesión 5 Bloque 1: inicializar toggle del dashboard (team vs personal)
+  // Se hace acá porque ya tenemos allUsuarios cargados
+  inicializarDashboardToggle();
 }
 
 // Carga las próximas reuniones desde el API y las renderiza en el widget del dashboard (Sesión 3)
@@ -2047,6 +2141,349 @@ async function cargarProximasReunionesDashboard() {
     c.innerHTML = html;
   } catch(e) {
     c.innerHTML = '<div style="text-align:center;padding:20px;color:#FF4D4D;font-size:12px;">Error cargando reuniones: '+e.message+'</div>';
+  }
+}
+
+// ══════════════════════════════════════════
+// DASHBOARD PERSONAL (Sesión 5 Bloque 1 - B4)
+// ══════════════════════════════════════════
+
+// Vista actual del dashboard: 'team' o 'personal'
+let dashViewActual = 'team';
+
+// Inicializar el toggle según el rol del usuario logueado.
+// Si es employee → solo ve personal, sin toggle
+// Si es leader/manager/admin → ve toggle y arranca en team
+function inicializarDashboardToggle() {
+  const me = allUsuarios.find(function(u){ return u.Email === window._userEmail; });
+  const toggleCont = document.getElementById('dashToggleContainer');
+  if (!me) {
+    // Si no encontramos al usuario (raro), asumimos líder para no romper
+    if (toggleCont) toggleCont.style.display = 'block';
+    return;
+  }
+  const isEmployeeOnly = me.AppRole === 'employee';
+  if (isEmployeeOnly) {
+    // Colaborador puro: sin toggle, arranca directo en personal
+    if (toggleCont) toggleCont.style.display = 'none';
+    dashViewActual = 'personal';
+    document.getElementById('dashViewTeam').style.display = 'none';
+    document.getElementById('dashViewPersonal').style.display = 'block';
+    cargarDashboardPersonal();
+  } else {
+    // Líder, manager o admin: toggle visible, arranca en team
+    if (toggleCont) toggleCont.style.display = 'block';
+    dashViewActual = 'team';
+    document.getElementById('dashViewTeam').style.display = 'block';
+    document.getElementById('dashViewPersonal').style.display = 'none';
+  }
+}
+
+// Cambiar entre las 2 vistas del dashboard
+function cambiarVistaDashboard(vista) {
+  dashViewActual = vista;
+  const btnTeam = document.getElementById('dashTabTeam');
+  const btnPersonal = document.getElementById('dashTabPersonal');
+  const viewTeam = document.getElementById('dashViewTeam');
+  const viewPersonal = document.getElementById('dashViewPersonal');
+  if (vista === 'team') {
+    btnTeam.style.background = '#FF5400';
+    btnTeam.style.color = '#fff';
+    btnPersonal.style.background = 'transparent';
+    btnPersonal.style.color = '#888';
+    viewTeam.style.display = 'block';
+    viewPersonal.style.display = 'none';
+  } else {
+    btnPersonal.style.background = '#FF5400';
+    btnPersonal.style.color = '#fff';
+    btnTeam.style.background = 'transparent';
+    btnTeam.style.color = '#888';
+    viewTeam.style.display = 'none';
+    viewPersonal.style.display = 'block';
+    cargarDashboardPersonal();
+  }
+}
+
+// Cargar todo el dashboard personal en paralelo
+async function cargarDashboardPersonal() {
+  if (!allUsuarios.length) await loadUsuarios();
+  const me = allUsuarios.find(function(u){ return u.Email === window._userEmail; });
+  if (!me) {
+    document.getElementById('dashPersonalObjetivos').innerHTML = '<div style="color:#FF4D4D;padding:15px;font-size:12px;">No se pudo identificar al usuario logueado.</div>';
+    return;
+  }
+  const heading = document.getElementById('dashPersonalHeading');
+  if (heading) heading.textContent = 'Mi Dashboard — ' + (me.FullName || me.Email);
+  // Cargar los 5 widgets en paralelo (sin bloquearse entre sí)
+  cargarObjetivosPersonalDash(me.UserID);
+  cargarCarreraPersonalDash(me.UserID);
+  cargarReunionesPersonalDash(me.UserID);
+  cargarOnboardingPersonalDash(me.UserID);
+  cargarFeedbackPersonalDash(me.UserID);
+}
+
+// Widget: Mis Objetivos (personales + core empresa)
+async function cargarObjetivosPersonalDash(userId) {
+  const cont = document.getElementById('dashPersonalObjetivos');
+  const kpiAct = document.getElementById('kpiObjActivos');
+  const kpiProm = document.getElementById('kpiAvancePromedio');
+  try {
+    const [personalRes, coreRes] = await Promise.all([
+      fetch(API_BASE + '/objectives?userId=' + userId + '&type=personal').then(r => r.ok ? r.json() : {ok:false}).catch(() => ({ok:false})),
+      fetch(API_BASE + '/objectives?type=company').then(r => r.ok ? r.json() : {ok:false}).catch(() => ({ok:false}))
+    ]);
+    const personales = Array.isArray(personalRes) ? personalRes : (personalRes.data || []);
+    const core = Array.isArray(coreRes) ? coreRes : (coreRes.data || []);
+    personales.forEach(function(o){ o._objType = 'personal'; });
+    core.forEach(function(o){ o._objType = 'core'; });
+    let todos = personales.concat(core).filter(function(o){
+      const st = String(o.Status || '').toLowerCase();
+      return st !== 'cancelled' && st !== 'not_met' && st !== 'deleted';
+    });
+    // KPIs
+    const activos = todos.filter(function(o){ return String(o.Status||'').toLowerCase() !== 'completed'; });
+    if (kpiAct) kpiAct.textContent = activos.length;
+    const prom = activos.length > 0
+      ? Math.round(activos.reduce(function(s, o){ return s + (parseFloat(o.Progress)||0); }, 0) / activos.length)
+      : 0;
+    if (kpiProm) kpiProm.textContent = prom + '%';
+    // Ordenar: personales primero, después por progreso desc
+    todos.sort(function(a, b){
+      if (a._objType !== b._objType) return a._objType === 'personal' ? -1 : 1;
+      return (b.Progress || 0) - (a.Progress || 0);
+    });
+    if (!todos.length) {
+      cont.innerHTML = '<div style="text-align:center;padding:30px 20px;color:#888;font-size:12px;">Sin objetivos asignados.</div>';
+      return;
+    }
+    const statusColors = {
+      in_progress:{label:'En Curso', col:'#F59E0B'},
+      not_started:{label:'No Iniciado', col:'#888'},
+      at_risk:{label:'En Riesgo', col:'#FF4D4D'},
+      completed:{label:'Completado', col:'#2ECC71'},
+      active:{label:'Activo', col:'#3B82F6'}
+    };
+    let html = '';
+    todos.forEach(function(o){
+      const isCore = o._objType === 'core';
+      const st = String(o.Status || 'in_progress').toLowerCase();
+      const stInfo = statusColors[st] || {label: o.Status||'—', col:'#888'};
+      const progress = Math.min(100, Math.max(0, parseFloat(o.Progress) || 0));
+      const badgeType = isCore
+        ? '<span style="font-size:9px;font-weight:700;color:#FF5400;background:rgba(255,84,0,0.15);padding:1px 7px;border-radius:8px;">CORE</span>'
+        : '<span style="font-size:9px;font-weight:700;color:#3B82F6;background:rgba(59,130,246,0.15);padding:1px 7px;border-radius:8px;">PERSONAL</span>';
+      const barColor = progress >= 70 ? '#2ECC71' : progress >= 40 ? '#F59E0B' : '#FF4D4D';
+      html += '<div style="background:#111;border:1px solid #252525;border-radius:8px;padding:10px;margin-bottom:8px;">';
+      html += '<div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap;align-items:center;">';
+      html += badgeType + '<span style="font-size:9px;font-weight:700;color:' + stInfo.col + ';background:' + stInfo.col + '22;padding:1px 7px;border-radius:8px;">' + stInfo.label + '</span>';
+      if (o.PeriodName) html += '<span style="font-size:9px;color:#666;">' + String(o.PeriodName).replace(/</g,'&lt;') + '</span>';
+      html += '</div>';
+      html += '<div style="font-size:12px;color:#f0ebe3;font-weight:600;line-height:1.3;margin-bottom:6px;">' + String(o.Title||'').replace(/</g,'&lt;') + '</div>';
+      html += '<div style="display:flex;align-items:center;gap:6px;">';
+      html += '<div style="flex:1;height:4px;background:#1a1a1a;border-radius:2px;overflow:hidden;"><div style="width:' + progress + '%;height:100%;background:' + barColor + ';"></div></div>';
+      html += '<div style="font-size:10px;font-weight:700;color:' + barColor + ';min-width:32px;text-align:right;">' + Math.round(progress) + '%</div>';
+      html += '</div></div>';
+    });
+    cont.innerHTML = html;
+  } catch(e) {
+    cont.innerHTML = '<div style="color:#FF4D4D;padding:15px;font-size:12px;">Error: ' + e.message + '</div>';
+  }
+}
+
+// Widget: Mi Plan de Carrera
+async function cargarCarreraPersonalDash(userId) {
+  const cont = document.getElementById('dashPersonalCarrera');
+  const kpiCarr = document.getElementById('kpiCareerProgress');
+  try {
+    const res = await fetch(API_BASE + '/career/' + userId);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const json = await res.json();
+    const data = json.data || json;
+    // Puede venir como objeto con { plan, milestones } o array
+    const milestones = data && data.milestones ? data.milestones : (Array.isArray(data) ? data : []);
+    const plan = data && data.plan ? data.plan : null;
+    const totalHitos = milestones.length;
+    const cumplidos = milestones.filter(function(m){ return m.IsCompleted === true || m.IsCompleted === 1 || m.Status === 'completed'; }).length;
+    if (kpiCarr) kpiCarr.textContent = totalHitos > 0 ? cumplidos + '/' + totalHitos : '—';
+    if (!totalHitos && !plan) {
+      cont.innerHTML = '<div style="text-align:center;padding:30px 20px;color:#888;font-size:12px;">Sin plan de carrera cargado.<br>Consultá con tu líder si querés arrancar uno.</div>';
+      return;
+    }
+    let html = '';
+    if (plan) {
+      const currentRole = plan.CurrentRole || plan.currentRole || '—';
+      const targetRole = plan.TargetRole || plan.targetRole || plan.NextRole || '—';
+      html += '<div style="background:#111;border:1px solid #252525;border-radius:8px;padding:10px;margin-bottom:10px;">';
+      html += '<div style="font-size:10px;color:#888;margin-bottom:3px;">Rol actual → Rol a desarrollar</div>';
+      html += '<div style="font-size:12px;color:#f0ebe3;font-weight:600;">' + String(currentRole).replace(/</g,'&lt;') + ' → <span style="color:#FF5400;">' + String(targetRole).replace(/</g,'&lt;') + '</span></div>';
+      html += '</div>';
+    }
+    if (milestones.length) {
+      html += '<div style="font-size:10px;color:#888;font-weight:700;text-transform:uppercase;margin-bottom:6px;">Hitos (' + cumplidos + '/' + totalHitos + ')</div>';
+      milestones.slice(0, 6).forEach(function(m){
+        const completed = m.IsCompleted === true || m.IsCompleted === 1 || m.Status === 'completed';
+        const icon = completed ? '✅' : '⏳';
+        const col = completed ? '#2ECC71' : '#F59E0B';
+        html += '<div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid #1a1a1a;font-size:12px;">';
+        html += '<span>' + icon + '</span>';
+        html += '<div style="flex:1;color:' + (completed ? '#888' : '#f0ebe3') + ';' + (completed ? 'text-decoration:line-through;' : '') + '">' + String(m.Title||m.MilestoneTitle||'—').replace(/</g,'&lt;') + '</div>';
+        html += '</div>';
+      });
+      if (milestones.length > 6) html += '<div style="font-size:10px;color:#666;margin-top:6px;text-align:center;">+' + (milestones.length - 6) + ' hitos más</div>';
+    }
+    cont.innerHTML = html || '<div style="text-align:center;padding:20px;color:#888;font-size:12px;">Sin hitos en tu plan.</div>';
+  } catch(e) {
+    // Silencioso, muchos users no tienen plan
+    cont.innerHTML = '<div style="text-align:center;padding:30px 20px;color:#888;font-size:12px;">Sin plan de carrera cargado.</div>';
+    if (kpiCarr) kpiCarr.textContent = '—';
+  }
+}
+
+// Widget: Mis Próximas Reuniones 1:1
+async function cargarReunionesPersonalDash(userId) {
+  const cont = document.getElementById('dashPersonalReuniones');
+  try {
+    const res = await fetch(API_BASE + '/meetings/' + userId);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const json = await res.json();
+    const todas = Array.isArray(json) ? json : (json.data || []);
+    // Filtrar solo próximas (fecha >= hoy) o últimas 30 días si no hay futuras
+    const hoy = new Date(); hoy.setHours(0,0,0,0);
+    const proximas = todas.filter(function(r){
+      const md = r.MeetingDate ? new Date(r.MeetingDate) : null;
+      return md && md >= hoy;
+    }).sort(function(a,b){ return new Date(a.MeetingDate) - new Date(b.MeetingDate); }).slice(0, 5);
+    if (!proximas.length) {
+      // Mostrar las últimas si no hay futuras
+      const recientes = todas.sort(function(a,b){ return new Date(b.MeetingDate) - new Date(a.MeetingDate); }).slice(0, 3);
+      if (!recientes.length) {
+        cont.innerHTML = '<div style="text-align:center;padding:30px 20px;color:#888;font-size:12px;">Sin reuniones registradas.</div>';
+        return;
+      }
+      let html = '<div style="font-size:10px;color:#888;font-weight:700;text-transform:uppercase;margin-bottom:6px;">Últimas reuniones</div>';
+      recientes.forEach(function(r){
+        const fecha = r.MeetingDate ? new Date(r.MeetingDate).toLocaleDateString('es-AR',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+        const tipo = r.MeetingType || '—';
+        html += '<div style="background:#111;border-radius:6px;padding:8px 10px;margin-bottom:6px;">';
+        html += '<div style="font-size:12px;color:#aaa;font-weight:600;">' + fecha + ' — ' + String(tipo).replace(/</g,'&lt;') + '</div>';
+        if (r.Title) html += '<div style="font-size:11px;color:#888;margin-top:2px;">' + String(r.Title).replace(/</g,'&lt;') + '</div>';
+        html += '</div>';
+      });
+      cont.innerHTML = html;
+      return;
+    }
+    let html = '';
+    proximas.forEach(function(r){
+      const fecha = r.MeetingDate ? new Date(r.MeetingDate).toLocaleDateString('es-AR',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+      const tipo = r.MeetingType || 'reunión';
+      html += '<div style="background:#111;border:1px solid #252525;border-radius:8px;padding:10px;margin-bottom:8px;">';
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;">';
+      html += '<div style="font-size:12px;color:#f0ebe3;font-weight:600;">' + fecha + '</div>';
+      html += '<span style="font-size:9px;color:#FF5400;background:rgba(255,84,0,0.15);padding:2px 8px;border-radius:8px;font-weight:700;text-transform:uppercase;">' + String(tipo).replace(/</g,'&lt;') + '</span>';
+      html += '</div>';
+      if (r.Title) html += '<div style="font-size:11px;color:#aaa;margin-top:4px;">' + String(r.Title).replace(/</g,'&lt;') + '</div>';
+      html += '</div>';
+    });
+    cont.innerHTML = html;
+  } catch(e) {
+    cont.innerHTML = '<div style="text-align:center;padding:20px;color:#888;font-size:12px;">Sin reuniones cargadas.</div>';
+  }
+}
+
+// Widget: Mi Onboarding activo
+async function cargarOnboardingPersonalDash(userId) {
+  const cont = document.getElementById('dashPersonalOnboarding');
+  const kpiOB = document.getElementById('kpiOnboardingProgress');
+  try {
+    const res = await fetch(API_BASE + '/onboarding');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const json = await res.json();
+    const todos = Array.isArray(json) ? json : (json.data || []);
+    const mios = todos.filter(function(o){ return String(o.UserID) === String(userId); });
+    const activo = mios.find(function(o){ return o.Status !== 'completed' && o.Status !== 'cancelled'; }) || mios[0];
+    if (!activo) {
+      if (kpiOB) kpiOB.textContent = '—';
+      cont.innerHTML = '<div style="text-align:center;padding:30px 20px;color:#888;font-size:12px;">Sin plan de onboarding activo.</div>';
+      return;
+    }
+    const totalM = activo.TotalMilestones || 0;
+    const cumplM = activo.CompletedMilestones || 0;
+    const totalC = activo.TotalCourses || 0;
+    const cumplC = activo.CompletedCourses || 0;
+    const total = totalM + totalC;
+    const cumpl = cumplM + cumplC;
+    const pct = total > 0 ? Math.round((cumpl / total) * 100) : 0;
+    if (kpiOB) kpiOB.textContent = pct + '%';
+    const barColor = pct >= 70 ? '#2ECC71' : pct >= 40 ? '#F59E0B' : '#FF4D4D';
+    let html = '';
+    html += '<div style="background:#111;border:1px solid #252525;border-radius:8px;padding:12px;margin-bottom:10px;">';
+    html += '<div style="font-size:11px;color:#888;margin-bottom:6px;">Progreso general</div>';
+    html += '<div style="display:flex;align-items:center;gap:8px;">';
+    html += '<div style="flex:1;height:6px;background:#1a1a1a;border-radius:3px;overflow:hidden;"><div style="width:' + pct + '%;height:100%;background:' + barColor + ';"></div></div>';
+    html += '<div style="font-size:12px;font-weight:700;color:' + barColor + ';min-width:38px;text-align:right;">' + pct + '%</div>';
+    html += '</div>';
+    html += '</div>';
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
+    html += '<div style="background:#111;border-radius:6px;padding:10px;text-align:center;"><div style="font-size:10px;color:#888;">Hitos</div><div style="font-size:16px;font-weight:800;color:#f0ebe3;margin-top:2px;">' + cumplM + '/' + totalM + '</div></div>';
+    html += '<div style="background:#111;border-radius:6px;padding:10px;text-align:center;"><div style="font-size:10px;color:#888;">Cursos</div><div style="font-size:16px;font-weight:800;color:#f0ebe3;margin-top:2px;">' + cumplC + '/' + totalC + '</div></div>';
+    html += '</div>';
+    if (activo.StartDate) {
+      const fi = new Date(activo.StartDate).toLocaleDateString('es-AR');
+      html += '<div style="font-size:10px;color:#666;margin-top:8px;text-align:center;">Inicio: ' + fi + '</div>';
+    }
+    cont.innerHTML = html;
+  } catch(e) {
+    if (kpiOB) kpiOB.textContent = '—';
+    cont.innerHTML = '<div style="text-align:center;padding:20px;color:#888;font-size:12px;">Sin plan de onboarding.</div>';
+  }
+}
+
+// Widget: Feedback + Áreas de mejora del usuario
+async function cargarFeedbackPersonalDash(userId) {
+  const cont = document.getElementById('dashPersonalFeedback');
+  try {
+    const res = await fetch(API_BASE + '/objectives?userId=' + userId + '&type=personal');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const json = await res.json();
+    const objetivos = Array.isArray(json) ? json : (json.data || []);
+    // Solo los que tienen algo cargado en feedback o áreas de mejora
+    const conFeedback = objetivos.filter(function(o){
+      return (o.Feedback && String(o.Feedback).trim()) || (o.ImprovementAreas && String(o.ImprovementAreas).trim());
+    });
+    if (!conFeedback.length) {
+      cont.innerHTML = '<div style="text-align:center;padding:30px 20px;color:#888;font-size:12px;">Todavía no tenés feedback registrado en tus objetivos.</div>';
+      return;
+    }
+    // Ordenar por fecha de feedback desc
+    conFeedback.sort(function(a, b){
+      const da = a.FeedbackDate || a.ImprovementAreasDate || a.UpdatedAt || 0;
+      const db = b.FeedbackDate || b.ImprovementAreasDate || b.UpdatedAt || 0;
+      return new Date(db) - new Date(da);
+    });
+    let html = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">';
+    conFeedback.slice(0, 4).forEach(function(o){
+      html += '<div style="background:#111;border:1px solid #252525;border-radius:8px;padding:12px;">';
+      html += '<div style="font-size:12px;color:#f0ebe3;font-weight:600;margin-bottom:6px;">🎯 ' + String(o.Title||'').replace(/</g,'&lt;') + '</div>';
+      if (o.Feedback && String(o.Feedback).trim()) {
+        const fd = o.FeedbackDate ? new Date(o.FeedbackDate).toLocaleDateString('es-AR') : '';
+        html += '<div style="margin-bottom:6px;">';
+        html += '<div style="font-size:10px;color:#3B82F6;font-weight:700;text-transform:uppercase;margin-bottom:2px;">📝 Feedback' + (fd ? ' · ' + fd : '') + '</div>';
+        html += '<div style="font-size:11px;color:#aaa;line-height:1.5;">' + String(o.Feedback).replace(/</g,'&lt;') + '</div>';
+        html += '</div>';
+      }
+      if (o.ImprovementAreas && String(o.ImprovementAreas).trim()) {
+        const id_ = o.ImprovementAreasDate ? new Date(o.ImprovementAreasDate).toLocaleDateString('es-AR') : '';
+        html += '<div>';
+        html += '<div style="font-size:10px;color:#F59E0B;font-weight:700;text-transform:uppercase;margin-bottom:2px;">🎯 Áreas de mejora' + (id_ ? ' · ' + id_ : '') + '</div>';
+        html += '<div style="font-size:11px;color:#aaa;line-height:1.5;">' + String(o.ImprovementAreas).replace(/</g,'&lt;') + '</div>';
+        html += '</div>';
+      }
+      html += '</div>';
+    });
+    html += '</div>';
+    cont.innerHTML = html;
+  } catch(e) {
+    cont.innerHTML = '<div style="text-align:center;padding:20px;color:#888;font-size:12px;">Error al cargar feedback.</div>';
   }
 }
 

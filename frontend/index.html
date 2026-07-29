@@ -1007,6 +1007,67 @@ label { color: #888 !important; }
 
       <!-- VISTA 1: Mi Equipo (para líderes/managers/admin) -->
       <div id="dashViewTeam">
+
+      <!-- Filtros Dashboard Líder (Sesión 5 Bloque 2.B) -->
+      <div class="card" style="padding:14px 16px;margin-bottom:14px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+          <div style="font-size:11px;font-weight:700;color:#FF5400;text-transform:uppercase;letter-spacing:0.5px;">🔍 Filtros del panel</div>
+          <button onclick="limpiarFiltrosDashboard()" style="padding:5px 12px;background:transparent;border:1px solid #333;border-radius:6px;color:#888;font-size:11px;cursor:pointer;">Limpiar filtros</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+          <div>
+            <label style="font-size:10px;color:#888;font-weight:600;text-transform:uppercase;margin-bottom:4px;display:block;">Líder</label>
+            <select id="filtroLiderDash" onchange="aplicarFiltrosDashboard()" style="width:100%;padding:8px 10px;background:#111;border:1px solid #333;border-radius:6px;color:#f0ebe3;font-size:12px;">
+              <option value="">Todos los líderes</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:10px;color:#888;font-weight:600;text-transform:uppercase;margin-bottom:4px;display:block;">Proyecto</label>
+            <select id="filtroProyectoDash" onchange="aplicarFiltrosDashboard()" style="width:100%;padding:8px 10px;background:#111;border:1px solid #333;border-radius:6px;color:#f0ebe3;font-size:12px;">
+              <option value="">Todos los proyectos</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:10px;color:#888;font-weight:600;text-transform:uppercase;margin-bottom:4px;display:block;">Tipo de proyecto</label>
+            <select id="filtroTipoProyectoDash" onchange="aplicarFiltrosDashboard()" style="width:100%;padding:8px 10px;background:#111;border:1px solid #333;border-radius:6px;color:#f0ebe3;font-size:12px;">
+              <option value="">Todos los tipos</option>
+              <option value="project">Proyecto</option>
+              <option value="cell">Célula</option>
+              <option value="staff_augmentation">Staff Augmentation</option>
+              <option value="turnkey">Llave en Mano</option>
+              <option value="support">Soporte</option>
+              <option value="consulting">Consultoría</option>
+              <option value="internal">Interno</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:flex;gap:20px;margin-top:12px;flex-wrap:wrap;font-size:11px;color:#aaa;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="color:#888;font-weight:600;">Mostrar en dropdown "Líder":</span>
+            <label style="display:flex;align-items:center;gap:4px;cursor:pointer;">
+              <input type="radio" name="dashModeLider" value="con_equipo" checked onchange="poblarSelectLiderDashboard();aplicarFiltrosDashboard();">
+              <span>Con equipo</span>
+            </label>
+            <label style="display:flex;align-items:center;gap:4px;cursor:pointer;">
+              <input type="radio" name="dashModeLider" value="todos" onchange="poblarSelectLiderDashboard();aplicarFiltrosDashboard();">
+              <span>Todos</span>
+            </label>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="color:#888;font-weight:600;">Combinar filtros con:</span>
+            <label style="display:flex;align-items:center;gap:4px;cursor:pointer;">
+              <input type="radio" name="dashModeFiltros" value="and" checked onchange="aplicarFiltrosDashboard()">
+              <span title="Todos los filtros deben cumplirse">Todos coinciden (Y)</span>
+            </label>
+            <label style="display:flex;align-items:center;gap:4px;cursor:pointer;">
+              <input type="radio" name="dashModeFiltros" value="or" onchange="aplicarFiltrosDashboard()">
+              <span title="Basta con que uno coincida">Alguno coincide (O)</span>
+            </label>
+          </div>
+        </div>
+        <div id="dashFiltroInfo" style="margin-top:10px;font-size:11px;color:#888;"></div>
+      </div>
+
       <div class="section-header">
         <div>
           <div class="section-heading">Mi Equipo</div>
@@ -2188,13 +2249,154 @@ async function apiGet(path) {
   }
 }
 
+// Sesión 5 Bloque 2.B: guardar data del dashboard para poder re-renderizar con filtros
+let dashboardUsersRaw = [];
+
 async function loadDashboardFromAPI() {
   const data = await apiGet('users/all');
   if (!data || !data.length) return;
 
-  // Solo usuarios activos con lider asignado (el equipo del manager logueado)
+  // Solo usuarios activos
   const active = data.filter(u => u.IsActive);
+  dashboardUsersRaw = active;
 
+  // Cargar próximas reuniones (widget aparte, no se filtra)
+  cargarProximasReunionesDashboard();
+
+  // Inicializar toggle del dashboard (team vs personal)
+  inicializarDashboardToggle();
+
+  // Cargar proyectos para el filtro (si no está ya)
+  if (!allProjects.length) {
+    loadProjects().then(function(){
+      poblarFiltrosDashboard();
+      renderDashboardEquipo(active);
+    });
+  } else {
+    poblarFiltrosDashboard();
+    renderDashboardEquipo(active);
+  }
+}
+
+// Poblar los 2 dropdowns de filtro (Líder y Proyecto)
+function poblarFiltrosDashboard() {
+  poblarSelectLiderDashboard();
+  poblarSelectProyectoDashboard();
+}
+
+// Dropdown de líder — según el modo elegido
+function poblarSelectLiderDashboard() {
+  const sel = document.getElementById('filtroLiderDash');
+  if (!sel) return;
+  const currentVal = sel.value;
+  const modeRadio = document.querySelector('input[name="dashModeLider"]:checked');
+  const mode = modeRadio ? modeRadio.value : 'con_equipo';
+  sel.innerHTML = '<option value="">Todos los líderes</option>';
+  // Modo "con_equipo": solo los que aparecen como LeaderName o ManagerName en dashboardUsersRaw
+  // Modo "todos": todos los usuarios activos con AppRole leader/manager/admin
+  let lideres = [];
+  if (mode === 'con_equipo') {
+    // Sacar de los usuarios activos los IDs únicos de LeaderID y ManagerID
+    const ids = new Set();
+    dashboardUsersRaw.forEach(function(u){
+      if (u.LeaderID)  ids.add(u.LeaderID);
+      if (u.ManagerID) ids.add(u.ManagerID);
+    });
+    lideres = (allUsuarios || []).filter(function(u){ return ids.has(u.UserID); });
+  } else {
+    // Todos los que tienen rol de líder/manager/admin
+    lideres = (allUsuarios || []).filter(function(u){
+      const r = String(u.AppRole||'').toLowerCase();
+      return u.IsActive && (r === 'leader' || r === 'manager' || r === 'admin');
+    });
+  }
+  lideres.sort(function(a,b){ return (a.FullName||'').localeCompare(b.FullName||''); })
+    .forEach(function(u){
+      const opt = document.createElement('option');
+      opt.value = u.UserID;
+      opt.textContent = u.FullName + ' (' + (u.AppRole || '') + ')';
+      sel.appendChild(opt);
+    });
+  if (currentVal) sel.value = currentVal;
+}
+
+// Dropdown de proyecto — todos los activos
+function poblarSelectProyectoDashboard() {
+  const sel = document.getElementById('filtroProyectoDash');
+  if (!sel) return;
+  const currentVal = sel.value;
+  sel.innerHTML = '<option value="">Todos los proyectos</option>';
+  const activos = (allProjects || []).filter(function(p){ return p.IsActive && p.Status === 'active'; });
+  activos.sort(function(a,b){ return (a.ProjectName||'').localeCompare(b.ProjectName||''); })
+    .forEach(function(p){
+      const opt = document.createElement('option');
+      opt.value = p.ProjectID;
+      opt.textContent = p.ProjectName + (p.Client ? ' — ' + p.Client : '');
+      sel.appendChild(opt);
+    });
+  if (currentVal) sel.value = currentVal;
+}
+
+// Aplicar los filtros al array y re-renderizar TODO el dashboard de equipo
+function aplicarFiltrosDashboard() {
+  if (!dashboardUsersRaw.length) return;
+  const liderId  = document.getElementById('filtroLiderDash') ? document.getElementById('filtroLiderDash').value : '';
+  const projId   = document.getElementById('filtroProyectoDash') ? document.getElementById('filtroProyectoDash').value : '';
+  const tipoProj = document.getElementById('filtroTipoProyectoDash') ? document.getElementById('filtroTipoProyectoDash').value : '';
+  const modeRadio = document.querySelector('input[name="dashModeFiltros"]:checked');
+  const mode = modeRadio ? modeRadio.value : 'and';
+
+  const hasFiltros = !!liderId || !!projId || !!tipoProj;
+  let filtrados;
+  if (!hasFiltros) {
+    filtrados = dashboardUsersRaw.slice();
+  } else {
+    filtrados = dashboardUsersRaw.filter(function(u){
+      // Cada condición: true si aplica el filtro
+      const matchLider = liderId
+        ? (String(u.LeaderID) === String(liderId) || String(u.ManagerID) === String(liderId))
+        : null;
+      const matchProj = projId ? (String(u.ProjectID) === String(projId)) : null;
+      const matchTipo = tipoProj ? (String(u.ProjectType) === String(tipoProj)) : null;
+      // Junto solo las que están activas (no null)
+      const activas = [matchLider, matchProj, matchTipo].filter(function(x){ return x !== null; });
+      if (mode === 'or') {
+        // OR: al menos una debe ser true
+        return activas.some(function(x){ return x; });
+      } else {
+        // AND: todas deben ser true
+        return activas.every(function(x){ return x; });
+      }
+    });
+  }
+  // Actualizar contador
+  const infoEl = document.getElementById('dashFiltroInfo');
+  if (infoEl) {
+    if (hasFiltros) {
+      infoEl.innerHTML = '📊 Mostrando <b style="color:#f0ebe3;">' + filtrados.length + '</b> de <b>' + dashboardUsersRaw.length + '</b> colaboradores';
+    } else {
+      infoEl.innerHTML = '';
+    }
+  }
+  renderDashboardEquipo(filtrados);
+}
+
+// Limpiar filtros
+function limpiarFiltrosDashboard() {
+  const l = document.getElementById('filtroLiderDash'); if (l) l.value = '';
+  const p = document.getElementById('filtroProyectoDash'); if (p) p.value = '';
+  const t = document.getElementById('filtroTipoProyectoDash'); if (t) t.value = '';
+  // Modo default
+  const radioLider = document.querySelector('input[name="dashModeLider"][value="con_equipo"]');
+  if (radioLider) radioLider.checked = true;
+  const radioFilt = document.querySelector('input[name="dashModeFiltros"][value="and"]');
+  if (radioFilt) radioFilt.checked = true;
+  poblarSelectLiderDashboard();
+  aplicarFiltrosDashboard();
+}
+
+// Renderizar KPIs, donut y lista con el array de usuarios (filtrado o no)
+function renderDashboardEquipo(active) {
   // KPIs
   const kpiEl = (id) => document.querySelector('[data-kpi="' + id + '"]');
   if (kpiEl('colaboradores')) kpiEl('colaboradores').textContent = active.length;
@@ -2202,7 +2404,7 @@ async function loadDashboardFromAPI() {
   const atRisk = active.filter(u => (u.AvgProgress || 0) < 40).length;
   if (kpiEl('riesgo')) kpiEl('riesgo').textContent = atRisk;
 
-  // Equipo — top 10 para el panel
+  // Equipo — top 15 para el panel
   teamData = active.slice(0, 15).map((u, i) => ({
     name:   u.FullName || u.Email,
     init:   ini(u.FullName || u.Email),
@@ -2228,13 +2430,6 @@ async function loadDashboardFromAPI() {
     <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF4D4D;margin-right:6px"></span>En Riesgo</span><strong>${rojo}</strong></div>
     <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF9F1C;margin-right:6px"></span>En Curso</span><strong>${naranja}</strong></div>
     <div style="display:flex;justify-content:space-between"><span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#2ECC71;margin-right:6px"></span>En Verde</span><strong>${verde}</strong></div>`;
-
-  // Cargar próximas reuniones reales para el widget del dashboard (Sesión 3)
-  cargarProximasReunionesDashboard();
-
-  // Sesión 5 Bloque 1: inicializar toggle del dashboard (team vs personal)
-  // Se hace acá porque ya tenemos allUsuarios cargados
-  inicializarDashboardToggle();
 }
 
 // Carga las próximas reuniones desde el API y las renderiza en el widget del dashboard (Sesión 3)

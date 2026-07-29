@@ -742,13 +742,6 @@ label { color: #888 !important; }
           <option value="">— Sin rol —</option>
         </select>
       </div>
-      <!-- Proyecto/Célula (Sesión 5) -->
-      <div>
-        <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Proyecto / Célula</label>
-        <select id="editProject" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
-          <option value="">— Sin proyecto —</option>
-        </select>
-      </div>
     </div>
     <div id="modalEditarError" style="color:#FF4D4D;font-size:12px;margin-top:12px;display:none;"></div>
     <div style="display:flex;gap:10px;margin-top:24px;justify-content:flex-end;">
@@ -827,13 +820,6 @@ label { color: #888 !important; }
         <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Rol de negocio</label>
         <select id="nuevoJobRole" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
           <option value="">— Sin rol —</option>
-        </select>
-      </div>
-      <!-- Proyecto/Célula (Sesión 5) -->
-      <div>
-        <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Proyecto / Célula</label>
-        <select id="nuevoProject" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
-          <option value="">— Sin proyecto —</option>
         </select>
       </div>
     </div>
@@ -955,10 +941,6 @@ label { color: #888 !important; }
   <div class="nav-item" onclick="showSection('roles')">
     <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><path d="M17 11h.01"/><path d="M20 8h.01"/><path d="M23 11h.01"/></svg>
     Roles
-  </div>
-  <div class="nav-item" onclick="showSection('proyectos')">
-    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-    Proyectos
   </div>
   <div class="nav-item" onclick="showSection('onboarding-templates')">
     <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h4"/><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
@@ -1322,121 +1304,6 @@ label { color: #888 !important; }
 </div>
 
 <!-- SECCIÓN PLANTILLAS ONBOARDING (Sesión 4 Bloque 2) -->
-<!-- SECCIÓN PROYECTOS (Sesión 5 Bloque 2.A) -->
-<div class="section" id="sec-proyectos">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-    <div>
-      <h2 style="font-size:20px;font-weight:800;color:#f0ebe3;">Proyectos</h2>
-      <p style="font-size:12px;color:#888;margin-top:2px;">Proyectos, células, staff augmentation y consultorías</p>
-    </div>
-    <button onclick="abrirModalProyecto()" style="padding:8px 16px;background:#FF5400;border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;">+ Nuevo Proyecto</button>
-  </div>
-  <div style="display:flex;gap:12px;align-items:center;margin-bottom:14px;flex-wrap:wrap;">
-    <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Filtros:</label>
-    <select id="proyectosFilterTipo" onchange="renderProyectosTable()" style="padding:6px 10px;background:#111;border:1px solid #333;border-radius:6px;color:#f0ebe3;font-size:12px;">
-      <option value="">Todos los tipos</option>
-      <option value="project">Proyecto</option>
-      <option value="cell">Célula</option>
-      <option value="staff_augmentation">Staff Augmentation</option>
-      <option value="consulting">Consultoría</option>
-      <option value="internal">Interno</option>
-    </select>
-    <select id="proyectosFilterEstado" onchange="renderProyectosTable()" style="padding:6px 10px;background:#111;border:1px solid #333;border-radius:6px;color:#f0ebe3;font-size:12px;">
-      <option value="all">Todos los estados</option>
-      <option value="active" selected>Activos</option>
-      <option value="closed">Cerrados</option>
-      <option value="on_hold">En pausa</option>
-    </select>
-  </div>
-  <div class="card" style="padding:0;overflow:hidden;">
-    <div id="proyectosLoading" style="text-align:center;padding:40px;color:#888;">Cargando proyectos...</div>
-    <table class="data-table" id="proyectosTable" style="display:none;">
-      <thead>
-        <tr>
-          <th>Proyecto</th>
-          <th>Tipo</th>
-          <th>Cliente</th>
-          <th>Líder</th>
-          <th># colabs</th>
-          <th>Estado</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody id="proyectosTbody"></tbody>
-    </table>
-  </div>
-</div>
-
-<!-- MODAL: Alta/Edición de Proyecto -->
-<div id="modalProyecto" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:500;align-items:center;justify-content:center;">
-  <div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:16px;padding:32px;width:600px;max-width:95vw;max-height:90vh;overflow-y:auto;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
-      <h3 id="modalProyectoTitle" style="font-size:16px;font-weight:800;color:#f0ebe3;">Nuevo Proyecto</h3>
-      <button onclick="cerrarModalProyecto()" style="background:none;border:none;color:#888;font-size:20px;cursor:pointer;">×</button>
-    </div>
-    <input type="hidden" id="modalProyectoId" value="">
-    <div style="display:flex;flex-direction:column;gap:14px;">
-      <div>
-        <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Nombre del proyecto *</label>
-        <input id="proyNombre" type="text" placeholder="Ej: Prisma" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-        <div>
-          <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Tipo *</label>
-          <select id="proyTipo" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
-            <option value="project">Proyecto</option>
-            <option value="cell">Célula</option>
-            <option value="staff_augmentation">Staff Augmentation</option>
-            <option value="consulting">Consultoría</option>
-            <option value="internal">Interno</option>
-          </select>
-        </div>
-        <div>
-          <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Código</label>
-          <input id="proyCode" type="text" placeholder="Ej: PRISMA" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
-        </div>
-      </div>
-      <div>
-        <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Cliente</label>
-        <input id="proyClient" type="text" placeholder="Ej: Prisma Medios de Pago" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
-      </div>
-      <div>
-        <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Líder del proyecto</label>
-        <select id="proyLeader" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
-          <option value="">— Sin líder —</option>
-        </select>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-        <div>
-          <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Fecha inicio</label>
-          <input id="proyStart" type="date" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
-        </div>
-        <div>
-          <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Fecha fin (estimada)</label>
-          <input id="proyEnd" type="date" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
-        </div>
-      </div>
-      <div>
-        <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Estado</label>
-        <select id="proyStatus" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
-          <option value="active">Activo</option>
-          <option value="on_hold">En pausa</option>
-          <option value="closed">Cerrado</option>
-        </select>
-      </div>
-      <div>
-        <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Descripción</label>
-        <textarea id="proyDesc" rows="3" placeholder="Descripción u objetivos del proyecto..." style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;resize:vertical;"></textarea>
-      </div>
-    </div>
-    <div id="modalProyectoError" style="color:#FF4D4D;font-size:12px;margin-top:12px;display:none;"></div>
-    <div style="display:flex;gap:10px;margin-top:24px;justify-content:flex-end;">
-      <button onclick="cerrarModalProyecto()" style="padding:10px 20px;background:#222;border:1px solid #333;border-radius:8px;color:#aaa;font-size:13px;cursor:pointer;">Cancelar</button>
-      <button onclick="guardarProyecto()" id="btnGuardarProyecto" style="padding:10px 24px;background:#FF5400;border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;">Guardar</button>
-    </div>
-  </div>
-</div>
-
 <div class="section" id="sec-onboarding-templates">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
     <div>
@@ -2140,7 +2007,7 @@ label { color: #888 !important; }
 
 <script>
 const titles = {
-  dashboard:'Dashboard',recruiting:'Recruiting',onboarding:'Onboarding',usuarios:'Usuarios',lideres:'Líderes',areas:'Áreas',roles:'Roles',proyectos:'Proyectos','onboarding-templates':'Plantillas Onboarding',objectives:'Objetivos',career:'Plan de Carrera',pip:'PIP — Improvement',pip:'PIP — Plan de Improvement',
+  dashboard:'Dashboard',recruiting:'Recruiting',onboarding:'Onboarding',usuarios:'Usuarios',lideres:'Líderes',areas:'Áreas',roles:'Roles','onboarding-templates':'Plantillas Onboarding',objectives:'Objetivos',career:'Plan de Carrera',pip:'PIP — Improvement',pip:'PIP — Plan de Improvement',
   competencies:'Competencias',oneononex:'Reuniones 1:1',feedback360:'Feedback 360°',reports:'Reportes',
   orgchart:'Organigrama',alerts:'Alertas',periods:'Períodos',settings:'Configuración',help:'Ayuda'
 };
@@ -2732,7 +2599,6 @@ function showSection(id){
   if(id==='lideres'){if(!Object.keys(allLideres||{}).length) loadLideres();}
   if(id==='areas'&&!allAreas.length) loadAreas();
   if(id==='roles'){ loadJobRoles(); }
-  if(id==='proyectos'){ loadProjects(); }
   if(id==='onboarding-templates'){
     if (!allJobRoles.length) loadJobRoles().then(poblarRolesPlantillaDropdown);
     else poblarRolesPlantillaDropdown();
@@ -3022,9 +2888,6 @@ function abrirModalUsuario() {
   // Poblar select de rol de negocio (Sesión 4)
   if (allJobRoles.length) poblarSelectsJobRole();
   else loadJobRoles().then(poblarSelectsJobRole);
-  // Poblar select de proyecto (Sesión 5)
-  if (allProjects.length) poblarSelectsProject();
-  else loadProjects().then(poblarSelectsProject);
   const liderSel = document.getElementById('nuevoLider');
   const managerSel = document.getElementById('nuevoManager');
   // Limpiar
@@ -3063,8 +2926,6 @@ async function guardarNuevoUsuario() {
   const hireDate = (document.getElementById('nuevoHireDate')||{}).value || null;
   // Rol de negocio (Sesión 4)
   const jobRoleId = (document.getElementById('nuevoJobRole')||{}).value || null;
-  // Proyecto (Sesión 5)
-  const projectId = (document.getElementById('nuevoProject')||{}).value || null;
   const errEl   = document.getElementById('modalUsuarioError');
   const btn     = document.getElementById('btnGuardarUsuario');
 
@@ -3079,7 +2940,7 @@ async function guardarNuevoUsuario() {
     const res = await fetch(API_BASE + '/manage/users', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fullName: nombre, email, appRole: rol, isActive: activo, leaderID: liderId ? parseInt(liderId) : null, managerID: managerId ? parseInt(managerId) : null, areaName: area || null, employeeNumber: legajo, hireDate: hireDate, jobRoleID: jobRoleId ? parseInt(jobRoleId) : null, projectID: projectId ? parseInt(projectId) : null })
+      body: JSON.stringify({ fullName: nombre, email, appRole: rol, isActive: activo, leaderID: liderId ? parseInt(liderId) : null, managerID: managerId ? parseInt(managerId) : null, areaName: area || null, employeeNumber: legajo, hireDate: hireDate, jobRoleID: jobRoleId ? parseInt(jobRoleId) : null })
     });
     const data = await res.json();
     if (data.ok === false) throw new Error(data.error || 'Error al guardar');
@@ -3159,14 +3020,6 @@ function abrirModalEditar(userId) {
   };
   if (allJobRoles.length) doPoblarRol();
   else loadJobRoles().then(doPoblarRol);
-  // Proyecto (Sesión 5)
-  const doPoblarProj = function(){
-    poblarSelectsProject();
-    const editP = document.getElementById("editProject");
-    if (editP) editP.value = (u.ProjectID != null ? String(u.ProjectID) : "");
-  };
-  if (allProjects.length) doPoblarProj();
-  else loadProjects().then(doPoblarProj);
   document.getElementById("modalEditarUsuario").style.display = "flex";
 }
 
@@ -3189,9 +3042,6 @@ async function guardarEdicionUsuario() {
   // Rol de negocio (Sesión 4)
   const jobRoleRaw = (document.getElementById("editJobRole")||{}).value;
   const jobRoleId = jobRoleRaw ? parseInt(jobRoleRaw, 10) : null;
-  // Proyecto (Sesión 5)
-  const projectRaw = (document.getElementById("editProject")||{}).value;
-  const projectId = projectRaw ? parseInt(projectRaw, 10) : null;
   const errEl   = document.getElementById("modalEditarError");
   const btn     = document.getElementById("btnGuardarEdicion");
   if (!nombre || !email) { errEl.textContent="Nombre y email son obligatorios"; errEl.style.display="block"; return; }
@@ -3206,8 +3056,7 @@ async function guardarEdicionUsuario() {
         AreaID:    document.getElementById("editArea")?.value ? parseInt(document.getElementById("editArea").value) : null,
         EmployeeNumber: legajo,
         HireDate: hireDate,
-        JobRoleID: jobRoleId,
-        ProjectID: projectId })
+        JobRoleID: jobRoleId })
     });
     const data = await res.json();
     if (data.ok === false) throw new Error(data.error || "Error al guardar");
@@ -3489,210 +3338,6 @@ function poblarSelectsJobRole() {
         const opt = document.createElement('option');
         opt.value = r.JobRoleID;
         opt.textContent = r.RoleName + (r.Level ? ' (' + r.Level + ')' : '');
-        sel.appendChild(opt);
-      });
-    if (currentVal) sel.value = currentVal;
-  });
-}
-
-// ══════════════════════════════════════════
-// SECCIÓN PROYECTOS (Sesión 5 Bloque 2.A)
-// ══════════════════════════════════════════
-let allProjects = [];
-
-async function loadProjects() {
-  const c = document.getElementById('proyectosLoading');
-  const t = document.getElementById('proyectosTable');
-  if (c) c.style.display = 'block';
-  if (t) t.style.display = 'none';
-  try {
-    const res = await fetch(API_BASE + '/projects?all=1');
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const json = await res.json();
-    allProjects = Array.isArray(json) ? json : (json.data || []);
-    renderProyectosTable();
-  } catch(e) {
-    if (c) c.innerHTML = '<div style="color:#FF4D4D;">Error cargando proyectos: ' + e.message + '</div>';
-  }
-}
-
-function renderProyectosTable() {
-  const c = document.getElementById('proyectosLoading');
-  const t = document.getElementById('proyectosTable');
-  const tb = document.getElementById('proyectosTbody');
-  if (!tb) return;
-  const filtTipo = (document.getElementById('proyectosFilterTipo') || {}).value || '';
-  const filtEst = (document.getElementById('proyectosFilterEstado') || {}).value || 'all';
-  let filtrados = allProjects.slice();
-  if (filtTipo) filtrados = filtrados.filter(function(p){ return (p.ProjectType || '') === filtTipo; });
-  if (filtEst !== 'all') filtrados = filtrados.filter(function(p){ return (p.Status || '') === filtEst; });
-
-  const tipoLabels = {project:'Proyecto', cell:'Célula', staff_augmentation:'Staff Aug', consulting:'Consultoría', internal:'Interno'};
-  const tipoColors = {project:'#3B82F6', cell:'#A855F7', staff_augmentation:'#F59E0B', consulting:'#14B8A6', internal:'#888'};
-  const statusLabels = {active:'Activo', closed:'Cerrado', on_hold:'En pausa'};
-  const statusColors = {active:'#2ECC71', closed:'#FF4D4D', on_hold:'#F59E0B'};
-
-  if (!filtrados.length) {
-    tb.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:30px;color:#888;">No hay proyectos que coincidan con los filtros.</td></tr>';
-  } else {
-    let html = '';
-    filtrados.forEach(function(p){
-      const tipoLabel = tipoLabels[p.ProjectType] || p.ProjectType || '—';
-      const tipoCol = tipoColors[p.ProjectType] || '#888';
-      const stLabel = statusLabels[p.Status] || p.Status || '—';
-      const stCol = statusColors[p.Status] || '#888';
-      const leader = p.ProjectLeaderName ? String(p.ProjectLeaderName).replace(/</g,'&lt;') : '<span style="color:#555;">—</span>';
-      const client = p.Client ? String(p.Client).replace(/</g,'&lt;') : '<span style="color:#555;">—</span>';
-      const users = p.UserCount || 0;
-      html += '<tr>' +
-        '<td><div style="font-weight:600;color:#f0ebe3;">' + String(p.ProjectName || '').replace(/</g,'&lt;') + '</div>' +
-          (p.Code ? '<div style="font-size:10px;color:#888;margin-top:2px;">' + String(p.Code).replace(/</g,'&lt;') + '</div>' : '') + '</td>' +
-        '<td><span style="font-size:10px;font-weight:700;color:' + tipoCol + ';background:' + tipoCol + '22;padding:2px 8px;border-radius:8px;">' + tipoLabel + '</span></td>' +
-        '<td style="font-size:12px;color:#aaa;">' + client + '</td>' +
-        '<td style="font-size:12px;color:#aaa;">' + leader + '</td>' +
-        '<td style="text-align:center;font-weight:700;color:' + (users > 0 ? '#FF5400' : '#666') + ';">' + users + '</td>' +
-        '<td><span style="font-size:10px;font-weight:700;color:' + stCol + ';background:' + stCol + '22;padding:2px 8px;border-radius:8px;">' + stLabel + '</span></td>' +
-        '<td>' +
-          '<button onclick="abrirModalProyecto(' + p.ProjectID + ')" style="padding:4px 12px;background:#222;border:1px solid #333;border-radius:5px;color:#aaa;font-size:11px;cursor:pointer;margin-right:4px;">Editar</button>' +
-          '<button onclick="eliminarProyecto(' + p.ProjectID + ',' + users + ')" style="padding:4px 12px;background:transparent;border:1px solid #333;border-radius:5px;color:#666;font-size:11px;cursor:pointer;">' + (users > 0 ? '🚫 Desactivar' : '🗑 Borrar') + '</button>' +
-        '</td>' +
-      '</tr>';
-    });
-    tb.innerHTML = html;
-  }
-  if (c) c.style.display = 'none';
-  if (t) t.style.display = 'table';
-}
-
-function abrirModalProyecto(projId) {
-  const modal = document.getElementById('modalProyecto');
-  const title = document.getElementById('modalProyectoTitle');
-  document.getElementById('modalProyectoError').style.display = 'none';
-  // Poblar dropdown de líderes con usuarios activos que sean líder/manager/admin
-  const leaderSel = document.getElementById('proyLeader');
-  leaderSel.innerHTML = '<option value="">— Sin líder —</option>';
-  (allUsuarios || []).filter(function(u){
-    const role = String(u.AppRole || '').toLowerCase();
-    return u.IsActive && (role === 'leader' || role === 'manager' || role === 'admin');
-  }).sort(function(a,b){ return (a.FullName||'').localeCompare(b.FullName||''); })
-    .forEach(function(u){
-      const opt = document.createElement('option');
-      opt.value = u.UserID;
-      opt.textContent = u.FullName + (u.AppRole ? ' (' + u.AppRole + ')' : '');
-      leaderSel.appendChild(opt);
-    });
-  if (projId) {
-    const p = allProjects.find(function(x){ return x.ProjectID === projId; });
-    if (!p) { mostrarToast('Proyecto no encontrado', 'error'); return; }
-    title.textContent = 'Editar Proyecto';
-    document.getElementById('modalProyectoId').value = projId;
-    document.getElementById('proyNombre').value = p.ProjectName || '';
-    document.getElementById('proyTipo').value = p.ProjectType || 'project';
-    document.getElementById('proyCode').value = p.Code || '';
-    document.getElementById('proyClient').value = p.Client || '';
-    document.getElementById('proyLeader').value = p.ProjectLeaderID || '';
-    document.getElementById('proyStart').value = p.StartDate ? String(p.StartDate).substring(0, 10) : '';
-    document.getElementById('proyEnd').value = p.EndDate ? String(p.EndDate).substring(0, 10) : '';
-    document.getElementById('proyStatus').value = p.Status || 'active';
-    document.getElementById('proyDesc').value = p.Description || '';
-  } else {
-    title.textContent = 'Nuevo Proyecto';
-    document.getElementById('modalProyectoId').value = '';
-    document.getElementById('proyNombre').value = '';
-    document.getElementById('proyTipo').value = 'project';
-    document.getElementById('proyCode').value = '';
-    document.getElementById('proyClient').value = '';
-    document.getElementById('proyLeader').value = '';
-    document.getElementById('proyStart').value = '';
-    document.getElementById('proyEnd').value = '';
-    document.getElementById('proyStatus').value = 'active';
-    document.getElementById('proyDesc').value = '';
-  }
-  modal.style.display = 'flex';
-}
-
-function cerrarModalProyecto() {
-  document.getElementById('modalProyecto').style.display = 'none';
-}
-
-async function guardarProyecto() {
-  const id = document.getElementById('modalProyectoId').value;
-  const nombre = document.getElementById('proyNombre').value.trim();
-  const tipo = document.getElementById('proyTipo').value;
-  const code = document.getElementById('proyCode').value.trim();
-  const client = document.getElementById('proyClient').value.trim();
-  const leader = document.getElementById('proyLeader').value;
-  const start = document.getElementById('proyStart').value;
-  const endD = document.getElementById('proyEnd').value;
-  const status = document.getElementById('proyStatus').value;
-  const desc = document.getElementById('proyDesc').value.trim();
-  const errEl = document.getElementById('modalProyectoError');
-  const btn = document.getElementById('btnGuardarProyecto');
-  if (!nombre) { errEl.textContent = 'El nombre es obligatorio'; errEl.style.display = 'block'; return; }
-  btn.textContent = 'Guardando...'; btn.disabled = true;
-  errEl.style.display = 'none';
-  try {
-    const method = id ? 'PUT' : 'POST';
-    const url = id ? (API_BASE + '/projects/' + id) : (API_BASE + '/projects');
-    const body = {
-      projectName: nombre,
-      projectType: tipo,
-      code: code || null,
-      client: client || null,
-      projectLeaderID: leader || null,
-      startDate: start || null,
-      endDate: endD || null,
-      status: status,
-      description: desc || null
-    };
-    const res = await fetch(url, {
-      method: method,
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(body)
-    });
-    const data = await res.json();
-    if (!res.ok || data.ok === false) throw new Error(data.error || ('HTTP ' + res.status));
-    mostrarToast(id ? 'Proyecto actualizado' : 'Proyecto creado', 'success');
-    cerrarModalProyecto();
-    loadProjects();
-  } catch(e) {
-    errEl.textContent = 'Error: ' + e.message;
-    errEl.style.display = 'block';
-  } finally {
-    btn.textContent = 'Guardar'; btn.disabled = false;
-  }
-}
-
-async function eliminarProyecto(projId, userCount) {
-  const msg = userCount > 0
-    ? '⚠️ Este proyecto tiene ' + userCount + ' colaborador(es) asignado(s). Al eliminarlo se desactiva (no se borra). ¿Continuar?'
-    : '¿Seguro que querés borrar este proyecto? Esta acción no se puede deshacer.';
-  if (!confirm(msg)) return;
-  try {
-    const res = await fetch(API_BASE + '/projects/' + projId, { method: 'DELETE' });
-    const data = await res.json();
-    if (!res.ok || data.ok === false) throw new Error(data.error || ('HTTP ' + res.status));
-    mostrarToast(data.data && data.data.deactivated ? 'Proyecto desactivado' : 'Proyecto borrado', 'success');
-    loadProjects();
-  } catch(e) {
-    mostrarToast('Error: ' + e.message, 'error');
-  }
-}
-
-// Poblar los selects de proyecto en los modales de Nuevo/Editar Usuario
-function poblarSelectsProject() {
-  ['nuevoProject', 'editProject'].forEach(function(selId){
-    const sel = document.getElementById(selId);
-    if (!sel) return;
-    const currentVal = sel.value;
-    sel.innerHTML = '<option value="">— Sin proyecto —</option>';
-    allProjects.filter(function(p){ return p.IsActive && p.Status === 'active'; })
-      .forEach(function(p){
-        const opt = document.createElement('option');
-        opt.value = p.ProjectID;
-        const typeLabels = {project:'Proyecto', cell:'Célula', staff_augmentation:'Staff Aug', consulting:'Consultoría', internal:'Interno'};
-        const tLabel = typeLabels[p.ProjectType] || p.ProjectType || '';
-        opt.textContent = p.ProjectName + (tLabel ? ' (' + tLabel + ')' : '');
         sel.appendChild(opt);
       });
     if (currentVal) sel.value = currentVal;

@@ -1968,6 +1968,62 @@ label { color: #888 !important; }
         <div><div class="section-heading">Reportes</div>
         <div class="section-subheading">Reportes individuales y de equipo por colaborador, líder o manager</div></div>
       </div>
+
+      <!-- Filtros de Reportes (Sesión 5 Bloque 2.C) -->
+      <div class="card" style="padding:14px 16px;margin-bottom:14px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+          <div style="font-size:11px;font-weight:700;color:#FF5400;text-transform:uppercase;letter-spacing:0.5px;">🔍 Filtros de Reportes</div>
+          <button onclick="limpiarFiltrosReportes()" style="padding:5px 12px;background:transparent;border:1px solid #333;border-radius:6px;color:#888;font-size:11px;cursor:pointer;">Limpiar filtros</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;">
+          <div>
+            <label style="font-size:10px;color:#888;font-weight:600;text-transform:uppercase;margin-bottom:4px;display:block;">Líder</label>
+            <select id="filtroLiderRep" onchange="aplicarFiltrosReportes()" style="width:100%;padding:8px 10px;background:#111;border:1px solid #333;border-radius:6px;color:#f0ebe3;font-size:12px;">
+              <option value="">Todos los líderes</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:10px;color:#888;font-weight:600;text-transform:uppercase;margin-bottom:4px;display:block;">Proyecto</label>
+            <select id="filtroProyectoRep" onchange="aplicarFiltrosReportes()" style="width:100%;padding:8px 10px;background:#111;border:1px solid #333;border-radius:6px;color:#f0ebe3;font-size:12px;">
+              <option value="">Todos los proyectos</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:10px;color:#888;font-weight:600;text-transform:uppercase;margin-bottom:4px;display:block;">Tipo de proyecto</label>
+            <select id="filtroTipoProyectoRep" onchange="aplicarFiltrosReportes()" style="width:100%;padding:8px 10px;background:#111;border:1px solid #333;border-radius:6px;color:#f0ebe3;font-size:12px;">
+              <option value="">Todos los tipos</option>
+              <option value="project">Proyecto</option>
+              <option value="cell">Célula</option>
+              <option value="staff_augmentation">Staff Augmentation</option>
+              <option value="turnkey">Llave en Mano</option>
+              <option value="support">Soporte</option>
+              <option value="consulting">Consultoría</option>
+              <option value="internal">Interno</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:10px;color:#888;font-weight:600;text-transform:uppercase;margin-bottom:4px;display:block;">Área</label>
+            <select id="filtroAreaRep" onchange="aplicarFiltrosReportes()" style="width:100%;padding:8px 10px;background:#111;border:1px solid #333;border-radius:6px;color:#f0ebe3;font-size:12px;">
+              <option value="">Todas las áreas</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:flex;gap:20px;margin-top:12px;flex-wrap:wrap;font-size:11px;color:#aaa;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="color:#888;font-weight:600;">Combinar filtros con:</span>
+            <label style="display:flex;align-items:center;gap:4px;cursor:pointer;">
+              <input type="radio" name="repModeFiltros" value="and" checked onchange="aplicarFiltrosReportes()">
+              <span title="Todos los filtros deben cumplirse">Todos coinciden (Y)</span>
+            </label>
+            <label style="display:flex;align-items:center;gap:4px;cursor:pointer;">
+              <input type="radio" name="repModeFiltros" value="or" onchange="aplicarFiltrosReportes()">
+              <span title="Basta con que uno coincida">Alguno coincide (O)</span>
+            </label>
+          </div>
+        </div>
+        <div id="repFiltroInfo" style="margin-top:10px;font-size:11px;color:#888;"></div>
+      </div>
+
       <div class="tabs" id="rep-tabs">
         <div class="tab active" onclick="switchTab('rep','persona',this);initReporteTab('persona')">Por Persona</div>
         <div class="tab" onclick="switchTab('rep','lider',this);initReporteTab('lider')">Por Líder</div>
@@ -4659,38 +4715,216 @@ function poblarSelectoresCompetencias() {
 
 // ═══ REPORTES ════════════════════════════════════════════════
 function initReportes() {
-  const pSel = document.getElementById('repPersonaSel');
-  const lSel = document.getElementById('repLiderSel');
+  // Sesión 5 Bloque 2.C: cargar filtros (líderes, proyectos, áreas)
+  poblarFiltrosReportes();
+  // Aplicar filtros (con default = ninguno) para poblar los dropdowns de cada tab
+  aplicarFiltrosReportes();
+  // Períodos
   const perSel = document.getElementById('repPeriodoSel');
-  if (pSel && pSel.options.length <= 1) {
-    allUsuarios.filter(u=>u.IsActive).sort((a,b)=>(a.FullName||'').localeCompare(b.FullName||'')).forEach(u=>pSel.add(new Option(u.FullName||u.Email, u.UserID)));
-  }
-  if (lSel && lSel.options.length <= 1) {
-    allUsuarios.filter(u=>u.IsActive&&['leader','manager','admin'].includes(u.AppRole)).sort((a,b)=>(a.FullName||'').localeCompare(b.FullName||'')).forEach(u=>lSel.add(new Option(u.FullName||u.Email, u.UserID)));
-  }
   if (perSel && perSel.options.length <= 1 && allPeriods.length) {
     allPeriods.forEach(p=>perSel.add(new Option(p.PeriodName, p.PeriodID)));
   }
 }
 
+// Sesión 5 Bloque 2.C: poblar los 4 dropdowns de filtro
+function poblarFiltrosReportes() {
+  // Líder — todos los que tienen rol leader/manager/admin
+  const liderSel = document.getElementById('filtroLiderRep');
+  if (liderSel && liderSel.options.length <= 1) {
+    (allUsuarios || []).filter(function(u){
+      const r = String(u.AppRole||'').toLowerCase();
+      return u.IsActive && (r === 'leader' || r === 'manager' || r === 'admin');
+    }).sort(function(a,b){ return (a.FullName||'').localeCompare(b.FullName||''); })
+      .forEach(function(u){
+        const opt = document.createElement('option');
+        opt.value = u.UserID;
+        opt.textContent = u.FullName + ' (' + (u.AppRole || '') + ')';
+        liderSel.appendChild(opt);
+      });
+  }
+  // Proyecto
+  const projSel = document.getElementById('filtroProyectoRep');
+  if (projSel && projSel.options.length <= 1) {
+    const cargarProj = function(){
+      (allProjects || []).filter(function(p){ return p.IsActive && p.Status === 'active'; })
+        .sort(function(a,b){ return (a.ProjectName||'').localeCompare(b.ProjectName||''); })
+        .forEach(function(p){
+          const opt = document.createElement('option');
+          opt.value = p.ProjectID;
+          opt.textContent = p.ProjectName + (p.Client ? ' — ' + p.Client : '');
+          projSel.appendChild(opt);
+        });
+    };
+    if (!allProjects.length) loadProjects().then(cargarProj);
+    else cargarProj();
+  }
+  // Área
+  const areaSel = document.getElementById('filtroAreaRep');
+  if (areaSel && areaSel.options.length <= 1) {
+    const cargarAreas = function(){
+      (allAreas || []).filter(function(a){ return a.IsActive; })
+        .sort(function(a,b){ return (a.AreaName||'').localeCompare(b.AreaName||''); })
+        .forEach(function(a){
+          const opt = document.createElement('option');
+          opt.value = a.AreaID;
+          opt.textContent = a.AreaName;
+          areaSel.appendChild(opt);
+        });
+    };
+    if (!allAreas.length) loadAreas().then(cargarAreas);
+    else cargarAreas();
+  }
+}
+
+// Sesión 5 Bloque 2.C: aplicar filtros a los datos de Reportes
+function aplicarFiltrosReportes() {
+  const liderId  = (document.getElementById('filtroLiderRep')||{}).value || '';
+  const projId   = (document.getElementById('filtroProyectoRep')||{}).value || '';
+  const tipoProj = (document.getElementById('filtroTipoProyectoRep')||{}).value || '';
+  const areaId   = (document.getElementById('filtroAreaRep')||{}).value || '';
+  const modeRadio = document.querySelector('input[name="repModeFiltros"]:checked');
+  const mode = modeRadio ? modeRadio.value : 'and';
+
+  const hasFiltros = !!liderId || !!projId || !!tipoProj || !!areaId;
+  // Base: todos los usuarios activos
+  const base = (allUsuarios || []).filter(function(u){ return u.IsActive; });
+  let filtrados;
+  if (!hasFiltros) {
+    filtrados = base.slice();
+  } else {
+    filtrados = base.filter(function(u){
+      const matchLider = liderId ? (String(u.LeaderID) === String(liderId) || String(u.ManagerID) === String(liderId)) : null;
+      const matchProj  = projId ? (String(u.ProjectID) === String(projId)) : null;
+      const matchTipo  = tipoProj ? (String(u.ProjectType) === String(tipoProj)) : null;
+      const matchArea  = areaId ? (String(u.AreaID) === String(areaId)) : null;
+      const activas = [matchLider, matchProj, matchTipo, matchArea].filter(function(x){ return x !== null; });
+      if (mode === 'or') return activas.some(function(x){ return x; });
+      return activas.every(function(x){ return x; });
+    });
+  }
+  // Guardar el filtrado para re-usar en las tabs
+  window._repFiltrados = filtrados;
+  // Contador
+  const infoEl = document.getElementById('repFiltroInfo');
+  if (infoEl) {
+    if (hasFiltros) {
+      infoEl.innerHTML = '📊 Filtrando a <b style="color:#f0ebe3;">' + filtrados.length + '</b> de <b>' + base.length + '</b> colaboradores';
+    } else {
+      infoEl.innerHTML = '';
+    }
+  }
+  // Repoblar el dropdown "Por Persona"
+  const pSel = document.getElementById('repPersonaSel');
+  if (pSel) {
+    const currentVal = pSel.value;
+    pSel.innerHTML = '<option value="">— Seleccionar colaborador —</option>';
+    filtrados.sort(function(a,b){ return (a.FullName||'').localeCompare(b.FullName||''); })
+      .forEach(function(u){
+        pSel.add(new Option(u.FullName||u.Email, u.UserID));
+      });
+    if (currentVal && filtrados.find(function(u){ return String(u.UserID) === String(currentVal); })) {
+      pSel.value = currentVal;
+    }
+  }
+  // Repoblar el dropdown "Por Líder" (de los filtrados, sacar líderes únicos)
+  const lSel = document.getElementById('repLiderSel');
+  if (lSel) {
+    const currentVal = lSel.value;
+    lSel.innerHTML = '<option value="">— Seleccionar líder —</option>';
+    // Líderes: usuarios con rol leader/manager/admin que aparecen como Leader/Manager en los filtrados,
+    // o todos los que tengan ese rol si no hay filtros
+    let lideres;
+    if (hasFiltros) {
+      const ids = new Set();
+      filtrados.forEach(function(u){
+        if (u.LeaderID)  ids.add(u.LeaderID);
+        if (u.ManagerID) ids.add(u.ManagerID);
+      });
+      lideres = (allUsuarios || []).filter(function(u){ return ids.has(u.UserID); });
+    } else {
+      lideres = (allUsuarios || []).filter(function(u){
+        const r = String(u.AppRole||'').toLowerCase();
+        return u.IsActive && (r === 'leader' || r === 'manager' || r === 'admin');
+      });
+    }
+    lideres.sort(function(a,b){ return (a.FullName||'').localeCompare(b.FullName||''); })
+      .forEach(function(u){ lSel.add(new Option(u.FullName||u.Email, u.UserID)); });
+    if (currentVal && lideres.find(function(u){ return String(u.UserID) === String(currentVal); })) {
+      lSel.value = currentVal;
+    }
+  }
+  // Refrescar tabs actualmente visibles: manager y empresa
+  actualizarTabManagerYEmpresa(filtrados);
+}
+
+// Refrescar las tabs de Manager y Empresa con datos filtrados
+function actualizarTabManagerYEmpresa(filtrados) {
+  // Tab Manager
+  const cMgr = document.getElementById('repManagerResult');
+  if (cMgr && document.getElementById('rep-manager') && document.getElementById('rep-manager').style.display !== 'none') {
+    const managers = (allUsuarios || []).filter(function(u){
+      const r = String(u.AppRole||'').toLowerCase();
+      return u.IsActive && (r === 'manager' || r === 'admin');
+    });
+    // Para cada manager, contar cuántos del filtrado son suyos
+    cMgr.innerHTML = managers.length ? managers.map(function(m){
+      const eq = filtrados.filter(function(u){ return String(u.ManagerID) === String(m.UserID) || String(u.LeaderID) === String(m.UserID); });
+      return '<div class="card"><div style="font-weight:800;color:#FF5400;margin-bottom:8px;">' + (m.FullName||'') + '</div><div style="font-size:12px;color:#888;">' + eq.length + ' personas</div></div>';
+    }).join('') : '<div style="padding:20px;color:#888;">Sin managers</div>';
+  }
+  // Tab Empresa
+  const kEmp = document.getElementById('repEmpresaKPIs');
+  if (kEmp && document.getElementById('rep-empresa') && document.getElementById('rep-empresa').style.display !== 'none') {
+    const act = filtrados.length;
+    const avgProg = filtrados.length > 0
+      ? Math.round(filtrados.reduce(function(s, u){ return s + (parseFloat(u.AvgProgress)||0); }, 0) / filtrados.length)
+      : 0;
+    const enRiesgo = filtrados.filter(function(u){ return (u.AvgProgress||0) < 40; }).length;
+    kEmp.innerHTML =
+      '<div class="kpi-card"><div class="kpi-label">Colaboradores filtrados</div><div class="kpi-value" style="color:#f0ebe3;">' + act + '</div></div>' +
+      '<div class="kpi-card"><div class="kpi-label">Avance promedio</div><div class="kpi-value" style="color:#FF5400;">' + avgProg + '%</div></div>' +
+      '<div class="kpi-card"><div class="kpi-label">En riesgo (<40%)</div><div class="kpi-value" style="color:#FF4D4D;">' + enRiesgo + '</div></div>';
+  }
+}
+
+// Limpiar filtros de reportes
+function limpiarFiltrosReportes() {
+  ['filtroLiderRep', 'filtroProyectoRep', 'filtroTipoProyectoRep', 'filtroAreaRep'].forEach(function(id){
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  const radioAnd = document.querySelector('input[name="repModeFiltros"][value="and"]');
+  if (radioAnd) radioAnd.checked = true;
+  aplicarFiltrosReportes();
+}
+
 function initReporteTab(tipo) {
+  // Sesión 5 Bloque 2.C: usar data filtrada si hay filtros aplicados
+  const filtrados = window._repFiltrados || (allUsuarios || []).filter(function(u){ return u.IsActive; });
   if (tipo === 'manager') {
     const c = document.getElementById('repManagerResult');
-    if (c && !c.innerHTML.trim()) {
-      const managers = allUsuarios.filter(u=>['manager','admin'].includes(u.AppRole));
-      c.innerHTML = managers.length ? managers.map(m=>{
-        const eq = allUsuarios.filter(u=>u.ManagerID==m.UserID||u.LeaderID==m.UserID);
-        return '<div class="card"><div style="font-weight:800;color:#FF5400;margin-bottom:8px;">'+m.FullName+'</div><div style="font-size:12px;color:#888;">'+eq.length+' personas</div></div>';
+    if (c) {
+      const managers = (allUsuarios || []).filter(function(u){
+        const r = String(u.AppRole||'').toLowerCase();
+        return u.IsActive && (r === 'manager' || r === 'admin');
+      });
+      c.innerHTML = managers.length ? managers.map(function(m){
+        const eq = filtrados.filter(function(u){ return String(u.ManagerID) === String(m.UserID) || String(u.LeaderID) === String(m.UserID); });
+        return '<div class="card"><div style="font-weight:800;color:#FF5400;margin-bottom:8px;">' + (m.FullName||'') + '</div><div style="font-size:12px;color:#888;">' + eq.length + ' personas</div></div>';
       }).join('') : '<div style="padding:20px;color:#888;">Sin managers</div>';
     }
   }
   if (tipo === 'empresa') {
     const k = document.getElementById('repEmpresaKPIs');
-    if (k && !k.innerHTML.trim()) {
-      const act = allUsuarios.filter(u=>u.IsActive).length;
-      k.innerHTML = '<div class="kpi-card"><div class="kpi-label">Total usuarios</div><div class="kpi-value" style="color:#f0ebe3;">'+allUsuarios.length+'</div></div>'+
-        '<div class="kpi-card"><div class="kpi-label">Activos</div><div class="kpi-value" style="color:#2ECC71;">'+act+'</div></div>'+
-        '<div class="kpi-card"><div class="kpi-label">Períodos activos</div><div class="kpi-value" style="color:#FF5400;">'+(allPeriods.filter(p=>p.IsActive).length)+'</div></div>';
+    if (k) {
+      const act = filtrados.length;
+      const avgProg = filtrados.length > 0
+        ? Math.round(filtrados.reduce(function(s, u){ return s + (parseFloat(u.AvgProgress)||0); }, 0) / filtrados.length)
+        : 0;
+      const enRiesgo = filtrados.filter(function(u){ return (u.AvgProgress||0) < 40; }).length;
+      k.innerHTML =
+        '<div class="kpi-card"><div class="kpi-label">Colaboradores filtrados</div><div class="kpi-value" style="color:#f0ebe3;">' + act + '</div></div>' +
+        '<div class="kpi-card"><div class="kpi-label">Avance promedio</div><div class="kpi-value" style="color:#FF5400;">' + avgProg + '%</div></div>' +
+        '<div class="kpi-card"><div class="kpi-label">En riesgo (<40%)</div><div class="kpi-value" style="color:#FF4D4D;">' + enRiesgo + '</div></div>';
     }
   }
 }

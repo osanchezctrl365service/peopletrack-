@@ -201,7 +201,7 @@ app.http('periods', {
     try {
       const user = await getAuthUser(req);
       if (!user) return err('No autorizado', 401);
-      const res = await query('SELECT * FROM FiscalPeriods WHERE IsActive=1 ORDER BY StartDate DESC');
+      const res = await query('SELECT * FROM FiscalPeriods WHERE IsActive=1 ORDER BY StartDate ASC');
       return ok(res.recordset);
     } catch (e) { return err(e.message, 500); }
   }
@@ -825,7 +825,7 @@ app.http('getAllPeriods', {
   methods: ['GET'], authLevel: 'anonymous', route: 'periods/all',
   handler: async (req) => {
     try {
-      const res = await query('SELECT * FROM FiscalPeriods ORDER BY StartDate DESC');
+      const res = await query('SELECT * FROM FiscalPeriods ORDER BY StartDate ASC');
       return ok(res.recordset);
     } catch (e) { return err(e.message, 500); }
   }

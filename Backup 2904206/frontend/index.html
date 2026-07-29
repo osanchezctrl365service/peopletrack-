@@ -43,8 +43,8 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { font-family: var(--font); font-size:14px; color:#f0ebe3; background:#0d0d0d; display:flex; overflow:hidden; }
-body { font-family: var(--font); font-size: 14px; color: var(--gray-800); background: var(--gray-50); display: flex; overflow: hidden; }
+html, body { font-family: var(--font); font-size:14px; color:#f0ebe3; background:#0d0d0d; display:flex; overflow:hidden; height:100vh; }
+body { font-family: var(--font); font-size: 14px; color: var(--gray-800); background: var(--gray-50); display: flex; overflow: hidden; height:100vh; }
 
 /* SIDEBAR */
 .sidebar {
@@ -625,7 +625,7 @@ label { color: #888 !important; }
       <h3 style="font-size:16px;font-weight:800;color:#f0ebe3;">Promover a Lider</h3>
       <button onclick="document.getElementById('modalPromoverLider').style.display='none'" style="background:none;border:none;color:#888;font-size:20px;cursor:pointer;">x</button>
     </div>
-    <p style="font-size:12px;color:#888;margin-bottom:16px;line-height:1.6;">Selecciona un empleado para asignarlo como lider. Aparecera en la seccion Lideres con sus colaboradores.</p>
+    <p style="font-size:12px;color:#888;margin-bottom:16px;line-height:1.6;">Selecciona un colaborador para asignarlo como líder. Aparecerá en la sección Líderes con sus colaboradores.</p>
     <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Buscar usuario</label>
     <input id="promoverSearch" type="text" placeholder="Nombre o email..." oninput="filtrarPromover()" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;box-sizing:border-box;">
     <div id="promoverLista" style="background:#111;border:1px solid #222;border-radius:8px;margin-top:8px;max-height:200px;overflow-y:auto;"></div>
@@ -662,8 +662,8 @@ label { color: #888 !important; }
         <div>
           <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Rol</label>
           <select id="editRol" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
-            <option value="employee">Empleado</option>
-            <option value="leader">Lider</option>
+            <option value="employee">Colaborador</option>
+            <option value="leader">Líder</option>
             <option value="manager">Manager</option>
             <option value="admin">Admin</option>
           </select>
@@ -685,10 +685,28 @@ label { color: #888 !important; }
         <select id="editManager" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;"></select>
       </div>
     </div>
+      <!-- Legajo + Fecha ingreso (Quick Win #5) -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Nro. de legajo</label>
+          <input id="editLegajo" type="number" min="0" step="1" placeholder="Ej: 12345" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
+        </div>
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Fecha de ingreso</label>
+          <input id="editHireDate" type="date" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
+        </div>
+      </div>
       <div>
         <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Área</label>
         <select id="editArea" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
           <option value="">— Sin área —</option>
+        </select>
+      </div>
+      <!-- Rol de negocio (Sesión 4) -->
+      <div>
+        <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Rol de negocio</label>
+        <select id="editJobRole" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
+          <option value="">— Sin rol —</option>
         </select>
       </div>
     </div>
@@ -721,7 +739,7 @@ label { color: #888 !important; }
         <div>
           <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Rol en la app</label>
           <select id="nuevoRol" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
-            <option value="employee">Empleado</option>
+            <option value="employee">Colaborador</option>
             <option value="leader">Líder</option>
             <option value="manager">Manager</option>
             <option value="admin">Admin</option>
@@ -747,10 +765,28 @@ label { color: #888 !important; }
           <option value="">— Sin manager —</option>
         </select>
       </div>
+      <!-- Legajo + Fecha ingreso (Quick Win #5) - ambos opcionales -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Nro. de legajo</label>
+          <input id="nuevoLegajo" type="number" min="0" step="1" placeholder="Ej: 12345" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
+        </div>
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Fecha de ingreso</label>
+          <input id="nuevoHireDate" type="date" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
+        </div>
+      </div>
       <div>
         <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Área</label>
         <select id="nuevoArea" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
           <option value="">— Sin área —</option>
+        </select>
+      </div>
+      <!-- Rol de negocio (Sesión 4) -->
+      <div>
+        <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Rol de negocio</label>
+        <select id="nuevoJobRole" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
+          <option value="">— Sin rol —</option>
         </select>
       </div>
     </div>
@@ -869,6 +905,10 @@ label { color: #888 !important; }
     <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
     Áreas
   </div>
+  <div class="nav-item" onclick="showSection('roles')">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><path d="M17 11h.01"/><path d="M20 8h.01"/><path d="M23 11h.01"/></svg>
+    Roles
+  </div>
 
   <div class="sidebar-section-label">Sistema</div>
   <div class="nav-item" onclick="showSection('periods')">
@@ -955,32 +995,9 @@ label { color: #888 !important; }
 
       <div class="card mt-16">
         <div class="card-title">Próximas Reuniones 1:1</div>
-        <table class="data-table">
-          <thead><tr><th>Colaborador</th><th>Tipo</th><th>Fecha</th><th>Estado</th><th>Acción</th></tr></thead>
-          <tbody>
-            <tr>
-              <td><div class="person-chip"><div class="avatar-sm" style="background:#1B3A5C">JM</div><span>Jorge Mercado</span></div></td>
-              <td><span class="badge badge-info">Mensual</span></td>
-              <td>22 Abr 2026</td>
-              <td><span class="badge badge-warning">Pendiente</span></td>
-              <td><button class="btn btn-secondary btn-sm" onclick="showSection('oneononex')">Ver bitácora</button></td>
-            </tr>
-            <tr>
-              <td><div class="person-chip"><div class="avatar-sm" style="background:#00A3A3">MR</div><span>Miguel Rocha</span></div></td>
-              <td><span class="badge badge-info">Mensual</span></td>
-              <td>25 Abr 2026</td>
-              <td><span class="badge badge-warning">Pendiente</span></td>
-              <td><button class="btn btn-secondary btn-sm" onclick="showSection('oneononex')">Ver bitácora</button></td>
-            </tr>
-            <tr>
-              <td><div class="person-chip"><div class="avatar-sm" style="background:#7B1FA2">LM</div><span>Leila Martínez</span></div></td>
-              <td><span class="badge badge-primary">Trimestral</span></td>
-              <td>30 Abr 2026</td>
-              <td><span class="badge badge-success">Planificada</span></td>
-              <td><button class="btn btn-secondary btn-sm" onclick="showSection('oneononex')">Ver bitácora</button></td>
-            </tr>
-          </tbody>
-        </table>
+        <div id="dashProximasReunionesContainer">
+          <div style="text-align:center;padding:20px;color:#888;font-size:12px;">Cargando próximas reuniones...</div>
+        </div>
       </div>
     </div>
 
@@ -1056,6 +1073,106 @@ label { color: #888 !important; }
       </thead>
       <tbody id="areasTbody"></tbody>
     </table>
+  </div>
+</div>
+
+<!-- SECCIÓN ROLES (Sesión 4 - Módulo Roles de negocio) -->
+<div class="section" id="sec-roles">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+    <div>
+      <h2 style="font-size:20px;font-weight:800;color:#f0ebe3;">Roles</h2>
+      <p style="font-size:12px;color:#888;margin-top:2px;">Roles de negocio de la empresa (distinto de los permisos del sistema)</p>
+    </div>
+    <button onclick="abrirModalRol()" style="padding:8px 16px;background:#FF5400;border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;">+ Nuevo Rol</button>
+  </div>
+  <div style="display:flex;gap:12px;align-items:center;margin-bottom:14px;flex-wrap:wrap;">
+    <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Filtro:</label>
+    <select id="rolesFilterCategoria" onchange="renderRolesTable()" style="padding:6px 10px;background:#111;border:1px solid #333;border-radius:6px;color:#f0ebe3;font-size:12px;">
+      <option value="">Todas las categorías</option>
+      <option value="Management">Management</option>
+      <option value="Delivery">Delivery</option>
+      <option value="Desarrollo">Desarrollo</option>
+      <option value="Infraestructura">Infraestructura</option>
+      <option value="Seguridad">Seguridad</option>
+      <option value="Comercial">Comercial</option>
+    </select>
+    <select id="rolesFilterEstado" onchange="renderRolesTable()" style="padding:6px 10px;background:#111;border:1px solid #333;border-radius:6px;color:#f0ebe3;font-size:12px;">
+      <option value="all">Todos</option>
+      <option value="1" selected>Solo activos</option>
+      <option value="0">Solo inactivos</option>
+    </select>
+  </div>
+  <div class="card" style="padding:0;overflow:hidden;">
+    <div id="rolesLoading" style="text-align:center;padding:40px;color:#888;">Cargando roles...</div>
+    <table class="data-table" id="rolesTable" style="display:none;">
+      <thead>
+        <tr>
+          <th>Rol</th>
+          <th>Categoría</th>
+          <th>Nivel</th>
+          <th># usuarios</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="rolesTbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- MODAL: Alta/Edición de Rol -->
+<div id="modalRol" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:500;align-items:center;justify-content:center;">
+  <div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:16px;padding:32px;width:520px;max-width:95vw;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+      <h3 id="modalRolTitle" style="font-size:16px;font-weight:800;color:#f0ebe3;">Nuevo Rol</h3>
+      <button onclick="cerrarModalRol()" style="background:none;border:none;color:#888;font-size:20px;cursor:pointer;">×</button>
+    </div>
+    <input type="hidden" id="modalRolId" value="">
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div>
+        <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Nombre del rol *</label>
+        <input id="rolNombre" type="text" placeholder="Ej: Desarrollador Senior" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
+      </div>
+      <div>
+        <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Descripción</label>
+        <textarea id="rolDescripcion" rows="3" placeholder="Descripción o responsabilidades del rol..." style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;resize:vertical;"></textarea>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Categoría</label>
+          <select id="rolCategoria" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
+            <option value="">— Sin categoría —</option>
+            <option value="Management">Management</option>
+            <option value="Delivery">Delivery</option>
+            <option value="Desarrollo">Desarrollo</option>
+            <option value="Infraestructura">Infraestructura</option>
+            <option value="Seguridad">Seguridad</option>
+            <option value="Comercial">Comercial</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Nivel</label>
+          <select id="rolNivel" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
+            <option value="">— Sin nivel —</option>
+            <option value="Junior">Junior</option>
+            <option value="Semi-Senior">Semi-Senior</option>
+            <option value="Senior">Senior</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Estado</label>
+        <select id="rolEstado" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
+          <option value="1">Activo</option>
+          <option value="0">Inactivo</option>
+        </select>
+      </div>
+    </div>
+    <div id="modalRolError" style="color:#FF4D4D;font-size:12px;margin-top:12px;display:none;"></div>
+    <div style="display:flex;gap:10px;margin-top:24px;justify-content:flex-end;">
+      <button onclick="cerrarModalRol()" style="padding:10px 20px;background:#222;border:1px solid #333;border-radius:8px;color:#aaa;font-size:13px;cursor:pointer;">Cancelar</button>
+      <button onclick="guardarRol()" id="btnGuardarRol" style="padding:10px 24px;background:#FF5400;border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;">Guardar</button>
+    </div>
   </div>
 </div>
 
@@ -1188,7 +1305,14 @@ label { color: #888 !important; }
         </div>
         <button class="btn btn-primary btn-sm" onclick="abrirModalNuevoPlan()">+ Nuevo Plan</button>
       </div>
-      <div id="careerContainer" style="max-height:calc(100vh - 220px);overflow-y:auto;padding-right:4px;">
+      <!-- Filtro por colaborador (Quick Win #4) -->
+      <div style="display:flex;gap:12px;align-items:center;margin-bottom:16px;">
+        <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap;">🔍 Filtrar por colaborador:</label>
+        <input id="careerFiltroInput" type="text" list="careerFiltroList" class="form-control" placeholder="Escribí nombre o dejá vacío para ver todos..." autocomplete="off" oninput="filtrarPlanesCarreraPorColab(this.value)" style="max-width:400px;">
+        <datalist id="careerFiltroList"></datalist>
+        <button onclick="limpiarFiltroCareer()" style="padding:6px 14px;background:#222;border:1px solid #333;border-radius:6px;color:#aaa;font-size:11px;cursor:pointer;white-space:nowrap;">Ver todos</button>
+      </div>
+      <div id="careerContainer" style="max-height:calc(100vh - 260px);overflow-y:auto;padding-right:4px;">
         <div style="text-align:center;padding:30px;color:#888;">Cargando planes de carrera...</div>
       </div>
 
@@ -1291,7 +1415,7 @@ label { color: #888 !important; }
       <!-- Tab Personales -->
       <div id="comp-personal" style="display:none;">
         <div class="card">
-          <div class="card-title">Competencias Personales / Acuerdo con el Empleado</div>
+          <div class="card-title">Competencias Personales / Acuerdo con el Colaborador</div>
           <p class="text-muted" style="font-size:13px;margin-bottom:12px;">Competencias adicionales acordadas entre el colaborador y el líder, fuera del marco global.</p>
           <div id="comp_personalList" style="color:#888;font-size:13px;padding:12px 0;">Seleccioná un colaborador y período para empezar.</div>
         </div>
@@ -1619,7 +1743,7 @@ label { color: #888 !important; }
       <div id="cfg-imports" style="display:none">
         <div class="card">
           <div class="card-title">Importación / Exportación de Usuarios</div>
-          <div class="help-tip"><span class="help-tip-icon">💡</span>Un colaborador puede tener <strong>más de un líder</strong> (multi-proyecto). En ese caso, cargue una fila por cada relación lider-colaborador con el mismo email de empleado.</div>
+          <div class="help-tip"><span class="help-tip-icon">💡</span>Un colaborador puede tener <strong>más de un líder</strong> (multi-proyecto). En ese caso, cargue una fila por cada relación líder-colaborador con el mismo email del colaborador.</div>
           <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
             <button class="btn btn-secondary" onclick="alert('Descargando template CSV...')">⬇ Descargar Template CSV</button>
             <button class="btn btn-primary">↑ Importar CSV de Usuarios</button>
@@ -1680,7 +1804,7 @@ label { color: #888 !important; }
 
 <script>
 const titles = {
-  dashboard:'Dashboard',recruiting:'Recruiting',onboarding:'Onboarding',usuarios:'Usuarios',lideres:'Líderes',areas:'Áreas',objectives:'Objetivos',career:'Plan de Carrera',pip:'PIP — Improvement',pip:'PIP — Plan de Improvement',
+  dashboard:'Dashboard',recruiting:'Recruiting',onboarding:'Onboarding',usuarios:'Usuarios',lideres:'Líderes',areas:'Áreas',roles:'Roles',objectives:'Objetivos',career:'Plan de Carrera',pip:'PIP — Improvement',pip:'PIP — Plan de Improvement',
   competencies:'Competencias',oneononex:'Reuniones 1:1',feedback360:'Feedback 360°',reports:'Reportes',
   orgchart:'Organigrama',alerts:'Alertas',periods:'Períodos',settings:'Configuración',help:'Ayuda'
 };
@@ -1752,6 +1876,65 @@ async function loadDashboardFromAPI() {
     <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF4D4D;margin-right:6px"></span>En Riesgo</span><strong>${rojo}</strong></div>
     <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF9F1C;margin-right:6px"></span>En Curso</span><strong>${naranja}</strong></div>
     <div style="display:flex;justify-content:space-between"><span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#2ECC71;margin-right:6px"></span>En Verde</span><strong>${verde}</strong></div>`;
+
+  // Cargar próximas reuniones reales para el widget del dashboard (Sesión 3)
+  cargarProximasReunionesDashboard();
+}
+
+// Carga las próximas reuniones desde el API y las renderiza en el widget del dashboard (Sesión 3)
+async function cargarProximasReunionesDashboard() {
+  var c = document.getElementById('dashProximasReunionesContainer');
+  if (!c) return;
+  try {
+    var res = await fetch(API_BASE + '/meetings/upcoming/all?limit=5');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    var json = await res.json();
+    var reuniones = Array.isArray(json) ? json : (json.data || []);
+    if (!reuniones.length) {
+      c.innerHTML = '<div style="text-align:center;padding:24px;color:#888;font-size:12px;">Sin reuniones pr\xf3ximas. Cre\xe1 una desde <b>Reuniones 1:1</b>.</div>';
+      return;
+    }
+    // Colores para los avatares y badges — soportamos tanto keys en inglés como labels en español
+    var typeBadge = {
+      weekly:     {label:'Semanal',    cls:'badge-info'},
+      Semanal:    {label:'Semanal',    cls:'badge-info'},
+      biweekly:   {label:'Quincenal',  cls:'badge-info'},
+      Quincenal:  {label:'Quincenal',  cls:'badge-info'},
+      monthly:    {label:'Mensual',    cls:'badge-info'},
+      Mensual:    {label:'Mensual',    cls:'badge-info'},
+      quarterly:  {label:'Trimestral', cls:'badge-primary'},
+      Trimestral: {label:'Trimestral', cls:'badge-primary'},
+      yearly:     {label:'Anual',      cls:'badge-primary'},
+      Anual:      {label:'Anual',      cls:'badge-primary'}
+    };
+    var statusBadge = {
+      planned:    {label:'Planificada', cls:'badge-success'},
+      pending:    {label:'Pendiente',   cls:'badge-warning'},
+      completed:  {label:'Completada',  cls:'badge-success'},
+      cancelled:  {label:'Cancelada',   cls:'badge-danger'}
+    };
+    var html = '<table class="data-table">' +
+      '<thead><tr><th>Colaborador</th><th>Tipo</th><th>Fecha</th><th>Estado</th></tr></thead><tbody>';
+    reuniones.forEach(function(r, i) {
+      var nombre = (r.EmployeeName || 'Sin nombre').replace(/</g,'&lt;');
+      var initials = nombre.split(' ').map(function(w){return w[0]||'';}).join('').substring(0,2).toUpperCase();
+      var colors = ['#1B3A5C','#00A3A3','#7B1FA2','#E65100','#2E7D32','#C62828'];
+      var color = colors[i % colors.length];
+      var fecha = r.MeetingDate ? new Date(r.MeetingDate).toLocaleDateString('es-AR',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+      var tipo = typeBadge[r.MeetingType] || {label: r.MeetingType || '—', cls:'badge-info'};
+      var estado = statusBadge[r.Status] || {label: r.Status || 'Pendiente', cls:'badge-warning'};
+      html += '<tr>' +
+        '<td><div class="person-chip"><div class="avatar-sm" style="background:'+color+'">'+initials+'</div><span>'+nombre+'</span></div></td>' +
+        '<td><span class="badge '+tipo.cls+'">'+tipo.label+'</span></td>' +
+        '<td>'+fecha+'</td>' +
+        '<td><span class="badge '+estado.cls+'">'+estado.label+'</span></td>' +
+      '</tr>';
+    });
+    html += '</tbody></table>';
+    c.innerHTML = html;
+  } catch(e) {
+    c.innerHTML = '<div style="text-align:center;padding:20px;color:#FF4D4D;font-size:12px;">Error cargando reuniones: '+e.message+'</div>';
+  }
 }
 
 function drawDonutReal(rojo, naranja, verde, total) {
@@ -1843,6 +2026,7 @@ function showSection(id){
   if(id==='usuarios'&&!allUsuarios.length) loadUsuarios();
   if(id==='lideres'){if(!Object.keys(allLideres||{}).length) loadLideres();}
   if(id==='areas'&&!allAreas.length) loadAreas();
+  if(id==='roles'){ loadJobRoles(); }
   if(id==='periods'&&!allPeriods.length) loadPeriods();
   if(id==='objectives'){
     ['obj-core','obj-personal','obj-tasks'].forEach(function(pid,i){var el=document.getElementById(pid);if(el)el.style.display=i===0?'':'none';});
@@ -2125,6 +2309,9 @@ function abrirModalUsuario() {
   modal.style.display = 'flex';
   if (allAreas.length) poblarSelectAreas();
   else loadAreas();
+  // Poblar select de rol de negocio (Sesión 4)
+  if (allJobRoles.length) poblarSelectsJobRole();
+  else loadJobRoles().then(poblarSelectsJobRole);
   const liderSel = document.getElementById('nuevoLider');
   const managerSel = document.getElementById('nuevoManager');
   // Limpiar
@@ -2157,6 +2344,12 @@ async function guardarNuevoUsuario() {
   const liderId = document.getElementById('nuevoLider').value || null;
   const managerId = document.getElementById('nuevoManager').value || null;
   const area    = document.getElementById('nuevoArea').value.trim();
+  // Nuevos campos (Quick Win #5) - ambos opcionales
+  const legajoRaw = (document.getElementById('nuevoLegajo')||{}).value;
+  const legajo   = legajoRaw ? parseInt(legajoRaw, 10) : null;
+  const hireDate = (document.getElementById('nuevoHireDate')||{}).value || null;
+  // Rol de negocio (Sesión 4)
+  const jobRoleId = (document.getElementById('nuevoJobRole')||{}).value || null;
   const errEl   = document.getElementById('modalUsuarioError');
   const btn     = document.getElementById('btnGuardarUsuario');
 
@@ -2171,7 +2364,7 @@ async function guardarNuevoUsuario() {
     const res = await fetch(API_BASE + '/manage/users', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fullName: nombre, email, appRole: rol, isActive: activo, leaderID: liderId ? parseInt(liderId) : null, managerID: managerId ? parseInt(managerId) : null, areaName: area || null })
+      body: JSON.stringify({ fullName: nombre, email, appRole: rol, isActive: activo, leaderID: liderId ? parseInt(liderId) : null, managerID: managerId ? parseInt(managerId) : null, areaName: area || null, employeeNumber: legajo, hireDate: hireDate, jobRoleID: jobRoleId ? parseInt(jobRoleId) : null })
     });
     const data = await res.json();
     if (data.ok === false) throw new Error(data.error || 'Error al guardar');
@@ -2234,6 +2427,23 @@ function abrirModalEditar(userId) {
   else loadAreas().then(poblarSelectAreas);
   const editArea = document.getElementById("editArea");
   if (editArea && u.AreaID) editArea.value = u.AreaID;
+  // Prepoblar legajo y fecha de ingreso (Quick Win #5)
+  const editLegajo = document.getElementById("editLegajo");
+  if (editLegajo) editLegajo.value = (u.EmployeeNumber != null ? u.EmployeeNumber : "");
+  const editHireDate = document.getElementById("editHireDate");
+  if (editHireDate) {
+    // Aceptar YYYY-MM-DD directo o ISO con timezone
+    var raw = u.HireDate || "";
+    editHireDate.value = raw ? String(raw).substring(0,10) : "";
+  }
+  // Rol de negocio (Sesión 4)
+  const doPoblarRol = function(){
+    poblarSelectsJobRole();
+    const editJR = document.getElementById("editJobRole");
+    if (editJR) editJR.value = (u.JobRoleID != null ? String(u.JobRoleID) : "");
+  };
+  if (allJobRoles.length) doPoblarRol();
+  else loadJobRoles().then(doPoblarRol);
   document.getElementById("modalEditarUsuario").style.display = "flex";
 }
 
@@ -2249,6 +2459,13 @@ async function guardarEdicionUsuario() {
   const activo  = document.getElementById("editEstado").value === "1";
   const liderId = document.getElementById("editLider").value || null;
   const managerId = document.getElementById("editManager").value || null;
+  // Nuevos campos (Quick Win #5)
+  const legajoRaw = (document.getElementById("editLegajo")||{}).value;
+  const legajo   = legajoRaw ? parseInt(legajoRaw, 10) : null;
+  const hireDate = (document.getElementById("editHireDate")||{}).value || null;
+  // Rol de negocio (Sesión 4)
+  const jobRoleRaw = (document.getElementById("editJobRole")||{}).value;
+  const jobRoleId = jobRoleRaw ? parseInt(jobRoleRaw, 10) : null;
   const errEl   = document.getElementById("modalEditarError");
   const btn     = document.getElementById("btnGuardarEdicion");
   if (!nombre || !email) { errEl.textContent="Nombre y email son obligatorios"; errEl.style.display="block"; return; }
@@ -2260,7 +2477,10 @@ async function guardarEdicionUsuario() {
       body: JSON.stringify({ FullName: nombre, Email: email, AppRole: rol, IsActive: activo,
         LeaderID:  liderId   ? parseInt(liderId)  : null,
         ManagerID: managerId ? parseInt(managerId): null,
-        AreaID:    document.getElementById("editArea")?.value ? parseInt(document.getElementById("editArea").value) : null })
+        AreaID:    document.getElementById("editArea")?.value ? parseInt(document.getElementById("editArea").value) : null,
+        EmployeeNumber: legajo,
+        HireDate: hireDate,
+        JobRoleID: jobRoleId })
     });
     const data = await res.json();
     if (data.ok === false) throw new Error(data.error || "Error al guardar");
@@ -2377,6 +2597,176 @@ function nuevoContextual() {
   showModal("newObjectiveModal");
 }
 
+
+// ══════════════════════════════════════════
+// SECCIÓN ROLES (Sesión 4 - Módulo Roles de negocio)
+// ══════════════════════════════════════════
+let allJobRoles = [];
+
+async function loadJobRoles() {
+  const c = document.getElementById('rolesLoading');
+  const t = document.getElementById('rolesTable');
+  if (c) c.style.display = 'block';
+  if (t) t.style.display = 'none';
+  try {
+    // Traer TODOS (activos + inactivos) para poder filtrar en la UI
+    const res = await fetch(API_BASE + '/job-roles?all=1');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const json = await res.json();
+    allJobRoles = Array.isArray(json) ? json : (json.data || []);
+    renderRolesTable();
+  } catch(e) {
+    if (c) c.innerHTML = '<div style="color:#FF4D4D;">Error cargando roles: ' + e.message + '</div>';
+  }
+}
+
+function renderRolesTable() {
+  const c = document.getElementById('rolesLoading');
+  const t = document.getElementById('rolesTable');
+  const tb = document.getElementById('rolesTbody');
+  if (!tb) return;
+  // Filtros
+  const filtCat = (document.getElementById('rolesFilterCategoria') || {}).value || '';
+  const filtEst = (document.getElementById('rolesFilterEstado') || {}).value || 'all';
+  let filtrados = allJobRoles.slice();
+  if (filtCat) filtrados = filtrados.filter(function(r){ return (r.Category || '') === filtCat; });
+  if (filtEst !== 'all') {
+    const wantActive = filtEst === '1';
+    filtrados = filtrados.filter(function(r){ return !!r.IsActive === wantActive; });
+  }
+  if (!filtrados.length) {
+    tb.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:#888;">No hay roles para mostrar con los filtros actuales.</td></tr>';
+  } else {
+    let html = '';
+    filtrados.forEach(function(r){
+      const nivel = r.Level ? '<span style="font-size:11px;color:#aaa;">' + r.Level + '</span>' : '<span style="font-size:11px;color:#555;">—</span>';
+      const cat = r.Category ? '<span class="badge badge-info">' + r.Category + '</span>' : '<span style="color:#555;">—</span>';
+      const estadoBadge = r.IsActive ? '<span class="badge badge-success">Activo</span>' : '<span class="badge badge-danger">Inactivo</span>';
+      const userCount = r.UserCount || 0;
+      html += '<tr>' +
+        '<td><div style="font-weight:600;color:#f0ebe3;">' + String(r.RoleName || '').replace(/</g,'&lt;') + '</div>' +
+          (r.Description ? '<div style="font-size:10px;color:#888;margin-top:2px;">' + String(r.Description).replace(/</g,'&lt;').substring(0,80) + '</div>' : '') + '</td>' +
+        '<td>' + cat + '</td>' +
+        '<td>' + nivel + '</td>' +
+        '<td style="text-align:center;font-weight:700;color:' + (userCount > 0 ? '#FF5400' : '#666') + ';">' + userCount + '</td>' +
+        '<td>' + estadoBadge + '</td>' +
+        '<td>' +
+          '<button onclick="abrirModalRol(' + r.JobRoleID + ')" style="padding:4px 12px;background:#222;border:1px solid #333;border-radius:5px;color:#aaa;font-size:11px;cursor:pointer;margin-right:4px;">Editar</button>' +
+          '<button onclick="eliminarRol(' + r.JobRoleID + ',' + userCount + ')" style="padding:4px 12px;background:transparent;border:1px solid #333;border-radius:5px;color:#666;font-size:11px;cursor:pointer;">' + (userCount > 0 ? '🚫 Desactivar' : '🗑 Borrar') + '</button>' +
+        '</td>' +
+      '</tr>';
+    });
+    tb.innerHTML = html;
+  }
+  if (c) c.style.display = 'none';
+  if (t) t.style.display = 'table';
+}
+
+function abrirModalRol(rolId) {
+  const modal = document.getElementById('modalRol');
+  const title = document.getElementById('modalRolTitle');
+  document.getElementById('modalRolError').style.display = 'none';
+  if (rolId) {
+    // Edición
+    const r = allJobRoles.find(function(x){ return x.JobRoleID === rolId; });
+    if (!r) { mostrarToast('Rol no encontrado', 'error'); return; }
+    title.textContent = 'Editar Rol';
+    document.getElementById('modalRolId').value = rolId;
+    document.getElementById('rolNombre').value = r.RoleName || '';
+    document.getElementById('rolDescripcion').value = r.Description || '';
+    document.getElementById('rolCategoria').value = r.Category || '';
+    document.getElementById('rolNivel').value = r.Level || '';
+    document.getElementById('rolEstado').value = r.IsActive ? '1' : '0';
+  } else {
+    // Alta
+    title.textContent = 'Nuevo Rol';
+    document.getElementById('modalRolId').value = '';
+    document.getElementById('rolNombre').value = '';
+    document.getElementById('rolDescripcion').value = '';
+    document.getElementById('rolCategoria').value = '';
+    document.getElementById('rolNivel').value = '';
+    document.getElementById('rolEstado').value = '1';
+  }
+  modal.style.display = 'flex';
+}
+
+function cerrarModalRol() {
+  document.getElementById('modalRol').style.display = 'none';
+}
+
+async function guardarRol() {
+  const id = document.getElementById('modalRolId').value;
+  const nombre = document.getElementById('rolNombre').value.trim();
+  const desc = document.getElementById('rolDescripcion').value.trim();
+  const cat = document.getElementById('rolCategoria').value;
+  const nivel = document.getElementById('rolNivel').value;
+  const estado = document.getElementById('rolEstado').value === '1';
+  const errEl = document.getElementById('modalRolError');
+  const btn = document.getElementById('btnGuardarRol');
+  if (!nombre) { errEl.textContent = 'El nombre es obligatorio'; errEl.style.display = 'block'; return; }
+  btn.textContent = 'Guardando...'; btn.disabled = true;
+  errEl.style.display = 'none';
+  try {
+    const method = id ? 'PUT' : 'POST';
+    const url = id ? (API_BASE + '/job-roles/' + id) : (API_BASE + '/job-roles');
+    const body = {
+      roleName: nombre,
+      description: desc || null,
+      category: cat || null,
+      level: nivel || null
+    };
+    if (id) body.isActive = estado; // sólo se manda en edición
+    const res = await fetch(url, {
+      method: method,
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    if (!res.ok || data.ok === false) throw new Error(data.error || ('HTTP ' + res.status));
+    mostrarToast(id ? 'Rol actualizado' : 'Rol creado', 'success');
+    cerrarModalRol();
+    loadJobRoles();
+  } catch(e) {
+    errEl.textContent = 'Error: ' + e.message;
+    errEl.style.display = 'block';
+  } finally {
+    btn.textContent = 'Guardar'; btn.disabled = false;
+  }
+}
+
+async function eliminarRol(rolId, userCount) {
+  const msg = userCount > 0
+    ? '⚠️ Este rol tiene ' + userCount + ' usuario(s) asignado(s). Al eliminarlo se desactiva (no se borra). ¿Continuar?'
+    : '¿Seguro que querés borrar este rol? Esta acción no se puede deshacer.';
+  if (!confirm(msg)) return;
+  try {
+    const res = await fetch(API_BASE + '/job-roles/' + rolId, { method: 'DELETE' });
+    const data = await res.json();
+    if (!res.ok || data.ok === false) throw new Error(data.error || ('HTTP ' + res.status));
+    mostrarToast(data.data && data.data.deactivated ? 'Rol desactivado' : 'Rol borrado', 'success');
+    loadJobRoles();
+  } catch(e) {
+    mostrarToast('Error: ' + e.message, 'error');
+  }
+}
+
+// Poblar selects de rol en el modal Nuevo Usuario y Editar Usuario
+function poblarSelectsJobRole() {
+  ['nuevoJobRole', 'editJobRole'].forEach(function(selId){
+    const sel = document.getElementById(selId);
+    if (!sel) return;
+    const currentVal = sel.value;
+    sel.innerHTML = '<option value="">— Sin rol —</option>';
+    allJobRoles.filter(function(r){ return r.IsActive; })
+      .forEach(function(r){
+        const opt = document.createElement('option');
+        opt.value = r.JobRoleID;
+        opt.textContent = r.RoleName + (r.Level ? ' (' + r.Level + ')' : '');
+        sel.appendChild(opt);
+      });
+    if (currentVal) sel.value = currentVal;
+  });
+}
 
 // ══════════════════════════════════════════
 // SECCIÓN ÁREAS
@@ -3593,15 +3983,42 @@ async function comp_saveAll() {
 
 // ═══ POBLAR MODAL NUEVO OBJETIVO ════════════════════════════
 function filtrarColabObj(q) {
-  const sel = document.getElementById('objColabSel');
-  if (!sel) return;
-  const query = q.toLowerCase();
-  sel.innerHTML = '<option value="">— Seleccionar colaborador —</option>';
-  allUsuarios.filter(u => u.IsActive && (!query || 
-    (u.FullName||'').toLowerCase().includes(query) || 
-    (u.Email||'').toLowerCase().includes(query)
-  )).sort((a,b)=>(a.FullName||'').localeCompare(b.FullName||''))
-  .forEach(u => sel.add(new Option((u.FullName||u.Email) + ' — ' + (u.Email||''), u.UserID)));
+  // Ahora populamos el <datalist> con TODOS los colaboradores activos.
+  // El browser filtra automáticamente mientras el usuario tipea en el input.
+  const dl = document.getElementById('objColabList');
+  if (!dl) return;
+  dl.innerHTML = '';
+  allUsuarios.filter(u => u.IsActive)
+    .sort((a,b)=>(a.FullName||'').localeCompare(b.FullName||''))
+    .forEach(u => {
+      const label = (u.FullName||u.Email||'') + ' — ' + (u.Email||'');
+      const opt = document.createElement('option');
+      opt.value = label;
+      opt.setAttribute('data-userid', u.UserID);
+      dl.appendChild(opt);
+    });
+  // Limpiar selección previa
+  const hid = document.getElementById('objColabSel');
+  const inp = document.getElementById('objColabInput');
+  if (hid) hid.value = '';
+  if (inp) inp.value = '';
+}
+
+// Resuelve el UserID a partir del texto tipeado en objColabInput
+// y lo guarda en el hidden input objColabSel (que es el que leen los otros lugares).
+function resolverColabObj(val) {
+  const hid = document.getElementById('objColabSel');
+  if (!hid) return;
+  const txt = (val||'').trim().toLowerCase();
+  if (!txt) { hid.value = ''; return; }
+  // Match exacto por "Nombre — Email" (cuando eligen del datalist)
+  let u = allUsuarios.find(x => {
+    const label = ((x.FullName||x.Email||'') + ' — ' + (x.Email||'')).toLowerCase();
+    return label === txt;
+  });
+  // Si no hay match exacto, probamos por email exacto
+  if (!u) u = allUsuarios.find(x => (x.Email||'').toLowerCase() === txt);
+  hid.value = u ? u.UserID : '';
 }
 
 function poblarModalObjetivo() {
@@ -3852,6 +4269,21 @@ async function editarObjetivo(id) {
       const fechaEl = document.getElementById('editObjFechaPersonal');
       if(fechaEl) fechaEl.value = obj.DueDate ? obj.DueDate.split('T')[0] : '';
     }
+    // Prepoblar Feedback + Áreas de mejora (Quick Win #6)
+    const fbEl = document.getElementById('editObjFeedback');
+    if (fbEl) fbEl.value = obj.Feedback || '';
+    const iaEl = document.getElementById('editObjImprovementAreas');
+    if (iaEl) iaEl.value = obj.ImprovementAreas || '';
+    const fbLabel = document.getElementById('editObjFeedbackDateLabel');
+    if (fbLabel) {
+      var fbDate = obj.FeedbackDate ? String(obj.FeedbackDate).substring(0,10) : '';
+      fbLabel.textContent = fbDate ? ('Última actualización: ' + fbDate) : 'Sin registros';
+    }
+    const iaLabel = document.getElementById('editObjImprovementDateLabel');
+    if (iaLabel) {
+      var iaDate = obj.ImprovementAreasDate ? String(obj.ImprovementAreasDate).substring(0,10) : '';
+      iaLabel.textContent = iaDate ? ('Última actualización: ' + iaDate) : 'Sin registros';
+    }
   }
   showModal('editObjectiveModal');
 }
@@ -3894,6 +4326,9 @@ async function guardarEdicionObjetivo() {
       body.status = document.getElementById('editObjEstado')?.value || 'not_started';
       body.progress = parseInt(document.getElementById('editObjAvance')?.value || '0');
     }
+    // Feedback + Áreas de mejora (Quick Win #6) - siempre se envían, el backend decide si actualiza la fecha
+    body.feedback = document.getElementById('editObjFeedback')?.value || '';
+    body.improvementAreas = document.getElementById('editObjImprovementAreas')?.value || '';
     const res = await fetch(API_BASE + '/objectives/' + id, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -3990,6 +4425,12 @@ function abrirNuevoObjetivoPersonal() {
   if (userId) setTimeout(() => {
     const s = document.getElementById('objColabSel');
     if (s) s.value = userId;
+    // También reflejar el nombre en el input visible
+    const inp = document.getElementById('objColabInput');
+    if (inp) {
+      const u = allUsuarios.find(x => String(x.UserID) === String(userId));
+      if (u) inp.value = (u.FullName||u.Email||'') + ' — ' + (u.Email||'');
+    }
   }, 100);
 }
 
@@ -4656,10 +5097,51 @@ function filtrarPipColab(q) {
   .forEach(function(u){ sel.add(new Option((u.FullName||u.Email)+' \u2014 '+(u.Email||''), u.UserID)); });
 }
 
+// Estado temporal de hitos mientras se crea el PIP (Sesión 3)
+var pipHitosTemp = [];
+
 function abrirModalNuevoPIP() {
   if (!allUsuarios.length) { loadUsuarios().then(function(){ filtrarPipColab(''); }); }
   else { filtrarPipColab(''); }
+  // Resetear hitos temp
+  pipHitosTemp = [];
+  renderHitosPIPTemp();
   showModal('modalNuevoPIP');
+}
+
+// Agregar un hito vacío al array temporal (Sesión 3)
+function agregarHitoPIPTemp() {
+  pipHitosTemp.push({ description: '', targetDate: '' });
+  renderHitosPIPTemp();
+}
+
+// Quitar un hito del array temporal por su índice (Sesión 3)
+function quitarHitoPIPTemp(idx) {
+  pipHitosTemp.splice(idx, 1);
+  renderHitosPIPTemp();
+}
+
+// Renderizar hitos temporales en el modal Nuevo PIP (Sesión 3)
+function renderHitosPIPTemp() {
+  var c = document.getElementById('pipHitosContainer');
+  if (!c) return;
+  if (!pipHitosTemp.length) {
+    c.innerHTML = '<div style="text-align:center;padding:20px;color:#666;font-size:11px;background:#111;border-radius:8px;border:1px dashed #2a2a2a;">Sin hitos. Agreg\xe1 al menos uno para el plan.</div>';
+    return;
+  }
+  var html = '';
+  pipHitosTemp.forEach(function(h, i) {
+    var idxStr = String(i);
+    html += '<div style="background:#111;border:1px solid #252525;border-radius:8px;padding:10px;">';
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">';
+    html += '<span style="font-size:11px;color:#FF5400;font-weight:700;">Hito #'+(i+1)+'</span>';
+    html += '<button type="button" data-idx="'+idxStr+'" onclick="quitarHitoPIPTemp(parseInt(this.dataset.idx))" style="background:none;border:none;color:#FF4D4D;font-size:14px;cursor:pointer;padding:2px 6px;">✕</button>';
+    html += '</div>';
+    html += '<input type="text" data-idx="'+idxStr+'" oninput="pipHitosTemp[parseInt(this.dataset.idx)].description=this.value" value="'+String(h.description||'').replace(/"/g,'&quot;')+'" placeholder="Descripci\xf3n del hito..." class="form-control" style="font-size:12px;margin-bottom:6px;">';
+    html += '<input type="date" data-idx="'+idxStr+'" onchange="pipHitosTemp[parseInt(this.dataset.idx)].targetDate=this.value" value="'+String(h.targetDate||'')+'" class="form-control" style="font-size:12px;">';
+    html += '</div>';
+  });
+  c.innerHTML = html;
 }
 
 async function guardarNuevoPIP() {
@@ -4670,24 +5152,48 @@ async function guardarNuevoPIP() {
   if (!empId) { errEl.textContent = 'Seleccion\xe1 un colaborador'; errEl.style.display='block'; return; }
   if (!reason) { errEl.textContent = 'El motivo es obligatorio'; errEl.style.display='block'; return; }
   if (!start) { errEl.textContent = 'La fecha de inicio es obligatoria'; errEl.style.display='block'; return; }
+  // Validar hitos (Sesión 3): al menos 1 con descripción
+  var hitosValidos = pipHitosTemp.filter(function(h){ return h.description && h.description.trim(); });
+  if (hitosValidos.length === 0) {
+    errEl.textContent = 'Agreg\xe1 al menos un hito con descripci\xf3n';
+    errEl.style.display = 'block';
+    return;
+  }
   errEl.style.display = 'none';
   var me = allUsuarios.find(function(u){ return u.Email === window._userEmail; });
   try {
+    // Paso 1: crear el PIP (sin los campos target 15/30/60 ni milestones textarea)
     var res = await fetch(API_BASE + '/pips', {
       method: 'POST', headers: {'Content-Type':'application/json'},
       body: JSON.stringify({ employeeId: parseInt(empId), createdById: me?me.UserID:1,
         reason: reason, startDate: start,
-        target15: document.getElementById('pipTarget15').value||null,
-        target30: document.getElementById('pipTarget30').value||null,
-        target60: document.getElementById('pipTarget60').value||null,
-        milestones: document.getElementById('pipMilestones').value||null })
+        target15: null, target30: null, target60: null,
+        milestones: null })
     });
     var data = await res.json();
     if (data.ok === false) throw new Error(data.error||'Error');
+    var newPipId = data.data && (data.data.pipId || data.data.PIPID);
+    if (!newPipId) throw new Error('No se recibió el PIPID creado');
+    // Paso 2: crear cada hito como POST individual a /pips/:id/milestones
+    for (var i = 0; i < hitosValidos.length; i++) {
+      var h = hitosValidos[i];
+      try {
+        await fetch(API_BASE + '/pips/' + newPipId + '/milestones', {
+          method: 'POST', headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({
+            description: h.description.trim(),
+            targetDate: h.targetDate || null,
+            sortOrder: i + 1
+          })
+        });
+      } catch(hErr) {
+        console.warn('Error creando hito', i, hErr);
+      }
+    }
     closeModal('modalNuevoPIP');
-    ['pipReason','pipMilestones','pipTarget15','pipTarget30','pipTarget60','pipStartDate']
-      .forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
-    mostrarToast('PIP creado correctamente', 'success');
+    ['pipReason','pipStartDate'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
+    pipHitosTemp = [];
+    mostrarToast('PIP creado correctamente con ' + hitosValidos.length + ' hito(s)', 'success');
     cargarPIPs();
   } catch(e) { errEl.textContent = 'Error: '+e.message; errEl.style.display='block'; }
 }
@@ -5001,37 +5507,267 @@ function verPIPCompleto(pipId) {
   overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:600;display:flex;align-items:center;justify-content:center;';
   overlay.id = 'overlayVerPIP';
   var inicio = pip.StartDate ? new Date(pip.StartDate).toLocaleDateString('es-AR') : '&#8212;';
-  var t15 = pip.Target15Days ? new Date(pip.Target15Days).toLocaleDateString('es-AR') : '&#8212;';
-  var t30 = pip.Target30Days ? new Date(pip.Target30Days).toLocaleDateString('es-AR') : '&#8212;';
-  var t60 = pip.Target60Days ? new Date(pip.Target60Days).toLocaleDateString('es-AR') : '&#8212;';
   var sc = pip.Status==='closed'?(pip.Achieved?'#2ECC71':'#FF4D4D'):'#F59E0B';
   var sl = pip.Status==='closed'?(pip.Achieved?'Logrado':'No logrado'):'Activo';
-  overlay.innerHTML = '<div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:16px;padding:28px;width:620px;max-width:95vw;max-height:90vh;overflow-y:auto;">' +
+  overlay.innerHTML = '<div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:16px;padding:28px;width:720px;max-width:95vw;max-height:90vh;overflow-y:auto;">' +
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">' +
     '<div><div style="font-size:16px;font-weight:800;color:#f0ebe3;">PIP &#8212; '+(pip.EmployeeName||'').replace(/</g,'&lt;')+'</div>' +
-    '<div style="font-size:11px;color:#888;margin-top:3px;">Creado por '+(pip.CreatedByName||'').replace(/</g,'&lt;')+'</div></div>' +
+    '<div style="font-size:11px;color:#888;margin-top:3px;">Creado por '+(pip.CreatedByName||'').replace(/</g,'&lt;')+' &middot; Inicio '+inicio+'</div></div>' +
     '<div style="display:flex;gap:10px;align-items:center;">' +
     '<span style="font-size:11px;font-weight:700;color:'+sc+';background:'+sc+'22;padding:3px 12px;border-radius:20px;">'+sl+'</span>' +
     '<button onclick="document.getElementById(\'overlayVerPIP\').remove()" style="background:none;border:none;color:#888;font-size:20px;cursor:pointer;">&#x2715;</button>' +
-    '</div></div>' +
-    '<div style="background:#111;border:1px solid #2a2a2a;border-radius:10px;padding:16px;margin-bottom:16px;">' +
-    '<div style="font-size:12px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:10px;">Fechas</div>' +
-    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;text-align:center;">' +
-    '<div><div style="font-size:10px;color:#888;">Inicio</div><div style="font-size:13px;font-weight:700;color:#f0ebe3;margin-top:3px;">'+inicio+'</div></div>' +
-    '<div><div style="font-size:10px;color:#888;">15 d\xedas</div><div style="font-size:13px;font-weight:700;color:#F59E0B;margin-top:3px;">'+t15+'</div></div>' +
-    '<div><div style="font-size:10px;color:#888;">30 d\xedas</div><div style="font-size:13px;font-weight:700;color:#F59E0B;margin-top:3px;">'+t30+'</div></div>' +
-    '<div><div style="font-size:10px;color:#888;">60 d\xedas</div><div style="font-size:13px;font-weight:700;color:#F59E0B;margin-top:3px;">'+t60+'</div></div>' +
     '</div></div>' +
     '<div style="margin-bottom:16px;">' +
     '<div style="font-size:12px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:8px;">Motivo del PIP</div>' +
     '<div style="font-size:13px;color:#aaa;line-height:1.7;background:#111;border-radius:8px;padding:14px;white-space:pre-wrap;">'+(pip.Reason||'').replace(/</g,'&lt;')+'</div>' +
     '</div>' +
-    (pip.Milestones ? '<div style="margin-bottom:16px;"><div style="font-size:12px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:8px;">Hitos del plan</div>' +
-    '<div style="font-size:13px;color:#aaa;line-height:1.7;background:#111;border-radius:8px;padding:14px;white-space:pre-wrap;">'+(pip.Milestones||'').replace(/</g,'&lt;')+'</div></div>' : '') +
+    // Sección Hitos (Sesión 3)
+    '<div style="margin-bottom:16px;">' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
+    '<div style="font-size:12px;font-weight:700;color:#888;text-transform:uppercase;">🎯 Hitos del plan</div>' +
+    '<button onclick="agregarHitoAExistente('+pipId+')" style="padding:4px 10px;background:rgba(255,84,0,0.1);border:1px solid rgba(255,84,0,0.3);border-radius:5px;color:#FF5400;font-size:10px;font-weight:600;cursor:pointer;">+ Agregar hito</button>' +
+    '</div>' +
+    '<div id="pipHitosLista_'+pipId+'" style="display:flex;flex-direction:column;gap:8px;">' +
+    '<div style="text-align:center;padding:16px;color:#666;font-size:11px;">Cargando hitos...</div>' +
+    '</div>' +
+    '</div>' +
+    // Sección Archivos (Sesión 3)
+    '<div style="margin-bottom:16px;">' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
+    '<div style="font-size:12px;font-weight:700;color:#888;text-transform:uppercase;">📎 Evidencia (archivos)</div>' +
+    '<label style="padding:4px 10px;background:rgba(255,84,0,0.1);border:1px solid rgba(255,84,0,0.3);border-radius:5px;color:#FF5400;font-size:10px;font-weight:600;cursor:pointer;">+ Subir archivo<input type="file" id="pipFileUpload_'+pipId+'" accept=".pdf,.docx,.jpg,.jpeg,.png" style="display:none;" onchange="subirArchivoPIP('+pipId+',this)"></label>' +
+    '</div>' +
+    '<div style="font-size:10px;color:#666;margin-bottom:6px;">Tipos permitidos: PDF, DOCX, JPG, PNG · Máx 10 MB</div>' +
+    '<div id="pipArchivosLista_'+pipId+'" style="display:flex;flex-direction:column;gap:6px;">' +
+    '<div style="text-align:center;padding:16px;color:#666;font-size:11px;">Cargando archivos...</div>' +
+    '</div>' +
+    '</div>' +
     (pip.ReviewNotes ? '<div><div style="font-size:12px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:8px;">Notas de revisi\xf3n</div>' +
     '<div style="font-size:13px;color:#aaa;line-height:1.7;background:#111;border-radius:8px;padding:14px;white-space:pre-wrap;">'+(pip.ReviewNotes||'').replace(/</g,'&lt;')+'</div></div>' : '') +
     '</div>';
   document.body.appendChild(overlay);
+  // Cargar hitos y archivos async
+  cargarHitosPIP(pipId);
+  cargarArchivosPIP(pipId);
+}
+
+// Cargar hitos de un PIP existente y renderizarlos (Sesión 3)
+async function cargarHitosPIP(pipId) {
+  var el = document.getElementById('pipHitosLista_'+pipId);
+  if (!el) return;
+  try {
+    var res = await fetch(API_BASE + '/pips/' + pipId + '/milestones');
+    if (!res.ok) throw new Error('HTTP '+res.status);
+    var json = await res.json();
+    var hitos = Array.isArray(json) ? json : (json.data||[]);
+    if (!hitos.length) {
+      el.innerHTML = '<div style="text-align:center;padding:16px;color:#666;font-size:11px;background:#111;border-radius:8px;border:1px dashed #2a2a2a;">Sin hitos cargados. Hac\xe9 click en <b>+ Agregar hito</b> para crear el primero.</div>';
+      return;
+    }
+    var statusColors = { pending:'#F59E0B', completed:'#2ECC71', not_met:'#FF4D4D' };
+    var statusLabels = { pending:'Pendiente', completed:'Cumplido', not_met:'No cumplido' };
+    var html = '';
+    hitos.forEach(function(h) {
+      var col = statusColors[h.Status] || '#888';
+      var lbl = statusLabels[h.Status] || h.Status;
+      var td = h.TargetDate ? new Date(h.TargetDate).toLocaleDateString('es-AR') : '—';
+      var cd = h.ClosedDate ? new Date(h.ClosedDate).toLocaleDateString('es-AR') : '';
+      html += '<div style="background:#111;border:1px solid #252525;border-radius:8px;padding:12px;">';
+      html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px;">';
+      html += '<div style="flex:1;font-size:13px;color:#f0ebe3;font-weight:600;">'+(h.Description||'').replace(/</g,'&lt;')+'</div>';
+      html += '<span style="font-size:10px;font-weight:700;color:'+col+';background:'+col+'22;padding:2px 8px;border-radius:12px;white-space:nowrap;">'+lbl+'</span>';
+      html += '</div>';
+      html += '<div style="display:flex;gap:12px;font-size:10px;color:#888;margin-bottom:8px;">';
+      html += '<span>🎯 Target: <b style="color:#aaa;">'+td+'</b></span>';
+      if (cd) html += '<span>✓ Cerrado: <b style="color:#aaa;">'+cd+'</b></span>';
+      html += '</div>';
+      if (h.LeaderFeedback) {
+        html += '<div style="font-size:11px;color:#aaa;background:#0d0d0d;border-left:2px solid #FF5400;border-radius:4px;padding:8px 10px;margin-bottom:8px;white-space:pre-wrap;">'+String(h.LeaderFeedback).replace(/</g,'&lt;')+'</div>';
+      }
+      html += '<div style="display:flex;gap:6px;flex-wrap:wrap;">';
+      html += '<button onclick="editarHitoPIP('+h.PIPMilestoneID+','+pipId+')" style="padding:3px 10px;background:#222;border:1px solid #333;border-radius:5px;color:#aaa;font-size:10px;cursor:pointer;">Editar</button>';
+      if (h.Status === 'pending') {
+        html += '<button onclick="cerrarHitoPIP('+h.PIPMilestoneID+','+pipId+',\'completed\')" style="padding:3px 10px;background:rgba(46,204,113,0.1);border:1px solid rgba(46,204,113,0.3);border-radius:5px;color:#2ECC71;font-size:10px;cursor:pointer;">✓ Marcar cumplido</button>';
+        html += '<button onclick="cerrarHitoPIP('+h.PIPMilestoneID+','+pipId+',\'not_met\')" style="padding:3px 10px;background:rgba(255,77,77,0.1);border:1px solid rgba(255,77,77,0.3);border-radius:5px;color:#FF4D4D;font-size:10px;cursor:pointer;">✕ No cumplido</button>';
+      } else {
+        html += '<button onclick="cerrarHitoPIP('+h.PIPMilestoneID+','+pipId+',\'pending\')" style="padding:3px 10px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);border-radius:5px;color:#F59E0B;font-size:10px;cursor:pointer;">↩ Reabrir</button>';
+      }
+      html += '<button onclick="eliminarHitoPIP('+h.PIPMilestoneID+','+pipId+')" style="padding:3px 10px;background:transparent;border:1px solid #333;border-radius:5px;color:#666;font-size:10px;cursor:pointer;margin-left:auto;">🗑 Borrar</button>';
+      html += '</div>';
+      html += '</div>';
+    });
+    el.innerHTML = html;
+  } catch(e) {
+    el.innerHTML = '<div style="text-align:center;padding:16px;color:#FF4D4D;font-size:11px;">Error cargando hitos: '+e.message+'</div>';
+  }
+}
+
+// Agregar un hito nuevo a un PIP existente (Sesión 3)
+async function agregarHitoAExistente(pipId) {
+  var desc = prompt('Descripción del nuevo hito:');
+  if (!desc || !desc.trim()) return;
+  var target = prompt('Fecha objetivo (formato AAAA-MM-DD, opcional):');
+  try {
+    var res = await fetch(API_BASE + '/pips/' + pipId + '/milestones', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ description: desc.trim(), targetDate: target || null })
+    });
+    if (!res.ok) throw new Error('HTTP '+res.status);
+    mostrarToast('Hito agregado', 'success');
+    cargarHitosPIP(pipId);
+  } catch(e) { mostrarToast('Error: '+e.message, 'error'); }
+}
+
+// Editar un hito (descripción, fecha, feedback) — usa prompts simples (Sesión 3)
+async function editarHitoPIP(mid, pipId) {
+  var newDesc = prompt('Nueva descripción del hito (dejá vacío para no cambiar):');
+  var newFb   = prompt('Feedback del líder (dejá vacío para no cambiar):');
+  var body = {};
+  if (newDesc !== null && newDesc.trim()) body.description = newDesc.trim();
+  if (newFb   !== null) body.leaderFeedback = newFb; // permitimos vaciar
+  if (Object.keys(body).length === 0) return;
+  try {
+    var res = await fetch(API_BASE + '/pips/milestones/' + mid, {
+      method: 'PUT', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(body)
+    });
+    if (!res.ok) throw new Error('HTTP '+res.status);
+    mostrarToast('Hito actualizado', 'success');
+    cargarHitosPIP(pipId);
+  } catch(e) { mostrarToast('Error: '+e.message, 'error'); }
+}
+
+// Cambiar estado de un hito (completed / not_met / pending) (Sesión 3)
+async function cerrarHitoPIP(mid, pipId, nuevoStatus) {
+  try {
+    var res = await fetch(API_BASE + '/pips/milestones/' + mid, {
+      method: 'PUT', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ status: nuevoStatus })
+    });
+    if (!res.ok) throw new Error('HTTP '+res.status);
+    var labels = { completed:'cumplido', not_met:'no cumplido', pending:'reabierto' };
+    mostrarToast('Hito ' + (labels[nuevoStatus]||'actualizado'), 'success');
+    cargarHitosPIP(pipId);
+  } catch(e) { mostrarToast('Error: '+e.message, 'error'); }
+}
+
+// Eliminar un hito (Sesión 3)
+async function eliminarHitoPIP(mid, pipId) {
+  if (!confirm('¿Seguro que querés eliminar este hito?')) return;
+  try {
+    var res = await fetch(API_BASE + '/pips/milestones/' + mid, { method: 'DELETE' });
+    if (!res.ok) throw new Error('HTTP '+res.status);
+    mostrarToast('Hito eliminado', 'success');
+    cargarHitosPIP(pipId);
+  } catch(e) { mostrarToast('Error: '+e.message, 'error'); }
+}
+
+// Cargar lista de archivos de un PIP (Sesión 3)
+async function cargarArchivosPIP(pipId) {
+  var el = document.getElementById('pipArchivosLista_'+pipId);
+  if (!el) return;
+  try {
+    var res = await fetch(API_BASE + '/pips/' + pipId + '/files');
+    if (!res.ok) throw new Error('HTTP '+res.status);
+    var json = await res.json();
+    var files = Array.isArray(json) ? json : (json.data||[]);
+    if (!files.length) {
+      el.innerHTML = '<div style="text-align:center;padding:16px;color:#666;font-size:11px;background:#111;border-radius:8px;border:1px dashed #2a2a2a;">Sin archivos. Hac\xe9 click en <b>+ Subir archivo</b> para agregar evidencia.</div>';
+      return;
+    }
+    var html = '';
+    files.forEach(function(f) {
+      var fecha = f.UploadedAt ? new Date(f.UploadedAt).toLocaleDateString('es-AR') : '';
+      var sizeKB = f.FileSize ? Math.round(f.FileSize/1024) : 0;
+      var iconMap = { pdf:'📄', docx:'📝', doc:'📝', jpg:'🖼', jpeg:'🖼', png:'🖼' };
+      var ext = String(f.FileName||'').split('.').pop().toLowerCase();
+      var icon = iconMap[ext] || '📎';
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;background:#111;border:1px solid #252525;border-radius:8px;padding:10px 12px;">';
+      html += '<div style="flex:1;min-width:0;">';
+      html += '<div style="font-size:12px;color:#f0ebe3;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+icon+' '+String(f.FileName||'').replace(/</g,'&lt;')+'</div>';
+      html += '<div style="font-size:10px;color:#888;margin-top:2px;">'+sizeKB+' KB · '+fecha+(f.UploadedByName?' · por '+String(f.UploadedByName).replace(/</g,'&lt;'):'')+'</div>';
+      html += '</div>';
+      html += '<button onclick="descargarArchivoPIP('+f.PIPFileID+')" style="padding:4px 12px;background:#222;border:1px solid #333;border-radius:5px;color:#aaa;font-size:11px;cursor:pointer;">⬇ Descargar</button>';
+      html += '<button onclick="eliminarArchivoPIP('+f.PIPFileID+','+pipId+')" style="padding:4px 8px;background:transparent;border:1px solid #333;border-radius:5px;color:#666;font-size:11px;cursor:pointer;">🗑</button>';
+      html += '</div>';
+    });
+    el.innerHTML = html;
+  } catch(e) {
+    el.innerHTML = '<div style="text-align:center;padding:16px;color:#FF4D4D;font-size:11px;">Error cargando archivos: '+e.message+'</div>';
+  }
+}
+
+// Subir archivo — convierte a base64 y hace POST (Sesión 3)
+async function subirArchivoPIP(pipId, inputEl) {
+  if (!inputEl || !inputEl.files || !inputEl.files.length) return;
+  var file = inputEl.files[0];
+  // Validación cliente-side
+  var allowedExt = /\.(pdf|docx|jpg|jpeg|png)$/i;
+  if (!allowedExt.test(file.name)) {
+    mostrarToast('Tipo de archivo no permitido. Sólo PDF, DOCX, JPG, PNG', 'error');
+    inputEl.value = ''; return;
+  }
+  if (file.size > 10 * 1024 * 1024) {
+    mostrarToast('Archivo demasiado grande (máx 10 MB)', 'error');
+    inputEl.value = ''; return;
+  }
+  mostrarToast('Subiendo archivo...', 'success');
+  try {
+    var reader = new FileReader();
+    reader.onload = async function() {
+      // reader.result es 'data:mimetype;base64,XXXX' — sacar solo la parte base64
+      var base64 = String(reader.result).split(',')[1];
+      var me = allUsuarios.find(function(u){ return u.Email === window._userEmail; });
+      var res = await fetch(API_BASE + '/pips/' + pipId + '/files', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({
+          fileName: file.name, fileData: base64,
+          mimeType: file.type || 'application/octet-stream',
+          uploadedById: me ? me.UserID : null
+        })
+      });
+      var data = await res.json();
+      if (!res.ok || data.ok === false) throw new Error(data.error || ('HTTP '+res.status));
+      mostrarToast('Archivo subido ✓', 'success');
+      inputEl.value = '';
+      cargarArchivosPIP(pipId);
+    };
+    reader.onerror = function() { mostrarToast('Error leyendo el archivo', 'error'); };
+    reader.readAsDataURL(file);
+  } catch(e) { mostrarToast('Error: '+e.message, 'error'); }
+}
+
+// Descargar archivo — pide base64 al backend y dispara descarga (Sesión 3)
+async function descargarArchivoPIP(fileId) {
+  try {
+    var res = await fetch(API_BASE + '/pips/files/' + fileId);
+    if (!res.ok) throw new Error('HTTP '+res.status);
+    var json = await res.json();
+    var data = json.data || json;
+    if (!data.fileData) throw new Error('Archivo vacío');
+    // Convertir base64 a Blob y disparar descarga
+    var byteChars = atob(data.fileData);
+    var byteNums = new Array(byteChars.length);
+    for (var i = 0; i < byteChars.length; i++) { byteNums[i] = byteChars.charCodeAt(i); }
+    var byteArr = new Uint8Array(byteNums);
+    var blob = new Blob([byteArr], { type: data.mimeType || 'application/octet-stream' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = data.fileName || 'archivo';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } catch(e) { mostrarToast('Error descargando: '+e.message, 'error'); }
+}
+
+// Eliminar archivo (Sesión 3)
+async function eliminarArchivoPIP(fileId, pipId) {
+  if (!confirm('¿Seguro que querés eliminar este archivo? Esta acción no se puede deshacer.')) return;
+  try {
+    var res = await fetch(API_BASE + '/pips/files/' + fileId, { method: 'DELETE' });
+    if (!res.ok) throw new Error('HTTP '+res.status);
+    mostrarToast('Archivo eliminado', 'success');
+    cargarArchivosPIP(pipId);
+  } catch(e) { mostrarToast('Error: '+e.message, 'error'); }
 }
 
 
@@ -5202,7 +5938,7 @@ function renderDetalleOnboarding(data) {
     if (m.DueDate) html += '<div style="font-size:10px;color:#888;">Vence: '+new Date(m.DueDate).toLocaleDateString('es-AR')+compDate+'</div>';
     html += '</div></div>';
     // Comentario
-    html += '<textarea data-mid="'+m.MilestoneID+'" class="form-control ob-comment" placeholder="Agreg\xe1 un comentario o evidencia..." style="font-size:12px;height:60px;resize:none;overflow-y:auto;margin-bottom:8px;">'+(m.EmployeeComment||'')+'</textarea>';
+    html += '<textarea data-mid="'+m.MilestoneID+'" class="form-control ob-comment" placeholder="Agreg\xe1 seguimiento o feedback..." style="font-size:12px;height:60px;resize:none;overflow-y:auto;margin-bottom:8px;">'+(m.EmployeeComment||'')+'</textarea>';
     // Upload archivo
     html += '<div style="display:flex;gap:8px;align-items:center;">';
     html += '<label style="padding:4px 10px;background:#222;border:1px solid #333;border-radius:5px;color:#aaa;font-size:11px;cursor:pointer;">';
@@ -5390,6 +6126,31 @@ async function cargarCandidatos() {
     c.innerHTML = '<div style="text-align:center;padding:20px;color:#FF4D4D;">Error al cargar candidatos: '+e.message+'</div>';
   }
 }
+
+// Mover candidato entre etapas del Kanban (Bug #5)
+// direccion = 1 → avanzar a etapa siguiente | direccion = -1 → volver a etapa anterior
+async function moverCandidatoEtapa(candId, direccion) {
+  if (!candId) return;
+  var ruta = direccion === 1 ? 'advance' : 'retrocede';
+  try {
+    var me = (allUsuarios||[]).find(function(u){ return u.Email === window._userEmail; });
+    var res = await fetch(API_BASE + '/candidates/' + candId + '/' + ruta, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ changedById: me ? me.UserID : 1 })
+    });
+    var data = await res.json();
+    if (!res.ok || data.ok === false) throw new Error(data.error || ('HTTP '+res.status));
+    if (data.data && data.data.message) {
+      mostrarToast(data.data.message, 'info');
+    } else {
+      mostrarToast('Candidato movido a: ' + (data.data ? data.data.newStatus : 'nueva etapa'), 'success');
+    }
+    cargarCandidatos();
+  } catch(e) {
+    mostrarToast('Error al mover candidato: ' + e.message, 'error');
+  }
+}
 function filtrarCandidatos(q) {
   var filtered = !q ? allCandidatos : allCandidatos.filter(function(c){
     return (c.FullName||'').toLowerCase().includes(q.toLowerCase()) ||
@@ -5421,6 +6182,9 @@ function renderKanban(candidatos) {
     html += '<span>'+stageLabels[stage]+'</span><span style="background:#333;color:#aaa;padding:1px 7px;border-radius:10px;font-size:10px;">'+grupo.length+'</span></div>';
     grupo.forEach(function(cand) {
       var nombre = (cand.FullName||'').replace(/</g,'&lt;');
+      // Determinar si puede avanzar/retroceder (hired/rejected no se mueven)
+      var canBack = ['technical','client','offer','hired'].indexOf(stage) !== -1;
+      var canFwd = ['screening','technical','client','offer'].indexOf(stage) !== -1;
       html += '<div style="background:#1a1a1a;border:1px solid '+(stageColors[stage]||'#2a2a2a')+';border-radius:8px;padding:10px;margin-bottom:8px;">';
       html += '<div style="font-weight:700;color:#f0ebe3;font-size:12px;margin-bottom:3px;">'+nombre+'</div>';
       html += '<div style="font-size:10px;color:#888;margin-bottom:4px;">'+(cand.TechStack||'').replace(/</g,'&lt;').substring(0,30)+'</div>';
@@ -5429,7 +6193,15 @@ function renderKanban(candidatos) {
         var srcColors = {LinkedIn:'#0A66C2',Consultora:'#F59E0B',Referido:'#A855F7',Formulario:'#2ECC71',Directo:'#888'};
         html += '<div style="margin-top:6px;"><span style="font-size:9px;background:rgba(255,255,255,0.05);color:'+(srcColors[cand.SourceType]||'#888')+';padding:2px 6px;border-radius:4px;">'+cand.SourceType+'</span></div>';
       }
+      // Botón Ver detalle
       html += '<button data-cid="'+cand.CandidateID+'" onclick="verCandidato(this.dataset.cid)" style="margin-top:8px;width:100%;padding:4px;background:#222;border:1px solid #333;border-radius:5px;color:#aaa;font-size:10px;cursor:pointer;">Ver detalle</button>';
+      // Botones ◀ ▶ para mover entre etapas (Bug #5)
+      if (canBack || canFwd) {
+        html += '<div style="display:flex;gap:4px;margin-top:4px;">';
+        html += '<button data-cid="'+cand.CandidateID+'" onclick="moverCandidatoEtapa(this.dataset.cid,-1)" '+(canBack?'':'disabled')+' title="Etapa anterior" style="flex:1;padding:4px;background:'+(canBack?'#222':'#161616')+';border:1px solid #333;border-radius:5px;color:'+(canBack?'#aaa':'#444')+';font-size:11px;cursor:'+(canBack?'pointer':'not-allowed')+';">◀</button>';
+        html += '<button data-cid="'+cand.CandidateID+'" onclick="moverCandidatoEtapa(this.dataset.cid,1)" '+(canFwd?'':'disabled')+' title="Etapa siguiente" style="flex:1;padding:4px;background:'+(canFwd?'#222':'#161616')+';border:1px solid #333;border-radius:5px;color:'+(canFwd?'#aaa':'#444')+';font-size:11px;cursor:'+(canFwd?'pointer':'not-allowed')+';">▶</button>';
+        html += '</div>';
+      }
       html += '</div>';
     });
     html += '</div>';
@@ -5771,6 +6543,16 @@ async function cargarArchivosCandidato(candId) {
   } catch(e) { /* silencioso si el endpoint no existe aún */ }
 }
 
+// Toggle expand/colapse de una fila del historial de entrevistas (Bug #4)
+function toggleHistorialEntrevista(bodyId, caretId) {
+  var body = document.getElementById(bodyId);
+  var caret = document.getElementById(caretId);
+  if (!body) return;
+  var isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'block';
+  if (caret) caret.textContent = isOpen ? '▶' : '▼';
+}
+
 async function cargarHistorialEntrevistas(candId) {
   var el = document.getElementById('cvInterviewHistory_'+candId);
   if (!el) return;
@@ -5797,17 +6579,26 @@ async function cargarHistorialEntrevistas(candId) {
     }
     var resultColors = {'Aprobado':'#2ECC71','Aprobado con observaciones':'#F59E0B','Rechazado':'#FF4D4D','Pendiente':'#888'};
     var html = '';
-    interviews.forEach(function(iv) {
+    interviews.forEach(function(iv, idx) {
       var fecha = iv.CreatedAt ? new Date(iv.CreatedAt).toLocaleDateString('es-AR',{day:'2-digit',month:'short',year:'numeric'}) : '';
       var color = resultColors[iv.Result] || '#888';
+      var rowId = 'ivRow_'+candId+'_'+idx;
+      var bodyId = 'ivBody_'+candId+'_'+idx;
+      var caretId = 'ivCaret_'+candId+'_'+idx;
+      var hasFeedback = !!iv.Feedback;
       html += '<div style="border-bottom:1px solid #1e1e1e;padding:6px 0;">';
-      html += '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:3px;">';
-      html += '<span style="font-size:11px;color:#f0ebe3;font-weight:700;">'+(iv.InterviewerName||'Sin entrevistador').replace(/</g,'&lt;')+'</span>';
+      // Fila colapsable: click en la fila expande/colapsa el feedback
+      html += '<div id="'+rowId+'" style="display:flex;justify-content:space-between;align-items:center;gap:8px;'+(hasFeedback?'cursor:pointer;':'')+'" '+(hasFeedback?'onclick="toggleHistorialEntrevista(\''+bodyId+'\',\''+caretId+'\')"':'')+'>';
+      html += '<span style="font-size:11px;color:#f0ebe3;font-weight:700;display:flex;align-items:center;gap:6px;">';
+      if (hasFeedback) html += '<span id="'+caretId+'" style="color:#888;font-size:10px;transition:transform 0.2s;">▶</span>';
+      html += (iv.InterviewerName||'Sin entrevistador').replace(/</g,'&lt;');
+      html += '</span>';
       html += '<span style="font-size:10px;color:'+color+';font-weight:700;">'+(iv.Result||'—').replace(/</g,'&lt;')+'</span>';
       html += '<span style="font-size:10px;color:#666;">'+fecha+'</span>';
       html += '</div>';
-      if (iv.Feedback) {
-        html += '<div style="font-size:11px;color:#aaa;line-height:1.4;">'+String(iv.Feedback).replace(/</g,'&lt;')+'</div>';
+      // Feedback colapsado por default
+      if (hasFeedback) {
+        html += '<div id="'+bodyId+'" style="display:none;font-size:11px;color:#aaa;line-height:1.4;margin-top:6px;padding:8px 10px;background:#141414;border-left:2px solid #FF5400;border-radius:4px;">'+String(iv.Feedback).replace(/</g,'&lt;')+'</div>';
       }
       html += '</div>';
     });
@@ -5949,10 +6740,65 @@ async function loadCareerPlans() {
     try { json = JSON.parse(txt); } catch(e){ throw new Error('JSON inválido: '+txt.substring(0,80)); }
     if (!res.ok) throw new Error('HTTP '+res.status+': '+(json.error||''));
     allCareerPlans = Array.isArray(json) ? json : (json.data||[]);
+    // Populate el datalist del filtro (Quick Win #4)
+    poblarCareerFiltroList();
     renderCareerPlans(allCareerPlans);
   } catch(e) {
     c.innerHTML = '<div style="text-align:center;padding:20px;color:#FF4D4D;font-size:13px;">Error: '+e.message+'</div>';
   }
+}
+
+// Poblar datalist del filtro de Plan de Carrera con los colaboradores que tienen planes (Quick Win #4)
+function poblarCareerFiltroList() {
+  var dl = document.getElementById('careerFiltroList');
+  if (!dl) return;
+  dl.innerHTML = '';
+  // Sacar colaboradores únicos de los planes cargados
+  var seen = {};
+  allCareerPlans.forEach(function(p){
+    if (p.EmployeeName && !seen[p.EmployeeName]) {
+      seen[p.EmployeeName] = true;
+      var opt = document.createElement('option');
+      opt.value = (p.EmployeeName||'') + (p.EmployeeEmail ? ' \u2014 ' + p.EmployeeEmail : '');
+      dl.appendChild(opt);
+    }
+  });
+}
+
+// Filtrar el grid de planes según lo tipeado en el input de filtro (Quick Win #4)
+function filtrarPlanesCarreraPorColab(val) {
+  var q = (val||'').trim().toLowerCase();
+  if (!q) {
+    renderCareerPlans(allCareerPlans);
+    return;
+  }
+  // Si el usuario eligió una opción del datalist, el value viene con formato
+  // "Nombre \u2014 email@dominio.com". Separamos por el guion largo.
+  var parts = q.split(' \u2014 ');
+  var qNombre = (parts[0]||'').trim();
+  var qEmail  = parts.length > 1 ? (parts[1]||'').trim() : '';
+  var filtrados = allCareerPlans.filter(function(p){
+    var nombre = (p.EmployeeName||'').toLowerCase();
+    var email  = (p.EmployeeEmail||'').toLowerCase();
+    // Match exacto por email si vino en el value (caso datalist elegido)
+    if (qEmail && email === qEmail) return true;
+    // Match parcial por nombre o email (caso usuario tipeando)
+    return (qNombre && (nombre.indexOf(qNombre) !== -1 || email.indexOf(qNombre) !== -1));
+  });
+  // Si hay filtro activo y no hay resultados, avisar con mensaje específico
+  if (filtrados.length === 0) {
+    var c = document.getElementById('careerContainer');
+    if (c) c.innerHTML = '<div style="text-align:center;padding:40px;color:#888;">No se encontraron planes para ese filtro. Prob\xe1 con otro nombre o hac\xe9 click en <b>Ver todos</b>.</div>';
+    return;
+  }
+  renderCareerPlans(filtrados);
+}
+
+// Limpiar filtro y volver a mostrar todos los planes (Quick Win #4)
+function limpiarFiltroCareer() {
+  var inp = document.getElementById('careerFiltroInput');
+  if (inp) inp.value = '';
+  renderCareerPlans(allCareerPlans);
 }
 
 function renderCareerPlans(plans) {
@@ -6099,7 +6945,7 @@ function renderDetallePlan(plan, milestones) {
       html += '</div>';
 
       // Comentario
-      html += '<textarea data-mid="'+m.MilestoneID+'" class="cp-comment form-control" style="margin-top:8px;height:55px;resize:none;overflow-y:auto;font-size:12px;" placeholder="Comentario o nota...">'+(m.EmployeeComment||'')+'</textarea>';
+      html += '<textarea data-mid="'+m.MilestoneID+'" class="cp-comment form-control" style="margin-top:8px;height:55px;resize:none;overflow-y:auto;font-size:12px;" placeholder="Seguimiento o feedback...">'+(m.EmployeeComment||'')+'</textarea>';
       html += '<div style="display:flex;justify-content:flex-end;margin-top:6px;"><button data-mid="'+m.MilestoneID+'" onclick="guardarComentarioCareer(this.dataset.mid)" style="padding:4px 12px;background:rgba(255,84,0,0.1);border:1px solid rgba(255,84,0,0.3);border-radius:5px;color:#FF5400;font-size:11px;cursor:pointer;">Guardar</button></div>';
       html += '</div></div></div>';
     });
@@ -6390,7 +7236,7 @@ function verEvidenciaCareer(mid) {
     <div class="section" id="sec-onboarding">
       <div class="section-header" style="margin-bottom:20px;">
         <div><div class="section-heading">Onboarding</div>
-          <div class="section-subheading">Incorporaci&oacute;n de nuevos empleados</div></div>
+          <div class="section-subheading">Incorporaci&oacute;n de nuevos colaboradores</div></div>
         <button class="btn btn-primary btn-sm" onclick="abrirModalNuevoOnboarding()">+ Nuevo Onboarding</button>
       </div>
       <!-- KPIs dinámicos -->
@@ -6476,30 +7322,32 @@ function verEvidenciaCareer(mid) {
               <input id="pipBuscarColab" type="text" class="form-control" placeholder="Buscar..." style="margin-bottom:4px;" oninput="filtrarPipColab(this.value)">
               <select id="pipColabSel" class="form-control"><option value="">&#8212; Seleccionar &#8212;</option></select>
             </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-              <div><label class="form-label" style="font-size:11px;">Fecha inicio *</label><input id="pipStartDate" type="date" class="form-control"></div>
-              <div><label class="form-label" style="font-size:11px;">Target 15d</label><input id="pipTarget15" type="date" class="form-control"></div>
-              <div><label class="form-label" style="font-size:11px;">Target 30d</label><input id="pipTarget30" type="date" class="form-control"></div>
-              <div><label class="form-label" style="font-size:11px;">Target 60d</label><input id="pipTarget60" type="date" class="form-control"></div>
+            <div>
+              <label class="form-label" style="font-size:11px;">Fecha inicio *</label>
+              <input id="pipStartDate" type="date" class="form-control">
             </div>
-          </div>
-          <div style="display:flex;flex-direction:column;gap:12px;">
             <div style="flex:1;">
               <label class="form-label">Motivo del PIP *</label>
               <textarea id="pipReason" class="form-control" placeholder="Describí el motivo del plan de mejora..." style="height:110px;resize:none;overflow-y:auto;margin-top:4px;"></textarea>
             </div>
-            <div style="flex:1;">
-              <label class="form-label">Hitos del plan</label>
-              <textarea id="pipMilestones" class="form-control" placeholder="Semana 1: reunión de alineación&#10;Semana 2: entrega..." style="height:110px;resize:none;overflow-y:auto;margin-top:4px;"></textarea>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <label class="form-label" style="margin:0;">🎯 Hitos del plan</label>
+              <button type="button" onclick="agregarHitoPIPTemp()" style="padding:4px 12px;background:rgba(255,84,0,0.1);border:1px solid rgba(255,84,0,0.3);border-radius:6px;color:#FF5400;font-size:11px;font-weight:600;cursor:pointer;">+ Agregar hito</button>
+            </div>
+            <div id="pipHitosContainer" style="display:flex;flex-direction:column;gap:8px;max-height:280px;overflow-y:auto;padding-right:4px;">
+              <div style="text-align:center;padding:20px;color:#666;font-size:11px;background:#111;border-radius:8px;border:1px dashed #2a2a2a;">Sin hitos. Agregá al menos uno para el plan.</div>
             </div>
           </div>
-        </div></div>
+        </div>
         <div id="pipError" style="color:#FF4D4D;font-size:12px;margin-top:10px;display:none;"></div>
         <div class="modal-actions">
           <button class="btn btn-secondary" onclick="closeModal('modalNuevoPIP')">Cancelar</button>
           <button class="btn btn-primary" onclick="guardarNuevoPIP()">Crear PIP</button>
         </div>
       </div>
+    </div>
 
 <div class="modal-overlay" id="modalRevisarPIP">
       <div class="modal" style="max-width:560px;">
@@ -6653,6 +7501,24 @@ function verEvidenciaCareer(mid) {
           </div>
         </div>
       </div>
+
+      <!-- FEEDBACK + ÁREAS DE MEJORA (Quick Win #6) - visible para ambos tipos -->
+      <div style="grid-column:1/-1;border-top:1px solid #2a2a2a;padding-top:16px;margin-top:8px;">
+        <div class="form-group" style="margin-bottom:14px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+            <label class="form-label" style="margin:0;">📝 Feedback</label>
+            <span id="editObjFeedbackDateLabel" style="font-size:10px;color:#888;">Sin registros</span>
+          </div>
+          <textarea id="editObjFeedback" class="form-control" rows="3" style="height:80px;resize:none;overflow-y:auto;" placeholder="Feedback sobre el objetivo, logros y observaciones..."></textarea>
+        </div>
+        <div class="form-group">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+            <label class="form-label" style="margin:0;">🎯 Áreas de mejora</label>
+            <span id="editObjImprovementDateLabel" style="font-size:10px;color:#888;">Sin registros</span>
+          </div>
+          <textarea id="editObjImprovementAreas" class="form-control" rows="3" style="height:80px;resize:none;overflow-y:auto;" placeholder="Aspectos a mejorar y próximos pasos..."></textarea>
+        </div>
+      </div>
     </div>
     <div id="editObjError" style="color:#FF4D4D;font-size:12px;margin-top:8px;display:none;"></div>
     <div class="modal-actions">
@@ -6716,9 +7582,9 @@ function verEvidenciaCareer(mid) {
             <div><label class="form-label">Fecha objetivo</label>
               <input id="obEndDate" type="date" class="form-control"></div>
           </div>
-          <div><label class="form-label">Descriptivo del rol</label>
-            <textarea id="obRoleDesc" class="form-control" rows="3" style="height:90px;resize:none;overflow-y:auto;" placeholder="Responsabilidades, objetivos, equipo, herramientas..."></textarea></div>
-          <div><label class="form-label">Responsable HR</label>
+          <!-- Campo 'Descriptivo del rol' oculto (Quick Win #2 - se mantiene en DB por compat con data histórica) -->
+          <textarea id="obRoleDesc" style="display:none;"></textarea>
+          <div><label class="form-label">Líder directo</label>
             <select id="obAsignado" class="form-control"><option value="">&#8212; Seleccionar &#8212;</option></select></div>
         </div>
         <div id="obError" style="color:#FF4D4D;font-size:12px;margin-top:10px;display:none;"></div>
@@ -6788,8 +7654,9 @@ function verEvidenciaCareer(mid) {
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
           <div class="form-group" style="grid-column:1/-1">
             <label class="form-label">Colaborador *</label>
-            <input id="objColabBuscar" type="text" class="form-control" placeholder="🔍 Buscar colaborador..." style="margin-bottom:4px;" oninput="filtrarColabObj(this.value)">
-            <select id="objColabSel" class="form-control"><option value="">— Seleccionar colaborador —</option></select>
+            <input id="objColabInput" type="text" class="form-control" list="objColabList" placeholder="🔍 Escribí nombre o email del colaborador..." autocomplete="off" oninput="resolverColabObj(this.value)">
+            <datalist id="objColabList"></datalist>
+            <input type="hidden" id="objColabSel">
           </div>
           <div class="form-group" style="grid-column:1/-1;">
             <div style="background:rgba(255,84,0,0.06);border:1px solid rgba(255,84,0,0.2);border-radius:8px;padding:12px 14px;">

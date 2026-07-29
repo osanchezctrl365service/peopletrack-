@@ -909,6 +909,10 @@ label { color: #888 !important; }
     <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><path d="M17 11h.01"/><path d="M20 8h.01"/><path d="M23 11h.01"/></svg>
     Roles
   </div>
+  <div class="nav-item" onclick="showSection('onboarding-templates')">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h4"/><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+    Plantillas Onboarding
+  </div>
 
   <div class="sidebar-section-label">Sistema</div>
   <div class="nav-item" onclick="showSection('periods')">
@@ -1172,6 +1176,64 @@ label { color: #888 !important; }
     <div style="display:flex;gap:10px;margin-top:24px;justify-content:flex-end;">
       <button onclick="cerrarModalRol()" style="padding:10px 20px;background:#222;border:1px solid #333;border-radius:8px;color:#aaa;font-size:13px;cursor:pointer;">Cancelar</button>
       <button onclick="guardarRol()" id="btnGuardarRol" style="padding:10px 24px;background:#FF5400;border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- SECCIÓN PLANTILLAS ONBOARDING (Sesión 4 Bloque 2) -->
+<div class="section" id="sec-onboarding-templates">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+    <div>
+      <h2 style="font-size:20px;font-weight:800;color:#f0ebe3;">Plantillas de Onboarding</h2>
+      <p style="font-size:12px;color:#888;margin-top:2px;">Definí los hitos y cursos por rol. Al crear un onboarding para un colaborador, se copian los seleccionados.</p>
+    </div>
+    <button onclick="abrirModalPlantillaItem()" id="btnNuevoPlantillaItem" style="padding:8px 16px;background:#FF5400;border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;" disabled>+ Nuevo Item</button>
+  </div>
+  <div style="display:flex;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap;">
+    <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Rol:</label>
+    <select id="plantillaRolSel" onchange="onCambioRolPlantilla()" style="padding:6px 10px;background:#111;border:1px solid #333;border-radius:6px;color:#f0ebe3;font-size:12px;min-width:280px;">
+      <option value="">— Elegí un rol para ver su plantilla —</option>
+    </select>
+  </div>
+  <div id="plantillaContainer">
+    <div style="text-align:center;padding:40px;color:#888;font-size:13px;">Seleccioná un rol arriba para ver o editar su plantilla de onboarding.</div>
+  </div>
+</div>
+
+<!-- MODAL: Alta/Edición de Item de Plantilla -->
+<div id="modalPlantillaItem" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:500;align-items:center;justify-content:center;">
+  <div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:16px;padding:32px;width:520px;max-width:95vw;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+      <h3 id="modalPlantillaItemTitle" style="font-size:16px;font-weight:800;color:#f0ebe3;">Nuevo Item</h3>
+      <button onclick="cerrarModalPlantillaItem()" style="background:none;border:none;color:#888;font-size:20px;cursor:pointer;">×</button>
+    </div>
+    <input type="hidden" id="modalPlantillaItemId" value="">
+    <input type="hidden" id="modalPlantillaItemRolId" value="">
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div>
+        <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Tipo *</label>
+        <select id="plantillaItemTipo" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
+          <option value="milestone">Hito</option>
+          <option value="course">Curso</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Título *</label>
+        <input id="plantillaItemTitle" type="text" placeholder="Ej: Firma de comodato" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
+      </div>
+      <div>
+        <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Descripción</label>
+        <textarea id="plantillaItemDesc" rows="2" placeholder="Detalles opcionales..." style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;resize:vertical;"></textarea>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <input id="plantillaItemRequired" type="checkbox">
+        <label for="plantillaItemRequired" style="font-size:13px;color:#f0ebe3;cursor:pointer;">Marcar como <b style="color:#FF5400;">obligatorio</b> para este rol</label>
+      </div>
+    </div>
+    <div id="modalPlantillaItemError" style="color:#FF4D4D;font-size:12px;margin-top:12px;display:none;"></div>
+    <div style="display:flex;gap:10px;margin-top:24px;justify-content:flex-end;">
+      <button onclick="cerrarModalPlantillaItem()" style="padding:10px 20px;background:#222;border:1px solid #333;border-radius:8px;color:#aaa;font-size:13px;cursor:pointer;">Cancelar</button>
+      <button onclick="guardarPlantillaItem()" id="btnGuardarPlantillaItem" style="padding:10px 24px;background:#FF5400;border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;">Guardar</button>
     </div>
   </div>
 </div>
@@ -1804,7 +1866,7 @@ label { color: #888 !important; }
 
 <script>
 const titles = {
-  dashboard:'Dashboard',recruiting:'Recruiting',onboarding:'Onboarding',usuarios:'Usuarios',lideres:'Líderes',areas:'Áreas',roles:'Roles',objectives:'Objetivos',career:'Plan de Carrera',pip:'PIP — Improvement',pip:'PIP — Plan de Improvement',
+  dashboard:'Dashboard',recruiting:'Recruiting',onboarding:'Onboarding',usuarios:'Usuarios',lideres:'Líderes',areas:'Áreas',roles:'Roles','onboarding-templates':'Plantillas Onboarding',objectives:'Objetivos',career:'Plan de Carrera',pip:'PIP — Improvement',pip:'PIP — Plan de Improvement',
   competencies:'Competencias',oneononex:'Reuniones 1:1',feedback360:'Feedback 360°',reports:'Reportes',
   orgchart:'Organigrama',alerts:'Alertas',periods:'Períodos',settings:'Configuración',help:'Ayuda'
 };
@@ -2027,6 +2089,10 @@ function showSection(id){
   if(id==='lideres'){if(!Object.keys(allLideres||{}).length) loadLideres();}
   if(id==='areas'&&!allAreas.length) loadAreas();
   if(id==='roles'){ loadJobRoles(); }
+  if(id==='onboarding-templates'){
+    if (!allJobRoles.length) loadJobRoles().then(poblarRolesPlantillaDropdown);
+    else poblarRolesPlantillaDropdown();
+  }
   if(id==='periods'&&!allPeriods.length) loadPeriods();
   if(id==='objectives'){
     ['obj-core','obj-personal','obj-tasks'].forEach(function(pid,i){var el=document.getElementById(pid);if(el)el.style.display=i===0?'':'none';});
@@ -2766,6 +2832,188 @@ function poblarSelectsJobRole() {
       });
     if (currentVal) sel.value = currentVal;
   });
+}
+
+// ══════════════════════════════════════════
+// PLANTILLAS DE ONBOARDING (Sesión 4 Bloque 2)
+// ══════════════════════════════════════════
+let plantillaItemsActual = []; // items del rol seleccionado
+
+// Poblar el dropdown de roles cuando entrás a la sección
+function poblarRolesPlantillaDropdown() {
+  const sel = document.getElementById('plantillaRolSel');
+  if (!sel) return;
+  const currentVal = sel.value;
+  sel.innerHTML = '<option value="">— Elegí un rol para ver su plantilla —</option>';
+  allJobRoles.filter(function(r){ return r.IsActive; })
+    .forEach(function(r){
+      const opt = document.createElement('option');
+      opt.value = r.JobRoleID;
+      opt.textContent = r.RoleName + (r.Level ? ' (' + r.Level + ')' : '');
+      sel.appendChild(opt);
+    });
+  if (currentVal) sel.value = currentVal;
+}
+
+// Cuando cambia el rol seleccionado, cargar los items del template
+async function onCambioRolPlantilla() {
+  const rolId = document.getElementById('plantillaRolSel').value;
+  const cont = document.getElementById('plantillaContainer');
+  const btnNuevo = document.getElementById('btnNuevoPlantillaItem');
+  if (!rolId) {
+    cont.innerHTML = '<div style="text-align:center;padding:40px;color:#888;font-size:13px;">Seleccioná un rol arriba para ver o editar su plantilla de onboarding.</div>';
+    if (btnNuevo) btnNuevo.disabled = true;
+    plantillaItemsActual = [];
+    return;
+  }
+  if (btnNuevo) btnNuevo.disabled = false;
+  cont.innerHTML = '<div style="text-align:center;padding:20px;color:#888;">Cargando plantilla...</div>';
+  try {
+    const res = await fetch(API_BASE + '/onboarding-templates?jobRoleId=' + rolId);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const json = await res.json();
+    plantillaItemsActual = Array.isArray(json) ? json : (json.data || []);
+    renderPlantillaItems();
+  } catch(e) {
+    cont.innerHTML = '<div style="color:#FF4D4D;text-align:center;padding:20px;">Error: ' + e.message + '</div>';
+  }
+}
+
+function renderPlantillaItems() {
+  const cont = document.getElementById('plantillaContainer');
+  const rolId = document.getElementById('plantillaRolSel').value;
+  const rol = allJobRoles.find(function(r){ return String(r.JobRoleID) === String(rolId); });
+  if (!plantillaItemsActual.length) {
+    cont.innerHTML = '<div style="text-align:center;padding:40px;color:#888;font-size:13px;background:#111;border-radius:8px;border:1px dashed #2a2a2a;">No hay items en la plantilla de <b style="color:#f0ebe3;">' + (rol ? rol.RoleName : 'este rol') + '</b>.<br>Hacé click en <b>+ Nuevo Item</b> para agregar el primero.</div>';
+    return;
+  }
+  // Separar en hitos y cursos
+  const hitos = plantillaItemsActual.filter(function(i){ return i.ItemType === 'milestone'; });
+  const cursos = plantillaItemsActual.filter(function(i){ return i.ItemType === 'course'; });
+  let html = '';
+  // Sección Hitos
+  html += '<div style="margin-bottom:20px;">';
+  html += '<div style="font-size:12px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:10px;">🎯 Hitos (' + hitos.length + ')</div>';
+  if (!hitos.length) {
+    html += '<div style="color:#666;font-size:12px;padding:10px 0;">Sin hitos definidos.</div>';
+  } else {
+    hitos.forEach(function(h){ html += renderItemCard(h); });
+  }
+  html += '</div>';
+  // Sección Cursos
+  html += '<div>';
+  html += '<div style="font-size:12px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:10px;">📚 Cursos (' + cursos.length + ')</div>';
+  if (!cursos.length) {
+    html += '<div style="color:#666;font-size:12px;padding:10px 0;">Sin cursos definidos.</div>';
+  } else {
+    cursos.forEach(function(c){ html += renderItemCard(c); });
+  }
+  html += '</div>';
+  cont.innerHTML = html;
+}
+
+function renderItemCard(item) {
+  const badge = item.IsRequired
+    ? '<span style="font-size:10px;font-weight:700;color:#FF4D4D;background:rgba(255,77,77,0.15);padding:2px 8px;border-radius:12px;">Obligatorio</span>'
+    : '<span style="font-size:10px;font-weight:700;color:#888;background:rgba(136,136,136,0.15);padding:2px 8px;border-radius:12px;">Opcional</span>';
+  let html = '<div style="background:#111;border:1px solid #252525;border-radius:8px;padding:12px;margin-bottom:8px;">';
+  html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">';
+  html += '<div style="flex:1;">';
+  html += '<div style="font-size:13px;color:#f0ebe3;font-weight:600;margin-bottom:3px;">' + String(item.Title || '').replace(/</g,'&lt;') + '</div>';
+  if (item.Description) html += '<div style="font-size:11px;color:#888;">' + String(item.Description).replace(/</g,'&lt;') + '</div>';
+  html += '</div>';
+  html += badge;
+  html += '</div>';
+  html += '<div style="display:flex;gap:6px;margin-top:8px;">';
+  html += '<button onclick="abrirModalPlantillaItem(' + item.TemplateItemID + ')" style="padding:3px 10px;background:#222;border:1px solid #333;border-radius:5px;color:#aaa;font-size:10px;cursor:pointer;">Editar</button>';
+  html += '<button onclick="eliminarPlantillaItem(' + item.TemplateItemID + ')" style="padding:3px 10px;background:transparent;border:1px solid #333;border-radius:5px;color:#666;font-size:10px;cursor:pointer;">🗑 Borrar</button>';
+  html += '</div>';
+  html += '</div>';
+  return html;
+}
+
+function abrirModalPlantillaItem(itemId) {
+  const modal = document.getElementById('modalPlantillaItem');
+  const title = document.getElementById('modalPlantillaItemTitle');
+  const rolId = document.getElementById('plantillaRolSel').value;
+  document.getElementById('modalPlantillaItemError').style.display = 'none';
+  document.getElementById('modalPlantillaItemRolId').value = rolId;
+  if (itemId) {
+    // Edición
+    const item = plantillaItemsActual.find(function(x){ return x.TemplateItemID === itemId; });
+    if (!item) { mostrarToast('Item no encontrado', 'error'); return; }
+    title.textContent = 'Editar Item de Plantilla';
+    document.getElementById('modalPlantillaItemId').value = itemId;
+    document.getElementById('plantillaItemTipo').value = item.ItemType || 'milestone';
+    document.getElementById('plantillaItemTitle').value = item.Title || '';
+    document.getElementById('plantillaItemDesc').value = item.Description || '';
+    document.getElementById('plantillaItemRequired').checked = !!item.IsRequired;
+  } else {
+    // Alta
+    title.textContent = 'Nuevo Item de Plantilla';
+    document.getElementById('modalPlantillaItemId').value = '';
+    document.getElementById('plantillaItemTipo').value = 'milestone';
+    document.getElementById('plantillaItemTitle').value = '';
+    document.getElementById('plantillaItemDesc').value = '';
+    document.getElementById('plantillaItemRequired').checked = false;
+  }
+  modal.style.display = 'flex';
+}
+
+function cerrarModalPlantillaItem() {
+  document.getElementById('modalPlantillaItem').style.display = 'none';
+}
+
+async function guardarPlantillaItem() {
+  const id = document.getElementById('modalPlantillaItemId').value;
+  const rolId = document.getElementById('modalPlantillaItemRolId').value;
+  const tipo = document.getElementById('plantillaItemTipo').value;
+  const title = document.getElementById('plantillaItemTitle').value.trim();
+  const desc = document.getElementById('plantillaItemDesc').value.trim();
+  const required = document.getElementById('plantillaItemRequired').checked;
+  const errEl = document.getElementById('modalPlantillaItemError');
+  const btn = document.getElementById('btnGuardarPlantillaItem');
+  if (!title) { errEl.textContent = 'El título es obligatorio'; errEl.style.display = 'block'; return; }
+  btn.textContent = 'Guardando...'; btn.disabled = true;
+  errEl.style.display = 'none';
+  try {
+    const method = id ? 'PUT' : 'POST';
+    const url = id ? (API_BASE + '/onboarding-templates/' + id) : (API_BASE + '/onboarding-templates');
+    const body = {
+      jobRoleId: parseInt(rolId),
+      itemType: tipo,
+      title: title,
+      description: desc || null,
+      isRequired: required
+    };
+    const res = await fetch(url, {
+      method: method,
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    if (!res.ok || data.ok === false) throw new Error(data.error || ('HTTP ' + res.status));
+    mostrarToast(id ? 'Item actualizado' : 'Item creado', 'success');
+    cerrarModalPlantillaItem();
+    onCambioRolPlantilla(); // recargar los items
+  } catch(e) {
+    errEl.textContent = 'Error: ' + e.message;
+    errEl.style.display = 'block';
+  } finally {
+    btn.textContent = 'Guardar'; btn.disabled = false;
+  }
+}
+
+async function eliminarPlantillaItem(itemId) {
+  if (!confirm('¿Seguro que querés borrar este item de la plantilla?')) return;
+  try {
+    const res = await fetch(API_BASE + '/onboarding-templates/' + itemId, { method: 'DELETE' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    mostrarToast('Item eliminado', 'success');
+    onCambioRolPlantilla();
+  } catch(e) {
+    mostrarToast('Error: ' + e.message, 'error');
+  }
 }
 
 // ══════════════════════════════════════════
@@ -5784,6 +6032,8 @@ function filtrarObColab(q) {
       return u.IsActive !== false && (!q || (u.FullName||'').toLowerCase().includes(q.toLowerCase()));
     }).sort(function(a,b){ return (a.FullName||'').localeCompare(b.FullName||''); })
     .forEach(function(u){ selColab.add(new Option((u.FullName||u.Email)+' — '+(u.Email||''), u.UserID)); });
+    // Sesión 4 Bloque 2: cuando se selecciona un colaborador, cargar los items del template de su rol
+    selColab.onchange = onCambioColabOnboarding;
   }
   var selHR = document.getElementById('obAsignado');
   if (selHR) {
@@ -5797,6 +6047,56 @@ function filtrarObColab(q) {
     });
   }
 }
+
+// Sesión 4 Bloque 2: al elegir colaborador, cargar el template del rol
+async function onCambioColabOnboarding() {
+  const userId = document.getElementById('obColabSel').value;
+  const preview = document.getElementById('obTemplatePreview');
+  const list = document.getElementById('obTemplateItemsList');
+  const nota = document.getElementById('obTemplateNota');
+  if (!preview || !list) return;
+  if (!userId) { preview.style.display = 'none'; return; }
+  const user = allUsuarios.find(function(u){ return String(u.UserID) === String(userId); });
+  if (!user || !user.JobRoleID) {
+    // Colaborador sin rol asignado — se usan los hitos hardcodeados por default
+    preview.style.display = 'block';
+    list.innerHTML = '<div style="text-align:center;padding:12px;color:#F59E0B;font-size:12px;background:rgba(245,158,11,0.1);border-radius:8px;">⚠️ Este colaborador no tiene rol asignado.</div>';
+    nota.textContent = 'Se crearán los 6 hitos + 2 cursos por defecto. Para usar plantilla, asigná primero un rol al colaborador desde Usuarios.';
+    return;
+  }
+  preview.style.display = 'block';
+  list.innerHTML = '<div style="text-align:center;padding:12px;color:#888;font-size:11px;">Cargando plantilla del rol...</div>';
+  nota.textContent = '';
+  try {
+    const res = await fetch(API_BASE + '/onboarding-templates?jobRoleId=' + user.JobRoleID);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const json = await res.json();
+    const items = Array.isArray(json) ? json : (json.data || []);
+    if (!items.length) {
+      list.innerHTML = '<div style="text-align:center;padding:12px;color:#F59E0B;font-size:12px;background:rgba(245,158,11,0.1);border-radius:8px;">⚠️ La plantilla del rol <b>' + (user.JobRoleName || '') + '</b> está vacía.</div>';
+      nota.textContent = 'Se crearán los hitos por defecto. Para configurar plantilla, andá a "Plantillas Onboarding" en el menú.';
+      return;
+    }
+    // Renderizar: obligatorios marcados+deshabilitados, opcionales marcables
+    let html = '<div style="font-size:10px;color:#888;margin-bottom:6px;">Rol: <b style="color:#f0ebe3;">' + (user.JobRoleName || '') + '</b></div>';
+    items.forEach(function(item){
+      const checked = item.IsRequired ? 'checked disabled' : 'checked';
+      const badge = item.IsRequired
+        ? '<span style="font-size:9px;font-weight:700;color:#FF4D4D;background:rgba(255,77,77,0.15);padding:1px 6px;border-radius:8px;margin-left:6px;">Obligatorio</span>'
+        : '<span style="font-size:9px;font-weight:700;color:#888;background:rgba(136,136,136,0.15);padding:1px 6px;border-radius:8px;margin-left:6px;">Opcional</span>';
+      const icon = item.ItemType === 'course' ? '📚' : '🎯';
+      html += '<label style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:#111;border-radius:6px;cursor:pointer;font-size:12px;color:#f0ebe3;">' +
+        '<input type="checkbox" class="ob-template-item-check" data-item-id="' + item.TemplateItemID + '" data-required="' + (item.IsRequired ? '1' : '0') + '" ' + checked + '>' +
+        icon + ' ' + String(item.Title || '').replace(/</g,'&lt;') + badge +
+        '</label>';
+    });
+    list.innerHTML = html;
+    nota.textContent = 'Los items obligatorios no se pueden desmarcar. Los opcionales podés desmarcarlos si no aplican.';
+  } catch(e) {
+    list.innerHTML = '<div style="color:#FF4D4D;font-size:12px;padding:10px;">Error: ' + e.message + '</div>';
+  }
+}
+
 function abrirModalNuevoOnboarding() {
   if (!allUsuarios.length) loadUsuarios().then(function(){ filtrarObColab(''); });
   else filtrarObColab('');
@@ -5806,6 +6106,8 @@ function abrirModalNuevoOnboarding() {
   // Default end = 60 días
   var end60 = new Date(); end60.setDate(end60.getDate()+60);
   var el2 = document.getElementById('obEndDate'); if (el2) el2.value = end60.toISOString().split('T')[0];
+  // Ocultar preview al abrir
+  var pv = document.getElementById('obTemplatePreview'); if (pv) pv.style.display = 'none';
   showModal('modalNuevoOnboarding');
 }
 
@@ -5816,21 +6118,32 @@ async function guardarNuevoOnboarding() {
   if (!userId) { errEl.textContent = 'Seleccion\xe1 un colaborador'; errEl.style.display='block'; return; }
   if (!start) { errEl.textContent = 'La fecha de inicio es obligatoria'; errEl.style.display='block'; return; }
   errEl.style.display = 'none';
+  // Sesión 4 Bloque 2: recolectar los items del template seleccionados
+  const checkboxes = document.querySelectorAll('.ob-template-item-check');
+  const selectedIds = [];
+  checkboxes.forEach(function(cb){
+    if (cb.checked) selectedIds.push(parseInt(cb.dataset.itemId));
+  });
   try {
+    const body = {
+      userId: parseInt(userId),
+      startDate: start,
+      targetEndDate: (document.getElementById('obEndDate')||{}).value||null,
+      roleDescription: (document.getElementById('obRoleDesc')||{}).value||null,
+      assignedToId: (document.getElementById('obAsignado')||{}).value||null
+    };
+    if (selectedIds.length > 0) body.templateItemIds = selectedIds;
     var res = await fetch(API_BASE+'/onboarding', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        userId: parseInt(userId),
-        startDate: start,
-        targetEndDate: (document.getElementById('obEndDate')||{}).value||null,
-        roleDescription: (document.getElementById('obRoleDesc')||{}).value||null,
-        assignedToId: (document.getElementById('obAsignado')||{}).value||null
-      })
+      body: JSON.stringify(body)
     });
     var data = await res.json();
     if (data.ok===false) throw new Error(data.error||'Error');
     closeModal('modalNuevoOnboarding');
-    mostrarToast('Onboarding creado con hitos y cursos por defecto', 'success');
+    const msg = selectedIds.length > 0
+      ? 'Onboarding creado con ' + selectedIds.length + ' item(s) de la plantilla'
+      : 'Onboarding creado con hitos y cursos por defecto';
+    mostrarToast(msg, 'success');
     cargarOnboardings();
   } catch(e) { errEl.textContent='Error: '+e.message; errEl.style.display='block'; }
 }
@@ -7586,6 +7899,12 @@ function verEvidenciaCareer(mid) {
           <textarea id="obRoleDesc" style="display:none;"></textarea>
           <div><label class="form-label">Líder directo</label>
             <select id="obAsignado" class="form-control"><option value="">&#8212; Seleccionar &#8212;</option></select></div>
+          <!-- Preview de items del template del rol (Sesión 4 Bloque 2) -->
+          <div id="obTemplatePreview" style="border-top:1px solid #2a2a2a;padding-top:12px;margin-top:4px;display:none;">
+            <div style="font-size:11px;color:#888;font-weight:700;text-transform:uppercase;margin-bottom:8px;">📋 Items de la plantilla del rol</div>
+            <div id="obTemplateItemsList" style="display:flex;flex-direction:column;gap:6px;max-height:280px;overflow-y:auto;padding-right:4px;"></div>
+            <div id="obTemplateNota" style="font-size:10px;color:#666;margin-top:8px;font-style:italic;"></div>
+          </div>
         </div>
         <div id="obError" style="color:#FF4D4D;font-size:12px;margin-top:10px;display:none;"></div>
         <div class="modal-actions">

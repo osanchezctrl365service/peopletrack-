@@ -167,6 +167,39 @@ body { font-family: var(--font); font-size: 14px; color: var(--gray-800); backgr
 .topbar-btn.primary:hover { background: var(--accent-dark); }
 .content { flex: 1; overflow-y: auto; background:#0d0d0d; padding: 24px; }
 
+/* Layout responsive de Reuniones 1:1 (Sesión 4 Bloque 3) */
+/* >= 1280px: 3 columnas horizontales — colaboradores + bitácora + objetivos */
+.reunion-3col-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr 340px;
+  grid-template-rows: 1fr;
+  gap: 12px;
+  height: calc(100vh - 200px);
+}
+/* 1024-1279px: 2 columnas — colaboradores + bitácora arriba, objetivos abajo */
+@media (max-width: 1279px) {
+  .reunion-3col-layout {
+    grid-template-columns: 240px 1fr;
+    grid-template-rows: 1fr auto;
+    height: auto;
+    min-height: calc(100vh - 200px);
+  }
+  .reunion-3col-layout > .card:nth-child(3) {
+    grid-column: 1 / -1;
+    max-height: 320px;
+  }
+}
+/* < 1024px: apilar todo verticalmente para tablets/móvil */
+@media (max-width: 1023px) {
+  .reunion-3col-layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+  }
+  .reunion-3col-layout > .card:nth-child(1) { max-height: 260px; }
+  .reunion-3col-layout > .card:nth-child(2) { min-height: 420px; }
+  .reunion-3col-layout > .card:nth-child(3) { max-height: 340px; grid-column: 1; }
+}
+
 /* SECTIONS (pages) */
 .section { display: none; }
 .section.active { display: block; }
@@ -1494,7 +1527,7 @@ label { color: #888 !important; }
         <button class="btn btn-primary btn-sm" onclick="abrirModalNuevaReunion()">+ Nueva Reunión</button>
       </div>
 
-      <div style="display:grid;grid-template-columns:260px 1fr 340px;gap:12px;height:calc(100vh - 200px);" id="reunion-layout-grid">
+      <div class="reunion-3col-layout" id="reunion-layout-grid">
         
         <!-- PANEL IZQUIERDO: lista de colaboradores -->
         <div class="card" style="padding:0;overflow:hidden;display:flex;flex-direction:column;">

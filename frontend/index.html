@@ -5302,7 +5302,11 @@ function filtrarAlertas() {
   let filtered = allAlertas;
   if (tipo === 'danger') filtered = filtered.filter(a => (a.AlertType||'').includes('risk') || a.Severity === 'danger');
   if (tipo === 'warning') filtered = filtered.filter(a => (a.AlertType||'').includes('warning') || a.Severity === 'warning');
-  if (q) filtered = filtered.filter(a => (a.FullName||a.UserName||'').toLowerCase().includes(q) || (a.ObjectiveTitle||a.Title||'').toLowerCase().includes(q));
+  if (q) filtered = filtered.filter(a =>
+    (a.FullName||a.UserName||'').toLowerCase().includes(q) ||
+    (a.ObjectiveTitle||a.Title||'').toLowerCase().includes(q) ||
+    (a.Message||a.message||'').toLowerCase().includes(q)
+  );
   renderAlertas(filtered);
 }
 

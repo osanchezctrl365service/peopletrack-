@@ -2215,7 +2215,7 @@ label { color: #888 !important; }
         </div>
 
         <div class="card" style="margin-bottom:14px;">
-          <div style="font-size:11px;font-weight:700;color:#FF5400;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">📌 Según los filtros de arriba</div>
+          <div style="font-size:11px;font-weight:700;color:#FF5400;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">📌 Según los filtros de arriba</div><div style="font-size:11px;color:#888;margin-bottom:12px;">Los paneles de abajo se calculan sobre <b>todos los activos</b>, no sobre este filtro.</div>
           <div id="repEmpresaKPIs" class="grid-3 gap-16"></div>
         </div>
 
@@ -6384,15 +6384,7 @@ function actualizarTabManagerYEmpresa(filtrados) {
   // Tab Empresa
   const kEmp = document.getElementById('repEmpresaKPIs');
   if (kEmp && document.getElementById('rep-empresa') && document.getElementById('rep-empresa').style.display !== 'none') {
-    const act = filtrados.length;
-    const avgProg = filtrados.length > 0
-      ? Math.round(filtrados.reduce(function(s, u){ return s + (parseFloat(u.AvgProgress)||0); }, 0) / filtrados.length)
-      : 0;
-    const enRiesgo = filtrados.filter(function(u){ return (u.AvgProgress||0) < 40; }).length;
-    kEmp.innerHTML =
-      '<div class="kpi-card"><div class="kpi-label">Colaboradores filtrados</div><div class="kpi-value" style="color:#f0ebe3;">' + act + '</div></div>' +
-      '<div class="kpi-card"><div class="kpi-label">Avance promedio</div><div class="kpi-value" style="color:#FF5400;">' + avgProg + '%</div></div>' +
-      '<div class="kpi-card"><div class="kpi-label">En riesgo (<40%)</div><div class="kpi-value" style="color:#FF4D4D;">' + enRiesgo + '</div></div>';
+    kEmp.innerHTML = repEmpresaFiltroKPIs(filtrados);
   }
 }
 
@@ -6423,15 +6415,7 @@ function initReporteTab(tipo) {
   if (tipo === 'empresa') {
     const k = document.getElementById('repEmpresaKPIs');
     if (k) {
-      const act = filtrados.length;
-      const avgProg = filtrados.length > 0
-        ? Math.round(filtrados.reduce(function(s, u){ return s + (parseFloat(u.AvgProgress)||0); }, 0) / filtrados.length)
-        : 0;
-      const enRiesgo = filtrados.filter(function(u){ return (u.AvgProgress||0) < 40; }).length;
-      k.innerHTML =
-        '<div class="kpi-card"><div class="kpi-label">Colaboradores filtrados</div><div class="kpi-value" style="color:#f0ebe3;">' + act + '</div></div>' +
-        '<div class="kpi-card"><div class="kpi-label">Avance promedio</div><div class="kpi-value" style="color:#FF5400;">' + avgProg + '%</div></div>' +
-        '<div class="kpi-card"><div class="kpi-label">En riesgo (<40%)</div><div class="kpi-value" style="color:#FF4D4D;">' + enRiesgo + '</div></div>';
+      k.innerHTML = repEmpresaFiltroKPIs(filtrados);
     }
     // Sesión 8: cargar el reporte completo de empresa la primera vez
     if (!_repEmpresaData) verReporteEmpresa();
@@ -7422,6 +7406,26 @@ function renderRepManagerDirectos(directos) {
 
 // ═══ "GENERAL EMPRESA" (Sesión 8 · Bloque 4) ═════════════════
 let _repEmpresaData = null;
+
+// KPIs de la barra de filtros. Antes mostraban "Avance promedio" y "En riesgo (<40%)"
+// calculados sobre u.AvgProgress, un campo que el API NUNCA devuelve: con `|| 0` daba
+// siempre 0%, y por lo tanto marcaba a TODA la empresa como "en riesgo". Se sacaron los
+// dos números inventados y se dejó solo lo que este listado realmente sabe.
+function repEmpresaFiltroKPIs(filtrados) {
+  const act = (filtrados || []).length;
+  const conArea = (filtrados || []).filter(function(u){ return u.AreaID || u.AreaName; }).length;
+  const conLider = (filtrados || []).filter(function(u){ return u.LeaderID || u.ManagerID; }).length;
+  function kpi(label, value, color, sub) {
+    return '<div class="kpi-card"><div class="kpi-label">' + label + '</div>' +
+           '<div class="kpi-value" style="color:' + color + ';">' + value + '</div>' +
+           (sub ? '<div style="font-size:10px;color:#666;margin-top:2px;">' + sub + '</div>' : '') + '</div>';
+  }
+  const sinArea  = act - conArea;
+  const sinLider = act - conLider;
+  return kpi('Colaboradores filtrados', act, '#f0ebe3', '') +
+         kpi('Sin área asignada', sinArea, sinArea ? '#F59E0B' : '#2ECC71', sinArea ? 'revisar en Usuarios' : '') +
+         kpi('Sin líder asignado', sinLider, sinLider ? '#F59E0B' : '#2ECC71', sinLider ? 'no aparecen en Por Líder' : '');
+}
 
 async function verReporteEmpresa() {
   const periodId = (document.getElementById('repEmpresaPeriodoSel')||{}).value || '';

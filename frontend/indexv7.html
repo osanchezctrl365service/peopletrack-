@@ -1847,10 +1847,10 @@ label { color: #888 !important; }
             </div>
             <div>
               <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;display:block;margin-bottom:6px;">Tipo de evaluación *</label>
-              <select id="compEvalTipoSel" class="form-control" style="width:100%;" onchange="compOnCambioTipoEval()">
-                <option value="leader">Yo evalúo como líder</option>
-                <option value="manager">Yo evalúo como manager</option>
-                <option value="self">Autoevaluación (el colaborador se evalúa)</option>
+              <select id="compEvalTipoSel" class="form-control" style="width:100%;">
+                <option value="leader">Como líder</option>
+                <option value="manager">Como manager</option>
+                <option value="self">Autoevaluación</option>
               </select>
             </div>
             <div>
@@ -5519,9 +5519,6 @@ function compAbrirNuevaEvaluacion() {
   compCambiarTab('evaluar', tabs.length > 1 ? tabs[1] : null);
 }
 
-// ID de la evaluación que estamos editando (null = nueva)
-let compEvalEditandoId = null;
-
 async function compOnCambioUsuarioEval() {
   const userId = document.getElementById('compEvalUserSel').value;
   const cont = document.getElementById('compEvalFormContainer');
@@ -5529,110 +5526,17 @@ async function compOnCambioUsuarioEval() {
   if (!userId) {
     cont.innerHTML = '<div style="text-align:center;padding:40px;color:#888;font-size:13px;">Elegí un colaborador para comenzar la evaluación.</div>';
     if (aviso) aviso.textContent = '';
-    compEvalEditandoId = null;
     return;
   }
   if (!compCatalogo.length) await cargarCatalogoCompetencias();
-
-  const myEmail = (window._userEmail || '').toLowerCase().trim();
-  const me = (allUsuarios||[]).find(function(u){ return String(u.Email||'').toLowerCase().trim() === myEmail; });
-  const tipoSel = document.getElementById('compEvalTipoSel');
-
-  // Si el colaborador elegido soy yo mismo → es autoevaluación
-  const esMiPropio = me && String(me.UserID) === String(userId);
-  if (esMiPropio && tipoSel) {
-    tipoSel.value = 'self';
-  } else if (tipoSel && tipoSel.value === 'self') {
-    tipoSel.value = 'leader';
-  }
-
-  compOnCambioTipoEval(false);
-  await cargarEvaluacionExistente();
-}
-
-// Busca si ya hay una evaluación de este colaborador con este tipo, y la precarga
-async function cargarEvaluacionExistente() {
-  const userId = document.getElementById('compEvalUserSel').value;
-  const tipo   = (document.getElementById('compEvalTipoSel')||{}).value || 'leader';
-  const cont   = document.getElementById('compEvalFormContainer');
-  if (!userId) return;
-
-  compEvalActual = {};
-  compEvalEditandoId = null;
-  cont.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Buscando evaluaciones previas...</div>';
-
-  try {
-    // 1. Buscar evaluaciones del colaborador
-    const res = await fetch(API_BASE + '/competencies/evaluations?userId=' + userId);
-    const raw = await res.text();
-    let existentes = [];
-    if (raw && raw.trim()) {
-      const json = JSON.parse(raw);
-      existentes = Array.isArray(json) ? json : (json.data || []);
-    }
-    // 2. Filtrar por el tipo elegido — tomamos la más reciente
-    const delTipo = existentes.filter(function(e){ return e.EvaluatorType === tipo; });
-    if (delTipo.length > 0) {
-      const ultima = delTipo[0]; // ya vienen ordenadas desc
-      compEvalEditandoId = ultima.EvaluationID;
-      // 3. Traer el detalle con los items
-      const detRes = await fetch(API_BASE + '/competencies/evaluations/' + ultima.EvaluationID);
-      const detRaw = await detRes.text();
-      if (detRaw && detRaw.trim()) {
-        const detJson = JSON.parse(detRaw);
-        const det = detJson.data || detJson;
-        (det.items || []).forEach(function(it){
-          compEvalActual[it.CompCatalogID] = {
-            levelValue: it.LevelValue,
-            comment: it.Comment || ''
-          };
-        });
-        // Guardar feedback general para precargarlo
-        compEvalActual._feedback = det.evaluation.GeneralFeedback || '';
-        compEvalActual._mejora   = det.evaluation.ImprovementAreas || '';
-        compEvalActual._status   = det.evaluation.Status;
-        compEvalActual._fecha    = det.evaluation.EvaluationDate;
-        compEvalActual._periodId = det.evaluation.PeriodID;
-      }
-    }
-    renderFormularioEvaluacion();
-  } catch(e) {
-    console.warn('[Competencias] Error buscando evaluación previa:', e);
-    renderFormularioEvaluacion();
-  }
-}
-
-// Muestra un aviso contextual según el tipo de evaluación elegido
-function compOnCambioTipoEval(recargar) {
-  const userId = document.getElementById('compEvalUserSel').value;
-  const tipo = (document.getElementById('compEvalTipoSel')||{}).value || 'leader';
-  const aviso = document.getElementById('compEvalAviso');
-  if (!aviso || !userId) return;
-
   const user = (allUsuarios||[]).find(function(u){ return String(u.UserID) === String(userId); });
-  const myEmail = (window._userEmail || '').toLowerCase().trim();
-  const me = (allUsuarios||[]).find(function(u){ return String(u.Email||'').toLowerCase().trim() === myEmail; });
-  const nombreEval = user ? String(user.FullName||user.Email).replace(/</g,'&lt;') : '—';
-  const esMiPropio = me && String(me.UserID) === String(userId);
-
-  let texto = '';
-  if (tipo === 'self') {
-    if (esMiPropio) {
-      texto = '🪞 <b style="color:#3B82F6;">Autoevaluación</b> — estás evaluando tu propio desempeño.';
-    } else {
-      texto = '⚠️ <b style="color:#F59E0B;">Ojo:</b> marcaste "autoevaluación" pero el colaborador elegido es <b style="color:#f0ebe3;">' + nombreEval + '</b>, no vos. ' +
-              'Usá esta opción solo si estás cargando la autoevaluación que esa persona completó en papel o en otro medio.';
-    }
-  } else {
-    const rolTxt = tipo === 'manager' ? 'manager' : 'líder';
-    texto = '👤 Estás evaluando a <b style="color:#f0ebe3;">' + nombreEval + '</b> en tu rol de <b>' + rolTxt + '</b>';
-    if (user && user.AreaName) texto += ' · ' + String(user.AreaName).replace(/</g,'&lt;');
-    if (user && user.JobRoleName) texto += ' · ' + String(user.JobRoleName).replace(/</g,'&lt;');
+  if (aviso && user) {
+    aviso.innerHTML = 'Evaluando a <b style="color:#f0ebe3;">' + String(user.FullName||'').replace(/</g,'&lt;') + '</b>' +
+                      (user.AreaName ? ' · ' + user.AreaName : '') +
+                      (user.JobRoleName ? ' · ' + user.JobRoleName : '');
   }
-  aviso.innerHTML = texto;
-
-  // Si cambió el tipo, recargar la evaluación existente de ese tipo
-  if (recargar !== false) cargarEvaluacionExistente();
+  compEvalActual = {};
+  renderFormularioEvaluacion();
 }
 
 function renderFormularioEvaluacion() {
@@ -5640,27 +5544,6 @@ function renderFormularioEvaluacion() {
   if (!cont || !compCatalogo.length) return;
 
   let html = '';
-
-  // Banner si estamos editando una evaluación existente
-  if (compEvalEditandoId) {
-    const fecha = compEvalActual._fecha ? new Date(compEvalActual._fecha).toLocaleDateString('es-AR') : '';
-    const st = compEvalActual._status === 'published' ? 'publicada' : 'borrador';
-    const stCol = compEvalActual._status === 'published' ? '#2ECC71' : '#F59E0B';
-    html += '<div style="background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.3);border-radius:8px;padding:12px 16px;margin-bottom:16px;">';
-    html += '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">';
-    html += '<div style="font-size:12px;color:#aaa;">';
-    html += '📝 <b style="color:#3B82F6;">Editando evaluación existente</b> del ' + fecha;
-    html += ' · <span style="color:' + stCol + ';font-weight:700;">' + st + '</span>';
-    html += '<div style="font-size:11px;color:#777;margin-top:3px;">Los valores previos están precargados. Al guardar se actualiza esta evaluación.</div>';
-    html += '</div>';
-    html += '<button onclick="empezarEvaluacionNueva()" style="padding:6px 14px;background:#222;border:1px solid #333;border-radius:6px;color:#aaa;font-size:11px;cursor:pointer;white-space:nowrap;">+ Crear una nueva en vez de editar</button>';
-    html += '</div></div>';
-  } else {
-    html += '<div style="background:rgba(46,204,113,0.06);border:1px solid rgba(46,204,113,0.2);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:12px;color:#aaa;">';
-    html += '✨ <b style="color:#2ECC71;">Evaluación nueva</b> — no hay evaluaciones previas de este tipo para este colaborador.';
-    html += '</div>';
-  }
-
   let tipoActual = null;
   compCatalogo.forEach(function(c){
     if (c.CompType !== tipoActual) {
@@ -5669,65 +5552,42 @@ function renderFormularioEvaluacion() {
       const col   = tipoActual === 'general' ? '#3B82F6' : '#A855F7';
       html += '<div style="font-size:12px;font-weight:700;color:' + col + ';text-transform:uppercase;margin:20px 0 10px;">' + label + '</div>';
     }
-    // Valores precargados si existen
-    const prev = compEvalActual[c.CompCatalogID] || {};
-    const nivelPrev = prev.levelValue;
-    const comentPrev = prev.comment || '';
-
-    html += '<div class="card" style="margin-bottom:12px;' + (nivelPrev != null ? 'border-left:3px solid ' + (COMP_NIVEL_COLORS[nivelPrev]||'#888') + ';' : '') + '">';
-    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">';
-    html += '<div style="font-size:13px;font-weight:700;color:#f0ebe3;">' + String(c.Name).replace(/</g,'&lt;') + '</div>';
-    if (nivelPrev != null) {
-      const npc = COMP_NIVEL_COLORS[nivelPrev] || '#888';
-      const nivelObj = (c.levels||[]).find(function(l){ return l.LevelValue === nivelPrev; });
-      html += '<span style="font-size:10px;font-weight:700;color:' + npc + ';background:' + npc + '22;padding:2px 8px;border-radius:8px;">' + (nivelObj ? nivelObj.LevelName : nivelPrev) + '</span>';
-    }
-    html += '</div>';
+    html += '<div class="card" style="margin-bottom:12px;">';
+    html += '<div style="font-size:13px;font-weight:700;color:#f0ebe3;margin-bottom:4px;">' + String(c.Name).replace(/</g,'&lt;') + '</div>';
     if (c.Definition) {
       html += '<div style="font-size:10px;color:#777;line-height:1.5;margin-bottom:10px;">' + String(c.Definition).replace(/</g,'&lt;').substring(0, 220) + '...</div>';
     }
+    // Opciones de nivel con su descriptor
     (c.levels||[]).forEach(function(l){
       const lc = COMP_NIVEL_COLORS[l.LevelValue] || '#888';
       const inputId = 'lvl-' + c.CompCatalogID + '-' + l.LevelValue;
-      const checked = (nivelPrev === l.LevelValue) ? 'checked' : '';
-      const bgSel = (nivelPrev === l.LevelValue) ? lc + '11' : '#111';
-      html += '<label for="' + inputId + '" style="display:flex;gap:10px;align-items:flex-start;padding:9px 11px;background:' + bgSel + ';border:1px solid #222;border-left:3px solid ' + lc + ';border-radius:6px;margin-bottom:5px;cursor:pointer;">';
-      html += '<input type="radio" id="' + inputId + '" name="comp-' + c.CompCatalogID + '" value="' + l.LevelValue + '" ' + checked + ' onchange="setNivelCompetencia(' + c.CompCatalogID + ',' + l.LevelValue + ')" style="margin-top:2px;">';
+      html += '<label for="' + inputId + '" style="display:flex;gap:10px;align-items:flex-start;padding:9px 11px;background:#111;border:1px solid #222;border-left:3px solid ' + lc + ';border-radius:6px;margin-bottom:5px;cursor:pointer;" onmouseover="this.style.background=\'#161616\'" onmouseout="this.style.background=\'#111\'">';
+      html += '<input type="radio" id="' + inputId + '" name="comp-' + c.CompCatalogID + '" value="' + l.LevelValue + '" onchange="setNivelCompetencia(' + c.CompCatalogID + ',' + l.LevelValue + ')" style="margin-top:2px;">';
       html += '<div style="flex:1;">';
       html += '<div style="font-size:11px;font-weight:700;color:' + lc + ';">' + String(l.LevelName) + '</div>';
       if (l.Descriptor) html += '<div style="font-size:10px;color:#888;line-height:1.5;margin-top:3px;">' + String(l.Descriptor).replace(/</g,'&lt;') + '</div>';
       html += '</div></label>';
     });
-    html += '<textarea id="comment-' + c.CompCatalogID + '" rows="2" placeholder="Comentario u observaciones (opcional)..." oninput="setComentarioCompetencia(' + c.CompCatalogID + ', this.value)" style="width:100%;margin-top:8px;background:#0d0d0d;border:1px solid #252525;border-radius:6px;padding:8px 10px;color:#f0ebe3;font-size:11px;outline:none;resize:vertical;">' + String(comentPrev).replace(/</g,'&lt;') + '</textarea>';
+    // Comentario
+    html += '<textarea id="comment-' + c.CompCatalogID + '" rows="2" placeholder="Comentario u observaciones (opcional)..." oninput="setComentarioCompetencia(' + c.CompCatalogID + ', this.value)" style="width:100%;margin-top:8px;background:#0d0d0d;border:1px solid #252525;border-radius:6px;padding:8px 10px;color:#f0ebe3;font-size:11px;outline:none;resize:vertical;"></textarea>';
     html += '</div>';
   });
 
-  // Feedback general (precargado si existe)
-  const fbPrev = compEvalActual._feedback || '';
-  const mejPrev = compEvalActual._mejora || '';
+  // Feedback general
   html += '<div class="card" style="margin-bottom:16px;">';
   html += '<div style="font-size:12px;font-weight:700;color:#FF5400;text-transform:uppercase;margin-bottom:10px;">Feedback general</div>';
-  html += '<textarea id="compEvalFeedback" rows="3" placeholder="Feedback general sobre el desempeño en competencias..." style="width:100%;background:#111;border:1px solid #252525;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:12px;outline:none;resize:vertical;margin-bottom:12px;">' + String(fbPrev).replace(/</g,'&lt;') + '</textarea>';
+  html += '<textarea id="compEvalFeedback" rows="3" placeholder="Feedback general sobre el desempeño en competencias..." style="width:100%;background:#111;border:1px solid #252525;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:12px;outline:none;resize:vertical;margin-bottom:12px;"></textarea>';
   html += '<div style="font-size:12px;font-weight:700;color:#F59E0B;text-transform:uppercase;margin-bottom:10px;">Áreas de mejora</div>';
-  html += '<textarea id="compEvalMejora" rows="3" placeholder="Áreas de mejora sugeridas..." style="width:100%;background:#111;border:1px solid #252525;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:12px;outline:none;resize:vertical;">' + String(mejPrev).replace(/</g,'&lt;') + '</textarea>';
+  html += '<textarea id="compEvalMejora" rows="3" placeholder="Áreas de mejora sugeridas..." style="width:100%;background:#111;border:1px solid #252525;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:12px;outline:none;resize:vertical;"></textarea>';
   html += '</div>';
 
   // Botones
-  const labelBtn = compEvalEditandoId ? '✓ Actualizar y publicar' : '✓ Guardar y publicar';
   html += '<div style="display:flex;gap:10px;justify-content:flex-end;margin-bottom:20px;">';
   html += '<button onclick="guardarEvaluacionCompetencias(\'draft\')" style="padding:10px 20px;background:#222;border:1px solid #333;border-radius:8px;color:#aaa;font-size:13px;cursor:pointer;">Guardar borrador</button>';
-  html += '<button onclick="guardarEvaluacionCompetencias(\'published\')" id="btnPublicarEval" style="padding:10px 24px;background:#FF5400;border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;">' + labelBtn + '</button>';
+  html += '<button onclick="guardarEvaluacionCompetencias(\'published\')" id="btnPublicarEval" style="padding:10px 24px;background:#FF5400;border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;">✓ Guardar y publicar</button>';
   html += '</div>';
 
   cont.innerHTML = html;
-}
-
-// Descartar la evaluación cargada y arrancar una nueva desde cero
-function empezarEvaluacionNueva() {
-  if (!confirm('¿Crear una evaluación nueva? La anterior se conserva en el historial.')) return;
-  compEvalEditandoId = null;
-  compEvalActual = {};
-  renderFormularioEvaluacion();
 }
 
 function setNivelCompetencia(compId, nivel) {
@@ -5748,8 +5608,6 @@ async function guardarEvaluacionCompetencias(status) {
 
   const items = [];
   Object.keys(compEvalActual).forEach(function(cid){
-    // Saltear las claves internas que empiezan con _
-    if (String(cid).charAt(0) === '_') return;
     const d = compEvalActual[cid];
     if (d.levelValue != null || (d.comment && d.comment.trim())) {
       items.push({ compCatalogId: parseInt(cid), levelValue: d.levelValue != null ? d.levelValue : null, comment: d.comment || null });
@@ -5758,53 +5616,36 @@ async function guardarEvaluacionCompetencias(status) {
   if (!items.length) { mostrarToast('Evaluá al menos una competencia', 'error'); return; }
 
   const btn = document.getElementById('btnPublicarEval');
-  const labelOriginal = btn ? btn.textContent : '';
   if (btn) { btn.textContent = 'Guardando...'; btn.disabled = true; }
 
   try {
-    const feedback = (document.getElementById('compEvalFeedback')||{}).value || null;
-    const mejora   = (document.getElementById('compEvalMejora')||{}).value || null;
-
-    let res, url, method, payload;
-    if (compEvalEditandoId) {
-      // Actualizar la existente
-      method = 'PUT';
-      url = API_BASE + '/competencies/evaluations/' + compEvalEditandoId;
-      payload = { status: status, generalFeedback: feedback, improvementAreas: mejora, items: items };
-    } else {
-      // Crear nueva
-      method = 'POST';
-      url = API_BASE + '/competencies/evaluations';
-      payload = {
-        userId: parseInt(userId),
-        evaluatorType: tipo,
-        periodId: period ? parseInt(period) : null,
-        status: status,
-        generalFeedback: feedback,
-        improvementAreas: mejora,
-        source: 'app',
-        items: items
-      };
-    }
-
-    res = await fetch(url, {
-      method: method, headers: {'Content-Type':'application/json'},
+    const payload = {
+      userId: parseInt(userId),
+      evaluatorType: tipo,
+      periodId: period ? parseInt(period) : null,
+      status: status,
+      generalFeedback: (document.getElementById('compEvalFeedback')||{}).value || null,
+      improvementAreas: (document.getElementById('compEvalMejora')||{}).value || null,
+      source: 'app',
+      items: items
+    };
+    const res = await fetch(API_BASE + '/competencies/evaluations', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
       body: JSON.stringify(payload)
     });
     const raw = await res.text();
     if (!raw || !raw.trim()) throw new Error('Sin respuesta del servidor (HTTP ' + res.status + ')');
     const json = JSON.parse(raw);
     if (!res.ok || json.ok === false) throw new Error(json.error || 'HTTP ' + res.status);
-
-    const accion = compEvalEditandoId ? 'actualizada' : 'guardada';
-    const estadoTxt = status === 'published' ? 'publicada' : 'borrador';
-    mostrarToast('✅ Evaluación ' + accion + ' (' + estadoTxt + ') — ' + items.length + ' competencia(s)', 'success');
-
-    // Recargar para reflejar el estado guardado
-    await cargarEvaluacionExistente();
+    const data = json.data || json;
+    mostrarToast('✅ Evaluación guardada — ' + (data.itemsSaved||0) + ' competencia(s)' + (status === 'published' ? ' (publicada)' : ' (borrador)'), 'success');
+    compEvalActual = {};
+    document.getElementById('compEvalUserSel').value = '';
+    compOnCambioUsuarioEval();
   } catch(e) {
     mostrarToast('Error guardando: ' + e.message, 'error');
-    if (btn) { btn.textContent = labelOriginal; btn.disabled = false; }
+  } finally {
+    if (btn) { btn.textContent = '✓ Guardar y publicar'; btn.disabled = false; }
   }
 }
 
@@ -5827,32 +5668,6 @@ async function cargarResultados360() {
     renderResultados360(json.data || json);
   } catch(e) {
     cont.innerHTML = '<div style="color:#FF4D4D;padding:20px;text-align:center;">Error: ' + e.message + '</div>';
-  }
-}
-
-// Mostrar/ocultar los comentarios de una competencia puntual
-function toggleComentariosComp(compId) {
-  const row = document.getElementById('comentRow-' + compId);
-  if (!row) return;
-  row.style.display = (row.style.display === 'none' || !row.style.display) ? 'table-row' : 'none';
-}
-
-// Mostrar/ocultar todos los comentarios de golpe
-function toggleTodosComentarios() {
-  const btn = document.getElementById('btnToggleComentarios');
-  const filas = document.querySelectorAll('[id^="comentRow-"]');
-  if (!filas.length) return;
-  // Si alguna está oculta, mostramos todas; si están todas visibles, ocultamos
-  let algunaOculta = false;
-  filas.forEach(function(f){
-    if (f.style.display === 'none' || !f.style.display) algunaOculta = true;
-  });
-  filas.forEach(function(f){ f.style.display = algunaOculta ? 'table-row' : 'none'; });
-  if (btn) {
-    const total = filas.length;
-    btn.textContent = algunaOculta
-      ? '💬 Ocultar comentarios (' + total + ')'
-      : '💬 Mostrar todos los comentarios (' + total + ')';
   }
 }
 
@@ -5899,7 +5714,7 @@ function renderResultados360(data) {
     html += '<div class="card" style="margin-bottom:16px;">';
     html += '<div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:12px;">Comparativa 360°</div>';
     html += '<div style="overflow-x:auto;"><table class="data-table" style="min-width:600px;">';
-    html += '<thead><tr><th>Competencia</th><th style="text-align:center;">Auto</th><th style="text-align:center;">Líder</th><th style="text-align:center;">Manager</th><th style="text-align:center;">Promedio</th><th style="text-align:center;">💬</th></tr></thead><tbody>';
+    html += '<thead><tr><th>Competencia</th><th style="text-align:center;">Auto</th><th style="text-align:center;">Líder</th><th style="text-align:center;">Manager</th><th style="text-align:center;">Promedio</th></tr></thead><tbody>';
 
     let tipoAct = null;
     matrix.forEach(function(m){
@@ -5907,19 +5722,13 @@ function renderResultados360(data) {
         tipoAct = m.compType;
         const lbl = tipoAct === 'general' ? 'Generales' : 'Liderazgo';
         const col = tipoAct === 'general' ? '#3B82F6' : '#A855F7';
-        html += '<tr><td colspan="6" style="padding-top:12px;"><span style="font-size:10px;font-weight:700;color:' + col + ';text-transform:uppercase;">' + lbl + '</span></td></tr>';
+        html += '<tr><td colspan="5" style="padding-top:12px;"><span style="font-size:10px;font-weight:700;color:' + col + ';text-transform:uppercase;">' + lbl + '</span></td></tr>';
       }
       const celda = function(v) {
         if (v == null) return '<span style="color:#444;">—</span>';
         const c = COMP_NIVEL_COLORS[v] || '#888';
         return '<span title="' + (nivelNombre[v]||'') + '" style="display:inline-block;width:26px;height:26px;line-height:26px;border-radius:50%;background:' + c + '22;color:' + c + ';font-weight:800;font-size:12px;">' + v + '</span>';
       };
-      // ¿Tiene comentarios?
-      const comentarios = [];
-      if (m.selfComment)    comentarios.push({tipo:'Autoevaluación', texto:m.selfComment,    col:'#3B82F6'});
-      if (m.leaderComment)  comentarios.push({tipo:'Líder',          texto:m.leaderComment,  col:'#FF5400'});
-      if (m.managerComment) comentarios.push({tipo:'Manager',        texto:m.managerComment, col:'#A855F7'});
-
       html += '<tr>';
       html += '<td style="font-size:12px;color:#f0ebe3;">' + String(m.name).replace(/</g,'&lt;') + '</td>';
       html += '<td style="text-align:center;">' + celda(m.self) + '</td>';
@@ -5930,41 +5739,14 @@ function renderResultados360(data) {
         const ac = COMP_NIVEL_COLORS[Math.round(m.average)] || '#888';
         html += '<b style="color:' + ac + ';font-size:13px;">' + m.average + '</b>';
       } else html += '<span style="color:#444;">—</span>';
-      html += '</td>';
-      // Botón de comentarios
-      html += '<td style="text-align:center;">';
-      if (comentarios.length) {
-        html += '<button onclick="toggleComentariosComp(' + m.compCatalogId + ')" title="Ver comentarios" style="background:transparent;border:none;color:#F59E0B;font-size:13px;cursor:pointer;padding:2px 6px;">💬 ' + comentarios.length + '</button>';
-      } else {
-        html += '<span style="color:#333;font-size:11px;">—</span>';
-      }
       html += '</td></tr>';
-
-      // Fila expandible con los comentarios
-      if (comentarios.length) {
-        html += '<tr id="comentRow-' + m.compCatalogId + '" style="display:none;"><td colspan="6" style="padding:0 0 10px 0;">';
-        html += '<div style="background:#0d0d0d;border-radius:8px;padding:12px;border-left:3px solid #F59E0B;">';
-        comentarios.forEach(function(c){
-          html += '<div style="margin-bottom:10px;">';
-          html += '<div style="font-size:10px;font-weight:700;color:' + c.col + ';text-transform:uppercase;margin-bottom:3px;">' + c.tipo + '</div>';
-          html += '<div style="font-size:11px;color:#aaa;line-height:1.6;">' + String(c.texto).replace(/</g,'&lt;') + '</div>';
-          html += '</div>';
-        });
-        html += '</div></td></tr>';
-      }
     });
     html += '</tbody></table></div>';
-    // Leyenda + botón para expandir todos
-    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;flex-wrap:wrap;gap:10px;">';
-    html += '<div style="display:flex;gap:14px;flex-wrap:wrap;font-size:10px;color:#888;">';
+    // Leyenda
+    html += '<div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;font-size:10px;color:#888;">';
     [4,3,2,1].forEach(function(v){
       html += '<span><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:' + COMP_NIVEL_COLORS[v] + ';margin-right:4px;"></span>' + v + ' = ' + nivelNombre[v] + '</span>';
     });
-    html += '</div>';
-    const totalComentarios = matrix.filter(function(m){ return m.selfComment || m.leaderComment || m.managerComment; }).length;
-    if (totalComentarios > 0) {
-      html += '<button onclick="toggleTodosComentarios()" id="btnToggleComentarios" style="padding:5px 12px;background:#222;border:1px solid #333;border-radius:6px;color:#aaa;font-size:11px;cursor:pointer;white-space:nowrap;">💬 Mostrar todos los comentarios (' + totalComentarios + ')</button>';
-    }
     html += '</div></div>';
   }
 

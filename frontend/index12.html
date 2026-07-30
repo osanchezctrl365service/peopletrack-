@@ -2186,64 +2186,11 @@ label { color: #888 !important; }
         </div>
       </div>
       <div id="rep-manager" style="display:none;margin-top:16px;">
-        <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
-          <select id="repManagerSel" class="form-control" style="width:260px" onchange="verReporteManager()"><option value="">— Seleccionar manager —</option></select>
-          <select id="repManagerPeriodoSel" class="form-control" style="width:180px" onchange="verReporteManager()"><option value="">Todos los períodos</option></select>
-        </div>
-        <div id="repManagerEmpty" style="text-align:center;padding:40px;color:#888;">Seleccioná un manager para ver su estructura</div>
-        <div id="repManagerResult" style="display:none;">
-          <div class="card" style="margin-bottom:14px;">
-            <div style="font-size:15px;font-weight:800;color:#f0ebe3;margin-bottom:4px;" id="repManagerNombre"></div>
-            <div class="text-muted mb-16" id="repManagerInfo"></div>
-            <div id="repManagerKPIs" style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;"></div>
-          </div>
-          <div class="card" style="margin-bottom:14px;">
-            <div style="font-size:11px;font-weight:700;color:#FF5400;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">🧭 Sus líderes</div>
-            <div id="repManagerLideres"><div style="padding:20px;color:#888;font-size:12px;">Cargando…</div></div>
-          </div>
-          <div class="card">
-            <div style="font-size:11px;font-weight:700;color:#FF5400;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">👤 Reportes directos</div>
-            <div id="repManagerDirectos"><div style="padding:20px;color:#888;font-size:12px;">Cargando…</div></div>
-          </div>
-        </div>
+        <div id="repManagerResult" class="grid-2 gap-16"></div>
       </div>
-
       <div id="rep-empresa" style="display:none;margin-top:16px;">
-        <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
-          <select id="repEmpresaPeriodoSel" class="form-control" style="width:180px" onchange="verReporteEmpresa()"><option value="">Todos los períodos</option></select>
-          <button type="button" onclick="verReporteEmpresa()" class="btn btn-secondary btn-sm" style="font-size:11px;">⟳ Actualizar</button>
-        </div>
-
-        <div class="card" style="margin-bottom:14px;">
-          <div style="font-size:11px;font-weight:700;color:#FF5400;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">📌 Según los filtros de arriba</div>
-          <div id="repEmpresaKPIs" class="grid-3 gap-16"></div>
-        </div>
-
-        <div class="card" style="margin-bottom:14px;">
-          <div style="font-size:11px;font-weight:700;color:#FF5400;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">📊 Adopción por módulo</div>
-          <div style="font-size:11px;color:#888;margin-bottom:12px;">Cuánta gente tiene datos cargados en cada módulo, sobre el total de activos.</div>
-          <div id="repEmpCobertura"><div style="padding:20px;color:#888;font-size:12px;">Cargando…</div></div>
-        </div>
-
-        <div class="card" style="margin-bottom:14px;">
-          <div style="font-size:11px;font-weight:700;color:#FF5400;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">📈 Distribución de avance</div>
-          <div id="repEmpDistribucion"><div style="padding:20px;color:#888;font-size:12px;">Cargando…</div></div>
-        </div>
-
-        <div class="card" style="margin-bottom:14px;">
-          <div style="font-size:11px;font-weight:700;color:#FF5400;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">🎯 Mapa de competencias</div>
-          <div id="repEmpCompetencias"><div style="padding:20px;color:#888;font-size:12px;">Cargando…</div></div>
-        </div>
-
-        <div class="card" style="margin-bottom:14px;">
-          <div style="font-size:11px;font-weight:700;color:#FF5400;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">⚠️ Planes de mejora (PIP)</div>
-          <div id="repEmpPips"><div style="padding:20px;color:#888;font-size:12px;">Cargando…</div></div>
-        </div>
-
-        <div class="card">
-          <div style="font-size:11px;font-weight:700;color:#FF5400;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">🏢 Por área</div>
-          <div id="repEmpAreas"><div style="padding:20px;color:#888;font-size:12px;">Cargando…</div></div>
-        </div>
+        <div class="card"><div style="font-size:14px;font-weight:700;color:#f0ebe3;margin-bottom:12px;">KPIs de empresa</div>
+        <div id="repEmpresaKPIs" class="grid-3 gap-16"></div></div>
       </div>
 
     <div class="section" id="sec-orgchart" style="overflow-y:auto;">
@@ -6219,7 +6166,7 @@ function initReportes() {
   // Aplicar filtros (con default = ninguno) para poblar los dropdowns de cada tab
   aplicarFiltrosReportes();
   // Períodos — Sesión 5 fix: cargar si no están. Sesión 8: también el de la tab Líder.
-  const perSels = ['repPeriodoSel','repLiderPeriodoSel','repManagerPeriodoSel','repEmpresaPeriodoSel']
+  const perSels = ['repPeriodoSel','repLiderPeriodoSel']
     .map(function(id){ return document.getElementById(id); })
     .filter(function(el){ return el && el.options.length <= 1; });
   if (perSels.length) {
@@ -6408,14 +6355,16 @@ function initReporteTab(tipo) {
   // Sesión 5 Bloque 2.C: usar data filtrada si hay filtros aplicados
   const filtrados = window._repFiltrados || (allUsuarios || []).filter(function(u){ return u.IsActive; });
   if (tipo === 'manager') {
-    // Sesión 8: el detalle lo arma verReporteManager(); acá solo poblamos el combo.
-    const sel = document.getElementById('repManagerSel');
-    if (sel && sel.options.length <= 1) {
-      (allUsuarios || []).filter(function(u){
+    const c = document.getElementById('repManagerResult');
+    if (c) {
+      const managers = (allUsuarios || []).filter(function(u){
         const r = String(u.AppRole||'').toLowerCase();
         return u.IsActive && (r === 'manager' || r === 'admin');
-      }).sort(function(a,b){ return (a.FullName||'').localeCompare(b.FullName||''); })
-        .forEach(function(u){ sel.add(new Option(u.FullName || u.Email, u.UserID)); });
+      });
+      c.innerHTML = managers.length ? managers.map(function(m){
+        const eq = filtrados.filter(function(u){ return String(u.ManagerID) === String(m.UserID) || String(u.LeaderID) === String(m.UserID); });
+        return '<div class="card"><div style="font-weight:800;color:#FF5400;margin-bottom:8px;">' + (m.FullName||'') + '</div><div style="font-size:12px;color:#888;">' + eq.length + ' personas</div></div>';
+      }).join('') : '<div style="padding:20px;color:#888;">Sin managers</div>';
     }
   }
   if (tipo === 'empresa') {
@@ -6431,8 +6380,6 @@ function initReporteTab(tipo) {
         '<div class="kpi-card"><div class="kpi-label">Avance promedio</div><div class="kpi-value" style="color:#FF5400;">' + avgProg + '%</div></div>' +
         '<div class="kpi-card"><div class="kpi-label">En riesgo (<40%)</div><div class="kpi-value" style="color:#FF4D4D;">' + enRiesgo + '</div></div>';
     }
-    // Sesión 8: cargar el reporte completo de empresa la primera vez
-    if (!_repEmpresaData) verReporteEmpresa();
   }
 }
 
@@ -7230,340 +7177,6 @@ function renderRepLiderObjetivos(objs) {
   cont.innerHTML = html;
 }
 
-// Salta a la tab "Por Líder" con el líder ya seleccionado
-function repIrALider(userId) {
-  const sel = document.getElementById('repLiderSel');
-  if (!sel) return;
-  const existe = Array.prototype.some.call(sel.options, function(o){ return String(o.value) === String(userId); });
-  if (!existe) {
-    alert('Ese líder no está en la lista actual de "Por Líder".\n\nProbablemente lo estén dejando afuera los filtros de arriba. Limpiá los filtros y volvé a intentar.');
-    return;
-  }
-  const tabs = document.querySelectorAll('#rep-tabs .tab');
-  if (tabs.length > 1) switchTab('rep', 'lider', tabs[1]);
-  sel.value = String(userId);
-  verReporteLider();
-  const sec = document.getElementById('sec-reports');
-  if (sec && sec.scrollIntoView) sec.scrollIntoView({ behavior:'smooth', block:'start' });
-}
-
-// ═══ DEEP-DIVE "POR MANAGER" (Sesión 8 · Bloque 3) ════════════
-let _repManagerData = null;
-
-async function verReporteManager() {
-  const managerId = (document.getElementById('repManagerSel')||{}).value || '';
-  const periodId  = (document.getElementById('repManagerPeriodoSel')||{}).value || '';
-  const res = document.getElementById('repManagerResult');
-  const emp = document.getElementById('repManagerEmpty');
-  if (!managerId) {
-    if (res) res.style.display = 'none';
-    if (emp) emp.style.display = 'block';
-    _repManagerData = null;
-    return;
-  }
-  if (res) res.style.display = 'block';
-  if (emp) emp.style.display = 'none';
-
-  const mgr = (allUsuarios||[]).find(function(u){ return String(u.UserID) === String(managerId); });
-  const period = (allPeriods||[]).find(function(p){ return String(p.PeriodID) === String(periodId); });
-  const elNom  = document.getElementById('repManagerNombre');
-  const elInfo = document.getElementById('repManagerInfo');
-  if (elNom)  elNom.textContent  = (mgr ? (mgr.FullName||mgr.Email) : 'Manager') + (period ? ' — ' + period.PeriodName : ' — todos los períodos');
-  if (elInfo) elInfo.textContent = mgr ? [mgr.JobRoleName || mgr.RoleName, mgr.AreaName].filter(Boolean).join(' · ') : '';
-
-  ['repManagerLideres','repManagerDirectos'].forEach(function(id){
-    const el = document.getElementById(id);
-    if (el) el.innerHTML = '<div style="padding:20px;color:#888;font-size:12px;">Cargando…</div>';
-  });
-
-  const data = await apiGet('managers/' + managerId + '/report' + (periodId ? '?periodId=' + periodId : ''));
-  _repManagerData = data;
-  if (data && data.warnings && data.warnings.length) console.warn('[Manager-report] avisos:', data.warnings);
-  if (!data) {
-    ['repManagerLideres','repManagerDirectos'].forEach(function(id){
-      const el = document.getElementById(id);
-      if (el) el.innerHTML = '<div style="padding:20px;color:#FF4D4D;font-size:12px;">No se pudo cargar el reporte. Revisá la consola (F12).</div>';
-    });
-    return;
-  }
-  renderRepManagerKPIs(data);
-  renderRepManagerLideres(data.leaders || []);
-  renderRepManagerDirectos(data.directReports || []);
-}
-
-function renderRepManagerKPIs(data) {
-  const cont = document.getElementById('repManagerKPIs');
-  if (!cont) return;
-  const lideres = data.leaders || [];
-  const directos = data.directReports || [];
-  const totalPersonas = lideres.reduce(function(s,l){ return s + (l.TeamSize||0); }, 0) + lideres.length + directos.length;
-  const atrasadasTotal = lideres.reduce(function(s,l){ return s + (l.MeetingsOverdue||0); }, 0) +
-                         directos.filter(function(d){ return d.MeetingStatus === 'warning' || d.MeetingStatus === 'critical'; }).length;
-  const sinReunionTotal = lideres.reduce(function(s,l){ return s + (l.MeetingsNone||0); }, 0) +
-                          directos.filter(function(d){ return d.MeetingStatus === 'none'; }).length;
-  const pipsTotal = lideres.reduce(function(s,l){ return s + (l.TeamOpenPIPs||0); }, 0) +
-                    directos.reduce(function(s,d){ return s + (d.OpenPIPs||0); }, 0);
-  const avances = lideres.map(function(l){ return l.TeamAvance; }).filter(function(v){ return v != null; });
-  const avgEquipos = avances.length ? Math.round(avances.reduce(function(s,v){ return s+v; },0)/avances.length) : null;
-
-  function kpi(label, value, color, sub) {
-    return '<div style="background:#111;border:1px solid #262626;border-radius:8px;padding:10px 12px;">' +
-           '<div style="font-size:9px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:4px;">' + label + '</div>' +
-           '<div style="font-size:18px;font-weight:800;color:' + color + ';">' + value + '</div>' +
-           (sub ? '<div style="font-size:10px;color:#666;margin-top:2px;">' + sub + '</div>' : '') + '</div>';
-  }
-  cont.innerHTML =
-    kpi('Líderes a cargo', lideres.length, '#f0ebe3', directos.length ? directos.length + ' directos' : '') +
-    kpi('Alcance total', totalPersonas, '#f0ebe3', 'personas') +
-    kpi('Avance de equipos', avgEquipos == null ? '—' : avgEquipos + '%',
-        avgEquipos == null ? '#888' : (avgEquipos >= 70 ? '#2ECC71' : (avgEquipos >= 40 ? '#F59E0B' : '#FF4D4D')), '') +
-    kpi('1:1 atrasadas', atrasadasTotal,
-        atrasadasTotal ? '#F59E0B' : (sinReunionTotal ? '#F59E0B' : '#2ECC71'),
-        sinReunionTotal ? sinReunionTotal + ' sin registros' : '') +
-    kpi('PIPs abiertos', pipsTotal, pipsTotal ? '#FF4D4D' : '#2ECC71', '');
-}
-
-function renderRepManagerLideres(lideres) {
-  const cont = document.getElementById('repManagerLideres');
-  if (!cont) return;
-  if (!lideres.length) {
-    cont.innerHTML = '<div style="padding:20px;color:#888;font-size:12px;">Nadie de su gente tiene equipo propio asignado. Todos figuran como reportes directos.</div>';
-    return;
-  }
-  let html = '<div style="overflow-x:auto;"><table class="data-table" style="width:100%;"><thead><tr>' +
-    '<th>Líder</th><th>Su equipo</th><th style="min-width:130px;">Avance del equipo</th>' +
-    '<th>1:1 pendientes</th><th>PIPs del equipo</th><th style="min-width:110px;">Objetivos propios</th><th></th>' +
-    '</tr></thead><tbody>';
-  lideres.forEach(function(l){
-    const av = l.TeamAvance;
-    let avCell;
-    if (av == null) {
-      avCell = '<span style="color:#666;font-size:11px;">sin objetivos</span>';
-    } else {
-      const c = av >= 70 ? '#2ECC71' : (av >= 40 ? '#F59E0B' : '#FF4D4D');
-      avCell = '<div style="display:flex;align-items:center;gap:8px;"><div style="flex:1;height:6px;background:#222;border-radius:3px;overflow:hidden;min-width:55px;">' +
-        '<div style="width:' + Math.max(0,Math.min(100,av)) + '%;height:100%;background:' + c + ';"></div></div>' +
-        '<span style="font-size:11px;font-weight:700;color:' + c + ';">' + av + '%</span></div>' +
-        '<div style="font-size:9px;color:#666;margin-top:2px;">' + l.TeamConObjetivos + '/' + l.TeamSize + ' con objetivos</div>';
-    }
-    // Esta columna mide al LÍDER, no al colaborador: son las 1:1 que él no hizo
-    let reunCell;
-    if (l.MeetingsOverdue) {
-      reunCell = '<span style="color:#F59E0B;font-weight:700;">' + l.MeetingsOverdue + '</span>' +
-                 (l.MeetingsNone ? '<div style="font-size:9px;color:#666;">+' + l.MeetingsNone + ' sin registros</div>' : '');
-    } else if (l.MeetingsNone) {
-      reunCell = '<span style="color:#F59E0B;font-weight:700;">' + l.MeetingsNone + '</span>' +
-                 '<div style="font-size:9px;color:#666;">sin registros</div>';
-    } else {
-      reunCell = '<span style="color:#2ECC71;">al día</span>';
-    }
-    const ownCell = l.OwnAvance == null
-      ? '<span style="color:#666;font-size:11px;">—</span>'
-      : '<span style="font-weight:700;color:' + (l.OwnAvance >= 70 ? '#2ECC71' : (l.OwnAvance >= 40 ? '#F59E0B' : '#FF4D4D')) + ';">' + l.OwnAvance + '%</span>' +
-        '<div style="font-size:9px;color:#666;">' + l.OwnObjectives + ' obj.</div>';
-
-    html += '<tr>' +
-      '<td><div style="font-weight:700;color:#f0ebe3;">' + repEsc(l.FullName || l.Email) + '</div>' +
-        '<div style="font-size:9px;color:#666;">' + repEsc(l.JobRoleName || l.AreaName || '') + '</div></td>' +
-      '<td style="font-weight:700;color:#f0ebe3;">' + l.TeamSize + '</td>' +
-      '<td>' + avCell + '</td>' +
-      '<td>' + reunCell + '</td>' +
-      '<td>' + (l.TeamOpenPIPs ? '<span style="color:#FF4D4D;font-weight:700;">' + l.TeamOpenPIPs + '</span>' : '<span style="color:#2ECC71;">0</span>') + '</td>' +
-      '<td>' + ownCell + '</td>' +
-      '<td><button type="button" data-verlider="' + l.UserID + '" style="padding:4px 10px;border-radius:6px;font-size:10px;cursor:pointer;border:1px solid #333;background:transparent;color:#FF5400;">Ver equipo →</button></td>' +
-      '</tr>';
-  });
-  html += '</tbody></table></div>';
-  html += '<div style="font-size:10px;color:#666;margin-top:10px;">La columna <b>1:1 pendientes</b> mide al líder: son las reuniones que él tiene atrasadas con su gente.</div>';
-  cont.innerHTML = html;
-  Array.prototype.forEach.call(cont.querySelectorAll('button[data-verlider]'), function(btn){
-    btn.addEventListener('click', function(){ repIrALider(btn.getAttribute('data-verlider')); });
-  });
-}
-
-function renderRepManagerDirectos(directos) {
-  const cont = document.getElementById('repManagerDirectos');
-  if (!cont) return;
-  if (!directos.length) {
-    cont.innerHTML = '<div style="padding:20px;color:#888;font-size:12px;">No tiene reportes directos sin líder intermedio.</div>';
-    return;
-  }
-  let html = '<div style="overflow-x:auto;"><table class="data-table" style="width:100%;"><thead><tr>' +
-    '<th>Colaborador</th><th>Área</th><th style="min-width:130px;">Objetivos</th><th>Última 1:1</th><th>PIPs</th><th></th>' +
-    '</tr></thead><tbody>';
-  directos.forEach(function(d){
-    const sem = REP_SEMAFORO[d.MeetingStatus] || REP_SEMAFORO.none;
-    let avCell;
-    if (d.Avance == null) avCell = '<span style="color:#666;font-size:11px;">sin objetivos</span>';
-    else {
-      const c = d.Avance >= 70 ? '#2ECC71' : (d.Avance >= 40 ? '#F59E0B' : '#FF4D4D');
-      avCell = '<div style="display:flex;align-items:center;gap:8px;"><div style="flex:1;height:6px;background:#222;border-radius:3px;overflow:hidden;min-width:55px;">' +
-        '<div style="width:' + Math.max(0,Math.min(100,d.Avance)) + '%;height:100%;background:' + c + ';"></div></div>' +
-        '<span style="font-size:11px;font-weight:700;color:' + c + ';">' + d.Avance + '%</span></div>';
-    }
-    html += '<tr>' +
-      '<td><div style="font-weight:700;color:#f0ebe3;">' + repEsc(d.FullName || d.Email) + '</div></td>' +
-      '<td style="font-size:11px;color:#aaa;">' + repEsc(d.AreaName || '—') + '</td>' +
-      '<td>' + avCell + '</td>' +
-      '<td><span style="color:' + sem.color + ';font-size:11px;font-weight:700;">● ' + sem.label + '</span>' +
-        (d.DaysSinceMeeting != null ? '<div style="font-size:9px;color:#666;">hace ' + d.DaysSinceMeeting + ' d</div>' : '') + '</td>' +
-      '<td>' + (d.OpenPIPs ? '<span style="color:#FF4D4D;font-weight:700;">' + d.OpenPIPs + '</span>' : '<span style="color:#2ECC71;">0</span>') + '</td>' +
-      '<td><button type="button" data-verpersona="' + d.UserID + '" style="padding:4px 10px;border-radius:6px;font-size:10px;cursor:pointer;border:1px solid #333;background:transparent;color:#FF5400;">Ver detalle →</button></td>' +
-      '</tr>';
-  });
-  html += '</tbody></table></div>';
-  cont.innerHTML = html;
-  Array.prototype.forEach.call(cont.querySelectorAll('button[data-verpersona]'), function(btn){
-    btn.addEventListener('click', function(){ repIrAPersona(btn.getAttribute('data-verpersona')); });
-  });
-}
-
-// ═══ "GENERAL EMPRESA" (Sesión 8 · Bloque 4) ═════════════════
-let _repEmpresaData = null;
-
-async function verReporteEmpresa() {
-  const periodId = (document.getElementById('repEmpresaPeriodoSel')||{}).value || '';
-  const conts = ['repEmpCobertura','repEmpDistribucion','repEmpCompetencias','repEmpPips','repEmpAreas'];
-  conts.forEach(function(id){
-    const el = document.getElementById(id);
-    if (el) el.innerHTML = '<div style="padding:20px;color:#888;font-size:12px;">Cargando…</div>';
-  });
-
-  const data = await apiGet('company/report' + (periodId ? '?periodId=' + periodId : ''));
-  _repEmpresaData = data;
-  if (data && data.warnings && data.warnings.length) console.warn('[Company-report] avisos:', data.warnings);
-  if (!data) {
-    conts.forEach(function(id){
-      const el = document.getElementById(id);
-      if (el) el.innerHTML = '<div style="padding:20px;color:#FF4D4D;font-size:12px;">No se pudo cargar. Revisá la consola (F12).</div>';
-    });
-    return;
-  }
-  renderRepEmpCobertura(data);
-  renderRepEmpDistribucion(data);
-  renderRepEmpCompetencias(data);
-  renderRepEmpPips(data);
-  renderRepEmpAreas(data);
-}
-
-function renderRepEmpCobertura(data) {
-  const cont = document.getElementById('repEmpCobertura');
-  if (!cont) return;
-  const cov = data.coverage || [];
-  if (!cov.length) { cont.innerHTML = '<div style="padding:20px;color:#888;font-size:12px;">Sin datos.</div>'; return; }
-  cont.innerHTML = cov.map(function(c){
-    if (c.pct == null) {
-      return '<div style="margin-bottom:12px;"><div style="font-size:12px;color:#888;">' + repEsc(c.modulo) + ' — <span style="color:#FF4D4D;">no se pudo leer</span></div></div>';
-    }
-    const color = c.pct >= 70 ? '#2ECC71' : (c.pct >= 30 ? '#F59E0B' : '#FF4D4D');
-    return '<div style="margin-bottom:12px;">' +
-      '<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">' +
-      '<span style="color:#f0ebe3;">' + repEsc(c.modulo) + '</span>' +
-      '<span style="color:' + color + ';font-weight:700;">' + c.pct + '% <span style="color:#666;font-weight:400;font-size:11px;">(' + c.con + ' de ' + c.total + ')</span></span></div>' +
-      '<div style="height:8px;background:#222;border-radius:4px;overflow:hidden;">' +
-      '<div style="width:' + c.pct + '%;height:100%;background:' + color + ';"></div></div></div>';
-  }).join('');
-}
-
-function renderRepEmpDistribucion(data) {
-  const cont = document.getElementById('repEmpDistribucion');
-  if (!cont) return;
-  const dist = data.distribution || [];
-  const totalConObj = dist.reduce(function(s,b){ return s + b.count; }, 0);
-  if (!totalConObj) {
-    cont.innerHTML = '<div style="padding:20px;color:#888;font-size:12px;">Todavía no hay nadie con objetivos cargados en este período, así que no hay distribución para mostrar.</div>';
-    return;
-  }
-  const maxC = Math.max.apply(null, dist.map(function(b){ return b.count; }));
-  let html = '<div style="display:flex;align-items:flex-end;gap:12px;height:150px;padding:0 8px;">';
-  dist.forEach(function(b){
-    const h = maxC ? Math.round(b.count / maxC * 120) : 0;
-    html += '<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;">' +
-      '<div style="font-size:13px;font-weight:800;color:' + b.color + ';margin-bottom:4px;">' + b.count + '</div>' +
-      '<div style="width:100%;height:' + Math.max(h,2) + 'px;background:' + b.color + ';border-radius:4px 4px 0 0;opacity:0.85;"></div>' +
-      '<div style="font-size:10px;color:#888;margin-top:6px;">' + b.label + '</div></div>';
-  });
-  html += '</div>';
-  html += '<div style="font-size:11px;color:#666;margin-top:10px;">Sobre <b style="color:#aaa;">' + totalConObj + '</b> personas con objetivos cargados (de ' + data.total + ' activas). ' +
-          'Se muestra la distribución en vez de un promedio único porque el promedio esconde los extremos.</div>';
-  cont.innerHTML = html;
-}
-
-function renderRepEmpCompetencias(data) {
-  const cont = document.getElementById('repEmpCompetencias');
-  if (!cont) return;
-  const comps = (data.competencies || []).filter(function(c){ return c.average != null; });
-  if (!comps.length) {
-    cont.innerHTML = '<div style="padding:20px;color:#888;font-size:12px;">Todavía no hay evaluaciones de competencias cargadas en este período.</div>';
-    return;
-  }
-  const ordenadas = comps.slice().sort(function(a,b){ return a.average - b.average; });
-  let html = '<div style="font-size:11px;color:#888;margin-bottom:12px;">Ordenado de menor a mayor: arriba están las competencias más flojas de la organización.</div>';
-  ordenadas.forEach(function(c){
-    const pct = (c.average / 4) * 100;
-    const color = c.average >= 3.5 ? '#2ECC71' : (c.average >= 2.5 ? '#F59E0B' : '#FF4D4D');
-    const tipoColor = c.compType === 'leadership' ? '#A855F7' : '#3B82F6';
-    html += '<div style="margin-bottom:12px;">' +
-      '<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;gap:8px;">' +
-      '<span style="color:' + tipoColor + ';">' + repEsc(c.name) + '</span>' +
-      '<span style="color:' + color + ';font-weight:700;white-space:nowrap;">' + c.average + ' / 4 <span style="color:#666;font-weight:400;font-size:10px;">(' + c.personas + ' pers.)</span></span></div>' +
-      '<div style="height:8px;background:#222;border-radius:4px;overflow:hidden;">' +
-      '<div style="width:' + pct.toFixed(1) + '%;height:100%;background:' + color + ';"></div></div></div>';
-  });
-  cont.innerHTML = html;
-}
-
-function renderRepEmpPips(data) {
-  const cont = document.getElementById('repEmpPips');
-  if (!cont) return;
-  const p = data.pips || {};
-  if (!p.total) {
-    cont.innerHTML = '<div style="padding:20px;color:#888;font-size:12px;">No hay planes de mejora cargados.</div>';
-    return;
-  }
-  function kpi(label, value, color, sub) {
-    return '<div style="background:#111;border:1px solid #262626;border-radius:8px;padding:10px 12px;">' +
-           '<div style="font-size:9px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:4px;">' + label + '</div>' +
-           '<div style="font-size:18px;font-weight:800;color:' + color + ';">' + value + '</div>' +
-           (sub ? '<div style="font-size:10px;color:#666;margin-top:2px;">' + sub + '</div>' : '') + '</div>';
-  }
-  const cerrados = (p.logrados||0) + (p.noLogrados||0);
-  const tasaExito = cerrados ? Math.round((p.logrados||0) / cerrados * 100) : null;
-  cont.innerHTML = '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;">' +
-    kpi('Total', p.total, '#f0ebe3', (p.personas||0) + ' personas') +
-    kpi('Abiertos', p.abiertos || 0, (p.abiertos ? '#F59E0B' : '#2ECC71'), '') +
-    kpi('Logrados', p.logrados || 0, '#2ECC71', '') +
-    kpi('No logrados', p.noLogrados || 0, (p.noLogrados ? '#FF4D4D' : '#888'), '') +
-    kpi('Reincidentes', p.reincidentes || 0, (p.reincidentes ? '#FF4D4D' : '#2ECC71'), 'con más de 1 PIP') +
-    '</div>' +
-    (tasaExito != null ? '<div style="font-size:11px;color:#888;margin-top:12px;">Tasa de éxito sobre PIPs cerrados: <b style="color:' + (tasaExito >= 60 ? '#2ECC71' : '#F59E0B') + ';">' + tasaExito + '%</b> (' + p.logrados + ' de ' + cerrados + ').</div>' : '');
-}
-
-function renderRepEmpAreas(data) {
-  const cont = document.getElementById('repEmpAreas');
-  if (!cont) return;
-  const areas = data.byArea || [];
-  if (!areas.length) { cont.innerHTML = '<div style="padding:20px;color:#888;font-size:12px;">Sin áreas cargadas.</div>'; return; }
-  let html = '<div style="overflow-x:auto;"><table class="data-table" style="width:100%;"><thead><tr>' +
-    '<th>Área</th><th>Personas</th><th style="min-width:130px;">Con objetivos</th><th>Avance promedio</th><th>Con 1:1</th>' +
-    '</tr></thead><tbody>';
-  areas.forEach(function(a){
-    const cObj = a.pctObjetivos >= 70 ? '#2ECC71' : (a.pctObjetivos >= 30 ? '#F59E0B' : '#FF4D4D');
-    const cAv  = a.avancePromedio == null ? '#666' : (a.avancePromedio >= 70 ? '#2ECC71' : (a.avancePromedio >= 40 ? '#F59E0B' : '#FF4D4D'));
-    html += '<tr>' +
-      '<td style="font-weight:700;color:#f0ebe3;">' + repEsc(a.area) + '</td>' +
-      '<td style="color:#aaa;">' + a.total + '</td>' +
-      '<td><div style="display:flex;align-items:center;gap:8px;"><div style="flex:1;height:6px;background:#222;border-radius:3px;overflow:hidden;min-width:55px;">' +
-        '<div style="width:' + a.pctObjetivos + '%;height:100%;background:' + cObj + ';"></div></div>' +
-        '<span style="font-size:11px;font-weight:700;color:' + cObj + ';">' + a.pctObjetivos + '%</span></div>' +
-        '<div style="font-size:9px;color:#666;margin-top:2px;">' + a.conObjetivos + ' de ' + a.total + '</div></td>' +
-      '<td style="font-weight:700;color:' + cAv + ';">' + (a.avancePromedio == null ? '—' : a.avancePromedio + '%') + '</td>' +
-      '<td style="color:#aaa;">' + a.pctReuniones + '%</td>' +
-      '</tr>';
-  });
-  html += '</tbody></table></div>';
-  cont.innerHTML = html;
-}
 // Salta a la tab "Por Persona" con el colaborador ya seleccionado
 function repIrAPersona(userId) {
   const sel = document.getElementById('repPersonaSel');

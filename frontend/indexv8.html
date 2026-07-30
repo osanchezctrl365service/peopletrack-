@@ -1854,9 +1854,9 @@ label { color: #888 !important; }
               </select>
             </div>
             <div>
-              <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;display:block;margin-bottom:6px;">Período *</label>
-              <select id="compEvalPeriodSel" class="form-control" style="width:100%;" onchange="cargarEvaluacionExistente()">
-                <option value="">— Seleccionar período —</option>
+              <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;display:block;margin-bottom:6px;">Período (opcional)</label>
+              <select id="compEvalPeriodSel" class="form-control" style="width:100%;">
+                <option value="">— Sin período —</option>
               </select>
             </div>
           </div>
@@ -1872,16 +1872,10 @@ label { color: #888 !important; }
       <div id="comp-tab-resultados" style="display:none;">
         <div class="card" style="margin-bottom:16px;">
           <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;">
-            <div style="flex:1;min-width:240px;">
+            <div style="flex:1;min-width:260px;">
               <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;display:block;margin-bottom:6px;">Colaborador</label>
               <select id="compResUserSel" class="form-control" style="width:100%;" onchange="cargarResultados360()">
                 <option value="">— Seleccionar colaborador —</option>
-              </select>
-            </div>
-            <div style="min-width:200px;">
-              <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;display:block;margin-bottom:6px;">Período</label>
-              <select id="compResPeriodSel" class="form-control" style="width:100%;" onchange="cargarResultados360()">
-                <option value="">Todos los períodos</option>
               </select>
             </div>
           </div>
@@ -5556,30 +5550,19 @@ async function compOnCambioUsuarioEval() {
   await cargarEvaluacionExistente();
 }
 
-// Busca si ya hay una evaluación de este colaborador, con este tipo y en este período
+// Busca si ya hay una evaluación de este colaborador con este tipo, y la precarga
 async function cargarEvaluacionExistente() {
-  const userId   = document.getElementById('compEvalUserSel').value;
-  const tipo     = (document.getElementById('compEvalTipoSel')||{}).value || 'leader';
-  const periodId = (document.getElementById('compEvalPeriodSel')||{}).value || '';
-  const cont     = document.getElementById('compEvalFormContainer');
+  const userId = document.getElementById('compEvalUserSel').value;
+  const tipo   = (document.getElementById('compEvalTipoSel')||{}).value || 'leader';
+  const cont   = document.getElementById('compEvalFormContainer');
   if (!userId) return;
 
   compEvalActual = {};
   compEvalEditandoId = null;
-
-  // Sin período no podemos buscar ni guardar
-  if (!periodId) {
-    cont.innerHTML = '<div style="text-align:center;padding:40px;color:#F59E0B;font-size:13px;">' +
-      '<div style="font-size:28px;margin-bottom:10px;">📅</div>' +
-      '<div><b>Elegí un período</b> para continuar</div>' +
-      '<div style="font-size:11px;color:#888;margin-top:6px;">Las evaluaciones se guardan por período para poder comparar la evolución.</div>' +
-      '</div>';
-    return;
-  }
-
   cont.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Buscando evaluaciones previas...</div>';
 
   try {
+    // 1. Buscar evaluaciones del colaborador
     const res = await fetch(API_BASE + '/competencies/evaluations?userId=' + userId);
     const raw = await res.text();
     let existentes = [];
@@ -5587,13 +5570,12 @@ async function cargarEvaluacionExistente() {
       const json = JSON.parse(raw);
       existentes = Array.isArray(json) ? json : (json.data || []);
     }
-    // Filtrar por tipo Y período
-    const match = existentes.filter(function(e){
-      return e.EvaluatorType === tipo && String(e.PeriodID) === String(periodId);
-    });
-    if (match.length > 0) {
-      const ultima = match[0];
+    // 2. Filtrar por el tipo elegido — tomamos la más reciente
+    const delTipo = existentes.filter(function(e){ return e.EvaluatorType === tipo; });
+    if (delTipo.length > 0) {
+      const ultima = delTipo[0]; // ya vienen ordenadas desc
       compEvalEditandoId = ultima.EvaluationID;
+      // 3. Traer el detalle con los items
       const detRes = await fetch(API_BASE + '/competencies/evaluations/' + ultima.EvaluationID);
       const detRaw = await detRes.text();
       if (detRaw && detRaw.trim()) {
@@ -5605,19 +5587,14 @@ async function cargarEvaluacionExistente() {
             comment: it.Comment || ''
           };
         });
+        // Guardar feedback general para precargarlo
         compEvalActual._feedback = det.evaluation.GeneralFeedback || '';
         compEvalActual._mejora   = det.evaluation.ImprovementAreas || '';
         compEvalActual._status   = det.evaluation.Status;
         compEvalActual._fecha    = det.evaluation.EvaluationDate;
         compEvalActual._periodId = det.evaluation.PeriodID;
-        compEvalActual._periodName = det.evaluation.PeriodName;
       }
     }
-    // Guardar también qué otros períodos ya tienen evaluación de este tipo (para el aviso)
-    compEvalActual._otrosPeriodos = existentes
-      .filter(function(e){ return e.EvaluatorType === tipo && String(e.PeriodID) !== String(periodId) && e.PeriodName; })
-      .map(function(e){ return e.PeriodName; });
-
     renderFormularioEvaluacion();
   } catch(e) {
     console.warn('[Competencias] Error buscando evaluación previa:', e);
@@ -5664,9 +5641,6 @@ function renderFormularioEvaluacion() {
 
   let html = '';
 
-  const periodSel = document.getElementById('compEvalPeriodSel');
-  const periodName = periodSel && periodSel.selectedIndex > 0 ? periodSel.options[periodSel.selectedIndex].text : '';
-
   // Banner si estamos editando una evaluación existente
   if (compEvalEditandoId) {
     const fecha = compEvalActual._fecha ? new Date(compEvalActual._fecha).toLocaleDateString('es-AR') : '';
@@ -5675,21 +5649,15 @@ function renderFormularioEvaluacion() {
     html += '<div style="background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.3);border-radius:8px;padding:12px 16px;margin-bottom:16px;">';
     html += '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">';
     html += '<div style="font-size:12px;color:#aaa;">';
-    html += '📝 <b style="color:#3B82F6;">Editando evaluación de ' + periodName + '</b> — creada el ' + fecha;
+    html += '📝 <b style="color:#3B82F6;">Editando evaluación existente</b> del ' + fecha;
     html += ' · <span style="color:' + stCol + ';font-weight:700;">' + st + '</span>';
     html += '<div style="font-size:11px;color:#777;margin-top:3px;">Los valores previos están precargados. Al guardar se actualiza esta evaluación.</div>';
     html += '</div>';
-    html += '<button onclick="empezarEvaluacionNueva()" style="padding:6px 14px;background:#222;border:1px solid #333;border-radius:6px;color:#aaa;font-size:11px;cursor:pointer;white-space:nowrap;">+ Crear otra para este período</button>';
+    html += '<button onclick="empezarEvaluacionNueva()" style="padding:6px 14px;background:#222;border:1px solid #333;border-radius:6px;color:#aaa;font-size:11px;cursor:pointer;white-space:nowrap;">+ Crear una nueva en vez de editar</button>';
     html += '</div></div>';
   } else {
     html += '<div style="background:rgba(46,204,113,0.06);border:1px solid rgba(46,204,113,0.2);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:12px;color:#aaa;">';
-    html += '✨ <b style="color:#2ECC71;">Evaluación nueva para ' + periodName + '</b> — no hay evaluaciones previas de este tipo en este período.';
-    // Avisar si hay evaluaciones en otros períodos
-    const otros = compEvalActual._otrosPeriodos || [];
-    if (otros.length) {
-      const unicos = otros.filter(function(v,i,a){ return a.indexOf(v) === i; });
-      html += '<div style="font-size:11px;color:#777;margin-top:5px;">📊 Este colaborador ya tiene evaluaciones de este tipo en: <b>' + unicos.join(', ') + '</b> — vas a poder comparar la evolución en Resultados 360°.</div>';
-    }
+    html += '✨ <b style="color:#2ECC71;">Evaluación nueva</b> — no hay evaluaciones previas de este tipo para este colaborador.';
     html += '</div>';
   }
 
@@ -5777,7 +5745,6 @@ async function guardarEvaluacionCompetencias(status) {
   const tipo   = document.getElementById('compEvalTipoSel').value;
   const period = document.getElementById('compEvalPeriodSel').value;
   if (!userId) { mostrarToast('Elegí un colaborador', 'error'); return; }
-  if (!period) { mostrarToast('Elegí un período — las evaluaciones se guardan por período', 'error'); return; }
 
   const items = [];
   Object.keys(compEvalActual).forEach(function(cid){
@@ -5845,42 +5812,22 @@ async function guardarEvaluacionCompetencias(status) {
 
 async function cargarResultados360() {
   const userId = document.getElementById('compResUserSel').value;
-  const periodId = (document.getElementById('compResPeriodSel')||{}).value || '';
   const cont = document.getElementById('compResultadosContainer');
   if (!userId) {
     cont.innerHTML = '<div style="text-align:center;padding:40px;color:#888;font-size:13px;">Elegí un colaborador para ver sus resultados.</div>';
-    const ps = document.getElementById('compResPeriodSel');
-    if (ps) ps.innerHTML = '<option value="">Todos los períodos</option>';
     return;
   }
   cont.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Cargando resultados...</div>';
   try {
-    const url = API_BASE + '/competencies/summary/' + userId + (periodId ? '?periodId=' + periodId : '');
-    const res = await fetch(url);
+    const res = await fetch(API_BASE + '/competencies/summary/' + userId);
     const raw = await res.text();
     if (!raw || !raw.trim()) throw new Error('Sin respuesta del servidor (HTTP ' + res.status + ')');
     const json = JSON.parse(raw);
     if (!res.ok || json.ok === false) throw new Error(json.error || 'HTTP ' + res.status);
-    const data = json.data || json;
-    // Poblar el selector de períodos con los que realmente tienen evaluaciones
-    poblarPeriodosResultados(data.periodos || [], periodId);
-    renderResultados360(data);
+    renderResultados360(json.data || json);
   } catch(e) {
     cont.innerHTML = '<div style="color:#FF4D4D;padding:20px;text-align:center;">Error: ' + e.message + '</div>';
   }
-}
-
-function poblarPeriodosResultados(periodos, seleccionado) {
-  const sel = document.getElementById('compResPeriodSel');
-  if (!sel) return;
-  sel.innerHTML = '<option value="">Todos los períodos</option>';
-  periodos.forEach(function(p){
-    const opt = document.createElement('option');
-    opt.value = p.periodId;
-    opt.textContent = p.periodName + ' (' + p.evaluationsCount + ' eval.)';
-    sel.appendChild(opt);
-  });
-  if (seleccionado) sel.value = seleccionado;
 }
 
 // Mostrar/ocultar los comentarios de una competencia puntual
@@ -5927,80 +5874,6 @@ function renderResultados360(data) {
   const tipoLabel = {self:'Autoevaluación', leader:'Líder', manager:'Manager', import:'Importado'};
 
   let html = '';
-
-  // ── EVOLUCIÓN ENTRE PERÍODOS (solo si hay 2 o más) ──
-  const evolution = data.evolution || [];
-  if (evolution.length > 1) {
-    // Ordenar por nombre de período para que la línea de tiempo tenga sentido
-    const evo = evolution.slice().sort(function(a,b){ return String(a.periodName||'').localeCompare(String(b.periodName||'')); });
-    html += '<div class="card" style="margin-bottom:16px;">';
-    html += '<div style="font-size:11px;font-weight:700;color:#2ECC71;text-transform:uppercase;margin-bottom:12px;">📈 Evolución entre períodos</div>';
-
-    // Promedio general por período
-    html += '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">';
-    evo.forEach(function(p, idx){
-      const prom = p.overallAverage;
-      const col = prom != null ? (COMP_NIVEL_COLORS[Math.round(prom)] || '#888') : '#444';
-      // Comparar con el período anterior
-      let delta = '';
-      if (idx > 0 && prom != null && evo[idx-1].overallAverage != null) {
-        const d = Math.round((prom - evo[idx-1].overallAverage) * 10) / 10;
-        if (d > 0)      delta = '<span style="color:#2ECC71;font-size:10px;font-weight:700;"> ▲ +' + d + '</span>';
-        else if (d < 0) delta = '<span style="color:#FF4D4D;font-size:10px;font-weight:700;"> ▼ ' + d + '</span>';
-        else            delta = '<span style="color:#888;font-size:10px;"> = </span>';
-      }
-      html += '<div style="flex:1;min-width:130px;background:#111;border:1px solid #252525;border-top:3px solid ' + col + ';border-radius:8px;padding:12px;text-align:center;">';
-      html += '<div style="font-size:10px;color:#888;font-weight:600;text-transform:uppercase;">' + String(p.periodName||'—') + '</div>';
-      html += '<div style="font-size:24px;font-weight:800;color:' + col + ';margin:6px 0 2px;">' + (prom != null ? prom : '—') + delta + '</div>';
-      html += '<div style="font-size:9px;color:#666;">' + p.evaluationsCount + ' evaluación(es)</div>';
-      html += '</div>';
-    });
-    html += '</div>';
-
-    // Tabla de evolución por competencia
-    html += '<div style="overflow-x:auto;"><table class="data-table" style="min-width:500px;">';
-    html += '<thead><tr><th>Competencia</th>';
-    evo.forEach(function(p){ html += '<th style="text-align:center;">' + String(p.periodName||'—') + '</th>'; });
-    html += '<th style="text-align:center;">Tendencia</th></tr></thead><tbody>';
-
-    let tipoEvo = null;
-    (evo[0].competencies || []).forEach(function(comp, ci){
-      if (comp.compType !== tipoEvo) {
-        tipoEvo = comp.compType;
-        const lbl = tipoEvo === 'general' ? 'Generales' : 'Liderazgo';
-        const col = tipoEvo === 'general' ? '#3B82F6' : '#A855F7';
-        html += '<tr><td colspan="' + (evo.length + 2) + '" style="padding-top:10px;"><span style="font-size:10px;font-weight:700;color:' + col + ';text-transform:uppercase;">' + lbl + '</span></td></tr>';
-      }
-      html += '<tr>';
-      html += '<td style="font-size:11px;color:#f0ebe3;">' + String(comp.name).replace(/</g,'&lt;') + '</td>';
-      const valores = [];
-      evo.forEach(function(p){
-        const c = (p.competencies || []).find(function(x){ return x.compCatalogId === comp.compCatalogId; });
-        const v = c ? c.average : null;
-        valores.push(v);
-        if (v == null) {
-          html += '<td style="text-align:center;color:#444;">—</td>';
-        } else {
-          const vc = COMP_NIVEL_COLORS[Math.round(v)] || '#888';
-          html += '<td style="text-align:center;"><b style="color:' + vc + ';font-size:12px;">' + v + '</b></td>';
-        }
-      });
-      // Tendencia: comparar el primero con el último que tengan valor
-      const conValor = valores.filter(function(v){ return v != null; });
-      let tend = '<span style="color:#444;">—</span>';
-      if (conValor.length >= 2) {
-        const d = Math.round((conValor[conValor.length-1] - conValor[0]) * 10) / 10;
-        if (d > 0)      tend = '<span style="color:#2ECC71;font-weight:700;">▲ +' + d + '</span>';
-        else if (d < 0) tend = '<span style="color:#FF4D4D;font-weight:700;">▼ ' + d + '</span>';
-        else            tend = '<span style="color:#888;">= 0</span>';
-      }
-      html += '<td style="text-align:center;font-size:11px;">' + tend + '</td>';
-      html += '</tr>';
-    });
-    html += '</tbody></table></div>';
-    html += '<div style="font-size:10px;color:#666;margin-top:10px;">La tendencia compara el primer período con el último que tenga datos.</div>';
-    html += '</div>';
-  }
 
   // Resumen de evaluaciones
   html += '<div class="card" style="margin-bottom:16px;">';

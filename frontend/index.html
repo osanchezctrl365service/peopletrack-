@@ -1629,7 +1629,7 @@ label { color: #888 !important; }
           <div class="section-subheading">Gestión de objetivos core y personales con ponderaciones por competencia</div>
         </div>
         <div class="flex gap-8">
-          <button class="btn btn-secondary btn-sm" onclick="showModal('importModal')">↑ Importar</button>
+          <button class="btn btn-secondary btn-sm" onclick="showSection('importar')">↑ Importar</button>
           <button class="btn btn-primary btn-sm" onclick="showModal('newObjectiveModal')">+ Nuevo Objetivo</button>
         </div>
       </div>
@@ -3008,8 +3008,19 @@ function parsearExcelPerformance(workbook, fileName) {
     userName: null, rol: null, proyecto: null, evaluador: null, area: null, periodoExcel: null,
     objectives: [],
     careerMilestones: [],
+    competenciasGenericas: [],
+    competenciasLiderazgo: [],
     careerCurrentRole: null, careerTargetRole: null, careerProgress: null,
     warnings: []
+  };
+
+  // Helper: detectar textos placeholder que no hay que importar
+  const esPlaceholder = function(txt) {
+    if (!txt) return true;
+    const t = String(txt).trim().toLowerCase();
+    if (!t) return true;
+    const placeholders = ['a completar', 'hito a cumplir', 'dd/mm/aaaa', 'n/a', '-', '—'];
+    return placeholders.indexOf(t) >= 0;
   };
 
   // ── Sheet "Performance Goals" ──
@@ -3026,19 +3037,18 @@ function parsearExcelPerformance(workbook, fileName) {
     result.area        = xlsGet(pg, 13, 4);
     result.periodoExcel= xlsGet(pg, 14, 4);
 
-    // Objetivos: empiezan en fila 33, terminan cuando aparece "Competencias"
+    // Objetivos: empiezan en fila 33, cortan al llegar a "Competencias"
+    let filaCompetencias = null;
     for (let r = 33; r <= 120; r++) {
       const num   = xlsGet(pg, r, 2);
       const texto = xlsGet(pg, r, 3);
-      // Corte: encontramos la sección de competencias
-      if (num && String(num).toLowerCase().indexOf('competencia') >= 0) break;
-      if (texto && String(texto).toLowerCase().indexOf('competencia') >= 0) break;
-      if (!texto) continue;
+      // Detectar corte por sección de competencias
+      if (num && String(num).toLowerCase().indexOf('competencia') >= 0) { filaCompetencias = r; break; }
+      if (texto && String(texto).toLowerCase().indexOf('competencia') >= 0) { filaCompetencias = r; break; }
+      if (!texto || esPlaceholder(texto)) continue;
       const numStr = num != null ? String(num).trim() : '';
-      // Los sub-objetivos (4.1, 4.2) los guardamos como descripción del padre, no como objetivos sueltos
-      const esSubObjetivo = numStr.indexOf('.') >= 0;
-      if (esSubObjetivo) {
-        // Adjuntar al último objetivo cargado
+      // Sub-objetivos (4.1, 4.2) → van como descripción del padre
+      if (numStr.indexOf('.') >= 0) {
         if (result.objectives.length > 0) {
           const ult = result.objectives[result.objectives.length - 1];
           ult.description = (ult.description ? ult.description + '\n' : '') + '• ' + String(texto).trim();
@@ -3047,27 +3057,76 @@ function parsearExcelPerformance(workbook, fileName) {
       }
       const pondRaw = xlsGet(pg, r, 9);
       const cumpRaw = xlsGet(pg, r, 10);
-      // La ponderación viene como decimal (0.1 = 10%)
+      // Ponderación: viene como decimal (0.2 = 20%) o entero
       let weight = 0;
       if (pondRaw != null && pondRaw !== '') {
         const pn = parseFloat(pondRaw);
         if (!isNaN(pn)) weight = pn <= 1 ? Math.round(pn * 100) : Math.round(pn);
       }
+      // Cumplimiento: suele venir como entero (40 = 40%)
       let progress = 0;
       if (cumpRaw != null && cumpRaw !== '') {
         const cn = parseFloat(cumpRaw);
-        if (!isNaN(cn)) progress = cn <= 1 && cn > 0 ? Math.round(cn * 100) : Math.round(cn);
+        if (!isNaN(cn)) progress = (cn > 0 && cn <= 1) ? Math.round(cn * 100) : Math.round(cn);
       }
       result.objectives.push({
         num: numStr,
         title: String(texto).trim(),
         description: null,
         weight: weight,
-        progress: progress,
-        action: 'create',      // create | update | skip
+        progress: Math.min(100, Math.max(0, progress)),
+        action: 'create',
         existingId: null,
         selected: true
       });
+    }
+
+    // ── Competencias (informativo por ahora, se guardarán en Competencias v2.0) ──
+    if (filaCompetencias) {
+      // Genéricas: desde filaCompetencias+2 hasta que aparezca "Liderazgo"
+      let r = filaCompetencias + 2;
+      let guard = 0;
+      while (r < filaCompetencias + 20 && guard < 20) {
+        guard++;
+        const nombre = xlsGet(pg, r, 2);
+        if (!nombre) { r++; continue; }
+        const nomStr = String(nombre).trim();
+        if (nomStr.toLowerCase().indexOf('liderazgo') >= 0) break;
+        if (nomStr.toLowerCase() === 'nombre') { r++; continue; }
+        const evalu = xlsGet(pg, r, 8);
+        if (!esPlaceholder(nomStr)) {
+          result.competenciasGenericas.push({
+            nombre: nomStr,
+            evaluacion: evalu ? String(evalu).trim() : null
+          });
+        }
+        r++;
+      }
+      // Liderazgo: buscar la fila que dice "Liderazgo"
+      for (let rr = filaCompetencias; rr < filaCompetencias + 30; rr++) {
+        const n = xlsGet(pg, rr, 2);
+        if (n && String(n).toLowerCase().indexOf('liderazgo') >= 0) {
+          let r2 = rr + 2;
+          let g2 = 0;
+          while (r2 < rr + 12 && g2 < 12) {
+            g2++;
+            const nombre2 = xlsGet(pg, r2, 2);
+            if (!nombre2) { r2++; continue; }
+            const nom2 = String(nombre2).trim();
+            if (nom2.toLowerCase().indexOf('feedback') >= 0) break;
+            if (nom2.toLowerCase() === 'nombre') { r2++; continue; }
+            const ev2 = xlsGet(pg, r2, 8);
+            if (!esPlaceholder(nom2)) {
+              result.competenciasLiderazgo.push({
+                nombre: nom2,
+                evaluacion: ev2 ? String(ev2).trim() : null
+              });
+            }
+            r2++;
+          }
+          break;
+        }
+      }
     }
   }
 
@@ -3076,8 +3135,10 @@ function parsearExcelPerformance(workbook, fileName) {
   if (cgName) {
     const cg = workbook.Sheets[cgName];
     result.careerProgress    = xlsGet(cg, 4, 3);
-    result.careerCurrentRole = xlsGet(cg, 9, 4);
-    result.careerTargetRole  = xlsGet(cg, 10, 4);
+    const cr = xlsGet(cg, 9, 4);
+    const tr = xlsGet(cg, 10, 4);
+    result.careerCurrentRole = esPlaceholder(cr) ? null : cr;
+    result.careerTargetRole  = esPlaceholder(tr) ? null : tr;
     // Hitos desde fila 15
     for (let r = 15; r <= 60; r++) {
       const texto = xlsGet(cg, r, 3);
@@ -3085,19 +3146,28 @@ function parsearExcelPerformance(workbook, fileName) {
       const t = String(texto).trim();
       if (t.toLowerCase().indexOf('feedback') >= 0) break;
       if (t.toLowerCase().indexOf('áreas de mejora') >= 0) break;
+      // Saltear placeholders ("Hito a cumplir")
+      if (esPlaceholder(t)) continue;
       const fb = xlsGet(cg, r, 8);
       const pctRaw = xlsGet(cg, r, 10);
       let prog = 0;
       if (pctRaw != null && pctRaw !== '') {
         const pn = parseFloat(pctRaw);
-        if (!isNaN(pn)) prog = pn <= 1 && pn > 0 ? Math.round(pn * 100) : Math.round(pn);
+        if (!isNaN(pn)) prog = (pn > 0 && pn <= 1) ? Math.round(pn * 100) : Math.round(pn);
       }
       result.careerMilestones.push({
         title: t,
-        feedback: (fb && String(fb).toLowerCase() !== 'a completar') ? String(fb) : null,
-        progress: prog,
+        feedback: esPlaceholder(fb) ? null : String(fb),
+        progress: Math.min(100, Math.max(0, prog)),
         selected: true
       });
+    }
+    // Si TODOS los hitos eran placeholders, avisar
+    if (result.careerMilestones.length === 0) {
+      const hayFilas = xlsGet(cg, 15, 3);
+      if (hayFilas) {
+        result.warnings.push('El sheet "Career Growth" tiene hitos sin completar (dicen "Hito a cumplir") — se omitieron.');
+      }
     }
   }
 
@@ -3293,6 +3363,42 @@ function renderUnPreview(fid, p) {
       html += '<div style="font-size:11px;color:#888;">' + h.progress + '%</div>';
       html += '</div>';
     });
+    html += '</div>';
+  }
+
+  // Competencias detectadas (informativo — se guardarán con Competencias v2.0)
+  const totalComp = (d.competenciasGenericas||[]).length + (d.competenciasLiderazgo||[]).length;
+  const compConEval = [].concat(d.competenciasGenericas||[], d.competenciasLiderazgo||[])
+                        .filter(function(c){ return c.evaluacion; });
+  if (totalComp > 0) {
+    html += '<div style="margin-bottom:14px;">';
+    html += '<div style="font-size:11px;font-weight:700;color:#A855F7;text-transform:uppercase;margin-bottom:8px;">⭐ Competencias detectadas (' + compConEval.length + ' con evaluación de ' + totalComp + ')</div>';
+    const nivelColor = function(ev) {
+      if (!ev) return '#555';
+      const e = ev.toLowerCase();
+      if (e.indexOf('súper') >= 0 || e.indexOf('super') >= 0) return '#2ECC71';
+      if (e.indexOf('viene bien') >= 0) return '#3B82F6';
+      if (e.indexOf('seguir trabajando') >= 0) return '#F59E0B';
+      if (e.indexOf('no lo tiene') >= 0) return '#FF4D4D';
+      return '#888';
+    };
+    const renderComp = function(lista, titulo) {
+      if (!lista.length) return '';
+      let h = '<div style="font-size:10px;color:#888;margin:6px 0 4px;">' + titulo + '</div>';
+      lista.forEach(function(c){
+        const col = nivelColor(c.evaluacion);
+        h += '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 8px;background:#111;border-radius:5px;margin-bottom:3px;font-size:11px;">';
+        h += '<span style="color:#f0ebe3;">' + String(c.nombre).replace(/</g,'&lt;') + '</span>';
+        h += c.evaluacion
+          ? '<span style="color:' + col + ';font-weight:700;font-size:10px;">' + String(c.evaluacion).replace(/</g,'&lt;') + '</span>'
+          : '<span style="color:#555;font-size:10px;">sin evaluar</span>';
+        h += '</div>';
+      });
+      return h;
+    };
+    html += renderComp(d.competenciasGenericas||[], 'Genéricas');
+    html += renderComp(d.competenciasLiderazgo||[], 'Liderazgo');
+    html += '<div style="font-size:10px;color:#F59E0B;margin-top:8px;padding:6px 8px;background:rgba(245,158,11,0.08);border-radius:5px;">ℹ️ Las competencias se detectan pero <b>todavía no se importan</b> — el módulo de Competencias v2.0 está planificado para la próxima sesión.</div>';
     html += '</div>';
   }
 

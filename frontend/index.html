@@ -6419,6 +6419,13 @@ async function verReportePersona() {
   const comp = await apiGet('competencies/summary/' + userId + (periodId ? '?periodId=' + periodId : ''));
   _repDeepData = deep;
   _repCompData = comp;
+  // Sesión 8b: el backend ahora avisa si algo se cargó a medias en vez de tragárselo.
+  if (deep && deep.warnings && deep.warnings.length) {
+    console.warn('[Deep-report] avisos del servidor:', deep.warnings);
+  }
+  if (deep && deep._diag) {
+    console.log('[Deep-report] diagnóstico PIPs:', deep._diag);
+  }
 
   if (!deep) {
     if (elAv) elAv.textContent = 'error';

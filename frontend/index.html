@@ -2107,17 +2107,50 @@ label { color: #888 !important; }
       <div id="rep-persona" style="margin-top:16px;">
         <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
           <select id="repPersonaSel" class="form-control" style="width:260px" onchange="verReportePersona()"><option value="">— Seleccionar colaborador —</option></select>
-          <select id="repPeriodoSel" class="form-control" style="width:140px" onchange="verReportePersona()"><option value="">— Período —</option></select>
+          <select id="repPeriodoSel" class="form-control" style="width:180px" onchange="verReportePersona()"><option value="">Todos los períodos</option></select>
         </div>
         <div id="repPersonaEmpty" style="text-align:center;padding:40px;color:#888;">Seleccioná un colaborador para ver el reporte</div>
-        <div id="repPersonaResult" class="card" style="display:none;">
-          <div style="font-size:15px;font-weight:800;color:#f0ebe3;margin-bottom:4px;" id="repPersonaNombre"></div>
-          <div class="text-muted mb-16" id="repPersonaInfo"></div>
-          <div class="grid-3 gap-16 mb-16">
-            <div class="kpi-card"><div class="kpi-label">Avance Objetivos</div><div id="repAvance" class="kpi-value" style="color:#F59E0B;">—</div></div>
-            <div class="kpi-card"><div class="kpi-label">Competencias</div><div id="repCompetencias" class="kpi-value" style="color:#2ECC71;">—</div></div>
-            <div class="kpi-card"><div class="kpi-label">Plan Carrera</div><div id="repCarrera" class="kpi-value" style="color:#FF5400;">—</div></div>
+        <div id="repPersonaResult" style="display:none;">
+
+          <!-- Encabezado + KPIs -->
+          <div class="card" style="margin-bottom:14px;">
+            <div style="font-size:15px;font-weight:800;color:#f0ebe3;margin-bottom:4px;" id="repPersonaNombre"></div>
+            <div class="text-muted mb-16" id="repPersonaInfo"></div>
+            <div class="grid-3 gap-16" style="margin-bottom:12px;">
+              <div class="kpi-card"><div class="kpi-label">Avance Objetivos</div><div id="repAvance" class="kpi-value" style="color:#F59E0B;">—</div></div>
+              <div class="kpi-card"><div class="kpi-label">Competencias</div><div id="repCompetencias" class="kpi-value" style="color:#2ECC71;">—</div></div>
+              <div class="kpi-card"><div class="kpi-label">Plan Carrera</div><div id="repCarrera" class="kpi-value" style="color:#FF5400;">—</div></div>
+            </div>
+            <div id="repPersonaKPIs2" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;"></div>
           </div>
+
+          <!-- Evolución de objetivos entre períodos -->
+          <div class="card" style="margin-bottom:14px;">
+            <div style="font-size:11px;font-weight:700;color:#FF5400;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">📈 Evolución de objetivos por período</div>
+            <div id="repEvolObj"><div style="padding:20px;color:#888;font-size:12px;">Cargando…</div></div>
+          </div>
+
+          <!-- Radar de competencias -->
+          <div class="card" style="margin-bottom:14px;">
+            <div style="font-size:11px;font-weight:700;color:#FF5400;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">🎯 Radar de competencias</div>
+            <div id="repRadarComp"><div style="padding:20px;color:#888;font-size:12px;">Cargando…</div></div>
+          </div>
+
+          <!-- Cronología -->
+          <div class="card" style="margin-bottom:14px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+              <div style="font-size:11px;font-weight:700;color:#FF5400;text-transform:uppercase;letter-spacing:0.5px;">🗓️ Cronología</div>
+              <div id="repCronoFiltros" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+            </div>
+            <div id="repCronologia"><div style="padding:20px;color:#888;font-size:12px;">Cargando…</div></div>
+          </div>
+
+          <!-- Feedback acumulado -->
+          <div class="card">
+            <div style="font-size:11px;font-weight:700;color:#FF5400;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">💬 Feedback acumulado</div>
+            <div id="repFeedbackAcum"><div style="padding:20px;color:#888;font-size:12px;">Cargando…</div></div>
+          </div>
+
         </div>
       </div>
       <div id="rep-lider" style="display:none;margin-top:16px;">
@@ -5328,31 +5361,10 @@ loadOrgChart = async function() {
   container.innerHTML = html;
 };
 
-// ═══ FIX REPORTES: tabs y ver reporte ═════════════════════════
-// Los tabs de reportes ya tienen switchTab, solo falta poblar selectores
-async function initReportes() {
-  const section = document.getElementById('sec-reports');
-  if (!section) return;
-  
-  // Poblar select de personas si existe
-  section.querySelectorAll('select').forEach((sel, i) => {
-    if (i === 0 && sel.options.length <= 2) {
-      const current = sel.value;
-      // Solo si es un selector de personas
-      if (!sel.querySelector('option[value=""]')) {
-        sel.innerHTML = '<option value="">— Seleccionar —</option>';
-      }
-      allUsuarios.filter(u=>u.IsActive).sort((a,b)=>(a.FullName||'').localeCompare(b.FullName||'')).forEach(u=>{
-        if (!sel.querySelector(`option[value="${u.UserID}"]`)) {
-          sel.add(new Option(u.FullName||u.Email, u.UserID));
-        }
-      });
-      if (current) sel.value = current;
-    }
-  });
-}
-
-// Cargar reportes cuando se activa la sección
+// ═══ FIX REPORTES ═════════════════════════════════════════════
+// Sesión 8: acá había una segunda definición de initReportes() que pisaba
+// a la buena (la de la sección REPORTES, más abajo). Se eliminó.
+// No volver a definir initReportes() en este punto del archivo.
 
 function poblarSelectoresObjetivos() {
   const modal = document.getElementById('newObjectiveModal');
@@ -6341,90 +6353,529 @@ function initReporteTab(tipo) {
   }
 }
 
+// ═══ DEEP-DIVE "POR PERSONA" (Sesión 8) ══════════════════════
+// Cache del último deep-report cargado, para que los filtros de la cronología
+// no tengan que volver a pegarle a la API.
+let _repDeepData   = null;
+let _repCompData   = null;
+let _repCronoFiltro = 'all';
+
+// Escape defensivo para todo lo que venga de la base
+function repEsc(s) {
+  return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function repFecha(d) {
+  if (!d) return '';
+  const dt = new Date(d);
+  return isNaN(dt.getTime()) ? '' : dt.toLocaleDateString('es-AR');
+}
+// Avance ponderado por Weight, con fallback a promedio simple
+function repAvancePonderado(objs) {
+  if (!objs || !objs.length) return null;
+  const sumW = objs.reduce(function(s,o){ return s + (parseFloat(o.Weight)||0); }, 0);
+  if (sumW > 0) {
+    const sumPW = objs.reduce(function(s,o){ return s + (parseFloat(o.Progress)||0) * (parseFloat(o.Weight)||0); }, 0);
+    return Math.round(sumPW / sumW);
+  }
+  return Math.round(objs.reduce(function(s,o){ return s + (parseFloat(o.Progress)||0); }, 0) / objs.length);
+}
+
 async function verReportePersona() {
-  const userId = document.getElementById('repPersonaSel')?.value;
-  const periodId = document.getElementById('repPeriodoSel')?.value;
+  const userId   = (document.getElementById('repPersonaSel')||{}).value || '';
+  const periodId = (document.getElementById('repPeriodoSel')||{}).value || '';
   const res = document.getElementById('repPersonaResult');
   const emp = document.getElementById('repPersonaEmpty');
-  if (!userId) { if(res)res.style.display='none'; if(emp)emp.style.display='block'; return; }
-  const user = allUsuarios.find(u=>String(u.UserID)===String(userId));
-  if (!user || !res) return;
-  res.style.display='block'; if(emp)emp.style.display='none';
-  const period = allPeriods.find(p=>String(p.PeriodID)===String(periodId));
-  document.getElementById('repPersonaNombre').textContent = (user.FullName||user.Email) + (period?' — '+period.PeriodName:'');
-  document.getElementById('repPersonaInfo').textContent = [user.RoleName,user.AreaName].filter(Boolean).join(' · ');
-
-  // Sesión 6 fix: loading state + cálculo PONDERADO + Plan Carrera + errores visibles
-  const elAv = document.getElementById('repAvance');
-  const elCp = document.getElementById('repCompetencias');
-  const elCarr = document.getElementById('repCarrera');
-  if (elAv) elAv.textContent = '...';
-  if (elCp) elCp.textContent = '...';
-  if (elCarr) elCarr.textContent = '...';
-
-  if (!periodId) {
-    if (elAv) elAv.textContent = '—';
-    if (elCp) elCp.textContent = '—';
-    if (elCarr) elCarr.textContent = '—';
+  if (!userId) {
+    if (res) res.style.display = 'none';
+    if (emp) emp.style.display = 'block';
+    _repDeepData = null; _repCompData = null;
     return;
   }
+  const user = (allUsuarios||[]).find(function(u){ return String(u.UserID) === String(userId); });
+  if (!user || !res) return;
+  res.style.display = 'block';
+  if (emp) emp.style.display = 'none';
 
-  try {
-    const data = await apiGet('users/'+userId+'/report?periodId='+periodId);
-    if (!data) throw new Error('Sin datos');
-    console.log('[Reporte Persona] Data recibida:', data);
+  const period = (allPeriods||[]).find(function(p){ return String(p.PeriodID) === String(periodId); });
+  const elNom  = document.getElementById('repPersonaNombre');
+  const elInfo = document.getElementById('repPersonaInfo');
+  if (elNom)  elNom.textContent  = (user.FullName||user.Email) + (period ? ' — ' + period.PeriodName : ' — todos los períodos');
+  if (elInfo) elInfo.textContent = [user.JobRoleName || user.RoleName, user.AreaName, user.ProjectName].filter(Boolean).join(' · ');
 
-    // Avance Objetivos — PONDERADO por Weight
-    const objs = data.objectives || [];
-    if (objs.length === 0) {
-      if (elAv) elAv.textContent = '—';
-    } else {
-      const sumW = objs.reduce(function(s, o){ return s + (parseFloat(o.Weight) || 0); }, 0);
-      let avance;
-      if (sumW > 0) {
-        // Ponderado: sum(Progress × Weight) / sum(Weight)
-        const sumPW = objs.reduce(function(s, o){
-          return s + (parseFloat(o.Progress) || 0) * (parseFloat(o.Weight) || 0);
-        }, 0);
-        avance = Math.round(sumPW / sumW);
-      } else {
-        // Fallback: promedio simple si no hay ponderaciones cargadas
-        avance = Math.round(objs.reduce(function(s, o){ return s + (parseFloat(o.Progress) || 0); }, 0) / objs.length);
-      }
-      if (elAv) elAv.textContent = avance + '%';
-    }
+  // Loading states
+  const elAv   = document.getElementById('repAvance');
+  const elCp   = document.getElementById('repCompetencias');
+  const elCarr = document.getElementById('repCarrera');
+  if (elAv)   elAv.textContent   = '…';
+  if (elCp)   elCp.textContent   = '…';
+  if (elCarr) elCarr.textContent = '…';
+  ['repEvolObj','repRadarComp','repCronologia','repFeedbackAcum'].forEach(function(id){
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = '<div style="padding:20px;color:#888;font-size:12px;">Cargando…</div>';
+  });
 
-    // Competencias — promedio del Score si existe
-    const comps = data.competencies || [];
-    if (comps.length === 0) {
-      if (elCp) elCp.textContent = '—';
-    } else {
-      const conScore = comps.filter(function(c){ return c.Score != null; });
-      if (conScore.length > 0) {
-        const prom = Math.round(conScore.reduce(function(s, c){ return s + (parseFloat(c.Score) || 0); }, 0) / conScore.length);
-        if (elCp) elCp.textContent = prom + 'pts';
-      } else {
-        if (elCp) elCp.textContent = comps.length + ' eval';
-      }
-    }
+  // Las dos llamadas en paralelo
+  const deep = await apiGet('users/' + userId + '/deep-report');
+  const comp = await apiGet('competencies/summary/' + userId + (periodId ? '?periodId=' + periodId : ''));
+  _repDeepData = deep;
+  _repCompData = comp;
 
-    // Plan Carrera — % de hitos completados
-    const career = data.career || [];
-    if (career.length === 0) {
-      if (elCarr) elCarr.textContent = 'Sin plan';
-    } else {
-      const completed = career.filter(function(m){
-        return m.IsCompleted === 1 || m.IsCompleted === true || m.Status === 'completed';
-      }).length;
-      const pct = Math.round((completed / career.length) * 100);
-      if (elCarr) elCarr.textContent = pct + '% (' + completed + '/' + career.length + ')';
-    }
-  } catch(e) {
-    console.warn('[Reporte Persona] Error:', e);
+  if (!deep) {
     if (elAv) elAv.textContent = 'error';
     if (elCp) elCp.textContent = 'error';
     if (elCarr) elCarr.textContent = 'error';
+    ['repEvolObj','repRadarComp','repCronologia','repFeedbackAcum'].forEach(function(id){
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = '<div style="padding:20px;color:#FF4D4D;font-size:12px;">No se pudo cargar el reporte. Revisá la consola (F12).</div>';
+    });
+    return;
   }
+
+  const todosObjs = deep.objectives || [];
+  const objsPeriodo = periodId
+    ? todosObjs.filter(function(o){ return String(o.PeriodID) === String(periodId); })
+    : todosObjs;
+
+  // ── KPI 1: avance de objetivos
+  const av = repAvancePonderado(objsPeriodo);
+  if (elAv) elAv.textContent = (av == null) ? '—' : av + '%';
+
+  // ── KPI 2: competencias (promedio de la matriz del período)
+  if (elCp) {
+    const filas = (comp && comp.matrix) ? comp.matrix.filter(function(r){ return r.average != null; }) : [];
+    if (!filas.length) elCp.textContent = '—';
+    else {
+      const prom = filas.reduce(function(s,r){ return s + r.average; }, 0) / filas.length;
+      elCp.textContent = (Math.round(prom*10)/10) + ' / 4';
+    }
+  }
+
+  // ── KPI 3: plan de carrera
+  const career = deep.career || [];
+  if (elCarr) {
+    if (!career.length) elCarr.textContent = 'Sin plan';
+    else {
+      const done = career.filter(repHitoCompleto).length;
+      elCarr.textContent = Math.round((done/career.length)*100) + '% (' + done + '/' + career.length + ')';
+    }
+  }
+
+  renderRepKPIs2(deep);
+  renderRepEvolucionObjetivos(todosObjs, periodId);
+  renderRepRadarCompetencias(comp);
+  _repCronoFiltro = 'all';
+  renderRepCronologia();
+  renderRepFeedbackAcumulado(todosObjs, comp);
+}
+
+function repHitoCompleto(m) {
+  return m.IsCompleted === 1 || m.IsCompleted === true ||
+         m.Status === 'completed' || m.Status === 'done' || m.Status === 'finished' ||
+         (parseFloat(m.Progress)||0) >= 100;
+}
+
+// ── Fila de KPIs secundarios: PIPs, 1:1, onboarding, certificaciones
+function renderRepKPIs2(deep) {
+  const cont = document.getElementById('repPersonaKPIs2');
+  if (!cont) return;
+  const pips = deep.pips || [];
+  const meetings = deep.meetings || [];
+  const ob = deep.onboarding || {};
+  const career = deep.career || [];
+
+  // PIPs
+  const pipsAbiertos = pips.filter(function(p){ return p.Achieved == null && p.Status !== 'closed'; }).length;
+  const pipTxt = pips.length ? pips.length + (pipsAbiertos ? ' (' + pipsAbiertos + ' abierto/s)' : '') : '0';
+  const pipColor = pipsAbiertos ? '#FF4D4D' : (pips.length ? '#F59E0B' : '#2ECC71');
+
+  // 1:1 — días desde la última
+  let unoTxt = '0', unoColor = '#888', unoSub = 'sin registros';
+  if (meetings.length) {
+    const ultima = meetings.map(function(m){ return new Date(m.MeetingDate); })
+                           .filter(function(d){ return !isNaN(d.getTime()); })
+                           .sort(function(a,b){ return b - a; })[0];
+    if (ultima) {
+      const dias = Math.floor((new Date() - ultima) / 86400000);
+      unoTxt = String(meetings.length);
+      unoSub = 'última hace ' + dias + ' d';
+      unoColor = dias > 60 ? '#FF4D4D' : (dias > 44 ? '#F59E0B' : '#2ECC71');
+    } else {
+      unoTxt = String(meetings.length);
+      unoSub = '';
+    }
+  }
+
+  // Onboarding
+  let obTxt = 'Sin plan', obColor = '#888', obSub = '';
+  if (ob.plan) {
+    const ms = ob.milestones || [], cs = ob.courses || [];
+    const total = ms.length + cs.length;
+    const done = ms.filter(function(m){ return m.IsCompleted; }).length + cs.filter(function(c){ return c.IsCompleted; }).length;
+    const pct = total ? Math.round(done/total*100) : 0;
+    obTxt = pct + '%';
+    obSub = done + '/' + total + ' completados';
+    obColor = pct >= 100 ? '#2ECC71' : (pct >= 50 ? '#F59E0B' : '#FF4D4D');
+  }
+
+  // Certificaciones (hitos de carrera con nombre de certificación)
+  const certs = career.filter(function(m){ return m.CertificationName || m.CertName || m.BadgeURL; });
+  const certsDone = certs.filter(repHitoCompleto).length;
+
+  function kpi(label, value, color, sub) {
+    return '<div style="background:#111;border:1px solid #262626;border-radius:8px;padding:10px 12px;">' +
+           '<div style="font-size:9px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:4px;">' + label + '</div>' +
+           '<div style="font-size:16px;font-weight:800;color:' + color + ';">' + value + '</div>' +
+           (sub ? '<div style="font-size:10px;color:#666;margin-top:2px;">' + sub + '</div>' : '') +
+           '</div>';
+  }
+  cont.innerHTML =
+    kpi('PIPs', pipTxt, pipColor, '') +
+    kpi('Reuniones 1:1', unoTxt, unoColor, unoSub) +
+    kpi('Onboarding', obTxt, obColor, obSub) +
+    kpi('Certificaciones', certsDone + '/' + certs.length, certs.length ? '#3B82F6' : '#888', '');
+}
+
+// ── Gráfico de evolución de objetivos período a período (SVG a mano, sin librerías)
+function renderRepEvolucionObjetivos(objs, periodIdActual) {
+  const cont = document.getElementById('repEvolObj');
+  if (!cont) return;
+  if (!objs || !objs.length) {
+    cont.innerHTML = '<div style="padding:20px;color:#888;font-size:12px;">Sin objetivos cargados.</div>';
+    return;
+  }
+  // Agrupar por período
+  const map = {};
+  objs.forEach(function(o){
+    if (!o.PeriodID) return;
+    if (!map[o.PeriodID]) {
+      map[o.PeriodID] = { periodId: o.PeriodID, name: o.PeriodName || ('Período ' + o.PeriodID), start: o.PeriodStartDate, objs: [] };
+    }
+    map[o.PeriodID].objs.push(o);
+  });
+  const puntos = Object.keys(map).map(function(k){ return map[k]; })
+    .sort(function(a,b){ return new Date(a.start||0) - new Date(b.start||0); })
+    .map(function(p){ p.avance = repAvancePonderado(p.objs) || 0; return p; });
+
+  if (puntos.length === 0) {
+    cont.innerHTML = '<div style="padding:20px;color:#888;font-size:12px;">Los objetivos no tienen período asignado.</div>';
+    return;
+  }
+  if (puntos.length === 1) {
+    const p = puntos[0];
+    cont.innerHTML = '<div style="padding:16px;background:#111;border-radius:8px;">' +
+      '<div style="font-size:12px;color:#888;margin-bottom:6px;">' + repEsc(p.name) + '</div>' +
+      '<div style="font-size:26px;font-weight:800;color:#FF5400;">' + p.avance + '%</div>' +
+      '<div style="font-size:11px;color:#666;margin-top:4px;">' + p.objs.length + ' objetivo(s). Hace falta un segundo período para ver evolución.</div>' +
+      '</div>';
+    return;
+  }
+
+  // SVG
+  const W = 700, H = 240, padL = 44, padR = 20, padT = 20, padB = 46;
+  const innerW = W - padL - padR, innerH = H - padT - padB;
+  const stepX = puntos.length > 1 ? innerW / (puntos.length - 1) : 0;
+  const xy = puntos.map(function(p, i){
+    return { x: padL + stepX * i, y: padT + innerH * (1 - (p.avance/100)), p: p };
+  });
+
+  let svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%;height:auto;" xmlns="http://www.w3.org/2000/svg">';
+  // Grilla horizontal 0/25/50/75/100
+  [0,25,50,75,100].forEach(function(v){
+    const y = padT + innerH * (1 - v/100);
+    svg += '<line x1="' + padL + '" y1="' + y + '" x2="' + (W-padR) + '" y2="' + y + '" stroke="#262626" stroke-width="1"/>';
+    svg += '<text x="' + (padL-8) + '" y="' + (y+4) + '" text-anchor="end" fill="#666" font-size="10">' + v + '%</text>';
+  });
+  // Línea de umbral 70%
+  const y70 = padT + innerH * (1 - 0.70);
+  svg += '<line x1="' + padL + '" y1="' + y70 + '" x2="' + (W-padR) + '" y2="' + y70 + '" stroke="#F59E0B" stroke-width="1" stroke-dasharray="4,4" opacity="0.5"/>';
+  // Polilínea
+  svg += '<polyline fill="none" stroke="#FF5400" stroke-width="2.5" points="' +
+         xy.map(function(pt){ return pt.x.toFixed(1) + ',' + pt.y.toFixed(1); }).join(' ') + '"/>';
+  // Puntos + etiquetas
+  xy.forEach(function(pt){
+    const esActual = periodIdActual && String(pt.p.periodId) === String(periodIdActual);
+    const color = pt.p.avance >= 70 ? '#2ECC71' : (pt.p.avance >= 40 ? '#F59E0B' : '#FF4D4D');
+    svg += '<circle cx="' + pt.x.toFixed(1) + '" cy="' + pt.y.toFixed(1) + '" r="' + (esActual ? 7 : 5) + '" fill="' + color + '" stroke="#0a0a0a" stroke-width="2"/>';
+    svg += '<text x="' + pt.x.toFixed(1) + '" y="' + (pt.y - 12).toFixed(1) + '" text-anchor="middle" fill="#f0ebe3" font-size="11" font-weight="700">' + pt.p.avance + '%</text>';
+    svg += '<text x="' + pt.x.toFixed(1) + '" y="' + (H - padB + 18) + '" text-anchor="middle" fill="' + (esActual ? '#FF5400' : '#888') + '" font-size="10" font-weight="' + (esActual ? '700' : '400') + '">' + repEsc(pt.p.name) + '</text>';
+    svg += '<text x="' + pt.x.toFixed(1) + '" y="' + (H - padB + 32) + '" text-anchor="middle" fill="#555" font-size="9">' + pt.p.objs.length + ' obj.</text>';
+  });
+  svg += '</svg>';
+
+  // Delta total
+  const primero = puntos[0].avance, ultimo = puntos[puntos.length-1].avance;
+  const delta = ultimo - primero;
+  const dColor = delta > 0 ? '#2ECC71' : (delta < 0 ? '#FF4D4D' : '#888');
+  const dIcon  = delta > 0 ? '▲' : (delta < 0 ? '▼' : '=');
+  svg += '<div style="margin-top:10px;font-size:11px;color:#888;">' +
+         'Variación entre ' + repEsc(puntos[0].name) + ' y ' + repEsc(puntos[puntos.length-1].name) + ': ' +
+         '<b style="color:' + dColor + ';">' + dIcon + ' ' + (delta > 0 ? '+' : '') + delta + ' pts</b>' +
+         ' · línea punteada = umbral 70%</div>';
+  cont.innerHTML = svg;
+}
+
+// ── Radar de competencias (SVG a mano)
+function renderRepRadarCompetencias(comp) {
+  const cont = document.getElementById('repRadarComp');
+  if (!cont) return;
+  if (!comp || !comp.matrix || !comp.matrix.length) {
+    cont.innerHTML = '<div style="padding:20px;color:#888;font-size:12px;">Sin evaluaciones de competencias para este colaborador.</div>';
+    return;
+  }
+  const filas = comp.matrix.filter(function(r){
+    return r.self != null || r.leader != null || r.manager != null || r.import != null;
+  });
+  if (!filas.length) {
+    cont.innerHTML = '<div style="padding:20px;color:#888;font-size:12px;">Hay evaluaciones cargadas pero sin puntajes en este período.</div>';
+    return;
+  }
+
+  const W = 520, H = 430, cx = 260, cy = 200, R = 140;
+  const n = filas.length;
+  const ang = function(i){ return (Math.PI * 2 * i / n) - Math.PI/2; };
+  const pt = function(i, v){
+    const r = R * (v / 4);
+    return { x: cx + r * Math.cos(ang(i)), y: cy + r * Math.sin(ang(i)) };
+  };
+
+  let svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%;max-width:560px;height:auto;display:block;margin:0 auto;" xmlns="http://www.w3.org/2000/svg">';
+  // Anillos 1..4
+  [1,2,3,4].forEach(function(lvl){
+    const pts = [];
+    for (let i = 0; i < n; i++) { const p = pt(i, lvl); pts.push(p.x.toFixed(1) + ',' + p.y.toFixed(1)); }
+    svg += '<polygon points="' + pts.join(' ') + '" fill="none" stroke="#262626" stroke-width="1"/>';
+  });
+  // Ejes + etiquetas
+  for (let i = 0; i < n; i++) {
+    const p = pt(i, 4);
+    svg += '<line x1="' + cx + '" y1="' + cy + '" x2="' + p.x.toFixed(1) + '" y2="' + p.y.toFixed(1) + '" stroke="#262626" stroke-width="1"/>';
+    const lp = pt(i, 4.62);
+    const anchor = Math.abs(lp.x - cx) < 12 ? 'middle' : (lp.x > cx ? 'start' : 'end');
+    // Cortar nombres largos en dos líneas
+    const nombre = String(filas[i].name || filas[i].code || '');
+    const palabras = nombre.split(' ');
+    let l1 = '', l2 = '';
+    palabras.forEach(function(w){
+      if ((l1 + ' ' + w).trim().length <= 16 && !l2) l1 = (l1 + ' ' + w).trim();
+      else l2 = (l2 + ' ' + w).trim();
+    });
+    const color = filas[i].compType === 'leadership' ? '#A855F7' : '#3B82F6';
+    svg += '<text x="' + lp.x.toFixed(1) + '" y="' + (lp.y - (l2 ? 5 : 0)).toFixed(1) + '" text-anchor="' + anchor + '" fill="' + color + '" font-size="9.5" font-weight="600">' + repEsc(l1) + '</text>';
+    if (l2) svg += '<text x="' + lp.x.toFixed(1) + '" y="' + (lp.y + 6).toFixed(1) + '" text-anchor="' + anchor + '" fill="' + color + '" font-size="9.5" font-weight="600">' + repEsc(l2) + '</text>';
+  }
+
+  // Series
+  const series = [
+    { key: 'self',    label: 'Autoevaluación', color: '#3B82F6' },
+    { key: 'leader',  label: 'Líder',          color: '#FF5400' },
+    { key: 'manager', label: 'Manager',        color: '#2ECC71' }
+  ];
+  let algunaSerie = false;
+  series.forEach(function(s){
+    const tiene = filas.some(function(r){ return r[s.key] != null; });
+    if (!tiene) return;
+    algunaSerie = true;
+    const pts = [];
+    for (let i = 0; i < n; i++) {
+      const v = filas[i][s.key] != null ? filas[i][s.key] : 0;
+      const p = pt(i, v);
+      pts.push(p.x.toFixed(1) + ',' + p.y.toFixed(1));
+    }
+    svg += '<polygon points="' + pts.join(' ') + '" fill="' + s.color + '" fill-opacity="0.13" stroke="' + s.color + '" stroke-width="2"/>';
+    for (let i = 0; i < n; i++) {
+      if (filas[i][s.key] == null) continue;
+      const p = pt(i, filas[i][s.key]);
+      svg += '<circle cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="3.5" fill="' + s.color + '"/>';
+    }
+  });
+  // Leyenda
+  let lx = 30;
+  const ly = H - 22;
+  series.forEach(function(s){
+    if (!filas.some(function(r){ return r[s.key] != null; })) return;
+    svg += '<rect x="' + lx + '" y="' + (ly-8) + '" width="10" height="10" rx="2" fill="' + s.color + '"/>';
+    svg += '<text x="' + (lx+15) + '" y="' + (ly+1) + '" fill="#888" font-size="10">' + s.label + '</text>';
+    lx += 20 + s.label.length * 6.2;
+  });
+  svg += '</svg>';
+
+  if (!algunaSerie) {
+    cont.innerHTML = '<div style="padding:20px;color:#888;font-size:12px;">Sin puntajes para graficar.</div>';
+    return;
+  }
+  svg += '<div style="text-align:center;font-size:10px;color:#666;margin-top:2px;">Escala 1 a 4 · anillo externo = 4 (Viene súper) · azul = generales, violeta = liderazgo</div>';
+  cont.innerHTML = svg;
+}
+
+// ── Cronología unificada
+function repEventosCronologia() {
+  const deep = _repDeepData;
+  if (!deep) return [];
+  const ev = [];
+
+  // Onboarding
+  const ob = deep.onboarding || {};
+  if (ob.plan) {
+    ev.push({ tipo:'onboarding', fecha: ob.plan.StartDate || ob.plan.CreatedAt, icono:'🚀', color:'#3B82F6',
+              titulo:'Inicio de onboarding', detalle: ob.plan.RoleDescription || '' });
+    (ob.milestones||[]).forEach(function(m){
+      if (m.IsCompleted && m.CompletedAt) {
+        ev.push({ tipo:'onboarding', fecha:m.CompletedAt, icono:'✅', color:'#3B82F6',
+                  titulo:'Hito de onboarding: ' + (m.Title||''), detalle:'' });
+      }
+    });
+    (ob.courses||[]).forEach(function(c){
+      if (c.IsCompleted && c.CompletedAt) {
+        ev.push({ tipo:'onboarding', fecha:c.CompletedAt, icono:'🎓', color:'#3B82F6',
+                  titulo:'Curso completado: ' + (c.CourseName||''), detalle:'' });
+      }
+    });
+  }
+
+  // Objetivos — un evento por período
+  const porPeriodo = {};
+  (deep.objectives||[]).forEach(function(o){
+    if (!o.PeriodID) return;
+    if (!porPeriodo[o.PeriodID]) porPeriodo[o.PeriodID] = { name:o.PeriodName, start:o.PeriodStartDate, objs:[] };
+    porPeriodo[o.PeriodID].objs.push(o);
+  });
+  Object.keys(porPeriodo).forEach(function(k){
+    const p = porPeriodo[k];
+    const av = repAvancePonderado(p.objs);
+    ev.push({ tipo:'objetivos', fecha:p.start, icono:'🎯',
+              color: av >= 70 ? '#2ECC71' : (av >= 40 ? '#F59E0B' : '#FF4D4D'),
+              titulo:'Objetivos ' + (p.name||''), detalle: p.objs.length + ' objetivo(s) · avance ponderado ' + av + '%' });
+  });
+
+  // PIPs
+  (deep.pips||[]).forEach(function(p){
+    const estado = p.Achieved === true || p.Achieved === 1 ? 'logrado'
+                 : (p.Achieved === false || p.Achieved === 0 ? 'no logrado' : 'en curso');
+    ev.push({ tipo:'pip', fecha:p.StartDate || p.CreatedAt, icono:'⚠️',
+              color: estado === 'logrado' ? '#2ECC71' : (estado === 'no logrado' ? '#FF4D4D' : '#F59E0B'),
+              titulo:'PIP — ' + estado, detalle:(p.Reason||'') + ' · hitos ' + (p.MilestonesDone||0) + '/' + (p.MilestonesTotal||0) + (p.FilesCount ? ' · ' + p.FilesCount + ' archivo(s)' : '') });
+  });
+
+  // Reuniones 1:1
+  (deep.meetings||[]).forEach(function(m){
+    ev.push({ tipo:'reunion', fecha:m.MeetingDate, icono:'🗣️', color:'#A855F7',
+              titulo:'1:1' + (m.Title ? ' — ' + m.Title : ''), detalle: m.MeetingType || '' });
+  });
+
+  // Certificaciones / hitos de carrera completados
+  (deep.career||[]).forEach(function(m){
+    if (!repHitoCompleto(m)) return;
+    const nombre = m.CertificationName || m.CertName || m.MilestoneTitle || 'Hito de carrera';
+    ev.push({ tipo:'carrera', fecha: m.CompletedAt || m.UpdatedAt || m.CreatedAt, icono:'🏅', color:'#FFD700',
+              titulo: nombre, detalle: m.MilestoneCategory || m.MilestoneType || '' });
+  });
+
+  return ev.filter(function(e){ return e.fecha; })
+           .sort(function(a,b){ return new Date(b.fecha) - new Date(a.fecha); });
+}
+
+function renderRepCronologia() {
+  const cont = document.getElementById('repCronologia');
+  const filtCont = document.getElementById('repCronoFiltros');
+  if (!cont) return;
+  const todos = repEventosCronologia();
+
+  // Chips de filtro (con data-attributes + delegación, sin comillas anidadas en onclick)
+  if (filtCont) {
+    const defs = [
+      { k:'all',        l:'Todo' },
+      { k:'onboarding', l:'🚀 Onboarding' },
+      { k:'objetivos',  l:'🎯 Objetivos' },
+      { k:'pip',        l:'⚠️ PIPs' },
+      { k:'reunion',    l:'🗣️ 1:1' },
+      { k:'carrera',    l:'🏅 Carrera' }
+    ];
+    filtCont.innerHTML = defs.map(function(d){
+      const n = d.k === 'all' ? todos.length : todos.filter(function(e){ return e.tipo === d.k; }).length;
+      const activo = _repCronoFiltro === d.k;
+      return '<button type="button" data-crono="' + d.k + '" style="padding:4px 10px;border-radius:20px;font-size:10px;cursor:pointer;border:1px solid ' +
+             (activo ? '#FF5400' : '#333') + ';background:' + (activo ? 'rgba(255,84,0,0.15)' : 'transparent') +
+             ';color:' + (activo ? '#FF5400' : '#888') + ';">' + d.l + ' (' + n + ')</button>';
+    }).join('');
+    Array.prototype.forEach.call(filtCont.querySelectorAll('button[data-crono]'), function(btn){
+      btn.addEventListener('click', function(){
+        _repCronoFiltro = btn.getAttribute('data-crono');
+        renderRepCronologia();
+      });
+    });
+  }
+
+  const eventos = _repCronoFiltro === 'all' ? todos : todos.filter(function(e){ return e.tipo === _repCronoFiltro; });
+  if (!eventos.length) {
+    cont.innerHTML = '<div style="padding:20px;color:#888;font-size:12px;">Sin eventos para mostrar.</div>';
+    return;
+  }
+  const MAX = 60;
+  const visibles = eventos.slice(0, MAX);
+  let html = '<div style="position:relative;padding-left:22px;">';
+  html += '<div style="position:absolute;left:6px;top:6px;bottom:6px;width:2px;background:#262626;"></div>';
+  visibles.forEach(function(e){
+    html += '<div style="position:relative;margin-bottom:14px;">';
+    html += '<div style="position:absolute;left:-21px;top:3px;width:10px;height:10px;border-radius:50%;background:' + e.color + ';border:2px solid #0a0a0a;"></div>';
+    html += '<div style="font-size:10px;color:#666;margin-bottom:2px;">' + repFecha(e.fecha) + '</div>';
+    html += '<div style="font-size:12px;font-weight:700;color:#f0ebe3;">' + e.icono + ' ' + repEsc(e.titulo) + '</div>';
+    if (e.detalle) html += '<div style="font-size:11px;color:#888;margin-top:2px;line-height:1.4;">' + repEsc(e.detalle) + '</div>';
+    html += '</div>';
+  });
+  html += '</div>';
+  if (eventos.length > MAX) {
+    html += '<div style="font-size:11px;color:#666;padding-top:6px;">Mostrando los ' + MAX + ' eventos más recientes de ' + eventos.length + '.</div>';
+  }
+  cont.innerHTML = html;
+}
+
+// ── Feedback acumulado: de objetivos + de evaluaciones de competencias
+function renderRepFeedbackAcumulado(objs, comp) {
+  const cont = document.getElementById('repFeedbackAcum');
+  if (!cont) return;
+  const items = [];
+
+  (objs||[]).forEach(function(o){
+    if (o.Feedback) {
+      items.push({ fecha:o.FeedbackDate || o.CreatedAt, origen:'Objetivo: ' + (o.Title||''),
+                   periodo:o.PeriodName || '', tipo:'feedback', texto:o.Feedback });
+    }
+    if (o.ImprovementAreas) {
+      items.push({ fecha:o.ImprovementAreasDate || o.CreatedAt, origen:'Objetivo: ' + (o.Title||''),
+                   periodo:o.PeriodName || '', tipo:'mejora', texto:o.ImprovementAreas });
+    }
+  });
+
+  const tipoLabelEv = { self:'Autoevaluación', leader:'Líder', manager:'Manager', import:'Importado' };
+  ((comp && comp.evaluations) || []).forEach(function(e){
+    const quien = (tipoLabelEv[e.EvaluatorType] || e.EvaluatorType || '') + (e.EvaluatorName ? ' — ' + e.EvaluatorName : '');
+    if (e.GeneralFeedback) {
+      items.push({ fecha:e.EvaluationDate, origen:'Competencias: ' + quien, periodo:e.PeriodName || '', tipo:'feedback', texto:e.GeneralFeedback });
+    }
+    if (e.ImprovementAreas) {
+      items.push({ fecha:e.EvaluationDate, origen:'Competencias: ' + quien, periodo:e.PeriodName || '', tipo:'mejora', texto:e.ImprovementAreas });
+    }
+  });
+
+  if (!items.length) {
+    cont.innerHTML = '<div style="padding:20px;color:#888;font-size:12px;">Sin feedback registrado todavía.</div>';
+    return;
+  }
+  items.sort(function(a,b){ return new Date(b.fecha||0) - new Date(a.fecha||0); });
+
+  cont.innerHTML = items.map(function(it){
+    const esMejora = it.tipo === 'mejora';
+    const color = esMejora ? '#F59E0B' : '#3B82F6';
+    const label = esMejora ? 'Áreas de mejora' : 'Feedback';
+    return '<div style="background:#111;border-left:3px solid ' + color + ';border-radius:6px;padding:10px 12px;margin-bottom:10px;">' +
+           '<div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:5px;">' +
+           '<div style="font-size:10px;font-weight:700;color:' + color + ';text-transform:uppercase;">' + label + '</div>' +
+           '<div style="font-size:10px;color:#666;">' + repFecha(it.fecha) + (it.periodo ? ' · ' + repEsc(it.periodo) : '') + '</div>' +
+           '</div>' +
+           '<div style="font-size:10px;color:#888;margin-bottom:4px;">' + repEsc(it.origen) + '</div>' +
+           '<div style="font-size:12px;color:#ccc;line-height:1.5;">' + repEsc(it.texto) + '</div>' +
+           '</div>';
+  }).join('');
 }
 
 async function verReporteLider() {

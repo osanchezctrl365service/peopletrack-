@@ -1731,20 +1731,68 @@ label { color: #888 !important; }
         </div>
         <button class="btn btn-primary btn-sm" onclick="abrirModalNuevoPIP()">+ Nuevo PIP</button>
       </div>
-      <div style="background:rgba(255,84,0,0.06);border:1px solid rgba(255,84,0,0.2);border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:#aaa;">
-        <strong style="color:#FF5400;">¿Qué es un PIP?</strong> Un Plan de Improvement se activa cuando un colaborador necesita mejorar su desempeño. 
-        El líder o manager define los hitos, fechas target y hace seguimiento del progreso.
+
+      <!-- Tabs (Sesión 6 Bloque 3.B) -->
+      <div class="tabs" style="margin-bottom:16px;">
+        <div class="tab active" onclick="cambiarTabPIP('activos', this)">PIPs Activos</div>
+        <div class="tab" onclick="cambiarTabPIP('historial', this)">📜 Historial por Persona</div>
+        <div class="tab" onclick="cambiarTabPIP('reincidentes', this)">🔁 Reincidentes</div>
       </div>
-      <div style="display:flex;gap:8px;margin-bottom:16px;">
-        <input id="pipBuscador" type="text" class="form-control" placeholder="🔍 Buscar colaborador..." style="flex:1;" oninput="filtrarPIPs(this.value)">
-        <select id="pipFiltroStatus" class="form-control" style="width:160px;" onchange="filtrarPIPs(document.getElementById('pipBuscador').value)">
-          <option value="">Todos</option>
-          <option value="active">Activos</option>
-          <option value="closed">Cerrados</option>
-        </select>
+
+      <!-- TAB 1: PIPs activos (vista original) -->
+      <div id="pip-tab-activos">
+        <div style="background:rgba(255,84,0,0.06);border:1px solid rgba(255,84,0,0.2);border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:#aaa;">
+          <strong style="color:#FF5400;">¿Qué es un PIP?</strong> Un Plan de Improvement se activa cuando un colaborador necesita mejorar su desempeño. 
+          El líder o manager define los hitos, fechas target y hace seguimiento del progreso.
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:16px;">
+          <input id="pipBuscador" type="text" class="form-control" placeholder="🔍 Buscar colaborador..." style="flex:1;" oninput="filtrarPIPs(this.value)">
+          <select id="pipFiltroStatus" class="form-control" style="width:160px;" onchange="filtrarPIPs(document.getElementById('pipBuscador').value)">
+            <option value="">Todos</option>
+            <option value="active">Activos</option>
+            <option value="closed">Cerrados</option>
+          </select>
+        </div>
+        <div id="pipContainer" style="max-height:calc(100vh - 320px);overflow-y:auto;padding-right:4px;">
+          <div style="text-align:center;padding:40px;color:#888;">Cargando PIPs...</div>
+        </div>
       </div>
-      <div id="pipContainer" style="max-height:calc(100vh - 280px);overflow-y:auto;padding-right:4px;">
-        <div style="text-align:center;padding:40px;color:#888;">Cargando PIPs...</div>
+
+      <!-- TAB 2: Historial por persona -->
+      <div id="pip-tab-historial" style="display:none;">
+        <div style="background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.2);border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:#aaa;">
+          <strong style="color:#3B82F6;">Historial completo</strong> — Elegí un colaborador para ver todos sus PIPs a lo largo del tiempo, con resultado final y progreso de hitos.
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:16px;align-items:flex-end;flex-wrap:wrap;">
+          <div style="flex:1;min-width:260px;">
+            <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;display:block;margin-bottom:6px;">Colaborador</label>
+            <select id="pipHistUserSel" class="form-control" style="width:100%;" onchange="cargarHistorialPIP()">
+              <option value="">— Seleccionar colaborador —</option>
+            </select>
+          </div>
+        </div>
+        <div id="pipHistorialContainer">
+          <div style="text-align:center;padding:40px;color:#888;font-size:13px;">Elegí un colaborador para ver su historial de PIPs.</div>
+        </div>
+      </div>
+
+      <!-- TAB 3: Reincidentes -->
+      <div id="pip-tab-reincidentes" style="display:none;">
+        <div style="background:rgba(255,77,77,0.06);border:1px solid rgba(255,77,77,0.2);border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:#aaa;">
+          <strong style="color:#FF4D4D;">Colaboradores reincidentes</strong> — Personas que tuvieron más de un PIP. Útil para detectar situaciones que requieren un abordaje distinto.
+        </div>
+        <div style="display:flex;gap:12px;margin-bottom:16px;align-items:center;flex-wrap:wrap;">
+          <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Mínimo de PIPs:</label>
+          <select id="pipReincMin" class="form-control" style="width:120px;" onchange="cargarReincidentes()">
+            <option value="2" selected>2 o más</option>
+            <option value="3">3 o más</option>
+            <option value="4">4 o más</option>
+          </select>
+          <button onclick="cargarReincidentes()" style="padding:8px 16px;background:#222;border:1px solid #333;border-radius:8px;color:#aaa;font-size:12px;cursor:pointer;">⟳ Actualizar</button>
+        </div>
+        <div id="pipReincidentesContainer">
+          <div style="text-align:center;padding:40px;color:#888;">Cargando...</div>
+        </div>
       </div>
     </div>
 
@@ -7614,6 +7662,229 @@ async function guardarNuevoPIP() {
     mostrarToast('PIP creado correctamente con ' + hitosValidos.length + ' hito(s)', 'success');
     cargarPIPs();
   } catch(e) { errEl.textContent = 'Error: '+e.message; errEl.style.display='block'; }
+}
+
+// ══════════════════════════════════════════
+// PIP — TABS, HISTORIAL Y REINCIDENTES (Sesión 6 Bloque 3.B)
+// ══════════════════════════════════════════
+
+function cambiarTabPIP(tab, el) {
+  // Toggle visual de tabs
+  document.querySelectorAll('#sec-pip .tab').forEach(function(t){ t.classList.remove('active'); });
+  if (el) el.classList.add('active');
+  // Mostrar/ocultar contenedores
+  ['activos','historial','reincidentes'].forEach(function(t){
+    const cont = document.getElementById('pip-tab-' + t);
+    if (cont) cont.style.display = (t === tab) ? '' : 'none';
+  });
+  // Cargar data según la tab
+  if (tab === 'historial') {
+    poblarSelectHistorialPIP();
+  } else if (tab === 'reincidentes') {
+    cargarReincidentes();
+  }
+}
+
+function poblarSelectHistorialPIP() {
+  const sel = document.getElementById('pipHistUserSel');
+  if (!sel || sel.options.length > 1) return;
+  const cargar = function(){
+    (allUsuarios || []).filter(function(u){ return u.IsActive; })
+      .sort(function(a,b){ return (a.FullName||'').localeCompare(b.FullName||''); })
+      .forEach(function(u){
+        sel.add(new Option((u.FullName||u.Email) + ' — ' + (u.Email||''), u.UserID));
+      });
+  };
+  if (!allUsuarios.length) loadUsuarios().then(cargar);
+  else cargar();
+}
+
+async function cargarHistorialPIP() {
+  const userId = document.getElementById('pipHistUserSel').value;
+  const cont = document.getElementById('pipHistorialContainer');
+  if (!userId) {
+    cont.innerHTML = '<div style="text-align:center;padding:40px;color:#888;font-size:13px;">Elegí un colaborador para ver su historial de PIPs.</div>';
+    return;
+  }
+  cont.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Cargando historial...</div>';
+  try {
+    const res = await fetch(API_BASE + '/pips/history/' + userId);
+    const raw = await res.text();
+    if (!raw || !raw.trim()) throw new Error('El servidor no respondió (HTTP ' + res.status + ')');
+    const json = JSON.parse(raw);
+    if (!res.ok || json.ok === false) throw new Error(json.error || 'HTTP ' + res.status);
+    const data = json.data || json;
+    renderHistorialPIP(data);
+  } catch(e) {
+    cont.innerHTML = '<div style="color:#FF4D4D;padding:20px;text-align:center;">Error: ' + e.message + '</div>';
+  }
+}
+
+function renderHistorialPIP(data) {
+  const cont = document.getElementById('pipHistorialContainer');
+  const pips = data.pips || [];
+  const s = data.summary || {};
+
+  if (!pips.length) {
+    cont.innerHTML = '<div style="text-align:center;padding:40px;color:#888;">' +
+      '<div style="font-size:32px;margin-bottom:10px;">✅</div>' +
+      '<div style="font-size:14px;color:#2ECC71;font-weight:700;">Sin PIPs registrados</div>' +
+      '<div style="font-size:12px;color:#888;margin-top:4px;">Este colaborador nunca tuvo un plan de improvement.</div>' +
+      '</div>';
+    return;
+  }
+
+  let html = '';
+
+  // Resumen en KPIs
+  html += '<div class="grid-4 mb-16">';
+  html += '<div class="kpi-card"><div class="kpi-label">Total PIPs</div><div class="kpi-value" style="color:#f0ebe3;">' + (s.total||0) + '</div></div>';
+  html += '<div class="kpi-card"><div class="kpi-label">Logrados</div><div class="kpi-value" style="color:#2ECC71;">' + (s.logrados||0) + '</div></div>';
+  html += '<div class="kpi-card"><div class="kpi-label">No logrados</div><div class="kpi-value" style="color:#FF4D4D;">' + (s.noLogrados||0) + '</div></div>';
+  html += '<div class="kpi-card"><div class="kpi-label">En curso</div><div class="kpi-value" style="color:#F59E0B;">' + (s.enCurso||0) + '</div></div>';
+  html += '</div>';
+
+  // Aviso si es reincidente
+  if ((s.total||0) > 1) {
+    html += '<div style="background:rgba(255,77,77,0.08);border:1px solid rgba(255,77,77,0.25);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:12px;color:#FF4D4D;">';
+    html += '🔁 <b>Colaborador reincidente</b> — tuvo ' + s.total + ' PIPs. Puede requerir un abordaje distinto al plan de mejora estándar.';
+    html += '</div>';
+  }
+
+  // Timeline
+  html += '<div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:10px;">Línea de tiempo</div>';
+  pips.forEach(function(p, idx){
+    // Resultado
+    let resLabel, resCol, resIcon;
+    if (p.Achieved === true || p.Achieved === 1) {
+      resLabel = 'Logrado'; resCol = '#2ECC71'; resIcon = '✅';
+    } else if (p.Achieved === false || p.Achieved === 0) {
+      resLabel = 'No logrado'; resCol = '#FF4D4D'; resIcon = '❌';
+    } else {
+      resLabel = 'En curso'; resCol = '#F59E0B'; resIcon = '⏳';
+    }
+    const fIni = p.StartDate ? new Date(p.StartDate).toLocaleDateString('es-AR') : '—';
+    const fCre = p.CreatedAt ? new Date(p.CreatedAt).toLocaleDateString('es-AR') : '—';
+    const msTotal = p.milestonesTotal || 0;
+    const msDone  = p.milestonesDone  || 0;
+    const msPct = msTotal > 0 ? Math.round((msDone / msTotal) * 100) : 0;
+
+    html += '<div style="display:flex;gap:12px;margin-bottom:12px;">';
+    // Marcador de timeline
+    html += '<div style="display:flex;flex-direction:column;align-items:center;padding-top:4px;">';
+    html += '<div style="width:12px;height:12px;border-radius:50%;background:' + resCol + ';flex-shrink:0;"></div>';
+    if (idx < pips.length - 1) html += '<div style="width:2px;flex:1;background:#2a2a2a;margin-top:4px;min-height:40px;"></div>';
+    html += '</div>';
+    // Card del PIP
+    html += '<div style="flex:1;background:#111;border:1px solid #252525;border-left:3px solid ' + resCol + ';border-radius:8px;padding:12px 14px;">';
+    html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:8px;">';
+    html += '<div>';
+    html += '<div style="font-size:12px;color:#f0ebe3;font-weight:700;">PIP #' + p.PIPID + ' — inicio ' + fIni + '</div>';
+    html += '<div style="font-size:10px;color:#666;margin-top:2px;">Creado el ' + fCre + (p.CreatedByName ? ' por ' + String(p.CreatedByName).replace(/</g,'&lt;') : '') + '</div>';
+    html += '</div>';
+    html += '<span style="font-size:10px;font-weight:700;color:' + resCol + ';background:' + resCol + '22;padding:3px 10px;border-radius:10px;white-space:nowrap;">' + resIcon + ' ' + resLabel + '</span>';
+    html += '</div>';
+    // Motivo
+    if (p.Reason) {
+      html += '<div style="font-size:11px;color:#aaa;line-height:1.5;margin-bottom:8px;padding:8px 10px;background:#0d0d0d;border-radius:6px;">';
+      html += '<span style="color:#888;font-weight:600;">Motivo: </span>' + String(p.Reason).replace(/</g,'&lt;').substring(0, 300);
+      html += '</div>';
+    }
+    // Progreso de hitos
+    if (msTotal > 0) {
+      const barCol = msPct >= 70 ? '#2ECC71' : msPct >= 40 ? '#F59E0B' : '#FF4D4D';
+      html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">';
+      html += '<span style="font-size:10px;color:#888;min-width:70px;">Hitos: ' + msDone + '/' + msTotal + '</span>';
+      html += '<div style="flex:1;height:5px;background:#1a1a1a;border-radius:3px;overflow:hidden;"><div style="width:' + msPct + '%;height:100%;background:' + barCol + ';"></div></div>';
+      html += '<span style="font-size:10px;font-weight:700;color:' + barCol + ';">' + msPct + '%</span>';
+      html += '</div>';
+    }
+    // Meta info
+    html += '<div style="display:flex;gap:14px;flex-wrap:wrap;font-size:10px;color:#666;">';
+    if (p.Target15Days) html += '<span>15d: ' + new Date(p.Target15Days).toLocaleDateString('es-AR') + '</span>';
+    if (p.Target30Days) html += '<span>30d: ' + new Date(p.Target30Days).toLocaleDateString('es-AR') + '</span>';
+    if (p.Target60Days) html += '<span>60d: ' + new Date(p.Target60Days).toLocaleDateString('es-AR') + '</span>';
+    if (p.filesCount)   html += '<span>📎 ' + p.filesCount + ' archivo(s)</span>';
+    if (p.Status)       html += '<span>Estado: ' + String(p.Status) + '</span>';
+    html += '</div>';
+    // Notas de revisión
+    if (p.ReviewNotes) {
+      html += '<div style="font-size:10px;color:#888;margin-top:8px;padding-top:8px;border-top:1px solid #1a1a1a;">';
+      html += '<span style="color:#666;font-weight:600;">Notas: </span>' + String(p.ReviewNotes).replace(/</g,'&lt;').substring(0, 250);
+      html += '</div>';
+    }
+    html += '</div></div>';
+  });
+
+  cont.innerHTML = html;
+}
+
+async function cargarReincidentes() {
+  const cont = document.getElementById('pipReincidentesContainer');
+  const min = (document.getElementById('pipReincMin')||{}).value || '2';
+  cont.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Analizando...</div>';
+  try {
+    const res = await fetch(API_BASE + '/pips/reincidentes?min=' + min);
+    const raw = await res.text();
+    if (!raw || !raw.trim()) throw new Error('El servidor no respondió (HTTP ' + res.status + ')');
+    const json = JSON.parse(raw);
+    if (!res.ok || json.ok === false) throw new Error(json.error || 'HTTP ' + res.status);
+    const lista = Array.isArray(json) ? json : (json.data || []);
+    renderReincidentes(lista, min);
+  } catch(e) {
+    cont.innerHTML = '<div style="color:#FF4D4D;padding:20px;text-align:center;">Error: ' + e.message + '</div>';
+  }
+}
+
+function renderReincidentes(lista, min) {
+  const cont = document.getElementById('pipReincidentesContainer');
+  if (!lista.length) {
+    cont.innerHTML = '<div style="text-align:center;padding:40px;color:#888;">' +
+      '<div style="font-size:32px;margin-bottom:10px;">✅</div>' +
+      '<div style="font-size:14px;color:#2ECC71;font-weight:700;">Sin reincidentes</div>' +
+      '<div style="font-size:12px;color:#888;margin-top:4px;">Ningún colaborador tuvo ' + min + ' o más PIPs.</div>' +
+      '</div>';
+    return;
+  }
+  let html = '<div style="font-size:11px;color:#888;margin-bottom:10px;">' + lista.length + ' colaborador(es) con ' + min + ' o más PIPs</div>';
+  html += '<table class="data-table"><thead><tr>';
+  html += '<th>Colaborador</th><th>Área</th><th>Rol</th><th>Líder</th>';
+  html += '<th style="text-align:center;">PIPs</th><th style="text-align:center;">Logrados</th>';
+  html += '<th style="text-align:center;">No logrados</th><th>Período</th><th></th>';
+  html += '</tr></thead><tbody>';
+  lista.forEach(function(r){
+    const primero = r.PrimerPIP ? new Date(r.PrimerPIP).toLocaleDateString('es-AR',{month:'short',year:'numeric'}) : '—';
+    const ultimo  = r.UltimoPIP ? new Date(r.UltimoPIP).toLocaleDateString('es-AR',{month:'short',year:'numeric'}) : '—';
+    const total = r.TotalPIPs || 0;
+    const totalCol = total >= 3 ? '#FF4D4D' : '#F59E0B';
+    html += '<tr>';
+    html += '<td><div style="font-weight:600;color:#f0ebe3;">' + String(r.FullName||'').replace(/</g,'&lt;') + '</div>' +
+            '<div style="font-size:10px;color:#666;">' + String(r.Email||'').replace(/</g,'&lt;') + '</div></td>';
+    html += '<td style="font-size:11px;color:#aaa;">' + String(r.AreaName||'—').replace(/</g,'&lt;') + '</td>';
+    html += '<td style="font-size:11px;color:#aaa;">' + String(r.JobRoleName||'—').replace(/</g,'&lt;') + '</td>';
+    html += '<td style="font-size:11px;color:#aaa;">' + String(r.LeaderName||'—').replace(/</g,'&lt;') + '</td>';
+    html += '<td style="text-align:center;"><span style="font-size:14px;font-weight:800;color:' + totalCol + ';">' + total + '</span></td>';
+    html += '<td style="text-align:center;color:#2ECC71;font-weight:700;">' + (r.Logrados||0) + '</td>';
+    html += '<td style="text-align:center;color:#FF4D4D;font-weight:700;">' + (r.NoLogrados||0) + '</td>';
+    html += '<td style="font-size:10px;color:#888;">' + primero + ' → ' + ultimo + '</td>';
+    html += '<td><button onclick="verHistorialDesdeReincidentes(' + r.UserID + ')" style="padding:4px 12px;background:#222;border:1px solid #333;border-radius:5px;color:#aaa;font-size:11px;cursor:pointer;white-space:nowrap;">Ver historial</button></td>';
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  cont.innerHTML = html;
+}
+
+function verHistorialDesdeReincidentes(userId) {
+  // Cambiar a la tab de historial y seleccionar al colaborador
+  const tabs = document.querySelectorAll('#sec-pip .tab');
+  cambiarTabPIP('historial', tabs.length > 1 ? tabs[1] : null);
+  setTimeout(function(){
+    const sel = document.getElementById('pipHistUserSel');
+    if (sel) {
+      sel.value = String(userId);
+      cargarHistorialPIP();
+    }
+  }, 150);
 }
 
 async function cargarPIPs() {

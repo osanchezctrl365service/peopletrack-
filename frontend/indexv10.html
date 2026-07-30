@@ -2156,34 +2156,8 @@ label { color: #888 !important; }
       <div id="rep-lider" style="display:none;margin-top:16px;">
         <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
           <select id="repLiderSel" class="form-control" style="width:260px" onchange="verReporteLider()"><option value="">— Seleccionar líder —</option></select>
-          <select id="repLiderPeriodoSel" class="form-control" style="width:180px" onchange="verReporteLider()"><option value="">Todos los períodos</option></select>
         </div>
-        <div id="repLiderEmpty" style="text-align:center;padding:40px;color:#888;">Seleccioná un líder para ver el reporte de su equipo</div>
-        <div id="repLiderResult" style="display:none;">
-
-          <!-- Encabezado + KPIs del equipo -->
-          <div class="card" style="margin-bottom:14px;">
-            <div style="font-size:15px;font-weight:800;color:#f0ebe3;margin-bottom:4px;" id="repLiderNombre"></div>
-            <div class="text-muted mb-16" id="repLiderInfo"></div>
-            <div id="repLiderKPIs" style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;"></div>
-          </div>
-
-          <!-- Tabla del equipo -->
-          <div class="card" style="margin-bottom:14px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
-              <div style="font-size:11px;font-weight:700;color:#FF5400;text-transform:uppercase;letter-spacing:0.5px;">👥 Equipo</div>
-              <div id="repLiderOrden" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
-            </div>
-            <div id="repLiderTabla"><div style="padding:20px;color:#888;font-size:12px;">Cargando…</div></div>
-          </div>
-
-          <!-- Objetivos propios del líder -->
-          <div class="card">
-            <div style="font-size:11px;font-weight:700;color:#FF5400;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">🎯 Objetivos del líder</div>
-            <div id="repLiderObjetivos"><div style="padding:20px;color:#888;font-size:12px;">Cargando…</div></div>
-          </div>
-
-        </div>
+        <div id="repLiderResult"></div>
       </div>
       <div id="rep-manager" style="display:none;margin-top:16px;">
         <div id="repManagerResult" class="grid-2 gap-16"></div>
@@ -6165,15 +6139,11 @@ function initReportes() {
   poblarFiltrosReportes();
   // Aplicar filtros (con default = ninguno) para poblar los dropdowns de cada tab
   aplicarFiltrosReportes();
-  // Períodos — Sesión 5 fix: cargar si no están. Sesión 8: también el de la tab Líder.
-  const perSels = ['repPeriodoSel','repLiderPeriodoSel']
-    .map(function(id){ return document.getElementById(id); })
-    .filter(function(el){ return el && el.options.length <= 1; });
-  if (perSels.length) {
+  // Períodos — Sesión 5 fix: cargar si no están
+  const perSel = document.getElementById('repPeriodoSel');
+  if (perSel && perSel.options.length <= 1) {
     const cargarPer = function(){
-      perSels.forEach(function(sel){
-        (allPeriods || []).forEach(function(p){ sel.add(new Option(p.PeriodName, p.PeriodID)); });
-      });
+      (allPeriods || []).forEach(function(p){ perSel.add(new Option(p.PeriodName, p.PeriodID)); });
     };
     if (!allPeriods.length) loadPeriods().then(cargarPer);
     else cargarPer();
@@ -6928,251 +6898,16 @@ function renderRepFeedbackAcumulado(objs, comp) {
   }).join('');
 }
 
-// ═══ DEEP-DIVE "POR LÍDER" (Sesión 8 · Bloque 2) ═════════════
-let _repLiderData  = null;
-let _repLiderOrden = 'riesgo';   // riesgo | nombre | avance | reunion
-
-const REP_SEMAFORO = {
-  ok:        { color:'#2ECC71', label:'Al día' },
-  warning:   { color:'#F59E0B', label:'Atrasada' },
-  critical:  { color:'#FF4D4D', label:'Crítica' },
-  scheduled: { color:'#3B82F6', label:'Solo agendada' },
-  none:      { color:'#888',    label:'Sin registros' }
-};
-
 async function verReporteLider() {
-  const leaderId = (document.getElementById('repLiderSel')||{}).value || '';
-  const periodId = (document.getElementById('repLiderPeriodoSel')||{}).value || '';
-  const res = document.getElementById('repLiderResult');
-  const emp = document.getElementById('repLiderEmpty');
-  if (!leaderId) {
-    if (res) res.style.display = 'none';
-    if (emp) emp.style.display = 'block';
-    _repLiderData = null;
-    return;
-  }
-  if (res) res.style.display = 'block';
-  if (emp) emp.style.display = 'none';
-
-  const lider = (allUsuarios||[]).find(function(u){ return String(u.UserID) === String(leaderId); });
-  const period = (allPeriods||[]).find(function(p){ return String(p.PeriodID) === String(periodId); });
-  const elNom  = document.getElementById('repLiderNombre');
-  const elInfo = document.getElementById('repLiderInfo');
-  if (elNom)  elNom.textContent  = (lider ? (lider.FullName||lider.Email) : 'Líder') + (period ? ' — ' + period.PeriodName : ' — todos los períodos');
-  if (elInfo) elInfo.textContent = lider ? [lider.JobRoleName || lider.RoleName, lider.AreaName].filter(Boolean).join(' · ') : '';
-
-  ['repLiderTabla','repLiderObjetivos'].forEach(function(id){
-    const el = document.getElementById(id);
-    if (el) el.innerHTML = '<div style="padding:20px;color:#888;font-size:12px;">Cargando…</div>';
-  });
-  const kp = document.getElementById('repLiderKPIs'); if (kp) kp.innerHTML = '';
-
-  const data = await apiGet('leaders/' + leaderId + '/team-report' + (periodId ? '?periodId=' + periodId : ''));
-  _repLiderData = data;
-  if (data && data.warnings && data.warnings.length) {
-    console.warn('[Team-report] avisos del servidor:', data.warnings);
-  }
-  if (!data) {
-    ['repLiderTabla','repLiderObjetivos'].forEach(function(id){
-      const el = document.getElementById(id);
-      if (el) el.innerHTML = '<div style="padding:20px;color:#FF4D4D;font-size:12px;">No se pudo cargar el reporte del equipo. Revisá la consola (F12).</div>';
-    });
-    return;
-  }
-
-  renderRepLiderKPIs(data);
-  renderRepLiderOrden();
-  renderRepLiderTabla();
-  renderRepLiderObjetivos(data.leaderObjectives || []);
-}
-
-function renderRepLiderKPIs(data) {
-  const cont = document.getElementById('repLiderKPIs');
-  if (!cont) return;
-  const team = data.team || [];
-  const conObj = team.filter(function(t){ return t.Avance != null; });
-  const avgProm = conObj.length ? Math.round(conObj.reduce(function(s,t){ return s + t.Avance; }, 0) / conObj.length) : null;
-  const atrasadas = team.filter(function(t){ return t.MeetingStatus === 'warning' || t.MeetingStatus === 'critical'; }).length;
-  const sinReunion = team.filter(function(t){ return t.MeetingStatus === 'none'; }).length;
-  const pipsAbiertos = team.reduce(function(s,t){ return s + (t.OpenPIPs||0); }, 0);
-  const alertas = team.reduce(function(s,t){ return s + (t.ActiveAlerts||0); }, 0);
-
-  function kpi(label, value, color, sub) {
-    return '<div style="background:#111;border:1px solid #262626;border-radius:8px;padding:10px 12px;">' +
-           '<div style="font-size:9px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:4px;">' + label + '</div>' +
-           '<div style="font-size:18px;font-weight:800;color:' + color + ';">' + value + '</div>' +
-           (sub ? '<div style="font-size:10px;color:#666;margin-top:2px;">' + sub + '</div>' : '') +
-           '</div>';
-  }
-  cont.innerHTML =
-    kpi('Equipo', team.length, '#f0ebe3', '') +
-    kpi('Avance promedio', avgProm == null ? '—' : avgProm + '%',
-        avgProm == null ? '#888' : (avgProm >= 70 ? '#2ECC71' : (avgProm >= 40 ? '#F59E0B' : '#FF4D4D')),
-        conObj.length + '/' + team.length + ' con objetivos') +
-    kpi('1:1 atrasadas', atrasadas, atrasadas ? '#F59E0B' : '#2ECC71', sinReunion ? sinReunion + ' sin registros' : '') +
-    kpi('PIPs abiertos', pipsAbiertos, pipsAbiertos ? '#FF4D4D' : '#2ECC71', '') +
-    kpi('Alertas activas', alertas, alertas ? '#FF4D4D' : '#2ECC71', '');
-}
-
-function renderRepLiderOrden() {
-  const cont = document.getElementById('repLiderOrden');
-  if (!cont) return;
-  const defs = [
-    { k:'riesgo',  l:'⚠️ Riesgo' },
-    { k:'nombre',  l:'A-Z' },
-    { k:'avance',  l:'Avance' },
-    { k:'reunion', l:'Última 1:1' }
-  ];
-  cont.innerHTML = '<span style="font-size:10px;color:#666;align-self:center;margin-right:2px;">Ordenar:</span>' +
-    defs.map(function(d){
-      const a = _repLiderOrden === d.k;
-      return '<button type="button" data-orden="' + d.k + '" style="padding:4px 10px;border-radius:20px;font-size:10px;cursor:pointer;border:1px solid ' +
-             (a ? '#FF5400' : '#333') + ';background:' + (a ? 'rgba(255,84,0,0.15)' : 'transparent') +
-             ';color:' + (a ? '#FF5400' : '#888') + ';">' + d.l + '</button>';
-    }).join('');
-  Array.prototype.forEach.call(cont.querySelectorAll('button[data-orden]'), function(btn){
-    btn.addEventListener('click', function(){
-      _repLiderOrden = btn.getAttribute('data-orden');
-      renderRepLiderOrden();
-      renderRepLiderTabla();
-    });
-  });
-}
-
-function renderRepLiderTabla() {
-  const cont = document.getElementById('repLiderTabla');
-  if (!cont || !_repLiderData) return;
-  const team = (_repLiderData.team || []).slice();
-  if (!team.length) {
-    cont.innerHTML = '<div style="padding:20px;color:#888;font-size:12px;">Este líder no tiene colaboradores asignados en Usuarios.</div>';
-    return;
-  }
-
-  // Puntaje de riesgo: 1:1 crítica pesa más que atrasada, y suma PIPs abiertos y alertas
-  const riesgo = function(t){
-    let r = 0;
-    if (t.MeetingStatus === 'critical') r += 40;
-    else if (t.MeetingStatus === 'warning') r += 20;
-    else if (t.MeetingStatus === 'none') r += 15;
-    r += (t.OpenPIPs||0) * 25;
-    r += (t.CriticalAlerts||0) * 10;
-    r += (t.ActiveAlerts||0) * 5;
-    if (t.Avance != null && t.Avance < 40) r += 20;
-    else if (t.Avance != null && t.Avance < 70) r += 8;
-    return r;
-  };
-  team.sort(function(a,b){
-    if (_repLiderOrden === 'nombre')  return (a.FullName||'').localeCompare(b.FullName||'');
-    if (_repLiderOrden === 'avance')  return (a.Avance == null ? 999 : a.Avance) - (b.Avance == null ? 999 : b.Avance);
-    if (_repLiderOrden === 'reunion') return (b.DaysSinceMeeting == null ? -1 : b.DaysSinceMeeting) - (a.DaysSinceMeeting == null ? -1 : a.DaysSinceMeeting);
-    return riesgo(b) - riesgo(a);
-  });
-
-  let html = '<div style="overflow-x:auto;"><table class="data-table" style="width:100%;">';
-  html += '<thead><tr>' +
-          '<th>Colaborador</th><th>Área / Proyecto</th><th style="min-width:140px;">Objetivos</th>' +
-          '<th>Última 1:1</th><th>PIPs</th><th>Alertas</th><th></th>' +
-          '</tr></thead><tbody>';
-
-  team.forEach(function(t){
-    const sem = REP_SEMAFORO[t.MeetingStatus] || REP_SEMAFORO.none;
-    // Barra de avance
-    let avanceCell;
-    if (t.Avance == null) {
-      avanceCell = '<span style="color:#666;font-size:11px;">sin objetivos</span>';
-    } else {
-      const c = t.Avance >= 70 ? '#2ECC71' : (t.Avance >= 40 ? '#F59E0B' : '#FF4D4D');
-      avanceCell = '<div style="display:flex;align-items:center;gap:8px;">' +
-        '<div style="flex:1;height:6px;background:#222;border-radius:3px;overflow:hidden;min-width:60px;">' +
-        '<div style="width:' + Math.max(0, Math.min(100, t.Avance)) + '%;height:100%;background:' + c + ';"></div></div>' +
-        '<span style="font-size:11px;font-weight:700;color:' + c + ';min-width:32px;">' + t.Avance + '%</span></div>' +
-        '<div style="font-size:9px;color:#666;margin-top:2px;">' + t.ObjectivesCount + ' obj.</div>';
-    }
-    // Celda de 1:1
-    let reunionCell = '<span style="color:' + sem.color + ';font-size:11px;font-weight:700;">● ' + sem.label + '</span>';
-    if (t.DaysSinceMeeting != null) {
-      reunionCell += '<div style="font-size:9px;color:#666;margin-top:2px;">hace ' + t.DaysSinceMeeting + ' d · ciclo ' + t.MeetingCycleDays + ' d</div>';
-    } else if (t.MeetingStatus === 'scheduled') {
-      reunionCell += '<div style="font-size:9px;color:#666;margin-top:2px;">solo futuras</div>';
-    }
-    // PIPs
-    const pipCell = t.TotalPIPs
-      ? '<span style="color:' + (t.OpenPIPs ? '#FF4D4D' : '#F59E0B') + ';font-weight:700;">' + t.TotalPIPs + '</span>' +
-        (t.OpenPIPs ? '<div style="font-size:9px;color:#FF4D4D;">' + t.OpenPIPs + ' abierto/s</div>' : '')
-      : '<span style="color:#2ECC71;">0</span>';
-    // Alertas
-    const alertCell = t.ActiveAlerts
-      ? '<span style="color:#FF4D4D;font-weight:700;">' + t.ActiveAlerts + '</span>'
-      : '<span style="color:#666;">0</span>';
-
-    html += '<tr>' +
-      '<td><div style="font-weight:700;color:#f0ebe3;">' + repEsc(t.FullName || t.Email) + '</div>' +
-        '<div style="font-size:9px;color:#666;">' + repEsc(t.Email||'') + '</div></td>' +
-      '<td style="font-size:11px;color:#aaa;">' + repEsc(t.AreaName || '—') +
-        (t.ProjectName ? '<div style="font-size:9px;color:#666;">' + repEsc(t.ProjectName) + '</div>' : '') + '</td>' +
-      '<td>' + avanceCell + '</td>' +
-      '<td>' + reunionCell + '</td>' +
-      '<td>' + pipCell + '</td>' +
-      '<td>' + alertCell + '</td>' +
-      '<td><button type="button" data-verpersona="' + t.UserID + '" style="padding:4px 10px;border-radius:6px;font-size:10px;cursor:pointer;border:1px solid #333;background:transparent;color:#FF5400;">Ver detalle →</button></td>' +
-      '</tr>';
-  });
-  html += '</tbody></table></div>';
-  html += '<div style="font-size:10px;color:#666;margin-top:10px;">Semáforo de 1:1: se compara contra el ciclo de la última reunión (' +
-          'semanal 7 d · quincenal 14 d · mensual 30 d · trimestral 90 d) más 14 días de gracia. ' +
-          'Mismo criterio que usan las alertas automáticas.</div>';
-  cont.innerHTML = html;
-
-  Array.prototype.forEach.call(cont.querySelectorAll('button[data-verpersona]'), function(btn){
-    btn.addEventListener('click', function(){
-      repIrAPersona(btn.getAttribute('data-verpersona'));
-    });
-  });
-}
-
-function renderRepLiderObjetivos(objs) {
-  const cont = document.getElementById('repLiderObjetivos');
-  if (!cont) return;
-  if (!objs || !objs.length) {
-    cont.innerHTML = '<div style="padding:20px;color:#888;font-size:12px;">El líder no tiene objetivos propios cargados en este período.</div>';
-    return;
-  }
-  const av = repAvancePonderado(objs);
-  const cGlobal = av >= 70 ? '#2ECC71' : (av >= 40 ? '#F59E0B' : '#FF4D4D');
-  let html = '<div style="margin-bottom:12px;font-size:12px;color:#888;">Avance ponderado propio: <b style="color:' + cGlobal + ';font-size:15px;">' + av + '%</b> · ' + objs.length + ' objetivo(s)</div>';
-  html += '<div style="overflow-x:auto;"><table class="data-table" style="width:100%;"><thead><tr><th>Objetivo</th><th>Período</th><th>Peso</th><th style="min-width:120px;">Avance</th></tr></thead><tbody>';
-  objs.forEach(function(o){
-    const p = parseFloat(o.Progress)||0;
-    const c = p >= 70 ? '#2ECC71' : (p >= 40 ? '#F59E0B' : '#FF4D4D');
-    html += '<tr>' +
-      '<td style="font-size:12px;color:#f0ebe3;">' + repEsc(o.Title||'') + '</td>' +
-      '<td style="font-size:11px;color:#888;">' + repEsc(o.PeriodName||'—') + '</td>' +
-      '<td style="font-size:11px;color:#888;">' + (o.Weight != null ? o.Weight : '—') + '</td>' +
-      '<td><div style="display:flex;align-items:center;gap:8px;">' +
-        '<div style="flex:1;height:6px;background:#222;border-radius:3px;overflow:hidden;min-width:60px;">' +
-        '<div style="width:' + Math.max(0,Math.min(100,p)) + '%;height:100%;background:' + c + ';"></div></div>' +
-        '<span style="font-size:11px;font-weight:700;color:' + c + ';">' + Math.round(p) + '%</span></div></td>' +
-      '</tr>';
-  });
-  html += '</tbody></table></div>';
-  cont.innerHTML = html;
-}
-
-// Salta a la tab "Por Persona" con el colaborador ya seleccionado
-function repIrAPersona(userId) {
-  const sel = document.getElementById('repPersonaSel');
-  if (!sel) return;
-  const existe = Array.prototype.some.call(sel.options, function(o){ return String(o.value) === String(userId); });
-  if (!existe) {
-    alert('Ese colaborador no está en la lista actual de "Por Persona".\n\nProbablemente lo estén dejando afuera los filtros de arriba. Limpiá los filtros y volvé a intentar.');
-    return;
-  }
-  const tabs = document.querySelectorAll('#rep-tabs .tab');
-  if (tabs.length) switchTab('rep', 'persona', tabs[0]);
-  sel.value = String(userId);
-  verReportePersona();
-  const sec = document.getElementById('sec-reports');
-  if (sec && sec.scrollIntoView) sec.scrollIntoView({ behavior:'smooth', block:'start' });
+  const userId = document.getElementById('repLiderSel')?.value;
+  const c = document.getElementById('repLiderResult');
+  if (!userId || !c) return;
+  const lider = allUsuarios.find(u=>String(u.UserID)===String(userId));
+  const equipo = allUsuarios.filter(u=>String(u.LeaderID)===String(userId)&&u.IsActive);
+  c.innerHTML = equipo.length
+    ? '<div class="card" style="margin-top:12px;"><div style="font-weight:800;color:#f0ebe3;margin-bottom:12px;">Equipo de '+(lider?.FullName||'')+'</div><table class="data-table"><thead><tr><th>Colaborador</th><th>Área</th><th>Estado</th></tr></thead><tbody>'+
+      equipo.map(u=>'<tr><td>'+(u.FullName||u.Email)+'</td><td>'+(u.AreaName||'—')+'</td><td><span style="color:'+(u.IsActive?'#2ECC71':'#888')+'">'+(u.IsActive?'Activo':'Inactivo')+'</span></td></tr>').join('')+'</tbody></table></div>'
+    : '<div style="padding:20px;color:#888;">Sin equipo asignado</div>';
 }
 
 

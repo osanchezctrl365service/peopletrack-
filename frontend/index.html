@@ -4946,7 +4946,7 @@ async function verReportePersona() {
   document.getElementById('repPersonaNombre').textContent = (user.FullName||user.Email) + (period?' — '+period.PeriodName:'');
   document.getElementById('repPersonaInfo').textContent = [user.RoleName,user.AreaName].filter(Boolean).join(' · ');
 
-  // Sesión 6 fix: loading state + cálculo ponderado + Plan Carrera + control de errores
+  // Sesión 6 fix: loading state + cálculo PONDERADO + Plan Carrera + errores visibles
   const elAv = document.getElementById('repAvance');
   const elCp = document.getElementById('repCompetencias');
   const elCarr = document.getElementById('repCarrera');
@@ -4964,8 +4964,9 @@ async function verReportePersona() {
   try {
     const data = await apiGet('users/'+userId+'/report?periodId='+periodId);
     if (!data) throw new Error('Sin datos');
+    console.log('[Reporte Persona] Data recibida:', data);
 
-    // Avance Objetivos — PONDERADO
+    // Avance Objetivos — PONDERADO por Weight
     const objs = data.objectives || [];
     if (objs.length === 0) {
       if (elAv) elAv.textContent = '—';
@@ -4973,31 +4974,33 @@ async function verReportePersona() {
       const sumW = objs.reduce(function(s, o){ return s + (parseFloat(o.Weight) || 0); }, 0);
       let avance;
       if (sumW > 0) {
-        // Ponderado real: sum(Progress * Weight) / sum(Weight)
-        const sumPW = objs.reduce(function(s, o){ return s + (parseFloat(o.Progress) || 0) * (parseFloat(o.Weight) || 0); }, 0);
+        // Ponderado: sum(Progress × Weight) / sum(Weight)
+        const sumPW = objs.reduce(function(s, o){
+          return s + (parseFloat(o.Progress) || 0) * (parseFloat(o.Weight) || 0);
+        }, 0);
         avance = Math.round(sumPW / sumW);
       } else {
-        // Fallback: promedio simple si no hay Weight
+        // Fallback: promedio simple si no hay ponderaciones cargadas
         avance = Math.round(objs.reduce(function(s, o){ return s + (parseFloat(o.Progress) || 0); }, 0) / objs.length);
       }
       if (elAv) elAv.textContent = avance + '%';
     }
 
-    // Competencias — promedio del Score si hay data
+    // Competencias — promedio del Score si existe
     const comps = data.competencies || [];
     if (comps.length === 0) {
       if (elCp) elCp.textContent = '—';
     } else {
-      const scores = comps.filter(function(c){ return c.Score != null; });
-      if (scores.length > 0) {
-        const promedio = Math.round(scores.reduce(function(s, c){ return s + (parseFloat(c.Score) || 0); }, 0) / scores.length);
-        if (elCp) elCp.textContent = promedio + 'pts';
+      const conScore = comps.filter(function(c){ return c.Score != null; });
+      if (conScore.length > 0) {
+        const prom = Math.round(conScore.reduce(function(s, c){ return s + (parseFloat(c.Score) || 0); }, 0) / conScore.length);
+        if (elCp) elCp.textContent = prom + 'pts';
       } else {
         if (elCp) elCp.textContent = comps.length + ' eval';
       }
     }
 
-    // Plan Carrera — porcentaje de hitos completados
+    // Plan Carrera — % de hitos completados
     const career = data.career || [];
     if (career.length === 0) {
       if (elCarr) elCarr.textContent = 'Sin plan';

@@ -6622,7 +6622,7 @@ function renderRepEvolucionObjetivos(objs, periodIdActual) {
     return { x: padL + stepX * i, y: padT + innerH * (1 - (p.avance/100)), p: p };
   });
 
-  let svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%;max-width:820px;height:auto;display:block;margin:0 auto;" xmlns="http://www.w3.org/2000/svg">';
+  let svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%;height:auto;" xmlns="http://www.w3.org/2000/svg">';
   // Grilla horizontal 0/25/50/75/100
   [0,25,50,75,100].forEach(function(v){
     const y = padT + innerH * (1 - v/100);
@@ -6636,15 +6636,13 @@ function renderRepEvolucionObjetivos(objs, periodIdActual) {
   svg += '<polyline fill="none" stroke="#FF5400" stroke-width="2.5" points="' +
          xy.map(function(pt){ return pt.x.toFixed(1) + ',' + pt.y.toFixed(1); }).join(' ') + '"/>';
   // Puntos + etiquetas
-  xy.forEach(function(pt, i){
+  xy.forEach(function(pt){
     const esActual = periodIdActual && String(pt.p.periodId) === String(periodIdActual);
     const color = pt.p.avance >= 70 ? '#2ECC71' : (pt.p.avance >= 40 ? '#F59E0B' : '#FF4D4D');
-    // Los extremos se anclan hacia adentro, si no el texto se sale del viewBox y se corta
-    const anchor = i === 0 ? 'start' : (i === xy.length - 1 ? 'end' : 'middle');
     svg += '<circle cx="' + pt.x.toFixed(1) + '" cy="' + pt.y.toFixed(1) + '" r="' + (esActual ? 7 : 5) + '" fill="' + color + '" stroke="#0a0a0a" stroke-width="2"/>';
-    svg += '<text x="' + pt.x.toFixed(1) + '" y="' + (pt.y - 12).toFixed(1) + '" text-anchor="' + anchor + '" fill="#f0ebe3" font-size="11" font-weight="700">' + pt.p.avance + '%</text>';
-    svg += '<text x="' + pt.x.toFixed(1) + '" y="' + (H - padB + 18) + '" text-anchor="' + anchor + '" fill="' + (esActual ? '#FF5400' : '#888') + '" font-size="10" font-weight="' + (esActual ? '700' : '400') + '">' + repEsc(pt.p.name) + '</text>';
-    svg += '<text x="' + pt.x.toFixed(1) + '" y="' + (H - padB + 32) + '" text-anchor="' + anchor + '" fill="#555" font-size="9">' + pt.p.objs.length + ' obj.</text>';
+    svg += '<text x="' + pt.x.toFixed(1) + '" y="' + (pt.y - 12).toFixed(1) + '" text-anchor="middle" fill="#f0ebe3" font-size="11" font-weight="700">' + pt.p.avance + '%</text>';
+    svg += '<text x="' + pt.x.toFixed(1) + '" y="' + (H - padB + 18) + '" text-anchor="middle" fill="' + (esActual ? '#FF5400' : '#888') + '" font-size="10" font-weight="' + (esActual ? '700' : '400') + '">' + repEsc(pt.p.name) + '</text>';
+    svg += '<text x="' + pt.x.toFixed(1) + '" y="' + (H - padB + 32) + '" text-anchor="middle" fill="#555" font-size="9">' + pt.p.objs.length + ' obj.</text>';
   });
   svg += '</svg>';
 
@@ -7006,29 +7004,12 @@ function renderRepLiderKPIs(data) {
            (sub ? '<div style="font-size:10px;color:#666;margin-top:2px;">' + sub + '</div>' : '') +
            '</div>';
   }
-  // El KPI de 1:1 no puede ir en verde si el equipo directamente no tiene reuniones
-  // registradas: "0 atrasadas" sobre 0 reuniones no es una buena noticia, es un agujero.
-  let color1a1, sub1a1;
-  if (team.length && sinReunion === team.length) {
-    color1a1 = '#FF4D4D';
-    sub1a1 = '⚠️ nadie tiene 1:1 registrada';
-  } else if (atrasadas) {
-    color1a1 = '#F59E0B';
-    sub1a1 = sinReunion ? sinReunion + ' además sin registros' : '';
-  } else if (sinReunion) {
-    color1a1 = '#F59E0B';
-    sub1a1 = sinReunion + ' de ' + team.length + ' sin registros';
-  } else {
-    color1a1 = '#2ECC71';
-    sub1a1 = 'todo el equipo al día';
-  }
-
   cont.innerHTML =
     kpi('Equipo', team.length, '#f0ebe3', '') +
     kpi('Avance promedio', avgProm == null ? '—' : avgProm + '%',
         avgProm == null ? '#888' : (avgProm >= 70 ? '#2ECC71' : (avgProm >= 40 ? '#F59E0B' : '#FF4D4D')),
         conObj.length + '/' + team.length + ' con objetivos') +
-    kpi('1:1 atrasadas', atrasadas, color1a1, sub1a1) +
+    kpi('1:1 atrasadas', atrasadas, atrasadas ? '#F59E0B' : '#2ECC71', sinReunion ? sinReunion + ' sin registros' : '') +
     kpi('PIPs abiertos', pipsAbiertos, pipsAbiertos ? '#FF4D4D' : '#2ECC71', '') +
     kpi('Alertas activas', alertas, alertas ? '#FF4D4D' : '#2ECC71', '');
 }

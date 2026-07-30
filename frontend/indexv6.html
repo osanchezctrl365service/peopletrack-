@@ -1802,90 +1802,76 @@ label { color: #888 !important; }
     
 
 <div class="section" id="sec-competencies">
-      <div class="section-header" style="margin-bottom:16px;">
+      <div class="section-header">
         <div>
           <div class="section-heading">Competencias</div>
-          <div class="section-subheading">Modelo organizacional v2.0 — 6 competencias generales + 3 de liderazgo</div>
+          <div class="section-subheading">Evaluación por competencias con ponderaciones globales, por equipo y personales</div>
         </div>
-        <button class="btn btn-primary btn-sm" onclick="compAbrirNuevaEvaluacion()">+ Nueva Evaluación</button>
+        <button class="btn btn-primary btn-sm" onclick="comp_saveAll()">💾 Guardar evaluación</button>
+      </div>
+
+      <!-- Selector de colaborador y período -->
+      <div class="card" style="margin-bottom:16px;">
+        <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
+          <div style="flex:1;min-width:240px;">
+            <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;display:block;margin-bottom:6px;">Colaborador</label>
+            <select id="comp_userSel" class="form-control" onchange="comp_loadEvaluationData()">
+              <option value="">— Seleccionar colaborador —</option>
+            </select>
+          </div>
+          <div style="min-width:200px;">
+            <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;display:block;margin-bottom:6px;">Período</label>
+            <select id="comp_periodSel" class="form-control" onchange="comp_loadEvaluationData()">
+              <option value="">— Período —</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Banner de escala dinámico -->
+      <div class="card" id="comp_scalesBanner" style="margin-bottom:16px;">
+        <div class="card-title">Escala de Evaluación</div>
+        <div id="comp_scalesContent" style="display:flex;flex-wrap:wrap;gap:8px;color:#888;font-size:13px;">Cargando escalas...</div>
       </div>
 
       <!-- Tabs -->
-      <div class="tabs" style="margin-bottom:16px;">
-        <div class="tab active" onclick="compCambiarTab('catalogo', this)">📖 Catálogo</div>
-        <div class="tab" onclick="compCambiarTab('evaluar', this)">✍️ Evaluar</div>
-        <div class="tab" onclick="compCambiarTab('resultados', this)">📊 Resultados 360°</div>
+      <div class="tabs">
+        <div class="tab active" onclick="comp_switchTab('global', this)">Globales (Empresa)</div>
+        <div class="tab" onclick="comp_switchTab('leadership', this)">Liderazgo</div>
+        <div class="tab" onclick="comp_switchTab('personal', this)">Personales</div>
       </div>
 
-      <!-- TAB 1: CATÁLOGO -->
-      <div id="comp-tab-catalogo">
-        <div style="background:rgba(168,85,247,0.06);border:1px solid rgba(168,85,247,0.2);border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:#aaa;">
-          <strong style="color:#A855F7;">Modelo de Competencias v2.0</strong> — Definido por People &amp; Culture (abril 2024).
-          Las competencias enmarcan el desempeño profesional que CTRL365 impulsa en cada colaborador: la cultura organizacional puesta en acción.
-        </div>
-        <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
-          <select id="compCatalogoFiltro" class="form-control" style="width:220px;" onchange="renderCatalogoCompetencias()">
-            <option value="">Todas las competencias</option>
-            <option value="general">Solo generales (6)</option>
-            <option value="leadership">Solo liderazgo (3)</option>
-          </select>
-        </div>
-        <div id="compCatalogoContainer">
-          <div style="text-align:center;padding:40px;color:#888;">Cargando catálogo...</div>
-        </div>
-      </div>
-
-      <!-- TAB 2: EVALUAR -->
-      <div id="comp-tab-evaluar" style="display:none;">
-        <div class="card" style="margin-bottom:16px;">
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;">
-            <div>
-              <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;display:block;margin-bottom:6px;">Colaborador a evaluar *</label>
-              <select id="compEvalUserSel" class="form-control" style="width:100%;" onchange="compOnCambioUsuarioEval()">
-                <option value="">— Seleccionar —</option>
-              </select>
-            </div>
-            <div>
-              <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;display:block;margin-bottom:6px;">Tipo de evaluación *</label>
-              <select id="compEvalTipoSel" class="form-control" style="width:100%;">
-                <option value="leader">Como líder</option>
-                <option value="manager">Como manager</option>
-                <option value="self">Autoevaluación</option>
-              </select>
-            </div>
-            <div>
-              <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;display:block;margin-bottom:6px;">Período (opcional)</label>
-              <select id="compEvalPeriodSel" class="form-control" style="width:100%;">
-                <option value="">— Sin período —</option>
-              </select>
-            </div>
-          </div>
-          <div id="compEvalAviso" style="font-size:11px;color:#888;"></div>
-        </div>
-
-        <div id="compEvalFormContainer">
-          <div style="text-align:center;padding:40px;color:#888;font-size:13px;">Elegí un colaborador para comenzar la evaluación.</div>
-        </div>
-      </div>
-
-      <!-- TAB 3: RESULTADOS 360 -->
-      <div id="comp-tab-resultados" style="display:none;">
-        <div class="card" style="margin-bottom:16px;">
-          <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;">
-            <div style="flex:1;min-width:260px;">
-              <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;display:block;margin-bottom:6px;">Colaborador</label>
-              <select id="compResUserSel" class="form-control" style="width:100%;" onchange="cargarResultados360()">
-                <option value="">— Seleccionar colaborador —</option>
-              </select>
-            </div>
+      <!-- Tab Globales -->
+      <div id="comp-global">
+        <div class="card">
+          <div class="card-title" id="comp_globalTitle">Competencias Globales</div>
+          <div id="comp_globalList" style="color:#888;font-size:13px;padding:12px 0;">Seleccioná un colaborador y período para empezar.</div>
+          <div class="divider" id="comp_globalDivider" style="display:none;"></div>
+          <div id="comp_globalSummary" style="display:none;" class="flex items-center justify-between">
+            <div><span class="text-muted">Resultado promedio:</span> <strong id="comp_globalAvg" style="color:var(--success);font-size:16px">— pts</strong></div>
           </div>
         </div>
-        <div id="compResultadosContainer">
-          <div style="text-align:center;padding:40px;color:#888;font-size:13px;">Elegí un colaborador para ver sus resultados.</div>
+      </div>
+
+      <!-- Tab Liderazgo -->
+      <div id="comp-leadership" style="display:none;">
+        <div class="card">
+          <div class="card-title">Competencias de Liderazgo</div>
+          <div id="comp_leadershipList" style="color:#888;font-size:13px;padding:12px 0;">Seleccioná un colaborador y período para empezar.</div>
+        </div>
+      </div>
+
+      <!-- Tab Personales -->
+      <div id="comp-personal" style="display:none;">
+        <div class="card">
+          <div class="card-title">Competencias Personales / Acuerdo con el Colaborador</div>
+          <p class="text-muted" style="font-size:13px;margin-bottom:12px;">Competencias adicionales acordadas entre el colaborador y el líder, fuera del marco global.</p>
+          <div id="comp_personalList" style="color:#888;font-size:13px;padding:12px 0;">Seleccioná un colaborador y período para empezar.</div>
         </div>
       </div>
     </div>
 
+    <!-- ======== 1:1 ======== -->
     <div class="section" id="sec-oneononex">
       <div class="section-header" style="margin-bottom:16px;">
         <div>
@@ -5364,415 +5350,18 @@ function poblarSelectoresObjetivos() {
   });
 }
 
-// ══════════════════════════════════════════
-// COMPETENCIAS v2.0 (Sesión 7)
-// ══════════════════════════════════════════
-
-let compCatalogo = [];       // catálogo de las 9 competencias
-let compEvalActual = {};     // { compCatalogId: {levelValue, comment} } del formulario
-
-const COMP_NIVEL_COLORS = {
-  4: '#2ECC71',  // Viene súper
-  3: '#3B82F6',  // Viene bien
-  2: '#F59E0B',  // Tiene que seguir trabajando
-  1: '#FF4D4D'   // No lo tiene muy desarrollado
-};
-
-// Punto de entrada del módulo
 function poblarSelectoresCompetencias() {
-  // Cargar catálogo
-  if (!compCatalogo.length) cargarCatalogoCompetencias();
-  else renderCatalogoCompetencias();
-  // Poblar dropdowns de usuarios
-  const cargarUsers = function(){
-    ['compEvalUserSel','compResUserSel'].forEach(function(id){
-      const sel = document.getElementById(id);
-      if (!sel || sel.options.length > 1) return;
-      (allUsuarios||[]).filter(function(u){ return u.IsActive; })
-        .sort(function(a,b){ return (a.FullName||'').localeCompare(b.FullName||''); })
-        .forEach(function(u){ sel.add(new Option((u.FullName||u.Email) + ' — ' + (u.Email||''), u.UserID)); });
-    });
-  };
-  if (!allUsuarios.length) loadUsuarios().then(cargarUsers);
-  else cargarUsers();
-  // Períodos
-  const perSel = document.getElementById('compEvalPeriodSel');
-  if (perSel && perSel.options.length <= 1) {
-    const cargarPer = function(){
-      (allPeriods||[]).forEach(function(p){ perSel.add(new Option(p.PeriodName, p.PeriodID)); });
-    };
-    if (!allPeriods.length) loadPeriods().then(cargarPer);
-    else cargarPer();
-  }
-}
-
-function compCambiarTab(tab, el) {
-  document.querySelectorAll('#sec-competencies .tab').forEach(function(t){ t.classList.remove('active'); });
-  if (el) el.classList.add('active');
-  ['catalogo','evaluar','resultados'].forEach(function(t){
-    const c = document.getElementById('comp-tab-' + t);
-    if (c) c.style.display = (t === tab) ? '' : 'none';
-  });
-  if (tab === 'catalogo' && !compCatalogo.length) cargarCatalogoCompetencias();
-}
-
-async function cargarCatalogoCompetencias() {
-  const cont = document.getElementById('compCatalogoContainer');
-  if (cont) cont.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Cargando catálogo...</div>';
-  try {
-    const res = await fetch(API_BASE + '/competencies/catalog');
-    const raw = await res.text();
-    if (!raw || !raw.trim()) throw new Error('Sin respuesta del servidor (HTTP ' + res.status + ')');
-    const json = JSON.parse(raw);
-    if (!res.ok || json.ok === false) throw new Error(json.error || 'HTTP ' + res.status);
-    compCatalogo = Array.isArray(json) ? json : (json.data || []);
-    renderCatalogoCompetencias();
-  } catch(e) {
-    if (cont) cont.innerHTML = '<div style="color:#FF4D4D;padding:20px;text-align:center;">Error cargando catálogo: ' + e.message + '</div>';
-  }
-}
-
-function renderCatalogoCompetencias() {
-  const cont = document.getElementById('compCatalogoContainer');
-  if (!cont) return;
-  const filtro = (document.getElementById('compCatalogoFiltro')||{}).value || '';
-  let lista = compCatalogo.slice();
-  if (filtro) lista = lista.filter(function(c){ return c.CompType === filtro; });
-
-  if (!lista.length) {
-    cont.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Sin competencias para mostrar.</div>';
-    return;
-  }
-
-  let html = '';
-  let tipoActual = null;
-  lista.forEach(function(c){
-    // Encabezado de grupo
-    if (c.CompType !== tipoActual) {
-      tipoActual = c.CompType;
-      const label = tipoActual === 'general' ? '🎯 Competencias Generales' : '⭐ Competencias de Liderazgo';
-      const col   = tipoActual === 'general' ? '#3B82F6' : '#A855F7';
-      html += '<div style="font-size:12px;font-weight:700;color:' + col + ';text-transform:uppercase;letter-spacing:0.5px;margin:20px 0 10px;">' + label + '</div>';
-    }
-    const accentCol = c.CompType === 'general' ? '#3B82F6' : '#A855F7';
-    html += '<div class="card" style="margin-bottom:12px;border-left:3px solid ' + accentCol + ';">';
-    // Header colapsable
-    html += '<div onclick="toggleCompCard(' + c.CompCatalogID + ')" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;">';
-    html += '<div>';
-    html += '<div style="font-size:14px;font-weight:800;color:#f0ebe3;">' + String(c.Name).replace(/</g,'&lt;') + '</div>';
-    html += '<div style="font-size:10px;color:#666;margin-top:2px;">' + c.Code + ' · ' + (c.drivers||[]).length + ' drivers · ' + (c.levels||[]).length + ' niveles</div>';
-    html += '</div>';
-    html += '<span id="compToggle-' + c.CompCatalogID + '" style="color:#888;font-size:14px;">▼</span>';
-    html += '</div>';
-    // Contenido colapsable
-    html += '<div id="compBody-' + c.CompCatalogID + '" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid #2a2a2a;">';
-    // Definición
-    if (c.Definition) {
-      html += '<div style="margin-bottom:14px;">';
-      html += '<div style="font-size:10px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:5px;">Definición</div>';
-      html += '<div style="font-size:12px;color:#aaa;line-height:1.6;">' + String(c.Definition).replace(/</g,'&lt;') + '</div>';
-      html += '</div>';
-    }
-    // Drivers
-    if ((c.drivers||[]).length) {
-      html += '<div style="margin-bottom:14px;">';
-      html += '<div style="font-size:10px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:6px;">Drivers de comportamiento</div>';
-      c.drivers.forEach(function(d){
-        html += '<div style="font-size:11px;color:#aaa;padding:4px 0 4px 14px;position:relative;line-height:1.5;">';
-        html += '<span style="position:absolute;left:0;color:' + accentCol + ';">▸</span>';
-        html += String(d.DriverText).replace(/</g,'&lt;');
-        html += '</div>';
-      });
-      html += '</div>';
-    }
-    // Niveles
-    if ((c.levels||[]).length) {
-      html += '<div>';
-      html += '<div style="font-size:10px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:6px;">Niveles de evaluación</div>';
-      c.levels.forEach(function(l){
-        const lc = COMP_NIVEL_COLORS[l.LevelValue] || '#888';
-        html += '<div style="background:#111;border-left:3px solid ' + lc + ';border-radius:6px;padding:10px 12px;margin-bottom:6px;">';
-        html += '<div style="font-size:11px;font-weight:700;color:' + lc + ';margin-bottom:4px;">' + String(l.LevelName) + '</div>';
-        if (l.Descriptor) html += '<div style="font-size:11px;color:#999;line-height:1.5;">' + String(l.Descriptor).replace(/</g,'&lt;') + '</div>';
-        html += '</div>';
-      });
-      html += '</div>';
-    }
-    html += '</div></div>';
-  });
-  cont.innerHTML = html;
-}
-
-function toggleCompCard(id) {
-  const body = document.getElementById('compBody-' + id);
-  const tog  = document.getElementById('compToggle-' + id);
-  if (!body) return;
-  const abierto = body.style.display !== 'none';
-  body.style.display = abierto ? 'none' : 'block';
-  if (tog) tog.textContent = abierto ? '▼' : '▲';
-}
-
-// ── TAB EVALUAR ──
-
-function compAbrirNuevaEvaluacion() {
-  const tabs = document.querySelectorAll('#sec-competencies .tab');
-  compCambiarTab('evaluar', tabs.length > 1 ? tabs[1] : null);
-}
-
-async function compOnCambioUsuarioEval() {
-  const userId = document.getElementById('compEvalUserSel').value;
-  const cont = document.getElementById('compEvalFormContainer');
-  const aviso = document.getElementById('compEvalAviso');
-  if (!userId) {
-    cont.innerHTML = '<div style="text-align:center;padding:40px;color:#888;font-size:13px;">Elegí un colaborador para comenzar la evaluación.</div>';
-    if (aviso) aviso.textContent = '';
-    return;
-  }
-  if (!compCatalogo.length) await cargarCatalogoCompetencias();
-  const user = (allUsuarios||[]).find(function(u){ return String(u.UserID) === String(userId); });
-  if (aviso && user) {
-    aviso.innerHTML = 'Evaluando a <b style="color:#f0ebe3;">' + String(user.FullName||'').replace(/</g,'&lt;') + '</b>' +
-                      (user.AreaName ? ' · ' + user.AreaName : '') +
-                      (user.JobRoleName ? ' · ' + user.JobRoleName : '');
-  }
-  compEvalActual = {};
-  renderFormularioEvaluacion();
-}
-
-function renderFormularioEvaluacion() {
-  const cont = document.getElementById('compEvalFormContainer');
-  if (!cont || !compCatalogo.length) return;
-
-  let html = '';
-  let tipoActual = null;
-  compCatalogo.forEach(function(c){
-    if (c.CompType !== tipoActual) {
-      tipoActual = c.CompType;
-      const label = tipoActual === 'general' ? '🎯 Competencias Generales' : '⭐ Competencias de Liderazgo';
-      const col   = tipoActual === 'general' ? '#3B82F6' : '#A855F7';
-      html += '<div style="font-size:12px;font-weight:700;color:' + col + ';text-transform:uppercase;margin:20px 0 10px;">' + label + '</div>';
-    }
-    html += '<div class="card" style="margin-bottom:12px;">';
-    html += '<div style="font-size:13px;font-weight:700;color:#f0ebe3;margin-bottom:4px;">' + String(c.Name).replace(/</g,'&lt;') + '</div>';
-    if (c.Definition) {
-      html += '<div style="font-size:10px;color:#777;line-height:1.5;margin-bottom:10px;">' + String(c.Definition).replace(/</g,'&lt;').substring(0, 220) + '...</div>';
-    }
-    // Opciones de nivel con su descriptor
-    (c.levels||[]).forEach(function(l){
-      const lc = COMP_NIVEL_COLORS[l.LevelValue] || '#888';
-      const inputId = 'lvl-' + c.CompCatalogID + '-' + l.LevelValue;
-      html += '<label for="' + inputId + '" style="display:flex;gap:10px;align-items:flex-start;padding:9px 11px;background:#111;border:1px solid #222;border-left:3px solid ' + lc + ';border-radius:6px;margin-bottom:5px;cursor:pointer;" onmouseover="this.style.background=\'#161616\'" onmouseout="this.style.background=\'#111\'">';
-      html += '<input type="radio" id="' + inputId + '" name="comp-' + c.CompCatalogID + '" value="' + l.LevelValue + '" onchange="setNivelCompetencia(' + c.CompCatalogID + ',' + l.LevelValue + ')" style="margin-top:2px;">';
-      html += '<div style="flex:1;">';
-      html += '<div style="font-size:11px;font-weight:700;color:' + lc + ';">' + String(l.LevelName) + '</div>';
-      if (l.Descriptor) html += '<div style="font-size:10px;color:#888;line-height:1.5;margin-top:3px;">' + String(l.Descriptor).replace(/</g,'&lt;') + '</div>';
-      html += '</div></label>';
-    });
-    // Comentario
-    html += '<textarea id="comment-' + c.CompCatalogID + '" rows="2" placeholder="Comentario u observaciones (opcional)..." oninput="setComentarioCompetencia(' + c.CompCatalogID + ', this.value)" style="width:100%;margin-top:8px;background:#0d0d0d;border:1px solid #252525;border-radius:6px;padding:8px 10px;color:#f0ebe3;font-size:11px;outline:none;resize:vertical;"></textarea>';
-    html += '</div>';
-  });
-
-  // Feedback general
-  html += '<div class="card" style="margin-bottom:16px;">';
-  html += '<div style="font-size:12px;font-weight:700;color:#FF5400;text-transform:uppercase;margin-bottom:10px;">Feedback general</div>';
-  html += '<textarea id="compEvalFeedback" rows="3" placeholder="Feedback general sobre el desempeño en competencias..." style="width:100%;background:#111;border:1px solid #252525;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:12px;outline:none;resize:vertical;margin-bottom:12px;"></textarea>';
-  html += '<div style="font-size:12px;font-weight:700;color:#F59E0B;text-transform:uppercase;margin-bottom:10px;">Áreas de mejora</div>';
-  html += '<textarea id="compEvalMejora" rows="3" placeholder="Áreas de mejora sugeridas..." style="width:100%;background:#111;border:1px solid #252525;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:12px;outline:none;resize:vertical;"></textarea>';
-  html += '</div>';
-
-  // Botones
-  html += '<div style="display:flex;gap:10px;justify-content:flex-end;margin-bottom:20px;">';
-  html += '<button onclick="guardarEvaluacionCompetencias(\'draft\')" style="padding:10px 20px;background:#222;border:1px solid #333;border-radius:8px;color:#aaa;font-size:13px;cursor:pointer;">Guardar borrador</button>';
-  html += '<button onclick="guardarEvaluacionCompetencias(\'published\')" id="btnPublicarEval" style="padding:10px 24px;background:#FF5400;border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;">✓ Guardar y publicar</button>';
-  html += '</div>';
-
-  cont.innerHTML = html;
-}
-
-function setNivelCompetencia(compId, nivel) {
-  if (!compEvalActual[compId]) compEvalActual[compId] = {};
-  compEvalActual[compId].levelValue = nivel;
-}
-
-function setComentarioCompetencia(compId, texto) {
-  if (!compEvalActual[compId]) compEvalActual[compId] = {};
-  compEvalActual[compId].comment = texto;
-}
-
-async function guardarEvaluacionCompetencias(status) {
-  const userId = document.getElementById('compEvalUserSel').value;
-  const tipo   = document.getElementById('compEvalTipoSel').value;
-  const period = document.getElementById('compEvalPeriodSel').value;
-  if (!userId) { mostrarToast('Elegí un colaborador', 'error'); return; }
-
-  const items = [];
-  Object.keys(compEvalActual).forEach(function(cid){
-    const d = compEvalActual[cid];
-    if (d.levelValue != null || (d.comment && d.comment.trim())) {
-      items.push({ compCatalogId: parseInt(cid), levelValue: d.levelValue != null ? d.levelValue : null, comment: d.comment || null });
+  document.querySelectorAll('#sec-competencies select').forEach(sel => {
+    const first = sel.querySelector('option');
+    if (!first) return;
+    const txt = first.textContent;
+    if (txt.includes('Mercado') || txt.includes('Rocha')) {
+      const cur = sel.value;
+      sel.innerHTML = '<option value="">— Colaborador —</option>';
+      allUsuarios.filter(u=>u.IsActive).sort((a,b)=>(a.FullName||'').localeCompare(b.FullName||'')).forEach(u=>sel.add(new Option(u.FullName||u.Email, u.UserID)));
+      if (cur) sel.value = cur;
     }
   });
-  if (!items.length) { mostrarToast('Evaluá al menos una competencia', 'error'); return; }
-
-  const btn = document.getElementById('btnPublicarEval');
-  if (btn) { btn.textContent = 'Guardando...'; btn.disabled = true; }
-
-  try {
-    const payload = {
-      userId: parseInt(userId),
-      evaluatorType: tipo,
-      periodId: period ? parseInt(period) : null,
-      status: status,
-      generalFeedback: (document.getElementById('compEvalFeedback')||{}).value || null,
-      improvementAreas: (document.getElementById('compEvalMejora')||{}).value || null,
-      source: 'app',
-      items: items
-    };
-    const res = await fetch(API_BASE + '/competencies/evaluations', {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify(payload)
-    });
-    const raw = await res.text();
-    if (!raw || !raw.trim()) throw new Error('Sin respuesta del servidor (HTTP ' + res.status + ')');
-    const json = JSON.parse(raw);
-    if (!res.ok || json.ok === false) throw new Error(json.error || 'HTTP ' + res.status);
-    const data = json.data || json;
-    mostrarToast('✅ Evaluación guardada — ' + (data.itemsSaved||0) + ' competencia(s)' + (status === 'published' ? ' (publicada)' : ' (borrador)'), 'success');
-    compEvalActual = {};
-    document.getElementById('compEvalUserSel').value = '';
-    compOnCambioUsuarioEval();
-  } catch(e) {
-    mostrarToast('Error guardando: ' + e.message, 'error');
-  } finally {
-    if (btn) { btn.textContent = '✓ Guardar y publicar'; btn.disabled = false; }
-  }
-}
-
-// ── TAB RESULTADOS 360° ──
-
-async function cargarResultados360() {
-  const userId = document.getElementById('compResUserSel').value;
-  const cont = document.getElementById('compResultadosContainer');
-  if (!userId) {
-    cont.innerHTML = '<div style="text-align:center;padding:40px;color:#888;font-size:13px;">Elegí un colaborador para ver sus resultados.</div>';
-    return;
-  }
-  cont.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Cargando resultados...</div>';
-  try {
-    const res = await fetch(API_BASE + '/competencies/summary/' + userId);
-    const raw = await res.text();
-    if (!raw || !raw.trim()) throw new Error('Sin respuesta del servidor (HTTP ' + res.status + ')');
-    const json = JSON.parse(raw);
-    if (!res.ok || json.ok === false) throw new Error(json.error || 'HTTP ' + res.status);
-    renderResultados360(json.data || json);
-  } catch(e) {
-    cont.innerHTML = '<div style="color:#FF4D4D;padding:20px;text-align:center;">Error: ' + e.message + '</div>';
-  }
-}
-
-function renderResultados360(data) {
-  const cont = document.getElementById('compResultadosContainer');
-  const evals = data.evaluations || [];
-  const matrix = data.matrix || [];
-
-  if (!evals.length) {
-    cont.innerHTML = '<div style="text-align:center;padding:40px;color:#888;">' +
-      '<div style="font-size:32px;margin-bottom:10px;">📋</div>' +
-      '<div style="font-size:14px;color:#aaa;">Sin evaluaciones registradas</div>' +
-      '<div style="font-size:12px;color:#666;margin-top:4px;">Este colaborador todavía no fue evaluado en competencias.</div>' +
-      '</div>';
-    return;
-  }
-
-  const nivelNombre = {4:'Viene súper', 3:'Viene bien', 2:'Tiene que seguir trabajando', 1:'No lo tiene muy desarrollado'};
-  const tipoLabel = {self:'Autoevaluación', leader:'Líder', manager:'Manager', import:'Importado'};
-
-  let html = '';
-
-  // Resumen de evaluaciones
-  html += '<div class="card" style="margin-bottom:16px;">';
-  html += '<div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:10px;">Evaluaciones registradas (' + evals.length + ')</div>';
-  evals.forEach(function(e){
-    const fecha = e.EvaluationDate ? new Date(e.EvaluationDate).toLocaleDateString('es-AR') : '—';
-    const stCol = e.Status === 'published' ? '#2ECC71' : '#F59E0B';
-    html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:#111;border-radius:6px;margin-bottom:5px;font-size:11px;flex-wrap:wrap;gap:8px;">';
-    html += '<div><b style="color:#f0ebe3;">' + (tipoLabel[e.EvaluatorType] || e.EvaluatorType) + '</b>';
-    if (e.EvaluatorName) html += ' <span style="color:#888;">por ' + String(e.EvaluatorName).replace(/</g,'&lt;') + '</span>';
-    html += '</div>';
-    html += '<div style="display:flex;gap:10px;align-items:center;">';
-    if (e.PeriodName) html += '<span style="color:#666;">' + e.PeriodName + '</span>';
-    html += '<span style="color:#888;">' + fecha + '</span>';
-    html += '<span style="color:' + stCol + ';font-weight:700;font-size:10px;">' + (e.Status === 'published' ? 'PUBLICADA' : 'BORRADOR') + '</span>';
-    html += '</div></div>';
-  });
-  html += '</div>';
-
-  // Matriz comparativa
-  const conDatos = matrix.filter(function(m){ return m.average != null; });
-  if (conDatos.length) {
-    html += '<div class="card" style="margin-bottom:16px;">';
-    html += '<div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:12px;">Comparativa 360°</div>';
-    html += '<div style="overflow-x:auto;"><table class="data-table" style="min-width:600px;">';
-    html += '<thead><tr><th>Competencia</th><th style="text-align:center;">Auto</th><th style="text-align:center;">Líder</th><th style="text-align:center;">Manager</th><th style="text-align:center;">Promedio</th></tr></thead><tbody>';
-
-    let tipoAct = null;
-    matrix.forEach(function(m){
-      if (m.compType !== tipoAct) {
-        tipoAct = m.compType;
-        const lbl = tipoAct === 'general' ? 'Generales' : 'Liderazgo';
-        const col = tipoAct === 'general' ? '#3B82F6' : '#A855F7';
-        html += '<tr><td colspan="5" style="padding-top:12px;"><span style="font-size:10px;font-weight:700;color:' + col + ';text-transform:uppercase;">' + lbl + '</span></td></tr>';
-      }
-      const celda = function(v) {
-        if (v == null) return '<span style="color:#444;">—</span>';
-        const c = COMP_NIVEL_COLORS[v] || '#888';
-        return '<span title="' + (nivelNombre[v]||'') + '" style="display:inline-block;width:26px;height:26px;line-height:26px;border-radius:50%;background:' + c + '22;color:' + c + ';font-weight:800;font-size:12px;">' + v + '</span>';
-      };
-      html += '<tr>';
-      html += '<td style="font-size:12px;color:#f0ebe3;">' + String(m.name).replace(/</g,'&lt;') + '</td>';
-      html += '<td style="text-align:center;">' + celda(m.self) + '</td>';
-      html += '<td style="text-align:center;">' + celda(m.leader) + '</td>';
-      html += '<td style="text-align:center;">' + celda(m.manager) + '</td>';
-      html += '<td style="text-align:center;">';
-      if (m.average != null) {
-        const ac = COMP_NIVEL_COLORS[Math.round(m.average)] || '#888';
-        html += '<b style="color:' + ac + ';font-size:13px;">' + m.average + '</b>';
-      } else html += '<span style="color:#444;">—</span>';
-      html += '</td></tr>';
-    });
-    html += '</tbody></table></div>';
-    // Leyenda
-    html += '<div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;font-size:10px;color:#888;">';
-    [4,3,2,1].forEach(function(v){
-      html += '<span><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:' + COMP_NIVEL_COLORS[v] + ';margin-right:4px;"></span>' + v + ' = ' + nivelNombre[v] + '</span>';
-    });
-    html += '</div></div>';
-  }
-
-  // Feedback de cada evaluación
-  const conFeedback = evals.filter(function(e){ return e.GeneralFeedback || e.ImprovementAreas; });
-  if (conFeedback.length) {
-    html += '<div class="card">';
-    html += '<div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:12px;">Feedback registrado</div>';
-    conFeedback.forEach(function(e){
-      const fecha = e.EvaluationDate ? new Date(e.EvaluationDate).toLocaleDateString('es-AR') : '';
-      html += '<div style="background:#111;border-radius:8px;padding:12px;margin-bottom:10px;">';
-      html += '<div style="font-size:10px;color:#888;font-weight:600;margin-bottom:8px;">' + (tipoLabel[e.EvaluatorType]||e.EvaluatorType) + (e.EvaluatorName ? ' — ' + String(e.EvaluatorName).replace(/</g,'&lt;') : '') + ' · ' + fecha + '</div>';
-      if (e.GeneralFeedback) {
-        html += '<div style="margin-bottom:8px;"><div style="font-size:10px;color:#3B82F6;font-weight:700;text-transform:uppercase;margin-bottom:3px;">Feedback</div>';
-        html += '<div style="font-size:11px;color:#aaa;line-height:1.5;">' + String(e.GeneralFeedback).replace(/</g,'&lt;') + '</div></div>';
-      }
-      if (e.ImprovementAreas) {
-        html += '<div><div style="font-size:10px;color:#F59E0B;font-weight:700;text-transform:uppercase;margin-bottom:3px;">Áreas de mejora</div>';
-        html += '<div style="font-size:11px;color:#aaa;line-height:1.5;">' + String(e.ImprovementAreas).replace(/</g,'&lt;') + '</div></div>';
-      }
-      html += '</div>';
-    });
-    html += '</div>';
-  }
-
-  cont.innerHTML = html;
 }
 
 

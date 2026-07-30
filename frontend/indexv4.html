@@ -4945,74 +4945,16 @@ async function verReportePersona() {
   const period = allPeriods.find(p=>String(p.PeriodID)===String(periodId));
   document.getElementById('repPersonaNombre').textContent = (user.FullName||user.Email) + (period?' — '+period.PeriodName:'');
   document.getElementById('repPersonaInfo').textContent = [user.RoleName,user.AreaName].filter(Boolean).join(' · ');
-
-  // Sesión 6 fix: loading state + cálculo ponderado + Plan Carrera + control de errores
-  const elAv = document.getElementById('repAvance');
-  const elCp = document.getElementById('repCompetencias');
-  const elCarr = document.getElementById('repCarrera');
-  if (elAv) elAv.textContent = '...';
-  if (elCp) elCp.textContent = '...';
-  if (elCarr) elCarr.textContent = '...';
-
-  if (!periodId) {
-    if (elAv) elAv.textContent = '—';
-    if (elCp) elCp.textContent = '—';
-    if (elCarr) elCarr.textContent = '—';
-    return;
-  }
-
-  try {
-    const data = await apiGet('users/'+userId+'/report?periodId='+periodId);
-    if (!data) throw new Error('Sin datos');
-
-    // Avance Objetivos — PONDERADO
-    const objs = data.objectives || [];
-    if (objs.length === 0) {
-      if (elAv) elAv.textContent = '—';
-    } else {
-      const sumW = objs.reduce(function(s, o){ return s + (parseFloat(o.Weight) || 0); }, 0);
-      let avance;
-      if (sumW > 0) {
-        // Ponderado real: sum(Progress * Weight) / sum(Weight)
-        const sumPW = objs.reduce(function(s, o){ return s + (parseFloat(o.Progress) || 0) * (parseFloat(o.Weight) || 0); }, 0);
-        avance = Math.round(sumPW / sumW);
-      } else {
-        // Fallback: promedio simple si no hay Weight
-        avance = Math.round(objs.reduce(function(s, o){ return s + (parseFloat(o.Progress) || 0); }, 0) / objs.length);
+  if (periodId) {
+    try {
+      const data = await apiGet('users/'+userId+'/report?periodId='+periodId);
+      if (data) {
+        const av = data.objectives?.length ? Math.round(data.objectives.reduce((s,o)=>s+(o.Progress||0),0)/data.objectives.length) : '—';
+        const cp = data.competencies?.length ? Math.round(data.competencies.reduce((s,c)=>s+(c.Score||0),0)/data.competencies.length) : '—';
+        document.getElementById('repAvance').textContent = av+(typeof av==='number'?'%':'');
+        document.getElementById('repCompetencias').textContent = cp+(typeof cp==='number'?'pts':'');
       }
-      if (elAv) elAv.textContent = avance + '%';
-    }
-
-    // Competencias — promedio del Score si hay data
-    const comps = data.competencies || [];
-    if (comps.length === 0) {
-      if (elCp) elCp.textContent = '—';
-    } else {
-      const scores = comps.filter(function(c){ return c.Score != null; });
-      if (scores.length > 0) {
-        const promedio = Math.round(scores.reduce(function(s, c){ return s + (parseFloat(c.Score) || 0); }, 0) / scores.length);
-        if (elCp) elCp.textContent = promedio + 'pts';
-      } else {
-        if (elCp) elCp.textContent = comps.length + ' eval';
-      }
-    }
-
-    // Plan Carrera — porcentaje de hitos completados
-    const career = data.career || [];
-    if (career.length === 0) {
-      if (elCarr) elCarr.textContent = 'Sin plan';
-    } else {
-      const completed = career.filter(function(m){
-        return m.IsCompleted === 1 || m.IsCompleted === true || m.Status === 'completed';
-      }).length;
-      const pct = Math.round((completed / career.length) * 100);
-      if (elCarr) elCarr.textContent = pct + '% (' + completed + '/' + career.length + ')';
-    }
-  } catch(e) {
-    console.warn('[Reporte Persona] Error:', e);
-    if (elAv) elAv.textContent = 'error';
-    if (elCp) elCp.textContent = 'error';
-    if (elCarr) elCarr.textContent = 'error';
+    } catch(e) { console.warn('Reporte error:', e); }
   }
 }
 

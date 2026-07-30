@@ -3419,30 +3419,59 @@ async function confirmarImportacion(fid) {
   try {
     const objs = p.parsed.objectives.filter(function(o){ return o.selected; });
     const hitos = (p.parsed.careerMilestones||[]).filter(function(h){ return h.selected; });
+    if (!objs.length && !hitos.length) {
+      mostrarToast('No hay nada seleccionado para importar', 'error');
+      if (btn) { btn.textContent = '✓ Importar este archivo'; btn.disabled = false; }
+      return;
+    }
+    const payload = {
+      userId: p.matchResult.user.UserID,
+      periodId: p.periodId,
+      fileName: p.parsed.fileName,
+      excelUserName: p.parsed.userName,
+      source: 'excel_import',
+      objectives: objs,
+      careerMilestones: hitos
+    };
+    console.log('[Import] Enviando payload:', payload);
+
     const res = await fetch(API_BASE + '/import/performance', {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({
-        userId: p.matchResult.user.UserID,
-        periodId: p.periodId,
-        fileName: p.parsed.fileName,
-        excelUserName: p.parsed.userName,
-        source: 'excel_import',
-        objectives: objs,
-        careerMilestones: hitos
-      })
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(payload)
     });
-    const json = await res.json();
+
+    // Leer como texto primero para poder diagnosticar respuestas vacías o no-JSON
+    const raw = await res.text();
+    console.log('[Import] HTTP', res.status, '— respuesta cruda:', raw ? raw.substring(0, 500) : '(vacía)');
+
+    if (!raw || !raw.trim()) {
+      throw new Error('El servidor no devolvió respuesta (HTTP ' + res.status + '). Verificá que el API esté deployado con los endpoints de importación.');
+    }
+
+    let json;
+    try {
+      json = JSON.parse(raw);
+    } catch(parseErr) {
+      throw new Error('Respuesta no válida del servidor (HTTP ' + res.status + '): ' + raw.substring(0, 200));
+    }
+
+    if (!res.ok || json.ok === false) {
+      throw new Error(json.error || ('HTTP ' + res.status));
+    }
+
     const data = json.data || json;
-    if (!res.ok || json.ok === false) throw new Error(json.error || 'Error');
     let msg = '✅ ' + (data.objectivesCreated||0) + ' objetivo(s) creado(s)';
     if (data.objectivesUpdated) msg += ', ' + data.objectivesUpdated + ' actualizado(s)';
     if (data.milestonesCreated) msg += ', ' + data.milestonesCreated + ' hito(s)';
     mostrarToast(msg, 'success');
     if (data.errors && data.errors.length) {
       console.warn('[Import] Errores parciales:', data.errors);
+      mostrarToast('⚠️ ' + data.errors.length + ' item(s) con problemas — revisá la consola', 'error');
     }
     descartarPreview(fid);
   } catch(e) {
+    console.error('[Import] Error:', e);
     mostrarToast('Error importando: ' + e.message, 'error');
     if (btn) { btn.textContent = '✓ Importar este archivo'; btn.disabled = false; }
   }

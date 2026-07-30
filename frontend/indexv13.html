@@ -2477,12 +2477,10 @@ function ini(name) {
 function colorFor(i) { return AVATAR_COLORS[i % AVATAR_COLORS.length]; }
 function statusFor(pct) { return pct >= 70 ? 'success' : pct >= 40 ? 'warning' : 'danger'; }
 
-async function apiGet(path, timeoutMs) {
+async function apiGet(path) {
   try {
     const ctl = new AbortController();
-    // Sesión 8: los reportes agregados (empresa, manager, líder) pegan a varias tablas
-    // y con volumen real no entran en 15s. Se les pasa un timeout más largo.
-    const tid = setTimeout(()=>ctl.abort(), timeoutMs || 15000);
+    const tid = setTimeout(()=>ctl.abort(), 15000);
     const res = await fetch(API_BASE + '/' + path, { signal: ctl.signal });
     clearTimeout(tid);
     if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -6500,7 +6498,7 @@ async function verReportePersona() {
   });
 
   // Las dos llamadas en paralelo
-  const deep = await apiGet('users/' + userId + '/deep-report', 45000);
+  const deep = await apiGet('users/' + userId + '/deep-report');
   const comp = await apiGet('competencies/summary/' + userId + (periodId ? '?periodId=' + periodId : ''));
   _repDeepData = deep;
   _repCompData = comp;
@@ -7024,7 +7022,7 @@ async function verReporteLider() {
   });
   const kp = document.getElementById('repLiderKPIs'); if (kp) kp.innerHTML = '';
 
-  const data = await apiGet('leaders/' + leaderId + '/team-report' + (periodId ? '?periodId=' + periodId : ''), 60000);
+  const data = await apiGet('leaders/' + leaderId + '/team-report' + (periodId ? '?periodId=' + periodId : ''));
   _repLiderData = data;
   if (data && data.warnings && data.warnings.length) {
     console.warn('[Team-report] avisos del servidor:', data.warnings);
@@ -7278,7 +7276,7 @@ async function verReporteManager() {
     if (el) el.innerHTML = '<div style="padding:20px;color:#888;font-size:12px;">Cargando…</div>';
   });
 
-  const data = await apiGet('managers/' + managerId + '/report' + (periodId ? '?periodId=' + periodId : ''), 60000);
+  const data = await apiGet('managers/' + managerId + '/report' + (periodId ? '?periodId=' + periodId : ''));
   _repManagerData = data;
   if (data && data.warnings && data.warnings.length) console.warn('[Manager-report] avisos:', data.warnings);
   if (!data) {
@@ -7431,7 +7429,7 @@ async function verReporteEmpresa() {
     if (el) el.innerHTML = '<div style="padding:20px;color:#888;font-size:12px;">Cargando…</div>';
   });
 
-  const data = await apiGet('company/report' + (periodId ? '?periodId=' + periodId : ''), 90000);
+  const data = await apiGet('company/report' + (periodId ? '?periodId=' + periodId : ''));
   _repEmpresaData = data;
   if (data && data.warnings && data.warnings.length) console.warn('[Company-report] avisos:', data.warnings);
   if (!data) {

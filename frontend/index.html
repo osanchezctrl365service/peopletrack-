@@ -1089,18 +1089,19 @@ label { color: #888 !important; }
         </div>
         <div class="kpi-card">
           <div class="kpi-label">Avance Promedio</div>
-          <div class="kpi-value" style="color:var(--accent)">64%</div>
-          <div class="kpi-bar"><div class="kpi-bar-fill" style="width:64%;background:var(--accent)"></div></div>
+          <div class="kpi-value" style="color:var(--accent)" data-kpi="avance">—</div>
+          <div class="kpi-bar"><div class="kpi-bar-fill" data-kpi="avanceBar" style="width:0%;background:var(--accent)"></div></div>
+          <div class="kpi-sub" data-kpi="avanceSub"></div>
         </div>
         <div class="kpi-card">
           <div class="kpi-label">Objetivos en Riesgo</div>
-          <div class="kpi-value" style="color:var(--danger)" data-kpi="riesgo">3</div>
-          <div class="kpi-sub">Bajo el umbral 70%</div>
+          <div class="kpi-value" style="color:var(--danger)" data-kpi="riesgo">—</div>
+          <div class="kpi-sub" data-kpi="riesgoSub">Bajo el 40% de avance</div>
         </div>
         <div class="kpi-card">
           <div class="kpi-label">1:1 Pendientes</div>
-          <div class="kpi-value" style="color:var(--warning)">2</div>
-          <div class="kpi-sub">Este mes</div>
+          <div class="kpi-value" style="color:var(--warning)" data-kpi="reuniones">—</div>
+          <div class="kpi-sub" data-kpi="reunionesSub">Fuera del ciclo esperado</div>
         </div>
       </div>
 
@@ -2681,6 +2682,34 @@ function renderDashboardEquipo(active) {
 
   const atRisk = conObj.filter(u => u.AvgProgress < 40).length;
   if (kpiEl('riesgo')) kpiEl('riesgo').textContent = atRisk;
+  if (kpiEl('riesgoSub')) {
+    kpiEl('riesgoSub').textContent = conObj.length
+      ? 'Bajo el 40% · sobre ' + conObj.length + ' con objetivos'
+      : 'Nadie tiene objetivos cargados';
+  }
+
+  // Avance promedio — solo sobre quienes tienen objetivos.
+  // Sesión 9: este KPI estaba HARDCODEADO en 64% en el HTML, nunca se actualizaba.
+  const avgProm = conObj.length
+    ? Math.round(conObj.reduce((s,u) => s + u.AvgProgress, 0) / conObj.length)
+    : null;
+  if (kpiEl('avance')) kpiEl('avance').textContent = avgProm == null ? '—' : avgProm + '%';
+  if (kpiEl('avanceBar')) kpiEl('avanceBar').style.width = (avgProm || 0) + '%';
+  if (kpiEl('avanceSub')) {
+    kpiEl('avanceSub').textContent = conObj.length
+      ? 'Sobre ' + conObj.length + ' de ' + active.length + ' con objetivos'
+      : 'Sin datos para promediar';
+  }
+
+  // 1:1 pendientes — también hardcodeado en 2. Ahora usa el semáforo real del API.
+  const reunAtrasadas = active.filter(u => u.MeetingStatus === 'warning' || u.MeetingStatus === 'critical').length;
+  const reunSinRegistro = active.filter(u => !u.MeetingStatus || u.MeetingStatus === 'none').length;
+  if (kpiEl('reuniones')) kpiEl('reuniones').textContent = reunAtrasadas;
+  if (kpiEl('reunionesSub')) {
+    kpiEl('reunionesSub').textContent = reunSinRegistro
+      ? reunSinRegistro + ' sin 1:1 registrada'
+      : 'Fuera del ciclo esperado';
+  }
 
   // Equipo — top 15 para el panel, priorizando a los que tienen objetivos
   const ordenados = active.slice().sort(function(a,b){

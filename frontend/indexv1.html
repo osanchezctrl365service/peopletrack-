@@ -2475,7 +2475,7 @@ function ini(name) {
   return (name || '??').split(/[ @]/).filter(Boolean).map(n=>n[0]).join('').slice(0,2).toUpperCase();
 }
 function colorFor(i) { return AVATAR_COLORS[i % AVATAR_COLORS.length]; }
-function statusFor(pct) { if (pct == null) return 'none'; return pct >= 70 ? 'success' : pct >= 40 ? 'warning' : 'danger'; }
+function statusFor(pct) { return pct >= 70 ? 'success' : pct >= 40 ? 'warning' : 'danger'; }
 
 async function apiGet(path, timeoutMs) {
   try {
@@ -2505,11 +2505,6 @@ async function loadDashboardFromAPI() {
   const active = data.filter(u => u.IsActive);
   dashboardUsersRaw = active;
 
-  // Sesión 9: /users/all no trae el avance. Se pide aparte y se mergea.
-  // Hasta ahora el dashboard leía u.AvgProgress (inexistente) con `|| 0`, así que
-  // mostraba 0% y "en riesgo" para todos.
-  cargarProgresoDashboard(active);
-
   // Cargar próximas reuniones (widget aparte, no se filtra)
   cargarProximasReunionesDashboard();
 
@@ -2526,28 +2521,6 @@ async function loadDashboardFromAPI() {
     poblarFiltrosDashboard();
     renderDashboardEquipo(active);
   }
-}
-
-// Trae el avance ponderado real y lo mergea en dashboardUsersRaw, después re-renderiza.
-// No bloquea la carga del dashboard: si tarda o falla, se ve el resto igual.
-async function cargarProgresoDashboard(active) {
-  const data = await apiGet('users/progress', 60000);
-  if (!data || !data.users) {
-    console.warn('[Dashboard] no se pudo cargar el avance por usuario');
-    return;
-  }
-  if (data.warnings && data.warnings.length) console.warn('[Dashboard] avisos:', data.warnings);
-  const porId = {};
-  data.users.forEach(function(u){ porId[u.UserID] = u; });
-  (dashboardUsersRaw || []).forEach(function(u){
-    const p = porId[u.UserID];
-    // null = sin objetivos cargados. NO se convierte a 0.
-    u.AvgProgress     = p ? p.AvgProgress : null;
-    u.ObjectivesCount = p ? p.ObjectivesCount : 0;
-    u.MeetingStatus   = p ? p.MeetingStatus : 'none';
-    u.OpenPIPs        = p ? p.OpenPIPs : 0;
-  });
-  aplicarFiltrosDashboard();
 }
 
 // Poblar los 2 dropdowns de filtro (Líder y Proyecto)
@@ -2668,32 +2641,21 @@ function limpiarFiltrosDashboard() {
 }
 
 // Renderizar KPIs, donut y lista con el array de usuarios (filtrado o no)
-// Sesión 9: AvgProgress puede venir null = "sin objetivos cargados". Ese caso NO
-// cuenta como riesgo ni como 0%, se muestra aparte. Si no, con la adopción actual
-// el 90% de la empresa aparecía en rojo sin tener un solo objetivo cargado.
 function renderDashboardEquipo(active) {
   // KPIs
   const kpiEl = (id) => document.querySelector('[data-kpi="' + id + '"]');
   if (kpiEl('colaboradores')) kpiEl('colaboradores').textContent = active.length;
 
-  const conObj = active.filter(u => u.AvgProgress != null);
-  const sinObj = active.length - conObj.length;
-
-  const atRisk = conObj.filter(u => u.AvgProgress < 40).length;
+  const atRisk = active.filter(u => (u.AvgProgress || 0) < 40).length;
   if (kpiEl('riesgo')) kpiEl('riesgo').textContent = atRisk;
 
-  // Equipo — top 15 para el panel, priorizando a los que tienen objetivos
-  const ordenados = active.slice().sort(function(a,b){
-    const av = a.AvgProgress == null ? 1 : 0, bv = b.AvgProgress == null ? 1 : 0;
-    if (av !== bv) return av - bv;
-    return (a.AvgProgress || 0) - (b.AvgProgress || 0);
-  });
-  teamData = ordenados.slice(0, 15).map((u, i) => ({
+  // Equipo — top 15 para el panel
+  teamData = active.slice(0, 15).map((u, i) => ({
     name:   u.FullName || u.Email,
     init:   ini(u.FullName || u.Email),
     color:  colorFor(i),
-    pct:    u.AvgProgress,
-    status: statusFor(u.AvgProgress),
+    pct:    u.AvgProgress || 0,
+    status: statusFor(u.AvgProgress || 0),
     userId: u.UserID,
     leader: u.LeaderName,
     manager: u.ManagerName,
@@ -2701,19 +2663,18 @@ function renderDashboardEquipo(active) {
 
   renderTeamProgress();
 
-  // Donut con datos reales — 4 categorías
-  const verde   = conObj.filter(u => u.AvgProgress >= 70).length;
-  const naranja = conObj.filter(u => u.AvgProgress >= 40 && u.AvgProgress < 70).length;
-  const rojo    = conObj.filter(u => u.AvgProgress < 40).length;
-  drawDonutReal(rojo, naranja, verde, active.length, sinObj);
+  // Donut con datos reales
+  const verde  = active.filter(u => (u.AvgProgress||0) >= 70).length;
+  const naranja = active.filter(u => (u.AvgProgress||0) >= 40 && (u.AvgProgress||0) < 70).length;
+  const rojo   = active.filter(u => (u.AvgProgress||0) < 40).length;
+  drawDonutReal(rojo, naranja, verde, active.length);
 
   // Leyenda
   const legEl = document.getElementById('donutLegend');
   if (legEl) legEl.innerHTML = `
     <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF4D4D;margin-right:6px"></span>En Riesgo</span><strong>${rojo}</strong></div>
     <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#FF9F1C;margin-right:6px"></span>En Curso</span><strong>${naranja}</strong></div>
-    <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#2ECC71;margin-right:6px"></span>En Verde</span><strong>${verde}</strong></div>
-    <div style="display:flex;justify-content:space-between;padding-top:6px;border-top:1px solid #262626;"><span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#555;margin-right:6px"></span>Sin objetivos</span><strong style="color:${sinObj ? '#F59E0B' : '#888'}">${sinObj}</strong></div>`;
+    <div style="display:flex;justify-content:space-between"><span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#2ECC71;margin-right:6px"></span>En Verde</span><strong>${verde}</strong></div>`;
 }
 
 // Carga las próximas reuniones desde el API y las renderiza en el widget del dashboard (Sesión 3)
@@ -3733,13 +3694,12 @@ async function verHistorialImportaciones() {
   }
 }
 
-function drawDonutReal(rojo, naranja, verde, total, sinObjetivos) {
+function drawDonutReal(rojo, naranja, verde, total) {
   const canvas = document.getElementById('donutChart');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
   const w = canvas.width, h = canvas.height, cx = w/2, cy = h/2, r = 60, inner = 38;
-  // Sesión 9: cuarto segmento gris para los que no tienen objetivos cargados
-  const data = [{v:rojo,c:'#FF4D4D'},{v:naranja,c:'#FF9F1C'},{v:verde,c:'#2ECC71'},{v:sinObjetivos||0,c:'#555'}].filter(d=>d.v>0);
+  const data = [{v:rojo,c:'#FF4D4D'},{v:naranja,c:'#FF9F1C'},{v:verde,c:'#2ECC71'}].filter(d=>d.v>0);
   if (!data.length) return;
   let start = -Math.PI/2;
   ctx.clearRect(0,0,w,h);
@@ -3763,21 +3723,16 @@ function renderTeamProgress(){
   const el = document.getElementById('teamProgressList');
   if(!el) return;
   el.innerHTML = teamData.map(p=>{
-    // Sesión 9: pct null = sin objetivos cargados. Se muestra en gris, no como 0% en rojo.
-    const sinObj = p.pct == null;
-    const color = sinObj ? '#666'
-                : p.status==='success'?'var(--success)':p.status==='warning'?'var(--warning)':'var(--danger)';
-    const texto = sinObj ? 'sin objetivos' : p.pct + '%';
-    const ancho = sinObj ? 0 : p.pct;
+    const color = p.status==='success'?'var(--success)':p.status==='warning'?'var(--warning)':'var(--danger)';
     return `<div style="margin-bottom:12px">
       <div class="progress-label">
         <div class="person-chip">
           <div class="avatar-sm" style="background:${p.color};width:24px;height:24px;font-size:9px">${p.init}</div>
           <span class="progress-name">${p.name}</span>
         </div>
-        <span class="progress-pct" style="color:${color};${sinObj?'font-size:10px;':''}">${texto}</span>
+        <span class="progress-pct" style="color:${color}">${p.pct}%</span>
       </div>
-      <div class="progress-bar"><div class="progress-fill" style="width:${ancho}%;background:${color}"></div></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${p.pct}%;background:${color}"></div></div>
     </div>`;
   }).join('');
 }

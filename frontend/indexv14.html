@@ -3592,9 +3592,7 @@ function renderUnPreview(fid, p) {
     };
     html += renderComp(d.competenciasGenericas||[], 'Genéricas');
     html += renderComp(d.competenciasLiderazgo||[], 'Liderazgo');
-    html += compConEval.length
-      ? '<div style="font-size:10px;color:#2ECC71;margin-top:8px;padding:6px 8px;background:rgba(46,204,113,0.08);border-radius:5px;">✅ Se importarán <b>' + compConEval.length + '</b> competencia(s) como evaluación histórica del período. Las que están sin evaluar se saltean. Si reimportás este archivo, la evaluación anterior se reemplaza (no se duplica).</div>'
-      : '<div style="font-size:10px;color:#888;margin-top:8px;padding:6px 8px;background:rgba(255,255,255,0.04);border-radius:5px;">Este archivo no tiene competencias evaluadas, así que no se va a crear ninguna evaluación.</div>';
+    html += '<div style="font-size:10px;color:#F59E0B;margin-top:8px;padding:6px 8px;background:rgba(245,158,11,0.08);border-radius:5px;">ℹ️ Las competencias se detectan pero <b>todavía no se importan</b> — el módulo de Competencias v2.0 está planificado para la próxima sesión.</div>';
     html += '</div>';
   }
 
@@ -3671,11 +3669,7 @@ async function confirmarImportacion(fid) {
   try {
     const objs = p.parsed.objectives.filter(function(o){ return o.selected; });
     const hitos = (p.parsed.careerMilestones||[]).filter(function(h){ return h.selected; });
-    // Sesión 9: las competencias ahora SÍ se importan (antes eran solo informativas).
-    // Se mandan únicamente las que tienen evaluación cargada en el Excel.
-    const comps = [].concat(p.parsed.competenciasGenericas||[], p.parsed.competenciasLiderazgo||[])
-                    .filter(function(c){ return c && c.nombre && c.evaluacion; });
-    if (!objs.length && !hitos.length && !comps.length) {
+    if (!objs.length && !hitos.length) {
       mostrarToast('No hay nada seleccionado para importar', 'error');
       if (btn) { btn.textContent = '✓ Importar este archivo'; btn.disabled = false; }
       return;
@@ -3687,8 +3681,7 @@ async function confirmarImportacion(fid) {
       excelUserName: p.parsed.userName,
       source: 'excel_import',
       objectives: objs,
-      careerMilestones: hitos,
-      competencies: comps
+      careerMilestones: hitos
     };
     console.log('[Import] Enviando payload:', payload);
 
@@ -3721,14 +3714,7 @@ async function confirmarImportacion(fid) {
     let msg = '✅ ' + (data.objectivesCreated||0) + ' objetivo(s) creado(s)';
     if (data.objectivesUpdated) msg += ', ' + data.objectivesUpdated + ' actualizado(s)';
     if (data.milestonesCreated) msg += ', ' + data.milestonesCreated + ' hito(s)';
-    if (data.competenciesCreated) msg += ', ' + data.competenciesCreated + ' competencia(s)';
     mostrarToast(msg, 'success');
-    // Sesión 9: si un nombre de competencia no matcheó contra el catálogo, hay que
-    // verlo. Si no, se pierde en silencio y el promedio queda mal sin que nadie sepa.
-    if (data.competenciesNotMatched && data.competenciesNotMatched.length) {
-      console.warn('[Import] Competencias sin match en el catálogo:', data.competenciesNotMatched);
-      mostrarToast('⚠️ No se reconocieron: ' + data.competenciesNotMatched.join(', '), 'error');
-    }
     if (data.errors && data.errors.length) {
       console.warn('[Import] Errores parciales:', data.errors);
       mostrarToast('⚠️ ' + data.errors.length + ' item(s) con problemas — revisá la consola', 'error');

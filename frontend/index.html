@@ -1374,6 +1374,15 @@ label { color: #888 !important; }
         </div>
       </div>
       <div>
+        <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Link al descriptivo del rol</label>
+        <input id="rolGuideURL" type="url" placeholder="https://..." style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
+        <div style="font-size:10px;color:#666;margin-top:4px;">Lo van a ver los colaboradores de este rol en Objetivos y Plan de Carrera.</div>
+      </div>
+      <div>
+        <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Texto del link (opcional)</label>
+        <input id="rolGuideLabel" type="text" maxlength="240" placeholder="Ej: Guía - Rol Developer" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
+      </div>
+      <div>
         <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Estado</label>
         <select id="rolEstado" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
           <option value="1">Activo</option>
@@ -2105,6 +2114,7 @@ label { color: #888 !important; }
         <div class="tab" onclick="switchTab('rep','lider',this);initReporteTab('lider')">Por Líder</div>
         <div class="tab" onclick="switchTab('rep','manager',this);initReporteTab('manager')">Por Manager</div>
         <div class="tab" onclick="switchTab('rep','empresa',this);initReporteTab('empresa')">General Empresa</div>
+        <div class="tab" onclick="switchTab('rep','proyectos',this);initReporteTab('proyectos')">Por Proyecto</div>
       </div>
       <div id="rep-persona" style="margin-top:16px;">
         <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
@@ -2245,6 +2255,29 @@ label { color: #888 !important; }
         <div class="card">
           <div style="font-size:11px;font-weight:700;color:#FF5400;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">🏢 Por área</div>
           <div id="repEmpAreas"><div style="padding:20px;color:#888;font-size:12px;">Cargando…</div></div>
+        </div>
+      </div>
+
+      <div id="rep-proyectos" style="display:none;margin-top:16px;">
+        <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
+          <select id="repProyPeriodoSel" class="form-control" style="width:180px" onchange="verReporteProyectos()"><option value="">Todos los períodos</option></select>
+          <button type="button" onclick="verReporteProyectos()" class="btn btn-secondary btn-sm" style="font-size:11px;">⟳ Actualizar</button>
+        </div>
+
+        <div class="card" style="margin-bottom:14px;">
+          <div style="font-size:11px;font-weight:700;color:#FF5400;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">📁 Proyectos</div>
+          <div id="repProyKPIs" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;"></div>
+          <div id="repProyTabla"><div style="padding:20px;color:#888;font-size:12px;">Cargando…</div></div>
+        </div>
+
+        <div class="card" style="margin-bottom:14px;">
+          <div style="font-size:11px;font-weight:700;color:#FF5400;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">🗂️ Por tipo de proyecto</div>
+          <div id="repProyTipo"><div style="padding:20px;color:#888;font-size:12px;">Cargando…</div></div>
+        </div>
+
+        <div class="card">
+          <div style="font-size:11px;font-weight:700;color:#FF5400;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">🤝 Por cliente</div>
+          <div id="repProyCliente"><div style="padding:20px;color:#888;font-size:12px;">Cargando…</div></div>
         </div>
       </div>
 
@@ -4532,7 +4565,8 @@ function renderRolesTable() {
       const estadoBadge = r.IsActive ? '<span class="badge badge-success">Activo</span>' : '<span class="badge badge-danger">Inactivo</span>';
       const userCount = r.UserCount || 0;
       html += '<tr>' +
-        '<td><div style="font-weight:600;color:#f0ebe3;">' + String(r.RoleName || '').replace(/</g,'&lt;') + '</div>' +
+        '<td><div style="font-weight:600;color:#f0ebe3;">' + String(r.RoleName || '').replace(/</g,'&lt;') +
+          (r.RoleGuideURL ? ' <span title="Tiene link al descriptivo" style="font-size:10px;">📄</span>' : '') + '</div>' +
           (r.Description ? '<div style="font-size:10px;color:#888;margin-top:2px;">' + String(r.Description).replace(/</g,'&lt;').substring(0,80) + '</div>' : '') + '</td>' +
         '<td>' + cat + '</td>' +
         '<td>' + nivel + '</td>' +
@@ -4564,6 +4598,8 @@ function abrirModalRol(rolId) {
     document.getElementById('rolDescripcion').value = r.Description || '';
     document.getElementById('rolCategoria').value = r.Category || '';
     document.getElementById('rolNivel').value = r.Level || '';
+    document.getElementById('rolGuideURL').value = r.RoleGuideURL || '';
+    document.getElementById('rolGuideLabel').value = r.RoleGuideLabel || '';
     document.getElementById('rolEstado').value = r.IsActive ? '1' : '0';
   } else {
     // Alta
@@ -4573,6 +4609,8 @@ function abrirModalRol(rolId) {
     document.getElementById('rolDescripcion').value = '';
     document.getElementById('rolCategoria').value = '';
     document.getElementById('rolNivel').value = '';
+    document.getElementById('rolGuideURL').value = '';
+    document.getElementById('rolGuideLabel').value = '';
     document.getElementById('rolEstado').value = '1';
   }
   modal.style.display = 'flex';
@@ -4588,6 +4626,8 @@ async function guardarRol() {
   const desc = document.getElementById('rolDescripcion').value.trim();
   const cat = document.getElementById('rolCategoria').value;
   const nivel = document.getElementById('rolNivel').value;
+  const guideURL = document.getElementById('rolGuideURL').value.trim();
+  const guideLabel = document.getElementById('rolGuideLabel').value.trim();
   const estado = document.getElementById('rolEstado').value === '1';
   const errEl = document.getElementById('modalRolError');
   const btn = document.getElementById('btnGuardarRol');
@@ -4601,7 +4641,10 @@ async function guardarRol() {
       roleName: nombre,
       description: desc || null,
       category: cat || null,
-      level: nivel || null
+      level: nivel || null,
+      // Se mandan siempre (aunque vacíos) para poder BORRAR un link cargado antes
+      roleGuideURL: guideURL,
+      roleGuideLabel: guideLabel
     };
     if (id) body.isActive = estado; // sólo se manda en edición
     const res = await fetch(url, {
@@ -6329,7 +6372,7 @@ function initReportes() {
   // Aplicar filtros (con default = ninguno) para poblar los dropdowns de cada tab
   aplicarFiltrosReportes();
   // Períodos — Sesión 5 fix: cargar si no están. Sesión 8: también el de la tab Líder.
-  const perSels = ['repPeriodoSel','repLiderPeriodoSel','repManagerPeriodoSel','repEmpresaPeriodoSel']
+  const perSels = ['repPeriodoSel','repLiderPeriodoSel','repManagerPeriodoSel','repEmpresaPeriodoSel','repProyPeriodoSel']
     .map(function(id){ return document.getElementById(id); })
     .filter(function(el){ return el && el.options.length <= 1; });
   if (perSels.length) {
@@ -6519,6 +6562,9 @@ function initReporteTab(tipo) {
       }).sort(function(a,b){ return (a.FullName||'').localeCompare(b.FullName||''); })
         .forEach(function(u){ sel.add(new Option(u.FullName || u.Email, u.UserID)); });
     }
+  }
+  if (tipo === 'proyectos') {
+    if (!_repProyData) verReporteProyectos();
   }
   if (tipo === 'empresa') {
     const k = document.getElementById('repEmpresaKPIs');
@@ -7510,6 +7556,144 @@ function renderRepManagerDirectos(directos) {
   Array.prototype.forEach.call(cont.querySelectorAll('button[data-verpersona]'), function(btn){
     btn.addEventListener('click', function(){ repIrAPersona(btn.getAttribute('data-verpersona')); });
   });
+}
+
+// ═══ "POR PROYECTO" (Sesión 10 · 5ª tab) ═════════════════════
+let _repProyData = null;
+
+async function verReporteProyectos() {
+  const periodId = (document.getElementById('repProyPeriodoSel')||{}).value || '';
+  const conts = ['repProyTabla','repProyTipo','repProyCliente'];
+  conts.forEach(function(id){
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = '<div style="padding:20px;color:#888;font-size:12px;">Cargando…</div>';
+  });
+
+  const data = await apiGet('projects/report' + (periodId ? '?periodId=' + periodId : ''), 90000);
+  _repProyData = data;
+  if (data && data.warnings && data.warnings.length) console.warn('[Projects-report] avisos:', data.warnings);
+  if (!data) {
+    conts.forEach(function(id){
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = '<div style="padding:20px;color:#FF4D4D;font-size:12px;">No se pudo cargar. Revisá la consola (F12).</div>';
+    });
+    return;
+  }
+  renderRepProyKPIs(data);
+  renderRepProyTabla(data);
+  renderRepProyAgrupado(data.byType || [], 'repProyTipo', 'tipo', 'Tipo');
+  renderRepProyAgrupado(data.byClient || [], 'repProyCliente', 'cliente', 'Cliente');
+}
+
+// Barra de avance reutilizable para las tablas de esta tab
+function repProyBarra(av, conObj, headcount) {
+  if (av == null) return '<span style="color:#666;font-size:11px;">sin objetivos</span>';
+  const c = av >= 70 ? '#2ECC71' : (av >= 40 ? '#F59E0B' : '#FF4D4D');
+  return '<div style="display:flex;align-items:center;gap:8px;">' +
+    '<div style="flex:1;height:6px;background:#222;border-radius:3px;overflow:hidden;min-width:55px;">' +
+    '<div style="width:' + Math.max(0,Math.min(100,av)) + '%;height:100%;background:' + c + ';"></div></div>' +
+    '<span style="font-size:11px;font-weight:700;color:' + c + ';">' + av + '%</span></div>' +
+    '<div style="font-size:9px;color:#666;margin-top:2px;">' + conObj + '/' + headcount + ' con objetivos</div>';
+}
+
+function renderRepProyKPIs(data) {
+  const cont = document.getElementById('repProyKPIs');
+  if (!cont) return;
+  const proys = data.projects || [];
+  const conGente = proys.filter(function(p){ return p.headcount > 0; });
+  const avances = proys.map(function(p){ return p.avance; }).filter(function(v){ return v != null; });
+  const avgProm = avances.length ? Math.round(avances.reduce(function(s,v){ return s+v; },0)/avances.length) : null;
+  const pipsTotal = proys.reduce(function(s,p){ return s + (p.pipsAbiertos||0); }, 0);
+  const sinProy = data.sinProyecto ? data.sinProyecto.headcount : 0;
+
+  function kpi(label, value, color, sub) {
+    return '<div style="background:#111;border:1px solid #262626;border-radius:8px;padding:10px 12px;">' +
+           '<div style="font-size:9px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:4px;">' + label + '</div>' +
+           '<div style="font-size:18px;font-weight:800;color:' + color + ';">' + value + '</div>' +
+           (sub ? '<div style="font-size:10px;color:#666;margin-top:2px;">' + sub + '</div>' : '') + '</div>';
+  }
+  cont.innerHTML =
+    kpi('Proyectos activos', proys.length, '#f0ebe3', conGente.length + ' con gente asignada') +
+    kpi('Avance promedio', avgProm == null ? '—' : avgProm + '%',
+        avgProm == null ? '#888' : (avgProm >= 70 ? '#2ECC71' : (avgProm >= 40 ? '#F59E0B' : '#FF4D4D')),
+        'entre proyectos con objetivos') +
+    kpi('PIPs abiertos', pipsTotal, pipsTotal ? '#FF4D4D' : '#2ECC71', '') +
+    kpi('Sin proyecto', sinProy, sinProy ? '#F59E0B' : '#2ECC71', sinProy ? 'de ' + data.totalUsers + ' activos' : '');
+}
+
+function renderRepProyTabla(data) {
+  const cont = document.getElementById('repProyTabla');
+  if (!cont) return;
+  const proys = (data.projects || []).slice();
+  if (!proys.length) {
+    cont.innerHTML = '<div style="padding:20px;color:#888;font-size:12px;">No hay proyectos activos cargados.</div>';
+    return;
+  }
+  // Los que tienen gente primero, y dentro de esos los de peor avance arriba
+  proys.sort(function(a,b){
+    if ((b.headcount>0) !== (a.headcount>0)) return (b.headcount>0) - (a.headcount>0);
+    const av = a.avance == null ? 999 : a.avance, bv = b.avance == null ? 999 : b.avance;
+    return av - bv;
+  });
+
+  let html = '<div style="overflow-x:auto;"><table class="data-table" style="width:100%;"><thead><tr>' +
+    '<th>Proyecto</th><th>Tipo</th><th>Cliente</th><th>Personas</th>' +
+    '<th style="min-width:130px;">Avance</th><th>1:1 atrasadas</th><th>PIPs</th>' +
+    '</tr></thead><tbody>';
+
+  const fila = function(p, esSinProyecto) {
+    const nombre = esSinProyecto
+      ? '<span style="color:#F59E0B;font-style:italic;">' + repEsc(p.name) + '</span>'
+      : '<div style="font-weight:700;color:#f0ebe3;">' + repEsc(p.name) + '</div>' +
+        (p.leader ? '<div style="font-size:9px;color:#666;">' + repEsc(p.leader) + '</div>' : '');
+    const reun = p.reunionesAtrasadas
+      ? '<span style="color:#F59E0B;font-weight:700;">' + p.reunionesAtrasadas + '</span>'
+      : (p.sinReunion === p.headcount && p.headcount > 0
+          ? '<span style="color:#666;font-size:11px;">sin registros</span>'
+          : '<span style="color:#2ECC71;">0</span>');
+    return '<tr>' +
+      '<td>' + nombre + '</td>' +
+      '<td style="font-size:11px;color:#aaa;">' + repEsc(p.type || '—') + '</td>' +
+      '<td style="font-size:11px;color:#aaa;">' + repEsc(p.client || '—') + '</td>' +
+      '<td style="font-weight:700;color:' + (p.headcount ? '#f0ebe3' : '#555') + ';">' + p.headcount + '</td>' +
+      '<td>' + repProyBarra(p.avance, p.conObjetivos, p.headcount) + '</td>' +
+      '<td>' + reun + '</td>' +
+      '<td>' + (p.pipsAbiertos ? '<span style="color:#FF4D4D;font-weight:700;">' + p.pipsAbiertos + '</span>' : '<span style="color:#2ECC71;">0</span>') + '</td>' +
+      '</tr>';
+  };
+
+  proys.forEach(function(p){ html += fila(p, false); });
+  if (data.sinProyecto) html += fila(data.sinProyecto, true);
+  html += '</tbody></table></div>';
+  html += '<div style="font-size:10px;color:#666;margin-top:10px;">Los proyectos sin gente asignada quedan al final. ' +
+          'La fila naranja son colaboradores activos sin proyecto en Usuarios.</div>';
+  cont.innerHTML = html;
+}
+
+// Tabla genérica para los cortes por tipo y por cliente
+function renderRepProyAgrupado(filas, contId, campo, etiqueta) {
+  const cont = document.getElementById(contId);
+  if (!cont) return;
+  if (!filas.length) {
+    cont.innerHTML = '<div style="padding:20px;color:#888;font-size:12px;">Sin datos.</div>';
+    return;
+  }
+  let html = '<div style="overflow-x:auto;"><table class="data-table" style="width:100%;"><thead><tr>' +
+    '<th>' + etiqueta + '</th><th>Proyectos</th><th>Personas</th>' +
+    '<th style="min-width:130px;">Avance</th><th>1:1 atrasadas</th><th>PIPs</th>' +
+    '</tr></thead><tbody>';
+  filas.forEach(function(f){
+    html += '<tr>' +
+      '<td style="font-weight:700;color:#f0ebe3;">' + repEsc(f[campo]) + '</td>' +
+      '<td style="color:#aaa;">' + f.proyectos + '</td>' +
+      '<td style="font-weight:700;color:' + (f.headcount ? '#f0ebe3' : '#555') + ';">' + f.headcount + '</td>' +
+      '<td>' + repProyBarra(f.avance, f.conObjetivos, f.headcount) + '</td>' +
+      '<td>' + (f.reunionesAtrasadas ? '<span style="color:#F59E0B;font-weight:700;">' + f.reunionesAtrasadas + '</span>' : '<span style="color:#2ECC71;">0</span>') + '</td>' +
+      '<td>' + (f.pipsAbiertos ? '<span style="color:#FF4D4D;font-weight:700;">' + f.pipsAbiertos + '</span>' : '<span style="color:#2ECC71;">0</span>') + '</td>' +
+      '</tr>';
+  });
+  html += '</tbody></table></div>';
+  cont.innerHTML = html;
 }
 
 // ═══ "GENERAL EMPRESA" (Sesión 8 · Bloque 4) ═════════════════

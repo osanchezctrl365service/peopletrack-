@@ -11264,8 +11264,13 @@ async function kanbanDrop(ev) {
   // Rechazar y contratar son decisiones fuertes: se piden confirmación aparte
   if (destino === 'rejected') {
     var motivo = prompt('Motivo del rechazo de ' + (cand.FullName||'') + ':');
-    if (motivo === null) return;
-    await moverCandidatoA(cid, 'rejected', motivo);
+    if (motivo === null) return; // canceló
+    motivo = String(motivo).trim();
+    if (!motivo) {
+      // Sin motivo el rechazo queda sin trazabilidad: se pide de nuevo o se cancela
+      if (!confirm('No escribiste un motivo.\n\nEl rechazo va a quedar sin justificación registrada. ¿Continuar igual?')) return;
+    }
+    await moverCandidatoA(cid, 'rejected', motivo || 'Sin motivo especificado', motivo);
     return;
   }
   if (destino === 'hired') {
@@ -11274,12 +11279,14 @@ async function kanbanDrop(ev) {
   await moverCandidatoA(cid, destino, 'Movido a ' + (labels[destino]||destino) + ' (arrastrar)');
 }
 
-async function moverCandidatoA(cid, destino, nota) {
+async function moverCandidatoA(cid, destino, nota, motivo) {
   try {
     var res = await fetch(API_BASE + '/candidates/' + cid + '/move', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ status: destino, note: nota, changedById: (window._userId || 1) })
+      // `reason` va aparte de `note`: el backend lo guarda en RejectionReason,
+      // que es lo que muestra el banner de la ficha.
+      body: JSON.stringify({ status: destino, note: nota, reason: motivo || null, changedById: (window._userId || 1) })
     });
     var data = await res.json();
     if (!res.ok || data.ok === false) throw new Error(data.error || ('HTTP ' + res.status));
@@ -11398,6 +11405,8 @@ async function verCandidato(id) {
         (cand.RejectionReason ? String(cand.RejectionReason).replace(/</g,'&lt;') : '<span style="color:#888;font-style:italic;">No se registró un motivo.</span>') +
       '</div>' +
       (cand.RejectedAt ? '<div style="font-size:10px;color:#888;margin-top:6px;">Rechazado el ' + new Date(cand.RejectedAt).toLocaleDateString('es-AR') + '</div>' : '') +
+      '<button type="button" data-cid="' + cand.CandidateID + '" onclick="editarMotivoRechazo(this.dataset.cid)" style="margin-top:8px;padding:5px 12px;background:transparent;border:1px solid rgba(255,77,77,0.4);border-radius:6px;color:#FF4D4D;font-size:11px;cursor:pointer;">' +
+        (cand.RejectionReason ? 'Editar motivo' : 'Registrar motivo') + '</button>' +
       '</div>';
   }
 
@@ -11612,6 +11621,29 @@ function emailAlEntrevistador(candId) {
     'Gracias,\n';
 
   window.location.href = 'mailto:?subject=' + encodeURIComponent(asunto) + '&body=' + encodeURIComponent(cuerpo);
+}
+
+// S10: permite completar el motivo de rechazos que quedaron sin registrar
+async function editarMotivoRechazo(candId) {
+  var cand = allCandidatos.find(function(x){ return String(x.CandidateID) === String(candId); });
+  if (!cand) return;
+  var actual = cand.RejectionReason || '';
+  var nuevo = prompt('Motivo del rechazo de ' + (cand.FullName||'') + ':', actual);
+  if (nuevo === null) return;
+  nuevo = String(nuevo).trim();
+  if (!nuevo) { mostrarToast('El motivo no puede quedar vacío', 'error'); return; }
+  try {
+    var res = await fetch(API_BASE + '/candidates/' + candId + '/reject', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ reason: nuevo, changedById: (window._userId || 1) })
+    });
+    var data = await res.json();
+    if (!res.ok || data.ok === false) throw new Error(data.error || ('HTTP ' + res.status));
+    mostrarToast('Motivo actualizado', 'success');
+    var ov = document.getElementById('overlayCandidato'); if (ov) ov.remove();
+    await cargarCandidatos();
+    verCandidato(candId);
+  } catch(e) { mostrarToast('Error: ' + e.message, 'error'); }
 }
 
 // S10: historial de movimientos entre etapas, con el motivo de cada cambio

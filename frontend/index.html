@@ -11291,8 +11291,8 @@ async function verCandidato(id) {
   var cand = allCandidatos.find(function(c){ return String(c.CandidateID)===String(id); });
   if (!cand) { mostrarToast('Candidato no encontrado','error'); return; }
   var nombre   = (cand.FullName||'').replace(/</g,'&lt;');
-  var stageMap = {screening:'Screening',technical:'T\xe9cnica',client:'Cliente',offer:'Oferta',hired:'Contratado',rejected:'Rechazado'};
-  var stageColor = {screening:'#888',technical:'#3B82F6',client:'#A855F7',offer:'#F59E0B',hired:'#2ECC71',rejected:'#FF4D4D'};
+  var stageMap = {database:'Base de datos',screening:'Screening',technical:'T\xe9cnica',client:'Cliente',offer:'Oferta',hired:'Contratado',rejected:'Rechazado'};
+  var stageColor = {database:'#A855F7',screening:'#888',technical:'#3B82F6',client:'#A855F7',offer:'#F59E0B',hired:'#2ECC71',rejected:'#FF4D4D'};
   var sc = stageColor[cand.Status]||'#888';
   var sl = stageMap[cand.Status]||cand.Status;
 
@@ -11311,7 +11311,7 @@ async function verCandidato(id) {
 
   // Campos por etapa
   var stageFields = '';
-  if (cand.Status==='screening'||cand.Status==='technical'||cand.Status==='client'||cand.Status==='offer') {
+  if (cand.Status==='database'||cand.Status==='screening'||cand.Status==='technical'||cand.Status==='client'||cand.Status==='offer') {
     stageFields += '<div style="margin-bottom:14px;"><div style="font-size:10px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:8px;">Info de la etapa: '+sl+'</div>';
     stageFields += '<textarea id="cvStageNotes" class="form-control" style="height:80px;resize:none;overflow-y:auto;" placeholder="'
       + (cand.Status==='screening'?'Primeras impresiones, disponibilidad, fit cultural...'
@@ -11497,13 +11497,16 @@ async function toggleMetricasRecruiting() {
   var orden = ['database','screening','technical','client','offer','hired','rejected'];
   var funnelMap = {};
   (d.funnel||[]).forEach(function(f){ funnelMap[f.stage] = f.count; });
-  var maxF = Math.max.apply(null, orden.map(function(k){ return funnelMap[k]||0; }).concat([1]));
+  // Sesión 10: 'rejected' se excluye del máximo. Es un acumulado histórico y,
+  // si entra en la escala, aplasta visualmente a las etapas del proceso activo.
+  var maxF = Math.max.apply(null, orden.filter(function(k){ return k !== 'rejected'; })
+                                       .map(function(k){ return funnelMap[k]||0; }).concat([1]));
 
   html += '<div class="card" style="margin-bottom:12px;">';
   html += '<div style="font-size:11px;font-weight:700;color:#FF5400;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">🔻 Embudo por etapa</div>';
   orden.forEach(function(k){
     var n = funnelMap[k] || 0;
-    var pct = Math.round(n / maxF * 100);
+    var pct = Math.min(100, Math.round(n / maxF * 100));
     var col = k === 'hired' ? '#2ECC71' : (k === 'rejected' ? '#FF4D4D' : (k === 'database' ? '#A855F7' : '#FF5400'));
     html += '<div style="margin-bottom:8px;">' +
       '<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;">' +

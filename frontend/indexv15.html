@@ -1675,8 +1675,7 @@ label { color: #888 !important; }
           </select>
           <button class="btn btn-primary btn-sm" onclick="abrirNuevoObjetivoPersonal()">+ Nuevo Personal</button>
         </div>
-        <div id="objPersonalLinkRol" style="display:none;margin-bottom:10px;"></div>
-        <div id="objPersonalTbody">>
+        <div id="objPersonalTbody">
           <div style="text-align:center;padding:30px;color:#888;">Seleccioná un colaborador</div>
         </div>
       </div>
@@ -3196,17 +3195,6 @@ function xlsGet(sheet, row, col) {
   return cell ? cell.v : null;
 }
 
-// Leer la URL de un hipervínculo. En el Excel el link al rol suele venir como
-// texto visible ("Guia - Rol Developer") con la URL real escondida detrás.
-function xlsGetHyperlink(sheet, row, col) {
-  const addr = XLSX.utils.encode_cell({ r: row - 1, c: col - 1 });
-  const cell = sheet[addr];
-  if (cell && cell.l && cell.l.Target) return cell.l.Target;
-  // Si el texto mismo es una URL, sirve igual
-  const v = cell ? String(cell.v || '') : '';
-  return /^https?:\/\//i.test(v.trim()) ? v.trim() : null;
-}
-
 // Parsear un archivo Excel de Performance
 function parsearExcelPerformance(workbook, fileName) {
   const result = {
@@ -3242,10 +3230,6 @@ function parsearExcelPerformance(workbook, fileName) {
     result.evaluador   = xlsGet(pg, 12, 4);
     result.area        = xlsGet(pg, 13, 4);
     result.periodoExcel= xlsGet(pg, 14, 4);
-    // Sesión 10: link al descriptivo del rol (pedido de P&C). El Excel ya lo trae
-    // en D15, ej. "Guia - Rol Developer". Puede venir como texto o como hipervínculo.
-    result.linkRol     = xlsGet(pg, 15, 4);
-    result.linkRolUrl  = xlsGetHyperlink(pg, 15, 4);
 
     // Objetivos: empiezan en fila 33, cortan al llegar a "Competencias"
     let filaCompetencias = null;
@@ -3704,10 +3688,7 @@ async function confirmarImportacion(fid) {
       source: 'excel_import',
       objectives: objs,
       careerMilestones: hitos,
-      competencies: comps,
-      // Sesión 10: link al descriptivo del rol que viene en D15 del Excel
-      roleGuideUrl: p.parsed.linkRolUrl || null,
-      roleGuideLabel: p.parsed.linkRol || null
+      competencies: comps
     };
     console.log('[Import] Enviando payload:', payload);
 
@@ -3741,7 +3722,6 @@ async function confirmarImportacion(fid) {
     if (data.objectivesUpdated) msg += ', ' + data.objectivesUpdated + ' actualizado(s)';
     if (data.milestonesCreated) msg += ', ' + data.milestonesCreated + ' hito(s)';
     if (data.competenciesCreated) msg += ', ' + data.competenciesCreated + ' competencia(s)';
-    if (data.roleGuideSaved) msg += ' · link al rol guardado';
     mostrarToast(msg, 'success');
     // Sesión 9: si un nombre de competencia no matcheó contra el catálogo, hay que
     // verlo. Si no, se pierde en silencio y el promedio queda mal sin que nadie sepa.
@@ -8452,34 +8432,6 @@ function filtrarTablaObjetivos(tipo, query) {
   renderObjetivosCore(filtered);
 }
 
-// ── Link al descriptivo del rol (Sesión 10, pedido de P&C) ───────────────
-// Devuelve el HTML del chip, o '' si la persona no tiene link cargado.
-function chipLinkRol(user) {
-  if (!user) return '';
-  const url   = user.RoleGuideURL;
-  const label = user.RoleGuideLabel || 'Ver descriptivo del rol';
-  if (!url && !label) return '';
-  const rol = user.JobRoleName ? ' · ' + String(user.JobRoleName).replace(/</g,'&lt;') : '';
-  const txt = String(label).replace(/</g,'&lt;');
-  if (!url) {
-    // Hay texto pero no URL: se muestra igual, sin link
-    return '<span style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:20px;font-size:11px;background:#111;border:1px solid #262626;color:#888;">📄 ' + txt + rol + '</span>';
-  }
-  return '<a href="' + String(url).replace(/"/g,'&quot;') + '" target="_blank" rel="noopener noreferrer" ' +
-         'style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:20px;font-size:11px;' +
-         'background:rgba(255,84,0,0.1);border:1px solid rgba(255,84,0,0.35);color:#FF5400;text-decoration:none;">' +
-         '📄 ' + txt + rol + ' ↗</a>';
-}
-
-function mostrarLinkRolObjetivos(userId) {
-  const cont = document.getElementById('objPersonalLinkRol');
-  if (!cont) return;
-  const user = (allUsuarios || []).find(function(u){ return String(u.UserID) === String(userId); });
-  const chip = chipLinkRol(user);
-  cont.innerHTML = chip;
-  cont.style.display = chip ? 'block' : 'none';
-}
-
 async function cargarObjetivosPersonales() {
   const colabSel = document.getElementById('objPersonalColab');
   const perSel = document.getElementById('objPersonalPeriodo');
@@ -8492,7 +8444,6 @@ async function cargarObjetivosPersonales() {
     return;
   }
   container.innerHTML = '<div style="text-align:center;padding:20px;color:#888;">Cargando...</div>';
-  mostrarLinkRolObjetivos(userId);
   try {
     const url = 'objectives?type=personal&userId=' + userId + (periodId ? '&periodId=' + periodId : '');
     const data = await apiGet(url);
@@ -11623,12 +11574,6 @@ function renderCareerPlans(plans) {
     html += '</div>';
     html += '<span style="font-size:10px;font-weight:700;color:'+color+';background:'+color+'18;padding:2px 8px;border-radius:10px;white-space:nowrap;">'+tipo+'</span>';
     html += '</div>';
-
-    // Link al descriptivo del rol (Sesión 10) — sale de Users.RoleGuideURL,
-    // que se llena solo al importar los Excel.
-    var uCarrera = (allUsuarios||[]).find(function(u){ return String(u.UserID) === String(p.UserID); });
-    var chipRol = chipLinkRol(uCarrera);
-    if (chipRol) html += '<div>' + chipRol + '</div>';
 
     // Rol objetivo
     if (p.TargetRole) {

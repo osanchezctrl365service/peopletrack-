@@ -1574,6 +1574,15 @@ label { color: #888 !important; }
         <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Descripción</label>
         <textarea id="plantillaItemDesc" rows="2" placeholder="Detalles opcionales..." style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;resize:vertical;"></textarea>
       </div>
+      <div>
+        <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Link al material</label>
+        <input id="plantillaItemResURL" type="url" placeholder="https://... (curso, PDF, video, tutorial)" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
+        <div style="font-size:10px;color:#666;margin-top:4px;">Para que el colaborador nuevo llegue al material sin tener que preguntar.</div>
+      </div>
+      <div>
+        <label style="font-size:11px;color:#888;font-weight:600;text-transform:uppercase;">Texto del link (opcional)</label>
+        <input id="plantillaItemResLabel" type="text" maxlength="190" placeholder="Ej: Ver curso en Udemy" style="width:100%;margin-top:6px;background:#111;border:1px solid #333;border-radius:8px;padding:10px 12px;color:#f0ebe3;font-size:13px;outline:none;">
+      </div>
       <div style="display:flex;align-items:center;gap:10px;">
         <input id="plantillaItemRequired" type="checkbox">
         <label for="plantillaItemRequired" style="font-size:13px;color:#f0ebe3;cursor:pointer;">Marcar como <b style="color:#FF5400;">obligatorio</b> para este rol</label>
@@ -5004,6 +5013,7 @@ function renderItemCard(item) {
   html += '<div style="flex:1;">';
   html += '<div style="font-size:13px;color:#f0ebe3;font-weight:600;margin-bottom:3px;">' + String(item.Title || '').replace(/</g,'&lt;') + '</div>';
   if (item.Description) html += '<div style="font-size:11px;color:#888;">' + String(item.Description).replace(/</g,'&lt;') + '</div>';
+  html += chipRecursoOnboarding(item);
   html += '</div>';
   html += badge;
   html += '</div>';
@@ -5030,6 +5040,8 @@ function abrirModalPlantillaItem(itemId) {
     document.getElementById('plantillaItemTipo').value = item.ItemType || 'milestone';
     document.getElementById('plantillaItemTitle').value = item.Title || '';
     document.getElementById('plantillaItemDesc').value = item.Description || '';
+    document.getElementById('plantillaItemResURL').value = item.ResourceURL || '';
+    document.getElementById('plantillaItemResLabel').value = item.ResourceLabel || '';
     document.getElementById('plantillaItemRequired').checked = !!item.IsRequired;
   } else {
     // Alta
@@ -5038,6 +5050,8 @@ function abrirModalPlantillaItem(itemId) {
     document.getElementById('plantillaItemTipo').value = 'milestone';
     document.getElementById('plantillaItemTitle').value = '';
     document.getElementById('plantillaItemDesc').value = '';
+    document.getElementById('plantillaItemResURL').value = '';
+    document.getElementById('plantillaItemResLabel').value = '';
     document.getElementById('plantillaItemRequired').checked = false;
   }
   modal.style.display = 'flex';
@@ -5067,7 +5081,10 @@ async function guardarPlantillaItem() {
       itemType: tipo,
       title: title,
       description: desc || null,
-      isRequired: required
+      isRequired: required,
+      // Se mandan siempre (aunque vacíos) para poder BORRAR un link cargado antes
+      resourceURL: document.getElementById('plantillaItemResURL').value.trim(),
+      resourceLabel: document.getElementById('plantillaItemResLabel').value.trim()
     };
     const res = await fetch(url, {
       method: method,
@@ -10892,6 +10909,21 @@ async function abrirDetalleOnboarding(obId, nombre) {
   } catch(e) { if(inner) inner.innerHTML='Error: '+e.message; }
 }
 
+// S10: chip con el link al material del hito/curso.
+// El objetivo es que el colaborador nuevo llegue al contenido sin preguntarle
+// a nadie: si el hito dice "Curso de Seguridad", acá está el link para hacerlo.
+function chipRecursoOnboarding(item) {
+  if (!item) return '';
+  var url = item.ResourceURL;
+  if (!url) return '';
+  var label = item.ResourceLabel || 'Ver material';
+  return '<div style="margin-top:6px;">' +
+    '<a href="' + String(url).replace(/"/g,'&quot;') + '" target="_blank" rel="noopener noreferrer" ' +
+    'style="display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;' +
+    'background:rgba(59,130,246,0.12);border:1px solid rgba(59,130,246,0.35);color:#3B82F6;text-decoration:none;">' +
+    '\ud83d\udd17 ' + String(label).replace(/</g,'&lt;') + ' \u2197</a></div>';
+}
+
 function renderDetalleOnboarding(data) {
   var inner = document.getElementById('obDetalleContenido');
   if (!inner) return;
@@ -10915,6 +10947,7 @@ function renderDetalleOnboarding(data) {
     html += '<input type="checkbox" '+checked+' data-mid="'+m.MilestoneID+'" onchange="toggleMilestone(this)" style="width:18px;height:18px;cursor:pointer;accent-color:#FF5400;">';
     html += '<div><div style="font-weight:700;color:'+(m.IsCompleted?'#2ECC71':'#f0ebe3')+';font-size:13px;">'+(m.Title||'').replace(/</g,'&lt;')+'</div>';
     if (m.DueDate) html += '<div style="font-size:10px;color:#888;">Vence: '+new Date(m.DueDate).toLocaleDateString('es-AR')+compDate+'</div>';
+    html += chipRecursoOnboarding(m);
     html += '</div></div>';
     // Comentario
     html += '<textarea data-mid="'+m.MilestoneID+'" class="form-control ob-comment" placeholder="Agreg\xe1 seguimiento o feedback..." style="font-size:12px;height:60px;resize:none;overflow-y:auto;margin-bottom:8px;">'+(m.EmployeeComment||'')+'</textarea>';
@@ -10936,6 +10969,7 @@ function renderDetalleOnboarding(data) {
     html += '<div style="flex:1;"><div style="font-weight:700;color:'+(c.IsCompleted?'#2ECC71':'#f0ebe3')+';font-size:13px;">'+(c.CourseName||'').replace(/</g,'&lt;')+'</div>';
     if (c.IsRequired) html += '<span style="font-size:9px;color:#FF4D4D;background:rgba(255,77,77,0.1);padding:1px 6px;border-radius:10px;">Obligatorio</span>';
     if (c.CompletedAt) html += ' <span style="font-size:10px;color:#2ECC71;">&#10003; '+new Date(c.CompletedAt).toLocaleDateString('es-AR')+'</span>';
+    html += chipRecursoOnboarding(c);
     html += '</div></div>';
     if (c.EmployeeComment) html += '<div style="font-size:11px;color:#888;margin-top:6px;padding-left:28px;">'+(c.EmployeeComment||'').replace(/</g,'&lt;')+'</div>';
     html += '</div>';

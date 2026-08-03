@@ -11197,6 +11197,10 @@ function renderKanban(candidatos) {
         chips += '<span title="Días en proceso" style="font-size:9px;color:'+dC+';">⏱'+cand.DaysInPipeline+'d</span>';
       }
       if (chips) html += '<div style="display:flex;gap:6px;margin-top:5px;flex-wrap:wrap;">'+chips+'</div>';
+      // El motivo del rechazo se ve en la tarjeta, sin tener que abrir la ficha
+      if (stage === 'rejected' && cand.RejectionReason) {
+        html += '<div title="'+String(cand.RejectionReason).replace(/"/g,'&quot;')+'" style="font-size:9px;color:#FF4D4D;margin-top:5px;padding:4px 6px;background:rgba(255,77,77,0.08);border-radius:4px;line-height:1.3;">\u26a0\ufe0f '+String(cand.RejectionReason).replace(/</g,'&lt;').substring(0,60)+(String(cand.RejectionReason).length>60?'\u2026':'')+'</div>';
+      }
       // Botón Ver detalle
       html += '<button data-cid="'+cand.CandidateID+'" onclick="verCandidato(this.dataset.cid)" style="margin-top:8px;width:100%;padding:4px;background:#222;border:1px solid #333;border-radius:5px;color:#aaa;font-size:10px;cursor:pointer;">Ver detalle</button>';
       // Botones ◀ ▶ para mover entre etapas (Bug #5)
@@ -11385,6 +11389,24 @@ async function verCandidato(id) {
     '<button data-cid="' + cand.CandidateID + '" onclick="guardarNosis(this.dataset.cid)" style="margin-top:8px;padding:6px 14px;background:#222;border:1px solid #333;border-radius:6px;color:#aaa;font-size:11px;cursor:pointer;">Guardar verificaci\xf3n</button>' +
     '</div>';
 
+  // S10: motivo del rechazo — antes se guardaba pero no se mostraba en ningún lado
+  var rechazoSection = '';
+  if (cand.Status === 'rejected') {
+    rechazoSection = '<div style="margin-bottom:14px;padding:12px;background:rgba(255,77,77,0.08);border:1px solid rgba(255,77,77,0.35);border-radius:8px;">' +
+      '<div style="font-size:10px;font-weight:700;color:#FF4D4D;text-transform:uppercase;margin-bottom:6px;">\u26a0\ufe0f Motivo del rechazo</div>' +
+      '<div style="font-size:13px;color:#f0ebe3;line-height:1.5;white-space:pre-wrap;">' +
+        (cand.RejectionReason ? String(cand.RejectionReason).replace(/</g,'&lt;') : '<span style="color:#888;font-style:italic;">No se registró un motivo.</span>') +
+      '</div>' +
+      (cand.RejectedAt ? '<div style="font-size:10px;color:#888;margin-top:6px;">Rechazado el ' + new Date(cand.RejectedAt).toLocaleDateString('es-AR') + '</div>' : '') +
+      '</div>';
+  }
+
+  // S10: historial de movimientos entre etapas
+  var historialSection = '<div style="margin-bottom:14px;">' +
+    '<div style="font-size:10px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:8px;">\ud83d\udd52 Historial de movimientos</div>' +
+    '<div id="cvHistory_' + cand.CandidateID + '" style="font-size:11px;color:#888;">Cargando historial...</div>' +
+    '</div>';
+
   // C5: Discusión interna del equipo
   var comentariosSection = '<div style="margin-bottom:14px;">' +
     '<div style="font-size:10px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:8px;">\ud83d\udcac Discusi\xf3n interna del equipo</div>' +
@@ -11416,10 +11438,12 @@ async function verCandidato(id) {
     '<div><div style="font-size:10px;color:#888;margin-bottom:3px;">D\xedas en proceso</div><div style="font-size:13px;color:'+diasColor+';font-weight:700;">'+(cand.DaysInPipeline!=null?cand.DaysInPipeline+' d':'&#8212;')+'</div></div>' +
     '</div>' +
 
+    rechazoSection +
     phoneScreenSection +
     nosisSection +
     adjuntosSection +
     comentariosSection +
+    historialSection +
 
     stageFields +
 
@@ -11449,6 +11473,7 @@ async function verCandidato(id) {
   cargarArchivosCandidato(cand.CandidateID);
   cargarHistorialEntrevistas(cand.CandidateID);
   cargarComentariosCandidato(cand.CandidateID);
+  cargarHistorialMovimientos(cand.CandidateID);
 }
 
 // ═══ C3 · C11 · C5 (S10): phone screening, Nosis y discusión interna ══
@@ -11587,6 +11612,37 @@ function emailAlEntrevistador(candId) {
     'Gracias,\n';
 
   window.location.href = 'mailto:?subject=' + encodeURIComponent(asunto) + '&body=' + encodeURIComponent(cuerpo);
+}
+
+// S10: historial de movimientos entre etapas, con el motivo de cada cambio
+async function cargarHistorialMovimientos(candId) {
+  var cont = document.getElementById('cvHistory_' + candId);
+  if (!cont) return;
+  var data = await apiGet('candidates/' + candId + '/history');
+  if (!data || !data.length) {
+    cont.innerHTML = '<div style="padding:8px;background:#0d0d0d;border-radius:6px;color:#666;">Sin movimientos registrados.</div>';
+    return;
+  }
+  var labels = {database:'Base de datos',screening:'Screening',technical:'Técnica',
+                client:'Cliente',offer:'Oferta',hired:'Contratado',rejected:'Rechazado'};
+  var colores = {hired:'#2ECC71',rejected:'#FF4D4D',database:'#A855F7'};
+
+  cont.innerHTML = '<div style="position:relative;padding-left:18px;">' +
+    '<div style="position:absolute;left:4px;top:4px;bottom:4px;width:2px;background:#262626;"></div>' +
+    data.map(function(h){
+      var fechaRaw = h.ChangeDate || h.CreatedAt || h.ChangedAt;
+      var fecha = fechaRaw ? new Date(fechaRaw).toLocaleString('es-AR', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
+      var col = colores[h.NewStatus] || '#FF5400';
+      var de = h.OldStatus ? (labels[h.OldStatus]||h.OldStatus) : null;
+      var a  = labels[h.NewStatus] || h.NewStatus;
+      var mov = de ? de + ' → ' + a : a;
+      return '<div style="position:relative;margin-bottom:10px;">' +
+        '<div style="position:absolute;left:-17px;top:3px;width:8px;height:8px;border-radius:50%;background:' + col + ';border:2px solid #1a1a1a;"></div>' +
+        '<div style="font-size:9px;color:#666;">' + fecha + (h.ChangedByName ? ' · ' + String(h.ChangedByName).replace(/</g,'&lt;') : '') + '</div>' +
+        '<div style="font-size:12px;font-weight:700;color:' + col + ';">' + mov + '</div>' +
+        (h.Note ? '<div style="font-size:11px;color:#aaa;margin-top:2px;line-height:1.4;white-space:pre-wrap;">' + String(h.Note).replace(/</g,'&lt;') + '</div>' : '') +
+        '</div>';
+    }).join('') + '</div>';
 }
 
 async function guardarPhoneScreen(candId) {
